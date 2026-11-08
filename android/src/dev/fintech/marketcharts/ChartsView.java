@@ -12,6 +12,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.util.Arrays;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.json.JSONObject;
@@ -105,6 +110,33 @@ public final class ChartsView extends WebView {
         callback.onReceiveValue(chosen==null?null:new Uri[]{chosen});
     }
     public final class Bridge {
+        @JavascriptInterface public void fetchPublicPlaylist(int id){
+            worker.execute(()->{
+                JSONObject result=new JSONObject();
+                try{
+                    URL url=new URL("https://iptv-org.github.io/iptv/index.m3u");
+                    HttpURLConnection connection=(HttpURLConnection)url.openConnection();
+                    connection.setConnectTimeout(9000);connection.setReadTimeout(12000);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestProperty("Accept","audio/x-mpegurl,text/plain,*/*");
+                    try{
+                        if(connection.getResponseCode()!=200)throw new Exception("Directory HTTP "+connection.getResponseCode());
+                        ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+                        try(InputStream stream=connection.getInputStream()){
+                            byte[] chunk=new byte[8192];int n;
+                            while((n=stream.read(chunk))!=-1){
+                                if(buffer.size()+n>16000000)throw new Exception("Playlist exceeds limit");
+                                buffer.write(chunk,0,n);
+                            }
+                        }
+                        String body=new String(buffer.toByteArray(),StandardCharsets.UTF_8);
+                        if(!body.startsWith("#EXTM3U"))throw new Exception("Invalid playlist");
+                        result.put("content",body);
+                    }finally{connection.disconnect();}
+                }catch(Exception ex){try{result.put("error","Channel directory unavailable");}catch(Exception ignored){}}
+                post(()->{if(!closed)evaluateJavascript("window.__newviewPlaylistResult&&window.__newviewPlaylistResult("+id+","+result.toString()+")",null);});
+            });
+        }
         @JavascriptInterface public void playStream(String raw){
             if(raw==null||raw.length()>2048)return;
             try{
