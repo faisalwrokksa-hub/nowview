@@ -16,10 +16,11 @@
   const geo=GEO[region]||GEO.SA;
   const q=TOPICS[topic]===undefined?'':TOPICS[topic];
   const url=new URL('https://news.google.com/search');
-  url.searchParams.set('q',q||'latest news');url.searchParams.set('hl',geo[1]);url.searchParams.set('gl',geo[0]);url.searchParams.set('ceid',geo[0]+':'+geo[1]);
+  url.searchParams.set('q',q||'latest news');
+  if(region!=='GLOBAL'){url.searchParams.set('hl',geo[1]);url.searchParams.set('gl',geo[0]);url.searchParams.set('ceid',geo[0]+':'+geo[1]);}
   return url.href;
  }
- function discoveryLinks(region,topic){return [{label:'Regional news search',url:discoveryUrl(region,topic)},{label:'Google Trends — explore region',url:'https://trends.google.com/trends/explore?geo='+encodeURIComponent(region==='GLOBAL'?'':GEO[region]?.[0]||'SA')},{label:'Reddit communities',url:'https://www.reddit.com/r/popular/'}];}
+ function discoveryLinks(region,topic){return [{label:region==='GLOBAL'?'Global news search':'Regional news search',url:discoveryUrl(region,topic)},{label:'Google Trends — explore region',url:'https://trends.google.com/trends/explore?geo='+encodeURIComponent(region==='GLOBAL'?'':GEO[region]?.[0]||'SA')},{label:'Reddit communities',url:'https://www.reddit.com/r/popular/'}];}
 
  function validate(platform,value){
   const source=SOURCES[platform];if(!source||typeof value!=='string'||value.length>500)return null;
