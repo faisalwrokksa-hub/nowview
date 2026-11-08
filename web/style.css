@@ -82,3 +82,13 @@ button:focus-visible{outline:3px solid #f6dfad;outline-offset:3px}
 .news-meta{color:#b8b59f}
 #news-original{color:#e6c481}
 @media(max-width:750px){.news-items{grid-template-columns:1fr}}
+
+/* Shared NowViewMedia controls (TV remote + touch). */
+.media-input{display:flex;flex-direction:column;gap:12px;padding:12px 0}
+.media-input label{color:#ddc184}
+#media-url{font:inherit;background:#18291e;color:#f6efe0;border:1px solid #87754e;padding:14px;border-radius:9px;min-height:46px;width:100%}
+.media-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.media-actions button,.media-actions a{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border:1px solid #8a774e;background:#223628;color:#f5d79c;border-radius:9px;text-decoration:none;font:inherit}
+.media-actions button:disabled{opacity:.45}
+.media-actions :is(button,a):focus-visible,#media-url:focus-visible{outline:3px solid #f3d390;outline-offset:2px}
+#media-frame{display:block;aspect-ratio:16/9;width:100%;max-width:920px;background:#050807;border:1px solid #544b34;border-radius:12px}

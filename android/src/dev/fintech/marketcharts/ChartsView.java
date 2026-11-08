@@ -1,5 +1,6 @@
 package app.nowview.markets;
 import android.content.Context;
+import android.content.Intent;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -23,6 +24,18 @@ public final class ChartsView extends WebView {
         addJavascriptInterface(new Bridge(),"Fintech");loadUrl("file:///android_asset/index.html"+(compact?"?home=1":""));
     }
     public final class Bridge {
+        @JavascriptInterface public boolean isPipeTvInstalled(){
+            return getContext().getPackageManager().getLaunchIntentForPackage("dev.limitedio.pipetv")!=null;
+        }
+        @JavascriptInterface public void openPipeTv(){
+            post(()->{
+                if(closed)return;
+                Intent intent=getContext().getPackageManager().getLaunchIntentForPackage("dev.limitedio.pipetv");
+                if(intent==null)return;
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try{getContext().startActivity(intent);}catch(Exception ignored){}
+            });
+        }
         @JavascriptInterface public boolean getPanelReady(){String enabled=android.provider.Settings.Secure.getString(getContext().getContentResolver(),android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);return android.provider.Settings.canDrawOverlays(getContext())&&enabled!=null&&(enabled.contains("app.nowview.markets/.HomePanelService")||enabled.contains("app.nowview.markets/app.nowview.markets.HomePanelService"));}
         @JavascriptInterface public boolean getPanelEnabled(){return getContext().getSharedPreferences("charts",0).getBoolean("homePanel",true);}
         @JavascriptInterface public void setPanelEnabled(boolean enabled){getContext().getSharedPreferences("charts",0).edit().putBoolean("homePanel",enabled).apply();if(!enabled)post(HomePanelService::hidePanel);}
