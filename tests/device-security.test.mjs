@@ -11,3 +11,16 @@ test('NewView device security hardening and manual test matrix are tracked',()=>
  assert.match(doc,/NOT RUN/);
  assert.match(wf,/tests\/device-security\.test\.mjs/);
 });
+
+test('Home overlay remains disabled until user explicitly opts in',()=>{
+ const service=read('../android/src/dev/fintech/marketcharts/HomePanelService.java');
+ const chart=read('../android/src/dev/fintech/marketcharts/ChartsView.java');
+ const config=read('../android/res/xml/home_panel_service.xml');
+ for(const source of [service,chart]){
+  assert.match(source,/getBoolean\("homePanel",false\)/);
+  assert.doesNotMatch(source,/getBoolean\("homePanel",true\)/);
+ }
+ assert.match(chart,/setPanelEnabled\(boolean enabled\)/);
+ assert.match(service,/Settings\.canDrawOverlays\(this\)/);
+ assert.match(config,/canRetrieveWindowContent="false"/);
+});
