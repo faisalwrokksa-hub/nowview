@@ -41,3 +41,10 @@ test('browser news rejects malformed article URLs without dropping the entire fe
  assert.match(source,/url\.username\|\|url\.password\|\|url\.port/);
  assert.match(source,/No valid announcements returned by this source/);
 });
+
+test('Stocktwits publisher RSS is allowlisted and keeps same-host article links',()=>{
+ assert.equal(NEWS_SOURCES.stocktwits.url,'https://stocktwits.com/sitemap/rss_feed.xml');
+ const xml='<rss><channel><item><title>Market update</title><link>https://stocktwits.com/news/markets</link></item><item><title>Unsafe</title><link>https://evil.example/post</link></item></channel></rss>';
+ assert.equal(parseNewsXml(xml,'stocktwits').length,1);
+ assert.equal(parseNewsXml(xml,'stocktwits')[0].source,'Stocktwits News');
+});
