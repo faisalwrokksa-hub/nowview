@@ -114,7 +114,7 @@ public final class ChartsView extends WebView {
             });
         }
         @JavascriptInterface public boolean getPanelReady(){String enabled=android.provider.Settings.Secure.getString(getContext().getContentResolver(),android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);return android.provider.Settings.canDrawOverlays(getContext())&&enabled!=null&&(enabled.contains("app.newview.dashboard/.HomePanelService")||enabled.contains("app.newview.dashboard/app.newview.dashboard.HomePanelService"));}
-        @JavascriptInterface public boolean getPanelEnabled(){return getContext().getSharedPreferences("charts",0).getBoolean("homePanel",true);}
+        @JavascriptInterface public boolean getPanelEnabled(){return getContext().getSharedPreferences("charts",0).getBoolean("homePanel",false);}
         @JavascriptInterface public void setPanelEnabled(boolean enabled){getContext().getSharedPreferences("charts",0).edit().putBoolean("homePanel",enabled).apply();if(!enabled)post(HomePanelService::hidePanel);}
         @JavascriptInterface public void requestChart(final String symbol,final String period,final int id){
             if(!Arrays.asList(MarketData.SYMBOLS).contains(symbol)||!Arrays.asList(MarketData.RANGES).contains(period)){deliver(id,error("Unsupported token or range"));return;}
