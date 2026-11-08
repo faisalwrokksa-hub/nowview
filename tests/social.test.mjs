@@ -58,3 +58,14 @@ test('Polymarket only permits canonical public wallet profiles, never market or 
  assert.equal(validate('polymarket','https://polymarket.com/profile/not-a-wallet'),null);
  assert.equal(validate('polymarket','https://polymarket.com.evil.example/profile/'+wallet),null);
 });
+
+test('external browser policies cover discovery and Polymarket on web and Android',()=>{
+ const web=fs.readFileSync(new URL('../web/external-links.js',import.meta.url),'utf8');
+ const android=fs.readFileSync(new URL('../android/src/dev/fintech/marketcharts/ChartsView.java',import.meta.url),'utf8');
+ for(const host of ['polymarket.com','stocktwits.com','truthsocial.com','news.google.com','trends.google.com','www.reddit.com']){
+  assert.ok(web.includes("'"+host+"'"),host+' missing from web');
+  assert.ok(android.includes('host.equals("'+host+'")'),host+' missing from Android');
+ }
+ assert.match(web,/u\.protocol==='https:'&&!u\.username&&!u\.password&&!u\.port/);
+ assert.match(android,/"https"\.equalsIgnoreCase\(uri\.getScheme\(\)\)/);
+});
