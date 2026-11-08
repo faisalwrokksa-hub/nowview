@@ -21,7 +21,7 @@
  function load(){try{const raw=localStorage.getItem(key);return raw===null?[...defaults]:sanitize(JSON.parse(raw));}catch{return [...defaults];}}
  function save(selected){const safe=sanitize(selected);try{localStorage.setItem(key,JSON.stringify(safe));}catch{}return safe;}
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
- if(!root||!editor){window.NewViewPersonal={catalog,sanitize,load,save};return;}
+ if(!root||!editor){window.NewViewPersonal={catalog,sanitize,load,save,preview};return;}
  let chosen=load();
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
