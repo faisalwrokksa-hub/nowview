@@ -70,3 +70,15 @@ button:focus-visible{outline:3px solid #f6dfad;outline-offset:3px}
 .home-panel #market-shell nav{display:none}
 @media(max-width:850px){.workspace-tab{flex:0 0 auto}.shell-grid{grid-template-columns:1fr}.shell-card.shell-feature{grid-column:auto}}
 @media(max-width:500px){.workspace-tab{min-height:42px;font-size:12px}.workspace-tab span{font-size:16px}.shell-card{min-height:150px}}
+
+/* Official source-linked news cards — same gold/forest shell, no third-party fonts. */
+.news-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:13px 0;color:#e0cb9e}
+.news-controls select{background:#203027;color:#f6efe0;border:1px solid #8b7955;border-radius:8px;padding:10px 14px;font:inherit;min-height:42px}
+.news-controls select:focus-visible,.news-controls button:focus-visible{outline:3px solid #efce87;outline-offset:2px}
+.news-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.news-item{padding:16px;border:1px solid #534d37;border-radius:11px;background:#1b2b20;display:flex;flex-direction:column;gap:10px}
+.news-link{font-size:clamp(14px,1.15vw,21px);color:#f2e4c6;text-decoration:none;line-height:1.45}
+.news-link:focus-visible,.news-link:hover{color:#f3c779;text-decoration:underline}
+.news-meta{color:#b8b59f}
+#news-original{color:#e6c481}
+@media(max-width:750px){.news-items{grid-template-columns:1fr}}
