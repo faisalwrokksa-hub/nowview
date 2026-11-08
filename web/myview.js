@@ -20,8 +20,32 @@
  }
  function load(){try{const raw=localStorage.getItem(key);return raw===null?[...defaults]:sanitize(JSON.parse(raw));}catch{return [...defaults];}}
  function save(selected){const safe=sanitize(selected);try{localStorage.setItem(key,JSON.stringify(safe));}catch{}return safe;}
+ function renderInstalledApps(){
+  const status=document.getElementById('home-app-status'),grid=document.getElementById('home-installed-grid');
+  if(!grid||!status)return;
+  grid.replaceChildren();
+  const native=window.NewViewNative;
+  if(!native||typeof native.listLaunchableApps!=='function'||typeof native.launchApp!=='function'){
+   status.textContent='Installed-app discovery is not supported by this APK yet.';return;
+  }
+  let apps;
+  try{apps=JSON.parse(native.listLaunchableApps());}catch{status.textContent='Unable to read installed TV apps';return;}
+  if(!Array.isArray(apps)){status.textContent='Invalid installed-app list';return;}
+  const seen=new Set();let count=0;
+  for(const app of apps){
+   if(!app||typeof app.label!=='string'||typeof app.packageName!=='string'||!/^([A-Za-z][A-Za-z0-9_]*\\.)+[A-Za-z][A-Za-z0-9_]*$/.test(app.packageName)||seen.has(app.packageName))continue;
+   seen.add(app.packageName);if(++count>100)break;
+   const button=document.createElement('button');button.type='button';button.className='home-installed-app';
+   button.textContent=app.label.slice(0,50);button.title=app.packageName;
+   button.addEventListener('click',()=>{try{native.launchApp(app.packageName);}catch{status.textContent='Could not launch '+app.label.slice(0,50);}});
+   grid.append(button);
+  }
+  status.textContent=count?count+' launchable apps found on this TV':'No launchable TV apps returned';
+ }
  function installHomeActions(){
   const status=document.getElementById('home-app-status');
+  document.getElementById('home-refresh-apps')?.addEventListener('click',renderInstalledApps);
+  renderInstalledApps();
   document.getElementById('home-pipetv')?.addEventListener('click',()=>{
    const bridge=window.NewViewNative;
    if(!bridge||typeof bridge.isPipeTvInstalled!=='function'||typeof bridge.openPipeTv!=='function'){if(status)status.textContent='PipeTv launch requires NewView on Android TV.';return;}
