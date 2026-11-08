@@ -35,8 +35,8 @@
   const chosen=permitted.has(category.value)?category.value:'news';
   playlist.href='https://iptv-org.github.io/iptv/categories/'+chosen+'.m3u';
  });}
- document.addEventListener('newview:workspace-change',syncDashboardCategories);
- window.addEventListener('newview:preferences-change',syncDashboardCategories);
+ if(typeof document.addEventListener==='function')document.addEventListener('newview:workspace-change',syncDashboardCategories);
+ if(typeof window.addEventListener==='function')window.addEventListener('newview:preferences-change',syncDashboardCategories);
  syncDashboardCategories();
  const input=document.getElementById('media-url');
  const output=document.getElementById('media-status');
