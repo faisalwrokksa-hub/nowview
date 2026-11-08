@@ -21,7 +21,7 @@
  function loadFirstLaunch(){try{const raw=localStorage.getItem(FIRST_LAUNCH_KEY);return raw?sanitizeFirstLaunch(JSON.parse(raw)):null;}catch{return null;}}
  function saveFirstLaunch(input){const safe=sanitizeFirstLaunch(input);try{localStorage.setItem(FIRST_LAUNCH_KEY,JSON.stringify(safe));}catch{}window.dispatchEvent(new CustomEvent('newview:preferences-change',{detail:safe}));return safe;}
  function installFirstLaunch(){
-  if(loadFirstLaunch())return;
+  if(window.NewViewApps||loadFirstLaunch())return;
   const container=document.createElement('section');container.className='shell-card';container.id='newview-first-launch';
   container.setAttribute('aria-label','First launch personalization');
   const title=document.createElement('h2');title.textContent='Welcome to NewView';
@@ -79,7 +79,8 @@
     const isBoard=document.body.classList.contains('board-active');
     board.hidden=!isBoard;chart.hidden=isBoard;
     if(!isBoard)requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
-  }else{market.hidden=true;board.hidden=true;chart.hidden=true;}
+  }else if(view==='myview'&&document.body.classList.contains('tv-launcher')){market.hidden=false;board.hidden=true;chart.hidden=false;requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));}
+  else{market.hidden=true;board.hidden=true;chart.hidden=true;}
   try{localStorage.setItem('newview.workspace',view);}catch{}
   const page=document.querySelector('[data-workspace="'+view+'"]');
   if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'instant'});
