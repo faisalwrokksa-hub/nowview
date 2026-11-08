@@ -9,8 +9,10 @@ test -s "$apk"
 badging="$("$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging "$apk")"
 printf '%s\n' "$badging" | grep -F "package: name='app.newview.dashboard'"
 printf '%s\n' "$badging" | grep -F "application-label:'NewView'"
+printf '%s\n' "$badging" | grep -F "versionCode='2'"
+printf '%s\n' "$badging" | grep -F "versionName='1.0.1-rc1'"
 assets="$(unzip -Z1 "$apk")"
-for name in index.html style.css app.js stock-board.js workspace-shell.js myview.js business.js news.js media.js social.js external-links.js live.js indicators.js market-data.mjs; do
+for name in index.html style.css app.js stock-board.js workspace-shell.js tv-home.js myview.js business.js news.js media.js social.js external-links.js live.js indicators.js market-data.mjs; do
   if ! printf '%s\n' "$assets" | grep -Fxq "assets/$name"; then
     echo "Missing packaged workspace asset: $name" >&2
     exit 1
