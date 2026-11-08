@@ -66,7 +66,9 @@
  }
  document.getElementById('myview-reset')?.addEventListener('click',()=>{chosen=save(defaults);render();});
  for(const id of ['market','business','news','social'])window.addEventListener('newview:'+id,event=>{
-  snapshots[id]=event.detail&&typeof event.detail==='object'?event.detail:null;
+  const next=event.detail&&typeof event.detail==='object'?event.detail:null;
+  if(preview[id](next)===preview[id](snapshots[id]))return; // Do not reset TV focus on unchanged quotes.
+  snapshots[id]=next;
   if(document.body.dataset.currentWorkspace==='myview')render();
  });
  window.NewViewPersonal={catalog,sanitize,load,save,render,preview};

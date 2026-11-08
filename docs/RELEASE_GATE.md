@@ -36,3 +36,8 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 - Snapshots are volatile and not stored or uploaded. Social counts are local. Market quote timestamps are displayed.
 - Markets calls the actual `window.NewViewBoard` export rather than obsolete `window.NowViewBoard`.
 - Source snapshots remain subject to actual-browser layout, accessibility and Android TV focus tests.
+
+## Runtime bridge naming audit
+- The JavaScript-to-Android interface and market callback now use `NewViewNative` and `__newviewResult`, replacing the old `Fintech` runtime names. This is naming only; no new privilege is granted to scripts.
+- MyView avoids redraws on identical snapshot text to preserve focus during frequent market refreshes.
+- Historical GitHub repository URL, previous migration package names, and physical source directory paths may still contain legacy names as provenance. Never imply a repository rename has occurred.

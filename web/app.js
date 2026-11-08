@@ -36,9 +36,9 @@ function subscribe(){
  if(stopLive)stopLive();liveKey=key;liveState='connecting';
  stopLive=MarketLive.connect(selected,period,event=>{if(data&&key===selected+':'+period&&MarketLive.apply(data,event))liveDirty=true;},state=>{liveState=state;liveDirty=true;});
 }
-window.__fintechResult=(id,payload)=>{const p=pending.get(id);if(!p)return;clearTimeout(p.timer);pending.delete(id);payload.error?p.reject(new Error(payload.error)):p.resolve(payload);};
+window.__newviewResult=(id,payload)=>{const p=pending.get(id);if(!p)return;clearTimeout(p.timer);pending.delete(id);payload.error?p.reject(new Error(payload.error)):p.resolve(payload);};
 function request(symbol,range){
- if(window.Fintech&&window.Fintech.requestChart)return new Promise((resolve,reject)=>{const id=++nativeId;const timer=setTimeout(()=>{pending.delete(id);reject(new Error('Market source timed out. Try Refresh.'));},45000);pending.set(id,{resolve,reject,timer});window.Fintech.requestChart(symbol,range,id);});
+ if(window.NewViewNative&&window.NewViewNative.requestChart)return new Promise((resolve,reject)=>{const id=++nativeId;const timer=setTimeout(()=>{pending.delete(id);reject(new Error('Market source timed out. Try Refresh.'));},45000);pending.set(id,{resolve,reject,timer});window.NewViewNative.requestChart(symbol,range,id);});
  return import('./market-data.mjs').then(m=>m.getChart(symbol,range));
 }
 function nav(){
@@ -121,7 +121,7 @@ document.addEventListener('keydown',event=>{
  }
  if(best){best.focus();best.scrollIntoView({block:'nearest',inline:'nearest'});event.preventDefault();}
 });
-if(window.Fintech&&window.Fintech.getPanelEnabled&&!compact){const ready=window.Fintech.getPanelReady();const b=button(ready?'Home panel: '+(window.Fintech.getPanelEnabled()?'on':'off'):'Home panel: setup needed',false,()=>{if(!window.Fintech.getPanelReady())return;const enabled=!window.Fintech.getPanelEnabled();window.Fintech.setPanelEnabled(enabled);b.textContent='Home panel: '+(enabled?'on':'off');});b.disabled=!ready;document.querySelector('.chart-tools').prepend(b);}
+if(window.NewViewNative&&window.NewViewNative.getPanelEnabled&&!compact){const ready=window.NewViewNative.getPanelReady();const b=button(ready?'Home panel: '+(window.NewViewNative.getPanelEnabled()?'on':'off'):'Home panel: setup needed',false,()=>{if(!window.NewViewNative.getPanelReady())return;const enabled=!window.NewViewNative.getPanelEnabled();window.NewViewNative.setPanelEnabled(enabled);b.textContent='Home panel: '+(enabled?'on':'off');});b.disabled=!ready;document.querySelector('.chart-tools').prepend(b);}
 if(!compact && window.NewViewBoard){
  window.NewViewBoard.build();
  const boardButton=button('Stock board',false,()=>{

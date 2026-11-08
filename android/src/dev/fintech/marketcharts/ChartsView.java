@@ -45,7 +45,7 @@ public final class ChartsView extends WebView {
                 return true;
             }
         });
-        addJavascriptInterface(new Bridge(),"Fintech");loadUrl("file:///android_asset/index.html"+(compact?"?home=1":""));
+        addJavascriptInterface(new Bridge(),"NewViewNative");loadUrl("file:///android_asset/index.html"+(compact?"?home=1":""));
     }
     private static boolean isInternal(Uri uri){
         return uri!=null&&"file".equals(uri.getScheme())&&"".equals(uri.getAuthority())
@@ -115,6 +115,6 @@ public final class ChartsView extends WebView {
         }
     }
     private static JSONObject error(String s){JSONObject j=new JSONObject();try{j.put("error",s);}catch(Exception ignored){}return j;}
-    private void deliver(int id,JSONObject j){post(()->{if(!closed)evaluateJavascript("window.__fintechResult("+id+","+j.toString()+")",null);});}
-    @Override public void destroy(){closed=true;worker.shutdownNow();if(pendingFiles!=null){pendingFiles.onReceiveValue(null);pendingFiles=null;}removeJavascriptInterface("Fintech");super.destroy();}
+    private void deliver(int id,JSONObject j){post(()->{if(!closed)evaluateJavascript("window.__newviewResult("+id+","+j.toString()+")",null);});}
+    @Override public void destroy(){closed=true;worker.shutdownNow();if(pendingFiles!=null){pendingFiles.onReceiveValue(null);pendingFiles=null;}removeJavascriptInterface("NewViewNative");super.destroy();}
 }

@@ -19,7 +19,7 @@
  const frame=document.getElementById('media-frame');
  if(!input||!output||!frame){window.NewViewMedia={parse};return;}
  const play=document.getElementById('media-play'),pipe=document.getElementById('media-pipe'),stop=document.getElementById('media-stop'),original=document.getElementById('media-original');
- const native=()=>!!(window.Fintech&&typeof window.Fintech.openPipeTv==='function');
+ const native=()=>!!(window.NewViewNative&&typeof window.NewViewNative.openPipeTv==='function');
  function validate(){
   const item=parse(input.value);
   play.disabled=!item;
@@ -39,8 +39,8 @@
  pipe.disabled=!native();
  pipe.addEventListener('click',()=>{
   if(!native()){output.textContent='PipeTv handoff requires the NewView Android TV app.';return;}
-  if(!window.Fintech.isPipeTvInstalled()){output.textContent='PipeTv is not installed. Install it independently before launching.';return;}
-  window.Fintech.openPipeTv();
+  if(!window.NewViewNative.isPipeTvInstalled()){output.textContent='PipeTv is not installed. Install it independently before launching.';return;}
+  window.NewViewNative.openPipeTv();
   output.textContent='Opening PipeTv. Find the video using PipeTv search.';
  });
  validate();

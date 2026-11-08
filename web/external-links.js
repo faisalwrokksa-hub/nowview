@@ -8,10 +8,10 @@
  }
  document.addEventListener('click',event=>{
   const a=event.target.closest?.('a[href]');
-  if(!a||!window.Fintech||typeof window.Fintech.openApprovedUrl!=='function')return;
+  if(!a||!window.NewViewNative||typeof window.NewViewNative.openApprovedUrl!=='function')return;
   const href=a.href;
   event.preventDefault();
-  if(approved(href))window.Fintech.openApprovedUrl(href);
+  if(approved(href))window.NewViewNative.openApprovedUrl(href);
  });
  window.NewViewExternal={approved};
 })();
