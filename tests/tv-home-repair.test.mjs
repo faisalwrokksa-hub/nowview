@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createRequire} from 'node:module';
-const require=createRequire(import.meta.url);
-const channels=require('../web/channel-filters.js');
+import vm from 'node:vm';
 const read=path=>fs.readFileSync(new URL(path,import.meta.url),'utf8');
+const sandbox={window:{},URL};vm.runInNewContext(read('../web/channel-filters.js'),sandbox);
+const channels=sandbox.window.NewViewChannels;
 
 test('quoted M3U commas do not truncate the channel title',()=>{
  const input='#EXTM3U\n#EXTINF:-1 tvg-id="test" group-title="News, International",Global News HD\nhttps://example.org/stream.m3u8\n';
