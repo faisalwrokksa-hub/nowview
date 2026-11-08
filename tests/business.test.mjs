@@ -34,3 +34,11 @@ test('business file upload is local and included in cloud and TV bundle',()=>{
  const build=fs.readFileSync(new URL('../cloud/build.mjs',import.meta.url),'utf8');
  assert.match(html,/id="business-file"/);assert.match(html,/id="business-kpis"/);assert.match(build,/business\.js/);
 });
+
+test('stale asynchronous CSV reads cannot restore cleared or replaced data',()=>{
+ assert.match(src,/let selectionVersion=0/);
+ assert.match(src,/selectionVersion\+\+/);
+ assert.match(src,/const version=\+\+selectionVersion/);
+ assert.match(src,/if\(version!==selectionVersion\)return/);
+ assert.match(src,/if\(version===selectionVersion\)status\.textContent/);
+});
