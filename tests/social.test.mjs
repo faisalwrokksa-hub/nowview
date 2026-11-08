@@ -33,12 +33,12 @@ test('Social workspace and assets included for web and Android',()=>{
 
 test('geo and topic selection produces regional discovery links without claiming live social trends',()=>{
  const {discoveryUrl,discoveryLinks}=window.NewViewSocial;
- const sa=new URL(discoveryUrl('SA','markets'));
- assert.equal(sa.hostname,'news.google.com');assert.equal(sa.searchParams.get('gl'),'SA');
+ const ca=new URL(discoveryUrl('CA','markets'));
+ assert.equal(ca.hostname,'news.google.com');assert.equal(ca.searchParams.get('gl'),'CA');
  assert.equal(sa.searchParams.get('q'),'financial markets');
  assert.equal(new URL(discoveryUrl('US','technology')).searchParams.get('gl'),'US');
- assert.equal(new URL(discoveryUrl('UNKNOWN','all')).searchParams.get('gl'),'SA');
- assert.equal(discoveryLinks('GB','all').length,3);
+ assert.equal(new URL(discoveryUrl('UNKNOWN','all')).searchParams.get('gl'),'US');
+ assert.equal(discoveryLinks('GB','all').length,5);
  const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
  for(const id of ['social-geo','social-topic','social-discovery'])assert.match(html,new RegExp('id="'+id+'"'));
 });
