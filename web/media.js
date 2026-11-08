@@ -14,6 +14,13 @@
    return /^[A-Za-z0-9_-]{11}$/.test(id||'')?{id,original:'https://www.youtube.com/watch?v='+id,embed:'https://www.youtube-nocookie.com/embed/'+id+'?autoplay=0'}:null;
   }catch{return null;}
  }
+ const category=document.getElementById('live-tv-category');
+ const playlist=document.getElementById('live-tv-playlist');
+ if(category&&playlist){category.addEventListener('change',()=>{
+  const permitted=new Set(['news','business','sports','documentary','education','kids','music','movies','entertainment','weather','general']);
+  const chosen=permitted.has(category.value)?category.value:'news';
+  playlist.href='https://iptv-org.github.io/iptv/categories/'+chosen+'.m3u';
+ });}
  const input=document.getElementById('media-url');
  const output=document.getElementById('media-status');
  const frame=document.getElementById('media-frame');
