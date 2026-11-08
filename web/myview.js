@@ -20,6 +20,17 @@
  }
  function load(){try{const raw=localStorage.getItem(key);return raw===null?[...defaults]:sanitize(JSON.parse(raw));}catch{return [...defaults];}}
  function save(selected){const safe=sanitize(selected);try{localStorage.setItem(key,JSON.stringify(safe));}catch{}return safe;}
+ function installHomeActions(){
+  const status=document.getElementById('home-app-status');
+  document.getElementById('home-pipetv')?.addEventListener('click',()=>{
+   const bridge=window.NewViewNative;
+   if(!bridge||typeof bridge.isPipeTvInstalled!=='function'||typeof bridge.openPipeTv!=='function'){if(status)status.textContent='PipeTv launch requires NewView on Android TV.';return;}
+   if(!bridge.isPipeTvInstalled()){if(status)status.textContent='PipeTv is not installed on this TV.';return;}
+   bridge.openPipeTv();if(status)status.textContent='Opening the separately installed PipeTv app.';
+  });
+  document.getElementById('home-guide')?.addEventListener('click',()=>{const el=document.getElementById('home-recovery');if(el)el.hidden=!el.hidden;});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installHomeActions);else installHomeActions();
  const wallpaperKey='newview.home.wallpaper.v1',shadeKey='newview.home.wallpaper.shade.v1';
  function setWallpaper(data){
   if(data&&(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(data)||data.length>1400000))return false;
