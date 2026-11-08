@@ -20,6 +20,33 @@
  }
  function load(){try{const raw=localStorage.getItem(key);return raw===null?[...defaults]:sanitize(JSON.parse(raw));}catch{return [...defaults];}}
  function save(selected){const safe=sanitize(selected);try{localStorage.setItem(key,JSON.stringify(safe));}catch{}return safe;}
+ const wallpaperKey='newview.home.wallpaper.v1',shadeKey='newview.home.wallpaper.shade.v1';
+ function setWallpaper(data){
+  if(data&&(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(data)||data.length>1400000))return false;
+  try{if(data)localStorage.setItem(wallpaperKey,data);else localStorage.removeItem(wallpaperKey);}catch{return false;}
+  applyWallpaper(data);return true;
+ }
+ function applyWallpaper(data){
+  document.body.classList.toggle('has-home-wallpaper',!!data);
+  if(data)document.body.style.setProperty('--newview-wallpaper','url("'+data+'")');else document.body.style.removeProperty('--newview-wallpaper');
+ }
+ function installWallpaper(){
+  const input=document.getElementById('wallpaper-file'),remove=document.getElementById('wallpaper-remove'),shade=document.getElementById('wallpaper-shade'),status=document.getElementById('wallpaper-status');
+  if(!input||!remove||!shade||!status)return;
+  try{applyWallpaper(localStorage.getItem(wallpaperKey));}catch{}
+  const saved=(()=>{try{return localStorage.getItem(shadeKey)}catch{return null}})();
+  if(['light','medium','dark'].includes(saved))shade.value=saved;
+  document.body.dataset.wallpaperShade=shade.value;
+  shade.addEventListener('change',()=>{document.body.dataset.wallpaperShade=shade.value;try{localStorage.setItem(shadeKey,shade.value);}catch{status.textContent='Shade not saved';}});
+  input.addEventListener('change',()=>{
+   const file=input.files?.[0];if(!file)return;
+   if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>950000){status.textContent='Choose a JPEG, PNG or WebP photo under 950 KB';input.value='';return;}
+   const reader=new FileReader();reader.onload=()=>{status.textContent=setWallpaper(reader.result)?'Home photo saved on this device':'Photo could not be saved; try a smaller file';input.value='';};
+   reader.onerror=()=>{status.textContent='Photo could not be read';};reader.readAsDataURL(file);
+  });
+  remove.addEventListener('click',()=>{status.textContent=setWallpaper(null)?'Home photo removed':'Could not clear stored photo';input.value='';});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installWallpaper);else installWallpaper();
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
  let chosen=load();
  const snapshots={market:null,business:null,news:null,social:null};
