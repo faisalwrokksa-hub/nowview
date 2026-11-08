@@ -20,7 +20,7 @@ Push-Location "$stage\dex"
 try{RunChecked "$JavaHome\bin\jar.exe" @('uf',"$out\unsigned.apk",'classes.dex')}finally{Pop-Location}
 RunChecked "$BuildTools\zipalign.exe" @('-f','4',"$out\unsigned.apk","$out\aligned.apk")
 $key=Join-Path $out 'local-signing.jks'
-if(!(Test-Path $key)){RunChecked "$JavaHome\bin\keytool.exe" @('-genkeypair','-keystore',$key,'-storepass','android','-keypass','android','-alias','nowview-markets-local','-keyalg','RSA','-keysize','2048','-validity','10000','-dname','CN=NowView Markets Local Build','-noprompt')}
-RunChecked "$BuildTools\apksigner.bat" @('sign','--ks',$key,'--ks-key-alias','nowview-markets-local','--ks-pass','pass:android','--key-pass','pass:android','--out',"$out\nowview-markets.apk","$out\aligned.apk")
-RunChecked "$BuildTools\apksigner.bat" @('verify','--verbose',"$out\nowview-markets.apk")
-Write-Output "APK: $out\nowview-markets.apk"
+if(!(Test-Path $key)){RunChecked "$JavaHome\bin\keytool.exe" @('-genkeypair','-keystore',$key,'-storepass','android','-keypass','android','-alias','newview-local','-keyalg','RSA','-keysize','2048','-validity','10000','-dname','CN=NewView Local Build','-noprompt')}
+RunChecked "$BuildTools\apksigner.bat" @('sign','--ks',$key,'--ks-key-alias','newview-local','--ks-pass','pass:android','--key-pass','pass:android','--out',"$out\newview.apk","$out\aligned.apk")
+RunChecked "$BuildTools\apksigner.bat" @('verify','--verbose',"$out\newview.apk")
+Write-Output "APK: $out\newview.apk"

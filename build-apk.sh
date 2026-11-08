@@ -16,11 +16,11 @@ mapfile -t classes < <(find "$stage/classes" -name '*.class' | sort)
 "$tools/d8" --lib "$platform" --min-api 24 --output "$stage/dex" "${classes[@]}"
 apk="$PWD/build/unsigned.apk"
 (cd "$stage/dex" && jar uf "$apk" classes.dex)
-"$tools/zipalign" -f 4 build/unsigned.apk build/nowview-markets-unsigned.apk
+"$tools/zipalign" -f 4 build/unsigned.apk build/newview-unsigned.apk
 # This is a local/test signing identity, not a production release certificate.
 if [[ ! -f build/local-signing.jks ]]; then
- keytool -genkeypair -keystore build/local-signing.jks -storepass android -keypass android -alias nowview-markets-local -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=NowView Markets Local Build' -noprompt
+ keytool -genkeypair -keystore build/local-signing.jks -storepass android -keypass android -alias newview-local -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=NewView Local Build' -noprompt
 fi
-"$tools/apksigner" sign --ks build/local-signing.jks --ks-key-alias nowview-markets-local --ks-pass pass:android --key-pass pass:android --out build/nowview-markets.apk build/nowview-markets-unsigned.apk
-"$tools/apksigner" verify --verbose build/nowview-markets.apk
-echo 'APK: build/nowview-markets.apk'
+"$tools/apksigner" sign --ks build/local-signing.jks --ks-key-alias newview-local --ks-pass pass:android --key-pass pass:android --out build/newview.apk build/newview-unsigned.apk
+"$tools/apksigner" verify --verbose build/newview.apk
+echo 'APK: build/newview.apk'

@@ -1,4 +1,4 @@
-name: NowView dashboard TV and web
+name: NewView dashboard TV and web
 on:
   push:
     paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', '.github/workflows/dashboard.yml']
@@ -50,8 +50,8 @@ jobs:
         run: bash scripts/verify-preview-apk.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: nowview-markets-test-apk
+          name: newview-test-apk
           path: |
-            build/nowview-markets.apk
-            build/nowview-markets-unsigned.apk
+            build/newview.apk
+            build/newview-unsigned.apk
           retention-days: 14

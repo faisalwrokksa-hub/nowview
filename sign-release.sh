@@ -11,8 +11,8 @@ cd "$(dirname "$0")"
 : "${NOWVIEW_RELEASE_KEY_PASSWORD:?Provide NOWVIEW_RELEASE_KEY_PASSWORD through a secure local environment}"
 
 tools="$ANDROID_HOME/build-tools/34.0.0"
-source_apk="build/nowview-markets-unsigned.apk"
-output_apk="build/nowview-markets-release.apk"
+source_apk="build/newview-unsigned.apk"
+output_apk="build/newview-release.apk"
 
 if [[ ! -f "$source_apk" ]]; then
   echo "Unsigned aligned APK not found; run build-apk.sh first." >&2

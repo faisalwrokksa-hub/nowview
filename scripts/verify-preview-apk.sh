@@ -4,11 +4,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 : "${ANDROID_HOME:=${ANDROID_SDK_ROOT:-}}"
 : "${ANDROID_HOME:?Set ANDROID_HOME}"
-apk="build/nowview-markets.apk"
+apk="build/newview.apk"
 test -s "$apk"
 badging="$("$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging "$apk")"
-printf '%s\n' "$badging" | grep -F "package: name='app.nowview.markets'"
-printf '%s\n' "$badging" | grep -F "application-label:'NowView'"
+printf '%s\n' "$badging" | grep -F "package: name='app.newview.dashboard'"
+printf '%s\n' "$badging" | grep -F "application-label:'NewView'"
 assets="$(unzip -Z1 "$apk")"
 for name in index.html style.css app.js stock-board.js workspace-shell.js myview.js business.js news.js media.js social.js external-links.js live.js indicators.js market-data.mjs; do
   if ! printf '%s\n' "$assets" | grep -Fxq "assets/$name"; then
