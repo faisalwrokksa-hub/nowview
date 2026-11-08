@@ -29,11 +29,49 @@
   category.dispatchEvent(new Event('change'));
  }
 
+ const directory=document.createElement('section');directory.id='newview-channel-directory';directory.setAttribute('aria-label','IPTV-org channel directory');
+ const heading=document.createElement('h3');heading.textContent='Free live TV directory';
+ const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Channel directory not loaded yet.';
+ const list=document.createElement('select');list.setAttribute('aria-label','Available IPTV channels');
+ const open=document.createElement('a');open.textContent='Open selected stream';open.target='_blank';open.rel='noopener noreferrer';open.hidden=true;
+ const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Refresh channels';
+ directory.append(heading,status,list,open,refresh);
+ category?.parentElement?.append(directory);
+ let allChannels=[];let lastFetch=0;let loading=null;
+ function renderChannels(){
+  if(!preferred?.filterChannels)return;
+  const chosen=preferred.filterChannels(allChannels,currentDashboard(),window.NewViewShell?.loadFirstLaunch?.()?.interests);
+  const narrowed=category?.value?chosen.filter(c=>c.category===category.value):chosen;
+  const visible=narrowed.length?narrowed:chosen;
+  list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
+  open.hidden=!visible.length;
+  if(visible.length){open.href=visible[0].url;status.textContent=visible.length+' channels in this view. Availability and rights vary by channel.';}
+  else{open.removeAttribute('href');status.textContent=allChannels.length?'No channels match this category. Select another category.':'No channels loaded. Try refresh.';}
+ }
+ list.addEventListener('change',()=>{if(list.value)open.href=list.value;});
+ async function loadDirectory(force=false){
+  if(loading)return loading;
+  if(!force&&allChannels.length&&Date.now()-lastFetch<3600000){renderChannels();return;}
+  status.textContent='Loading public IPTV directory…';
+  loading=(async()=>{try{
+   const response=await fetch(preferred.MAIN_PLAYLIST,{cache:'no-store'});
+   if(!response.ok)throw Error('HTTP '+response.status);
+   const content=await response.text();if(content.length>16000000)throw Error('Playlist too large');
+   const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
+   allChannels=parsed;lastFetch=Date.now();renderChannels();
+  }catch(error){status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
+  finally{loading=null;}})();return loading;
+ }
+ refresh.addEventListener('click',()=>loadDirectory(true));
+ category?.addEventListener('change',renderChannels);
+ if(typeof document.addEventListener==='function')document.addEventListener('newview:workspace-change',renderChannels);
+ if(typeof window.addEventListener==='function')window.addEventListener('newview:preferences-change',renderChannels);
+ if(preferred?.MAIN_PLAYLIST)loadDirectory();
  const playlist=document.getElementById('live-tv-playlist');
  if(category&&playlist){category.addEventListener('change',()=>{
   const permitted=new Set(['news','business','sports','documentary','education','kids','music','movies','entertainment','weather','general']);
   const chosen=permitted.has(category.value)?category.value:'news';
-  playlist.href='https://iptv-org.github.io/iptv/categories/'+chosen+'.m3u';
+  playlist.href=preferred?.MAIN_PLAYLIST||'https://iptv-org.github.io/iptv/index.m3u';
  });}
  if(typeof document.addEventListener==='function')document.addEventListener('newview:workspace-change',syncDashboardCategories);
  if(typeof window.addEventListener==='function')window.addEventListener('newview:preferences-change',syncDashboardCategories);
