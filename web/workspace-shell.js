@@ -123,7 +123,7 @@
   document.querySelectorAll('[data-open-markets]').forEach(b=>b.addEventListener('click',()=>select('markets')));
   const boardButton=document.getElementById('board-toggle');
   if(boardButton)document.getElementById('shell-market-actions').appendChild(boardButton);
-  select(getStored());
+  select(window.NewViewApps?'myview':getStored());
   installDisplay();
   installFirstLaunch();
  }
