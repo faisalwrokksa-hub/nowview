@@ -12,7 +12,7 @@ const xmlDecode=s=>String(s).replace(/&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos)
 const cleanText=s=>xmlDecode(String(s||'').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1').replace(/<[^>]*>/g,' ').replace(/[\u0000-\u001f]/g,' ').replace(/\s+/g,' ').trim()).slice(0,210);
 const tag=(xml,name)=>{const m=xml.match(new RegExp('<(?:[a-z]+:)?'+name+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/(?:[a-z]+:)?'+name+'>','i'));return m?m[1]:'';};
 const validArticleLink=(value,source)=>{
- try{const u=new URL(xmlDecode(value).trim());return u.protocol==='https:'&&u.hostname===source.host&&u.username===''&&u.password===''?u.href:null;}catch{return null;}
+ try{const u=new URL(xmlDecode(value).trim());return u.protocol==='https:'&&(u.hostname===source.host)&&u.username===''&&u.password===''&&u.port===''?u.href:null;}catch{return null;}
 };
 export function parseNewsXml(xml,sourceId){
  const source=NEWS_SOURCES[sourceId];if(!source)throw new Error('Unknown news source');
