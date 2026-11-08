@@ -41,3 +41,9 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 - The JavaScript-to-Android interface and market callback now use `NewViewNative` and `__newviewResult`, replacing the old `Fintech` runtime names. This is naming only; no new privilege is granted to scripts.
 - MyView avoids redraws on identical snapshot text to preserve focus during frequent market refreshes.
 - Historical GitHub repository URL, previous migration package names, and physical source directory paths may still contain legacy names as provenance. Never imply a repository rename has occurred.
+
+## Device acceptance hardening batch
+- Added WebView file-origin access restrictions and disabled remote debugging/multiple windows; safe browsing is enabled on supported Android versions.
+- Automatic URL redirects cannot launch external apps from main-frame navigation; allowed explicit user-gesture links continue through the existing audited allowlist.
+- Recognizes the app-local file URL with either null or empty URI authority, preventing an Android URI normalization mismatch.
+- See `docs/DEVICE_ACCEPTANCE.md` for an owner-run hardware test matrix; no device test is claimed to have executed.

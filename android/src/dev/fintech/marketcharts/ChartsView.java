@@ -3,6 +3,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.app.Activity;
 import android.net.Uri;
+import android.os.Build;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.JavascriptInterface;
@@ -22,11 +23,18 @@ public final class ChartsView extends WebView {
     private ValueCallback<Uri[]> pendingFiles;
     public ChartsView(Context context,boolean compact){
         super(context);WebSettings s=getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(false);s.setAllowContentAccess(true);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        s.setAllowFileAccessFromFileURLs(false);
+        s.setAllowUniversalAccessFromFileURLs(false);
+        s.setSupportMultipleWindows(false);
+        if(Build.VERSION.SDK_INT>=26)s.setSafeBrowsingEnabled(true);
+        setWebContentsDebuggingEnabled(false);
         setBackgroundColor(0xff080c13);
         setWebViewClient(new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){
                 // Subframes must never cause an external app launch.
                 if(!r.isForMainFrame())return true;
+                // Never launch another app on automatic redirects or script navigation.
+                if(!r.hasGesture()&&!isInternal(r.getUrl()))return true;
                 return routeNavigation(r.getUrl());
             }
             @Override public boolean shouldOverrideUrlLoading(WebView v,String u){return routeNavigation(Uri.parse(u));}
@@ -48,7 +56,7 @@ public final class ChartsView extends WebView {
         addJavascriptInterface(new Bridge(),"NewViewNative");loadUrl("file:///android_asset/index.html"+(compact?"?home=1":""));
     }
     private static boolean isInternal(Uri uri){
-        return uri!=null&&"file".equals(uri.getScheme())&&"".equals(uri.getAuthority())
+        return uri!=null&&"file".equals(uri.getScheme())&&(uri.getAuthority()==null||uri.getAuthority().isEmpty())
             &&"/android_asset/index.html".equals(uri.getPath());
     }
     private static boolean approvedUrl(Uri uri){

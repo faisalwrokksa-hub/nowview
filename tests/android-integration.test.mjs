@@ -36,3 +36,13 @@ test('document-picker content URI remains readable without raw file access',()=>
  assert.match(chart,/"content"\.equals\(chosen\.getScheme\(\)\)/);
  assert.match(chart,/Intent\.ACTION_OPEN_DOCUMENT/);
 });
+
+test('Android WebView disables file-origin escalation, multiple windows and debug mode',()=>{
+ assert.match(chart,/setAllowFileAccessFromFileURLs\(false\)/);
+ assert.match(chart,/setAllowUniversalAccessFromFileURLs\(false\)/);
+ assert.match(chart,/setSupportMultipleWindows\(false\)/);
+ assert.match(chart,/setSafeBrowsingEnabled\(true\)/);
+ assert.match(chart,/setWebContentsDebuggingEnabled\(false\)/);
+ assert.match(chart,/!r\.hasGesture\(\)/);
+ assert.match(chart,/uri\.getAuthority\(\)==null/);
+});
