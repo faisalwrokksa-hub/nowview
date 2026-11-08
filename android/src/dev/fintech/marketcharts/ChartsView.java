@@ -1,4 +1,4 @@
-package app.nowview.markets;
+package app.newview.dashboard;
 import android.content.Context;
 import android.content.Intent;
 import android.app.Activity;
@@ -103,7 +103,7 @@ public final class ChartsView extends WebView {
                 try{getContext().startActivity(intent);}catch(Exception ignored){}
             });
         }
-        @JavascriptInterface public boolean getPanelReady(){String enabled=android.provider.Settings.Secure.getString(getContext().getContentResolver(),android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);return android.provider.Settings.canDrawOverlays(getContext())&&enabled!=null&&(enabled.contains("app.nowview.markets/.HomePanelService")||enabled.contains("app.nowview.markets/app.nowview.markets.HomePanelService"));}
+        @JavascriptInterface public boolean getPanelReady(){String enabled=android.provider.Settings.Secure.getString(getContext().getContentResolver(),android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);return android.provider.Settings.canDrawOverlays(getContext())&&enabled!=null&&(enabled.contains("app.newview.dashboard/.HomePanelService")||enabled.contains("app.newview.dashboard/app.newview.dashboard.HomePanelService"));}
         @JavascriptInterface public boolean getPanelEnabled(){return getContext().getSharedPreferences("charts",0).getBoolean("homePanel",true);}
         @JavascriptInterface public void setPanelEnabled(boolean enabled){getContext().getSharedPreferences("charts",0).edit().putBoolean("homePanel",enabled).apply();if(!enabled)post(HomePanelService::hidePanel);}
         @JavascriptInterface public void requestChart(final String symbol,final String period,final int id){

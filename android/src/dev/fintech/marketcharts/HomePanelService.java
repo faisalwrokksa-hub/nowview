@@ -1,4 +1,4 @@
-package app.nowview.markets;
+package app.newview.dashboard;
 import android.accessibilityservice.AccessibilityService;
 import android.content.BroadcastReceiver;
 import android.content.Context;

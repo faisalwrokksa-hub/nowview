@@ -1,4 +1,4 @@
-package app.nowview.markets;
+package app.newview.dashboard;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -23,7 +23,7 @@ public final class MarketData {
         if (System.currentTimeMillis() / 1000 < blockedUntil) throw new java.io.IOException("API cooldown");
         HttpURLConnection connection = (HttpURLConnection) new URL("https://data-api.binance.vision/api/v3/" + path + "?" + query).openConnection();
         connection.setConnectTimeout(10000);connection.setReadTimeout(10000);
-        connection.setRequestProperty("User-Agent", "FintechMarketCharts/1.0");connection.setRequestProperty("Accept", "application/json");
+        connection.setRequestProperty("User-Agent", "NewViewMarkets/1.0");connection.setRequestProperty("Accept", "application/json");
         try {
             int status = connection.getResponseCode();
             if (status == 418 || status == 429) {

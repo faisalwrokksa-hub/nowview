@@ -1,4 +1,4 @@
-package app.nowview.markets;
+package app.newview.dashboard;
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.Intent;
