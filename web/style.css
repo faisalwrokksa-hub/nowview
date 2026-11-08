@@ -177,3 +177,5 @@ body.has-home-wallpaper[data-current-workspace="myview"][data-wallpaper-shade="d
 .wallpaper-controls input{max-width:220px}.wallpaper-controls select{background:#18291e;color:#f6efe0;border:1px solid #87754e;border-radius:8px;padding:9px;min-height:42px}
 .wallpaper-controls button{min-height:42px}.wallpaper-controls :is(input,select,button):focus-visible{outline:3px solid #f3d390;outline-offset:2px}
 .home-panel .wallpaper-controls,.display-mode .wallpaper-controls{display:none}
+
+.home-apps{margin:14px 0;min-height:0}.home-app-actions{display:flex;flex-wrap:wrap;gap:10px}.home-app-actions a{display:inline-flex;align-items:center;padding:10px 14px;min-height:44px;border:1px solid #8a774e;border-radius:9px;color:#f5d79c;text-decoration:none;background:#223628}.home-app-actions :is(a,button):focus-visible{outline:3px solid #f3d390;outline-offset:2px}
