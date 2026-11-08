@@ -3,9 +3,10 @@
 **Status:** Development policy and opt-in signing helper; not an issued production key or approved public release.
 
 ## Identities and test builds
+- Current development preview packaging names are `build/newview.apk` and `build/newview-unsigned.apk`, as checked by CI. These names are not production-release designations.
 - Production candidate application ID: `app.newview.dashboard` (independent of the original Fintech app).
-- CI's `build/newview-markets.apk` is a **test-only** APK. It is signed by a local automatically generated key with a known test password, possibly different on every runner. **Never distribute or market this as a customer release.**
-- `build/newview-markets-unsigned.apk` is aligned but unsigned. It is the input to the separate owner-controlled signer.
+- CI's `build/newview.apk` is a **test-only** APK. It is signed by a local automatically generated key with a known test password, possibly different on every runner. **Never distribute or market this as a customer release.**
+- `build/newview-unsigned.apk` is aligned but unsigned. It is the input to the separate owner-controlled signer.
 - The previous NowView preview package `app.nowview.markets` also has a different Android application ID and will not be upgraded in place; remove old preview installations only after exporting any desired local preferences. The original Fintech app uses a different application ID; the two can coexist but do **not** upgrade one another. Local NewView test builds may also not upgrade each other if signatures differ.
 
 ## One-time owner setup (outside GitHub)
