@@ -1,4 +1,4 @@
-package dev.fintech.marketcharts;
+package app.nowview.markets;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;

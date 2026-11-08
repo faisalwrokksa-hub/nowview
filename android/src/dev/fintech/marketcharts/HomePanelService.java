@@ -1,4 +1,4 @@
-package dev.fintech.marketcharts;
+package app.nowview.markets;
 import android.accessibilityservice.AccessibilityService;
 import android.content.BroadcastReceiver;
 import android.content.Context;

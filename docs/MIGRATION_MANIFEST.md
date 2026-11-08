@@ -48,3 +48,9 @@
 - Existing original CI/test status **does not certify** this new repository; run dedicated NowView CI and physical-device QA.
 - Audit license provenance of every migrated file and market-data redistribution rights.
 - No production APK, website or git merge authorized.
+
+## NowView beta app identity (development branch)
+- Android application ID: `app.nowview.markets`; this is a **different application** from the original Fintech package. Existing Fintech installations will not upgrade in place. Do not uninstall the existing original app without backing up settings.
+- Java package statements have been updated while the source directory remains at `android/src/dev/fintech/marketcharts/` for this controlled migration batch; Java compilation uses declared package namespaces. Directory relocation and any JavaScript bridge rename require separate review.
+- Development APK output is `build/nowview-markets.apk`. CI keys remain ephemeral test keys. APK files from separate CI runs **cannot be assumed update-compatible**; commercial signing must be configured separately.
+- Actual Android device installation/upgrade verification and approved domain/trademark ownership are not yet complete.

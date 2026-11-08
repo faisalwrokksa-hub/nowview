@@ -1,4 +1,4 @@
-name: Market Charts TV and web
+name: NowView Markets TV and web
 on:
   push:
     paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', '.github/workflows/dashboard.yml']
@@ -39,8 +39,8 @@ jobs:
         run: bash build-apk.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: market-charts-test-apk
+          name: nowview-markets-test-apk
           path: |
-            build/market-charts.apk
-            build/market-charts-unsigned.apk
+            build/nowview-markets.apk
+            build/nowview-markets-unsigned.apk
           retention-days: 14

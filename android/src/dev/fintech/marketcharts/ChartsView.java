@@ -1,4 +1,4 @@
-package dev.fintech.marketcharts;
+package app.nowview.markets;
 import android.content.Context;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
@@ -23,7 +23,7 @@ public final class ChartsView extends WebView {
         addJavascriptInterface(new Bridge(),"Fintech");loadUrl("file:///android_asset/index.html"+(compact?"?home=1":""));
     }
     public final class Bridge {
-        @JavascriptInterface public boolean getPanelReady(){String enabled=android.provider.Settings.Secure.getString(getContext().getContentResolver(),android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);return android.provider.Settings.canDrawOverlays(getContext())&&enabled!=null&&(enabled.contains("dev.fintech.marketcharts/.HomePanelService")||enabled.contains("dev.fintech.marketcharts/dev.fintech.marketcharts.HomePanelService"));}
+        @JavascriptInterface public boolean getPanelReady(){String enabled=android.provider.Settings.Secure.getString(getContext().getContentResolver(),android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);return android.provider.Settings.canDrawOverlays(getContext())&&enabled!=null&&(enabled.contains("app.nowview.markets/.HomePanelService")||enabled.contains("app.nowview.markets/app.nowview.markets.HomePanelService"));}
         @JavascriptInterface public boolean getPanelEnabled(){return getContext().getSharedPreferences("charts",0).getBoolean("homePanel",true);}
         @JavascriptInterface public void setPanelEnabled(boolean enabled){getContext().getSharedPreferences("charts",0).edit().putBoolean("homePanel",enabled).apply();if(!enabled)post(HomePanelService::hidePanel);}
         @JavascriptInterface public void requestChart(final String symbol,final String period,final int id){
