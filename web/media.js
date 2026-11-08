@@ -52,6 +52,7 @@
  list.addEventListener('change',()=>{if(list.value)open.href=list.value;});
  async function loadDirectory(force=false){
   if(loading)return loading;
+  if(location.protocol==='file:'){status.textContent='Android APK: open the official playlist in a compatible external player.';return;}
   if(!force&&allChannels.length&&Date.now()-lastFetch<3600000){renderChannels();return;}
   status.textContent='Loading public IPTV directory…';
   loading=(async()=>{try{
