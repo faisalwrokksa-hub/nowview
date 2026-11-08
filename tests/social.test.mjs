@@ -77,3 +77,10 @@ test('Global geography does not silently force US news localization',()=>{
  assert.equal(global.searchParams.get('q'),'financial markets');
  assert.match(window.NewViewSocial.discoveryLinks('GLOBAL','all')[0].label,/Global/);
 });
+
+test('region and topic preferences persist locally and fall back safely',()=>{
+ assert.match(source,/newview\.social\.discovery\.v1/);
+ assert.match(source,/localStorage\.setItem\(PREF_KEY/);
+ assert.match(source,/Object\.hasOwn\(GEO,p\.geo\)/);
+ assert.match(source,/Object\.hasOwn\(TOPICS,p\.topic\)/);
+});
