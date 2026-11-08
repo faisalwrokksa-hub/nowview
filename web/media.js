@@ -34,26 +34,32 @@
  const heading=document.createElement('h3');heading.textContent='Free live TV directory';
  const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Channel directory not loaded yet.';
  const list=document.createElement('select');list.setAttribute('aria-label','Available IPTV channels');
+ const search=document.createElement('input');search.type='search';search.placeholder='Filter channels by name or ID';search.setAttribute('aria-label','Search channels');
+ const secureOnly=document.createElement('input');secureOnly.type='checkbox';secureOnly.checked=true;secureOnly.id='newview-https-only';
+ const secureLabel=document.createElement('label');secureLabel.htmlFor=secureOnly.id;secureLabel.textContent='HTTPS streams only';
  const nativeStream=()=>typeof window.NewViewNative?.playStream==='function';
  const playChannel=document.createElement('button');playChannel.type='button';playChannel.textContent='Play selected channel in NewView';playChannel.hidden=!nativeStream();playChannel.disabled=true;
  const open=document.createElement('a');open.textContent='Open selected stream';open.target='_blank';open.rel='noopener noreferrer';open.hidden=true;
  const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Refresh channels';
- directory.append(heading,status,list,playChannel,open,refresh);
+ directory.append(heading,status,search,secureLabel,secureOnly,list,playChannel,open,refresh);
  category?.parentElement?.append(directory);
  let allChannels=[];let lastFetch=0;let loading=null;
  function renderChannels(){
   if(!preferred?.filterChannels)return;
   const chosen=preferred.filterChannels(allChannels,currentDashboard(),window.NewViewShell?.loadFirstLaunch?.()?.interests);
   const narrowed=category?.value?chosen.filter(c=>c.category.toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):chosen;
-  const visible=narrowed;
+  const term=search.value.trim().toLowerCase().slice(0,120);
+  const visible=narrowed.filter(c=>(!secureOnly.checked||c.url.startsWith('https://'))&&(!term||(c.name+' '+c.id).toLowerCase().includes(term)));
   list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
   open.hidden=!visible.length;
   playChannel.disabled=!visible.length;
   open.setAttribute('aria-disabled',String(!visible.length));
-  if(visible.length){open.href=visible[0].url;status.textContent=visible.length+' channels in this view. Availability and rights vary by channel.';}
+  if(visible.length){open.href=visible[0].url;status.textContent=visible.length+' matching channels (showing first 1500). Availability and rights vary by channel.';}
   else{open.removeAttribute('href');status.textContent=allChannels.length?'No channels match this category. Select another category.':'No channels loaded. Try refresh.';}
  }
  list.addEventListener('change',()=>{if(list.value)open.href=list.value;});
+ search.addEventListener('input',renderChannels);
+ secureOnly.addEventListener('change',renderChannels);
  playChannel.addEventListener('click',()=>{if(!nativeStream()||!list.value)return;try{const url=new URL(list.value);if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port)window.NewViewNative.playStream(url.href);}catch{}});
  async function loadDirectory(force=false){
   if(loading)return loading;
