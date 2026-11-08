@@ -43,7 +43,8 @@
 - Fintech's commercial plan (scope incorporated into NowView's master prompt).
 
 ## Follow-up work
-- **Not yet rebranded:** Android package `dev.fintech.marketcharts`, visible Market Charts strings, APK filename and Python user agent remain for baseline test compatibility. Change them in separately validated steps before public sale.
+- **Visual brand update (development only):** HTML title/header, Android visible app/service labels and package metadata now use NowView Markets. Historical quote caption corrected from USD to USDT; instrument display remains Binance-based.
+- **Still pending:** Android package ID `dev.fintech.marketcharts`, APK filename, Python user agent, test/signing identity and other legacy internals remain for build and upgrade-path compatibility. Change only with separate signing/upgrade strategy before public sale.
 - Existing original CI/test status **does not certify** this new repository; run dedicated NowView CI and physical-device QA.
 - Audit license provenance of every migrated file and market-data redistribution rights.
 - No production APK, website or git merge authorized.
