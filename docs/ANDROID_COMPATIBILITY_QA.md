@@ -11,3 +11,5 @@
 **Security scope:** External link allowlist includes platform home domains only, not approved individual creators or their content rights. Social links remain subject to validation in NewViewSocial. User-initiated links might open a browser chooser, or do nothing if no browser handles them.
 
 **Still requiring real-device QA:** Full Android TV remote-navigation, browsers installed on device, activity switch/back behavior, document-provider availability, CSV content URI access, WebView keyboard and PiP behavior. An APK build is not equivalent to successful device testing or permission to commercially distribute third-party media.
+
+- Content-provider access is enabled in WebView for user-selected system documents, while unrestricted filesystem access stays disabled. Picker results reject raw file and remote URI schemes. Actual provider read behavior remains a physical-device test item.

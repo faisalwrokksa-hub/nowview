@@ -29,3 +29,10 @@ test('external-link bridge is installed in cloud bundle and HTML',()=>{
  assert.match(build,/external-links\.js/);
  assert.match(chart,/openApprovedUrl\(String raw\)/);
 });
+
+test('document-picker content URI remains readable without raw file access',()=>{
+ assert.match(chart,/setAllowContentAccess\(true\)/);
+ assert.match(chart,/setAllowFileAccess\(false\)/);
+ assert.match(chart,/"content"\.equals\(chosen\.getScheme\(\)\)/);
+ assert.match(chart,/Intent\.ACTION_OPEN_DOCUMENT/);
+});

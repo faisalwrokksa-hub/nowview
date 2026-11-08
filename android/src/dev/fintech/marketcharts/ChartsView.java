@@ -21,7 +21,7 @@ public final class ChartsView extends WebView {
     private static final int CSV_PICKER_REQUEST=2307;
     private ValueCallback<Uri[]> pendingFiles;
     public ChartsView(Context context,boolean compact){
-        super(context);WebSettings s=getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(false);s.setAllowContentAccess(false);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        super(context);WebSettings s=getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(false);s.setAllowContentAccess(true);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         setBackgroundColor(0xff080c13);
         setWebViewClient(new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){
@@ -84,6 +84,8 @@ public final class ChartsView extends WebView {
         ValueCallback<Uri[]> callback=pendingFiles;pendingFiles=null;
         if(callback==null)return;
         Uri chosen=result==Activity.RESULT_OK&&data!=null?data.getData():null;
+        // Only expose a single system-provider document, never a raw file or network URI.
+        if(chosen!=null&&!"content".equals(chosen.getScheme()))chosen=null;
         callback.onReceiveValue(chosen==null?null:new Uri[]{chosen});
     }
     public final class Bridge {
