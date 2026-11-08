@@ -159,3 +159,12 @@ button:focus-visible{outline:3px solid #f6dfad;outline-offset:3px}
 @media(hover:none){button,.workspace-tab,.myview-widget-actions button,.social-profile-link{min-height:44px}}
 
 .myview-insight{border-top:1px solid #5b553c;padding-top:12px;font-size:clamp(12px,1vw,16px)!important;color:#f0d8a6!important;overflow-wrap:anywhere}
+
+/* Device-local presentation controls; not a Cast receiver or remote control protocol. */
+.display-controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:clamp(12px,1vw,17px)}
+.display-controls select{font:inherit;min-height:42px;padding:8px;background:#18291e;color:#f6efe0;border:1px solid #87754e;border-radius:8px}
+.display-controls button{min-height:42px}
+.display-controls :is(select,button):focus-visible{outline:3px solid #f3d390;outline-offset:2px}
+.display-mode header,.display-mode footer,.display-mode .display-controls{display:none}
+.display-mode main{height:100vh;min-height:0;padding:2vh 2vw;gap:1vh}
+@media(max-width:650px){.display-controls{gap:6px}.display-controls select{max-width:150px}}
