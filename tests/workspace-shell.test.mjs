@@ -22,5 +22,5 @@ test('workspace and stock board remain separate from market engine',()=>{
  assert.match(board,/U\.S\. Stocks/);
  assert.match(html,/id="business-file"/);
  assert.match(html,/id="business-kpis"/);
- assert.match(html,/Official feeds and embeds not connected/);
+ assert.match(html,/id="social-add"/);
 });

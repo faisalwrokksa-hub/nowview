@@ -129,3 +129,19 @@ button:focus-visible{outline:3px solid #f6dfad;outline-offset:3px}
 .business-row-value{text-align:right;font-variant-numeric:tabular-nums}
 @media(max-width:850px){.business-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:550px){.business-kpis{grid-template-columns:1fr}.business-trend-row{grid-template-columns:81px minmax(30px,1fr) 80px;gap:6px}}
+
+/* NowViewSocial: links only, no third-party script injection or fake posts. */
+.social-intro{min-height:0!important;margin-bottom:14px}
+.social-form{display:flex;flex-wrap:wrap;gap:11px;align-items:center;padding:10px 0}
+.social-form label{font-size:clamp(12px,1vw,17px);color:#e7c992}
+.social-form select,.social-form input{font:inherit;color:#f6efe0;background:#1e3224;border:1px solid #8a7852;border-radius:9px;padding:12px;min-height:46px}
+.social-form input{flex:1 1 270px;min-width:140px}
+.social-form :is(select,input,button):focus-visible{outline:3px solid #f4d18e;outline-offset:2px}
+.social-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.social-link-card{background:linear-gradient(145deg,#203a2a,#0f1e16);border:1px solid #5a503b;border-radius:14px;padding:19px;display:flex;flex-direction:column;gap:13px}
+.social-link-card h3{font-size:clamp(17px,1.45vw,23px);font-weight:500;margin:0;color:#f2e2c0;overflow-wrap:anywhere}
+.social-profile-link{color:#e6bf77;text-decoration:underline;min-height:35px;display:inline-flex;align-items:center}
+.social-link-card button{align-self:flex-start}
+.social-empty{color:#c4b69a;padding:18px}
+@media(max-width:950px){.social-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){.social-links{grid-template-columns:1fr}}
