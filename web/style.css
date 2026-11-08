@@ -196,3 +196,45 @@ body.has-home-wallpaper[data-current-workspace="myview"][data-wallpaper-shade="d
 :where(button,a[href],input,select,textarea):disabled{opacity:.5;cursor:not-allowed}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 @media (max-width:650px){main{height:auto;min-height:100dvh}.shell-page{overflow:visible}.workspace{min-height:55vh}}
+
+/* Android TV launcher: simplify MyView; detailed configuration remains available in Settings. */
+body.tv-launcher[data-current-workspace="myview"] main{height:100vh;min-height:0;overflow:hidden;position:relative;padding:2.5vh 3vw;gap:0}
+body.tv-launcher[data-current-workspace="myview"] header,
+body.tv-launcher[data-current-workspace="myview"] #workspace-switcher,
+body.tv-launcher[data-current-workspace="myview"] #workspace-intro,
+body.tv-launcher[data-current-workspace="myview"] footer,
+body.tv-launcher[data-current-workspace="myview"] #public-source-directory,
+body.tv-launcher[data-current-workspace="myview"] #display-controls,
+body.tv-launcher[data-current-workspace="myview"] #wallpaper-controls,
+body.tv-launcher[data-current-workspace="myview"] .myview-controls,
+body.tv-launcher[data-current-workspace="myview"] #myview-grid,
+body.tv-launcher[data-current-workspace="myview"] .home-apps{display:none!important}
+body.tv-launcher[data-current-workspace="myview"] [data-workspace="myview"]{display:block!important;overflow:visible;position:static;min-height:0;padding:0;background:transparent;border:0}
+.tv-home-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;position:relative;z-index:5}
+.tv-home-clock{font-size:clamp(23px,2.6vw,43px);font-weight:700;color:#fff;text-shadow:0 3px 12px #000;line-height:1.3}
+.tv-home-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.tv-home-actions button{font-size:clamp(15px,1.3vw,22px);padding:10px 16px;min-height:52px;border-radius:14px;background:#071b31e8;border:1px solid #48789b;color:#fff}
+body.tv-launcher[data-current-workspace="myview"] #market-shell{display:block!important;position:absolute;top:19%;left:12%;width:76%;height:55%;min-height:0;overflow:hidden;border:1px solid #4c8bad;border-radius:20px;background:#061427eb;box-shadow:0 20px 60px #0008;z-index:1;padding:12px}
+body.tv-launcher[data-current-workspace="myview"] #market-shell #symbols,
+body.tv-launcher[data-current-workspace="myview"] #market-shell #ranges,
+body.tv-launcher[data-current-workspace="myview"] #market-shell #stock-board{display:none!important}
+body.tv-launcher[data-current-workspace="myview"] #market-shell .workspace{display:block!important;height:100%;min-height:0;overflow:hidden}
+body.tv-launcher[data-current-workspace="myview"] .tv-home-favorites{display:flex;align-items:center;gap:18px;position:absolute;bottom:5%;left:6%;right:6%;z-index:4}
+.tv-home-favorites span{font-size:clamp(18px,1.6vw,26px);color:#e8eef5;text-shadow:0 2px 10px #000}
+.tv-home-favorites button{font-size:clamp(20px,1.7vw,30px);font-weight:700;min-width:180px;min-height:82px;background:#092440eb;border:1px solid #4e94c1;color:white;border-radius:17px}
+body.tv-launcher[data-current-workspace="myview"].tv-home-settings #display-controls,
+body.tv-launcher[data-current-workspace="myview"].tv-home-settings #wallpaper-controls,
+body.tv-launcher[data-current-workspace="myview"].tv-home-settings .myview-controls{display:flex!important;position:relative;z-index:10;background:#061427f5;max-height:28vh;overflow:auto}
+body.tv-launcher[data-current-workspace="myview"].tv-home-settings #market-shell{opacity:.25;pointer-events:none}
+body.tv-launcher[data-current-workspace="myview"].tv-all-apps .home-apps{display:block!important;position:absolute;top:16%;left:6%;right:6%;bottom:4%;z-index:9;overflow:auto;background:#061427f7}
+body.tv-launcher[data-current-workspace="myview"].tv-all-apps #market-shell{visibility:hidden}
+body.tv-launcher[data-current-workspace="myview"] .home-app-actions{display:none}
+body.tv-launcher[data-current-workspace="myview"] .home-installed-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+@media(max-width:700px){
+ body.tv-launcher[data-current-workspace="myview"] main{height:auto;min-height:100dvh;overflow:auto;padding:14px}
+ .tv-home-top{flex-direction:column;gap:12px}
+ .tv-home-actions{justify-content:flex-start}
+ body.tv-launcher[data-current-workspace="myview"] #market-shell{position:relative;top:auto;left:auto;width:100%;height:48vh;margin:18px 0}
+ body.tv-launcher[data-current-workspace="myview"] .tv-home-favorites{position:relative;bottom:auto;left:auto;right:auto;flex-wrap:wrap;margin:14px 0}
+ .tv-home-favorites button{min-width:125px;min-height:60px}
+}
