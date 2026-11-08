@@ -11,6 +11,17 @@
   media:'Media · official YouTube embeds may contain ads · PipeTv external on Android TV',
   social:'Social · saved public profile links only, no live feeds'
  };
+ const DISPLAY_KEY='newview.display.profiles.v1';
+ const DISPLAY_DEFAULT={name:'Default TV',views:['myview','markets','business','news','media','social'],refreshSeconds:60,fullscreen:false};
+ function sanitizeDisplay(value){
+  if(!value||typeof value!=='object')return {...DISPLAY_DEFAULT,views:[...DISPLAY_DEFAULT.views]};
+  const list=Array.isArray(value.views)?value.views:DISPLAY_DEFAULT.views;
+  const selected=[...new Set(list.filter(v=>views.includes(v)))];
+  const seconds=Number(value.refreshSeconds);
+  return {name:typeof value.name==='string'?value.name.slice(0,40):DISPLAY_DEFAULT.name,views:selected.length?selected:[...DISPLAY_DEFAULT.views],refreshSeconds:[0,30,60,120,300].includes(seconds)?seconds:60,fullscreen:value.fullscreen===true};
+ }
+ function loadDisplays(){try{const x=JSON.parse(localStorage.getItem(DISPLAY_KEY)||'[]');return Array.isArray(x)?x.slice(0,5).map(sanitizeDisplay):[];}catch{return [];}}
+ function saveDisplays(profiles){const safe=profiles.slice(0,5).map(sanitizeDisplay);try{localStorage.setItem(DISPLAY_KEY,JSON.stringify(safe));}catch{}return safe;}
  const getStored=()=>{try{const v=localStorage.getItem('newview.workspace');return views.includes(v)?v:'myview';}catch{return 'myview';}};
  function select(view){
   if(!views.includes(view)||document.body.classList.contains('home-panel'))return false;
@@ -51,6 +62,6 @@
   if(boardButton)document.getElementById('shell-market-actions').appendChild(boardButton);
   select(getStored());
  }
- window.NewViewShell={views,names,select,getStored};
+ window.NewViewShell={views,names,select,getStored,sanitizeDisplay,loadDisplays,saveDisplays};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
