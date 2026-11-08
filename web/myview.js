@@ -5,8 +5,8 @@
   Object.freeze({id:'market',title:'Markets',description:'Open verified Binance market charts and watchlists.',view:'markets',label:'Market charts'}),
   Object.freeze({id:'news',title:'News',description:'Read source-linked financial announcements.',view:'news',label:'Financial announcements'}),
   Object.freeze({id:'media',title:'Media',description:'Open supported video and TV playback options.',view:'media',label:'Video and TV'}),
-  Object.freeze({id:'business',title:'Business',description:'Business data connector not configured.',view:'business',label:'Business KPIs'}),
-  Object.freeze({id:'social',title:'Social',description:'Approved social feed connector not configured.',view:'social',label:'Social discovery'})
+  Object.freeze({id:'business',title:'Business',description:'Import your authorized business CSV locally to review KPIs.',view:'business',label:'Business KPIs'}),
+  Object.freeze({id:'social',title:'Social',description:'Save and open public social profile bookmarks.',view:'social',label:'Social discovery'})
  ]);
  const ids=new Set(catalog.map(x=>x.id));
  const defaults=['market','news','media'];

@@ -1,4 +1,4 @@
-name: NowView Markets TV and web
+name: NowView dashboard TV and web
 on:
   push:
     paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', '.github/workflows/dashboard.yml']
@@ -46,6 +46,8 @@ jobs:
           packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
       - name: Build universal TV and phone APK
         run: bash build-apk.sh
+      - name: Verify preview APK identity and bundled workspace assets
+        run: bash scripts/verify-preview-apk.sh
       - uses: actions/upload-artifact@v4
         with:
           name: nowview-markets-test-apk

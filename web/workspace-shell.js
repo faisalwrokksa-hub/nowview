@@ -3,6 +3,14 @@
 (function(){
  const views=['myview','markets','business','news','media','social'];
  const names={myview:'MyView',markets:'NowViewMarkets',business:'NowViewBusiness',news:'NowViewNews',media:'NowViewMedia',social:'NowViewSocial'};
+ const sourceNotes={
+  myview:'MyView · preferences stored on this device',
+  markets:'Binance public token prices in USDT · U.S. stock quotes unavailable without authorized feed',
+  business:'Business · CSV processed locally and never uploaded',
+  news:'News · official RSS announcements, source-linked',
+  media:'Media · official YouTube embeds may contain ads · PipeTv external on Android TV',
+  social:'Social · saved public profile links only, no live feeds'
+ };
  const getStored=()=>{try{const v=localStorage.getItem('nowview.workspace');return views.includes(v)?v:'myview';}catch{return 'myview';}};
  function select(view){
   if(!views.includes(view)||document.body.classList.contains('home-panel'))return false;
@@ -17,6 +25,8 @@
    const active=el.dataset.viewButton===view;el.setAttribute('aria-pressed',String(active));el.classList.toggle('selected',active);
   }
   document.getElementById('workspace-title').textContent=names[view];
+  const source=document.getElementById('footer-source');
+  if(source)source.textContent=sourceNotes[view];
   document.body.dataset.currentWorkspace=view;
   const activeTab=document.querySelector('[data-view-button="'+view+'"]');
   if(activeTab)activeTab.setAttribute('aria-current','page');
