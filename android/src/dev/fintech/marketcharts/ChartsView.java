@@ -46,14 +46,15 @@ public final class ChartsView extends WebView {
                 pendingFiles=callback;
                 Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 pick.addCategory(Intent.CATEGORY_OPENABLE);
-                pick.setType("text/*");
-                pick.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"text/csv","text/comma-separated-values","application/csv","text/plain"});
+                pick.setType("*/*");
+                pick.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"text/csv","text/comma-separated-values","application/csv","text/plain","image/jpeg","image/png","image/webp"});
                 try{((Activity)getContext()).startActivityForResult(pick,CSV_PICKER_REQUEST);}
                 catch(Exception ignored){pendingFiles=null;callback.onReceiveValue(null);}
                 return true;
             }
         });
-        addJavascriptInterface(new Bridge(),"NewViewNative");loadUrl("file:///android_asset/index.html"+(compact?"?home=1":""));
+        addJavascriptInterface(new Bridge(),"NewViewNative");
+        addJavascriptInterface(new LauncherAppsBridge(context),"NewViewApps");loadUrl("file:///android_asset/index.html"+(compact?"?home=1":""));
     }
     private static boolean isInternal(Uri uri){
         return uri!=null&&"file".equals(uri.getScheme())&&(uri.getAuthority()==null||uri.getAuthority().isEmpty())
@@ -129,5 +130,5 @@ public final class ChartsView extends WebView {
     }
     private static JSONObject error(String s){JSONObject j=new JSONObject();try{j.put("error",s);}catch(Exception ignored){}return j;}
     private void deliver(int id,JSONObject j){post(()->{if(!closed)evaluateJavascript("window.__newviewResult("+id+","+j.toString()+")",null);});}
-    @Override public void destroy(){closed=true;worker.shutdownNow();if(pendingFiles!=null){pendingFiles.onReceiveValue(null);pendingFiles=null;}removeJavascriptInterface("NewViewNative");super.destroy();}
+    @Override public void destroy(){closed=true;worker.shutdownNow();if(pendingFiles!=null){pendingFiles.onReceiveValue(null);pendingFiles=null;}removeJavascriptInterface("NewViewNative");removeJavascriptInterface("NewViewApps");super.destroy();}
 }
