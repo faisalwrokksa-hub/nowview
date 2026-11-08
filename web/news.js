@@ -23,7 +23,7 @@
    if(!response.ok)throw new Error('News service unavailable');
    const feed=await response.json();
    if(current!==controller)return;
-   if(!Array.isArray(feed.items)||!feed.items.length){status.textContent='No announcements returned by this source';return;}
+   if(!Array.isArray(feed.items)||!feed.items.length){status.textContent='No headlines returned by this source. Check the original publisher.';return;}
    for(const item of feed.items){
     let url;
     try{url=new URL(item.url);}catch{continue;}
@@ -36,7 +36,10 @@
     container.append(article);
    }
    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:choose.value,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
-   status.textContent=container.children.length?'Source-linked headlines · fetched '+new Date(feed.fetchedAt).toLocaleTimeString():'No valid announcements returned by this source';
+   const fetched=new Date(feed.fetchedAt);
+   const age=Date.now()-fetched.getTime();
+   const freshness=Number.isFinite(age)&&age>=0&&age<=3600000?'Recently fetched':'Fetch time unavailable or older than one hour';
+   status.textContent=container.children.length?'Source-linked headlines · '+freshness+' · fetched '+(Number.isFinite(fetched.getTime())?fetched.toLocaleString():'unknown'):'No valid announcements returned by this source';
   }catch(err){
    if(current!==controller||err.name==='AbortError')return;
    status.textContent='Headlines unavailable. Open the official source below.';
