@@ -6,6 +6,9 @@
  if(!container||!choose||!refresh)return;
  const external={'fed':'https://www.federalreserve.gov/newsevents/pressreleases.htm','sec':'https://www.sec.gov/newsroom/press-releases','stocktwits':'https://stocktwits.com/'};
  let controller=null;
+ let nativeRequestId=0;
+ const nativePending=new Map();
+ window.__newviewNewsResult=(id,data)=>{const entry=nativePending.get(id);if(!entry)return;nativePending.delete(id);clearTimeout(entry.timer);if(data?.error)entry.reject(Error(data.error));else entry.resolve(data);};
  let lastItems=[];let lastFetchLabel='';
  const search=document.createElement('input');search.type='search';search.placeholder='Filter headlines';search.setAttribute('aria-label','Filter news headlines');
  const auto=document.createElement('input');auto.type='checkbox';auto.id='news-auto-refresh';
@@ -33,6 +36,7 @@
  }
  async function refreshNews(){
   if(controller)controller.abort();
+  for(const [id,p] of nativePending){clearTimeout(p.timer);p.reject(new DOMException('Superseded','AbortError'));nativePending.delete(id);}
   controller=new AbortController();
   const current=controller;
   sourceLink();status.textContent='Loading source-linked headlines…';container.replaceChildren();lastItems=[];
@@ -42,9 +46,9 @@
    if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicNews==='function'){
     if(choose.value==='stocktwits'){status.textContent='This publisher does not have a verified native RSS feed. Open the source below.';return;}
     feed=await new Promise((resolve,reject)=>{
-     const id=Date.now()+Math.floor(Math.random()*1000);
-     const timer=setTimeout(()=>{delete window.__newviewNewsResult;reject(Error('News timeout'));},20000);
-     window.__newviewNewsResult=(received,data)=>{if(received!==id)return;clearTimeout(timer);delete window.__newviewNewsResult;if(data?.error)reject(Error(data.error));else resolve(data);};
+     const id=++nativeRequestId;
+     const timer=setTimeout(()=>{nativePending.delete(id);reject(Error('News timeout'));},20000);
+     nativePending.set(id,{resolve,reject,timer});
      window.NewViewNative.fetchPublicNews(choose.value,id);
     });
    }else{
