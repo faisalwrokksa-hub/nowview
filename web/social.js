@@ -6,7 +6,8 @@
   tiktok:Object.freeze({label:'TikTok',hosts:['tiktok.com','www.tiktok.com','m.tiktok.com'],root:'https://www.tiktok.com/'}),
   facebook:Object.freeze({label:'Facebook',hosts:['facebook.com','www.facebook.com','m.facebook.com'],root:'https://www.facebook.com/'}),
   truth:Object.freeze({label:'Truth Social',hosts:['truthsocial.com','www.truthsocial.com'],root:'https://truthsocial.com/'}),
-  stocktwits:Object.freeze({label:'Stocktwits',hosts:['stocktwits.com','www.stocktwits.com'],root:'https://stocktwits.com/'})
+  stocktwits:Object.freeze({label:'Stocktwits',hosts:['stocktwits.com','www.stocktwits.com'],root:'https://stocktwits.com/'}),
+  polymarket:Object.freeze({label:'Polymarket',hosts:['polymarket.com','www.polymarket.com'],root:'https://polymarket.com/'})
  });
  const KEY='newview.social.links.v1',MAX=24;
  const GEO=Object.freeze({SA:['SA','ar'],US:['US','en'],GB:['GB','en'],AE:['AE','ar'],IN:['IN','en'],GLOBAL:['US','en']});
@@ -40,6 +41,10 @@
    if(platform==='truth'){
     if(parts.length!==1||!/^@[A-Za-z0-9_]{1,30}$/.test(parts[0]))return null;
     return {platform,url:'https://truthsocial.com/'+parts[0],name:parts[0]};
+   }
+   if(platform==='polymarket'){
+    if(parts.length!==2||parts[0]!=='profile'||!/^0x[a-fA-F0-9]{40}$/.test(parts[1]))return null;
+    return {platform,url:'https://polymarket.com/profile/'+parts[1],name:'Public profile'};
    }
    if(platform==='stocktwits'){
     if(parts.length!==1||!(/^[A-Za-z0-9_]{1,30}$/.test(parts[0]))||['login','signup','streams','symbol','news','search'].includes(parts[0].toLowerCase()))return null;
