@@ -80,3 +80,8 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 ## Installed-app grid integration boundary
 - MyView now includes an accessible installed-app grid, refresh action, validated package identifiers, duplicate filtering, and explicit unsupported-APK messaging.
 - This frontend requires Android bridge methods listLaunchableApps() and launchApp(packageName); these native methods are NOT implemented or verified. Do not claim installed-app discovery is functional until native support is built, package visibility is scoped, and physical TV QA passes.
+
+## Native installed-app bridge helper — integration pending
+- Added android/src/app/newview/dashboard/LauncherAppsBridge.java with scoped LEANBACK_LAUNCHER/LAUNCHER discovery and validated package launch methods. Manifest now declares corresponding package visibility queries, not QUERY_ALL_PACKAGES.
+- IMPORTANT: The helper is not yet registered on MainActivity's WebView. Integrate only after inspecting the actual Java MainActivity and its trusted-content navigation policy: e.g. webView.addJavascriptInterface(new LauncherAppsBridge(this), "NewViewApps"); update frontend to use this distinct bridge or explicitly delegate methods in existing NewViewNative. Never expose this bridge to arbitrary untrusted websites.
+- No native app-launch claim until Android CI passes and the user verifies a real TV. Do not merge/deploy.
