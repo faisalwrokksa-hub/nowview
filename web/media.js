@@ -72,7 +72,7 @@
  if(category&&playlist){category.addEventListener('change',()=>{
   const permitted=new Set(['news','business','sports','documentary','education','kids','music','movies','entertainment','weather','general']);
   const chosen=permitted.has(category.value)?category.value:'news';
-  playlist.href=preferred?.MAIN_PLAYLIST||'https://iptv-org.github.io/iptv/index.m3u';
+  playlist.href=preferred?.playlistUrl(chosen)||preferred?.MAIN_PLAYLIST||'https://iptv-org.github.io/iptv/index.m3u';
  });}
  if(typeof document.addEventListener==='function')document.addEventListener('newview:workspace-change',syncDashboardCategories);
  if(typeof window.addEventListener==='function')window.addEventListener('newview:preferences-change',syncDashboardCategories);
@@ -95,7 +95,7 @@
  input.addEventListener('input',()=>{clear();validate();});
  play.addEventListener('click',()=>{
   const item=validate();if(!item)return;
-  if(location.protocol==='file:'){output.textContent='Use the PipeTv button on Android TV. Official web embedding is available only on the hosted web app.';return;}
+  if(location.protocol==='file:'){output.textContent='On Android TV, open the official YouTube link in your browser or launch PipeTv. Embedded playback is not supported in this APK.';return;}
   clear();frame.src=item.embed;frame.hidden=false;stop.disabled=false;
   output.textContent='Official YouTube embedded player; advertisements may appear.';
  });
