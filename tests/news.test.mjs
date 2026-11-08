@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {parseNewsXml,loadNews,NEWS_SOURCES} from '../cloud/news.mjs';
 
 const feed='<?xml version="1.0"?><rss version="2.0"><channel><item><title>Rate &amp; Policy Update</title><link>https://www.federalreserve.gov/newsevents/pressreleases/monetary20261108a.htm</link><pubDate>Sun, 08 Nov 2026 10:00:00 GMT</pubDate></item></channel></rss>';
@@ -26,3 +27,10 @@ test('successful async fetch returns tagged verified announcements',async()=>{
  assert.equal(result.items.length,1);assert.ok(result.fetchedAt);
 });
 test('responses over 512 KB rejected',()=>assert.throws(()=>parseNewsXml('<rss>'+('x'.repeat(524290))+'</rss>','fed'),/oversized/));
+
+test('browser news view ignores stale responses after source changes',()=>{
+ const source=readFileSync(new URL('../web/news.js',import.meta.url),'utf8');
+ assert.match(source,/const current=controller/);
+ assert.match(source,/if\(current!==controller\)return/);
+ assert.match(source,/if\(current!==controller\|\|err\.name==='AbortError'\)return/);
+});
