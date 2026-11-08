@@ -42,3 +42,11 @@ test('geo and topic selection produces regional discovery links without claiming
  const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
  for(const id of ['social-geo','social-topic','social-discovery'])assert.match(html,new RegExp('id="'+id+'"'));
 });
+
+test('Truth Social and Stocktwits allow only canonical public profile URLs',()=>{
+ assert.equal(validate('truth','https://truthsocial.com/@example').url,'https://truthsocial.com/@example');
+ assert.equal(validate('stocktwits','https://stocktwits.com/example').url,'https://stocktwits.com/example');
+ assert.equal(validate('truth','https://truthsocial.com/@example/posts/123'),null);
+ assert.equal(validate('stocktwits','https://stocktwits.com/symbol/BTC'),null);
+ assert.equal(validate('truth','https://truthsocial.com.evil.example/@example'),null);
+});
