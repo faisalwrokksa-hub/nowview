@@ -1,6 +1,6 @@
-# NowViewBusiness — local data dashboard
+# NewViewBusiness — local data dashboard
 
-NowViewBusiness accepts a locally selected CSV. No paid API or server, database, account or upload is required.
+NewViewBusiness accepts a locally selected CSV. No paid API or server, database, account or upload is required.
 
 ## Required CSV schema
 ```csv

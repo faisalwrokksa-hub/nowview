@@ -84,7 +84,7 @@ class ChartCache:
         if time.time() < self.blocked_until:
             raise OSError('Market source cooldown')
         req = urllib.request.Request(API + path + '?' + urllib.parse.urlencode(params),
-                                     headers={'User-Agent': 'FintechMarketCharts/1.0', 'Accept': 'application/json'})
+                                     headers={'User-Agent': 'NewViewMarkets/1.0', 'Accept': 'application/json'})
         try:
             with urllib.request.urlopen(req, timeout=10) as response:
                 return json.load(response)

@@ -1,4 +1,4 @@
-# NowViewNews — official RSS integration (first prototype)
+# NewViewNews — official RSS integration (first prototype)
 
 The official financial announcements connector uses allowlisted RSS sources:
 - Federal Reserve public news feed: https://www.federalreserve.gov/feeds/press_all.xml

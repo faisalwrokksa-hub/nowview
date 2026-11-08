@@ -1,4 +1,4 @@
-# NowViewSocial — public social profile bookmarks
+# NewViewSocial — public social profile bookmarks
 
 Initial free-first social functionality works **without third-party APIs, scraping or subscriptions**.
 
@@ -10,4 +10,4 @@ Initial free-first social functionality works **without third-party APIs, scrapi
 - On Android TV, external links may be blocked by the current WebView navigation policy. Native external browser handoff would require an explicit URL allowlist and TV device validation; until then the bookmark management interface works, but opening the source may depend on the platform.
 - Tests verify approved hosts, URL rejection, duplicate handling, asset packaging and absence of network scraper logic.
 
-This is a functional foundation for NowViewSocial, not a full social intelligence API integration.
+This is a functional foundation for NewViewSocial, not a full social intelligence API integration.

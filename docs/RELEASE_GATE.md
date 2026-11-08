@@ -1,6 +1,6 @@
-# NowView — preview release-gate checklist
+# NewView — preview release-gate checklist
 
-The Android TV and mobile application retains the existing package ID `app.nowview.markets` to avoid breaking updates to the installed test package, while the user-facing Android label is now **NowView**. No public production channel or final product identity has been approved.
+The Android TV and mobile application now uses the new package ID `app.newview.dashboard`; existing `app.nowview.markets` preview installations will not be upgraded in place, while the user-facing Android label is now **NewView**. No public production channel or final product identity has been approved.
 
 ## CI-enforced checks
 - Node unit/regression tests and syntax checks for the web/cloud application.
