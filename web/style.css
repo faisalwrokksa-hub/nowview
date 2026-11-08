@@ -168,3 +168,12 @@ button:focus-visible{outline:3px solid #f6dfad;outline-offset:3px}
 .display-mode header,.display-mode footer,.display-mode .display-controls{display:none}
 .display-mode main{height:100vh;min-height:0;padding:2vh 2vw;gap:1vh}
 @media(max-width:650px){.display-controls{gap:6px}.display-controls select{max-width:150px}}
+
+/* Customer-provided wallpaper is confined to MyView; readable overlay and TV focus retained. */
+body.has-home-wallpaper[data-current-workspace="myview"]{background-image:linear-gradient(#07150bc7,#07150bc7),var(--newview-wallpaper);background-position:center;background-size:cover;background-attachment:fixed}
+body.has-home-wallpaper[data-current-workspace="myview"][data-wallpaper-shade="light"]{background-image:linear-gradient(#07150b80,#07150b80),var(--newview-wallpaper)}
+body.has-home-wallpaper[data-current-workspace="myview"][data-wallpaper-shade="dark"]{background-image:linear-gradient(#07150be8,#07150be8),var(--newview-wallpaper)}
+.wallpaper-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.wallpaper-controls input{max-width:220px}.wallpaper-controls select{background:#18291e;color:#f6efe0;border:1px solid #87754e;border-radius:8px;padding:9px;min-height:42px}
+.wallpaper-controls button{min-height:42px}.wallpaper-controls :is(input,select,button):focus-visible{outline:3px solid #f3d390;outline-offset:2px}
+.home-panel .wallpaper-controls,.display-mode .wallpaper-controls{display:none}
