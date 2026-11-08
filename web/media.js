@@ -40,6 +40,7 @@
  category?.parentElement?.append(directory);
  let allChannels=[];let lastFetch=0;let loading=null;
  function renderChannels(){
+  if(location.protocol==='file:'){status.textContent='Android APK: use the official playlist link with an external IPTV player.';return;}
   if(!preferred?.filterChannels)return;
   const chosen=preferred.filterChannels(allChannels,currentDashboard(),window.NewViewShell?.loadFirstLaunch?.()?.interests);
   const narrowed=category?.value?chosen.filter(c=>c.category.split(/[;,|]/).some(group=>group.trim()===category.value)):chosen;
