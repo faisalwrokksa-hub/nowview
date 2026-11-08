@@ -23,12 +23,13 @@ jobs:
           node-version: '22'
       - name: Validate and build cloud dashboard
         run: |
-          node --test tests/cloud.test.mjs tests/live.test.mjs tests/indicators.test.mjs tests/stock-board.test.mjs tests/workspace-shell.test.mjs tests/news.test.mjs tests/media.test.mjs
+          node --test tests/cloud.test.mjs tests/live.test.mjs tests/indicators.test.mjs tests/stock-board.test.mjs tests/workspace-shell.test.mjs tests/news.test.mjs tests/media.test.mjs tests/myview.test.mjs
           node --check web/app.js
           node --check web/stock-board.js
           node --check web/workspace-shell.js
           node --check web/news.js
           node --check web/media.js
+          node --check web/myview.js
           node --check cloud/news.mjs
           node cloud/build.mjs
       - uses: actions/setup-java@v4
