@@ -69,3 +69,11 @@ test('external browser policies cover discovery and Polymarket on web and Androi
  assert.match(web,/u\.protocol==='https:'&&!u\.username&&!u\.password&&!u\.port/);
  assert.match(android,/"https"\.equalsIgnoreCase\(uri\.getScheme\(\)\)/);
 });
+
+test('Global geography does not silently force US news localization',()=>{
+ const global=new URL(window.NewViewSocial.discoveryUrl('GLOBAL','markets'));
+ assert.equal(global.searchParams.get('gl'),null);
+ assert.equal(global.searchParams.get('ceid'),null);
+ assert.equal(global.searchParams.get('q'),'financial markets');
+ assert.match(window.NewViewSocial.discoveryLinks('GLOBAL','all')[0].label,/Global/);
+});
