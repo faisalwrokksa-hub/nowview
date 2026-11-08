@@ -1,0 +1,36 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';
+const src=fs.readFileSync(new URL('../web/business.js',import.meta.url),'utf8');
+const ctx={window:{},document:{getElementById:()=>null},TextEncoder,Date};
+vm.runInNewContext(src,ctx);
+const {parseBusinessCsv,summarize,parseCsv}=ctx.window.NowViewBusiness;
+const header='date,revenue,cost,orders,customers\n';
+test('parses, sorts, aggregates only supplied records',()=>{
+ const rows=parseBusinessCsv(header+'2026-11-08,120,50,5,20\n2026-11-07,100,60,4,18\n');
+ assert.equal(rows[0].date,'2026-11-07');
+ const k=summarize(rows);
+ assert.equal(k.revenue,220);assert.equal(k.cost,110);assert.equal(k.difference,110);assert.equal(k.orders,9);assert.equal(k.customers,20);
+});
+test('CSV quoted values parsed correctly and comments not executed',()=>{
+ const rows=parseCsv('a,b\n"hi,there","quote ""test"""\n');
+ assert.equal(rows[1][0],'hi,there');
+ assert.equal(rows[1][1],'quote "test"');
+ assert.doesNotMatch(src,/fetch\(|XMLHttpRequest|sendBeacon|Math\.random/);
+});
+test('rejects invalid header, non-numeric inputs, duplicate date and invalid date',()=>{
+ for(const csv of [
+ 'date,revenue,cost,orders\n2026-11-08,10,5,1\n',
+ header+'2026-11-08,-10,5,1,2',
+ header+'2026-11-08,10,5,1.5,2',
+ header+'2026-02-30,10,5,1,2',
+ header+'2026-11-08,10,5,1,2\n2026-11-08,9,4,1,2'
+ ])assert.throws(()=>parseBusinessCsv(csv));
+});
+test('zero revenue shows undefined difference percentage',()=>{
+ const rows=parseBusinessCsv(header+'2026-11-08,0,10,0,0');
+ assert.equal(summarize(rows).margin,null);
+});
+test('business file upload is local and included in cloud and TV bundle',()=>{
+ const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
+ const build=fs.readFileSync(new URL('../cloud/build.mjs',import.meta.url),'utf8');
+ assert.match(html,/id="business-file"/);assert.match(html,/id="business-kpis"/);assert.match(build,/business\.js/);
+});

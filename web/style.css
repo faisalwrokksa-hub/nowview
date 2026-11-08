@@ -111,3 +111,21 @@ button:focus-visible{outline:3px solid #f6dfad;outline-offset:3px}
 .myview-empty{color:#d2c29f;padding:20px}
 @media(max-width:1100px){.myview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.myview-grid{grid-template-columns:1fr}}
+
+/* NowViewBusiness uses local customer-owned files, no off-device analytics. */
+.business-source{min-height:0!important;margin-bottom:14px}
+.business-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:15px 0;color:#e2c58b}
+.business-actions input{min-width:0;max-width:100%;color:#dcd2ba;font:inherit}
+.business-actions input::file-selector-button{font:inherit;background:#30442e;color:#f1dda7;border:1px solid #a08a59;border-radius:9px;padding:12px;margin-right:10px;cursor:pointer}
+.business-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+.business-kpi{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:13px;border:1px solid #64573e;background:linear-gradient(140deg,#233a2a,#13271d)}
+.business-value{font-size:clamp(20px,2vw,33px);color:#f6e4c0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.business-chart{min-height:0!important}
+.business-trend{display:flex;flex-direction:column;gap:8px;padding:12px 0}
+.business-trend-row{display:grid;grid-template-columns:100px minmax(70px,1fr) 110px;gap:12px;align-items:center;color:#d1cab6;font-size:clamp(11px,.9vw,16px)}
+.business-trend-row time{white-space:nowrap}
+.business-bar-track{height:17px;border-radius:6px;background:#344436;overflow:hidden}
+.business-bar-fill{height:100%;background:#cfae6e;border-radius:6px}
+.business-row-value{text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:850px){.business-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){.business-kpis{grid-template-columns:1fr}.business-trend-row{grid-template-columns:81px minmax(30px,1fr) 80px;gap:6px}}
