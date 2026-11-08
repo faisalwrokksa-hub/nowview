@@ -31,7 +31,15 @@
   }
   return channels;
  }
- function filterChannels(channels,dashboard,interests){const allowed=new Set(categoriesFor(dashboard,interests));return channels.filter(c=>allowed.has(c.category)||(allowed.has('general')&&c.category==='undefined'));}
+ function filterChannels(channels,dashboard,interests){
+  const allowed=new Set(categoriesFor(dashboard,interests));
+  if(!Array.isArray(channels))return [];
+  return channels.filter(c=>{
+   if(!c||typeof c.category!=='string')return false;
+   const groups=c.category.toLowerCase().split(/[;,|]/).map(x=>x.trim()).filter(Boolean);
+   return groups.some(group=>allowed.has(group)||(allowed.has('general')&&(group==='undefined'||group==='')));
+  });
+ }
  function playlistUrl(category){
   if(!known.has(category)||category==='favorites')return null;
   return 'https://iptv-org.github.io/iptv/categories/'+category+'.m3u';
