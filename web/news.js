@@ -16,12 +16,21 @@
   const current=controller;
   sourceLink();status.textContent='Loading source-linked headlines…';container.replaceChildren();
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:null}));
-  if(location.protocol==='file:'){status.textContent='Live RSS is available through the web backend. Open the official source below on this device.';return;}
   try{
-   const response=await fetch('/api/news?source='+encodeURIComponent(choose.value),{signal:current.signal});
-   if(current!==controller)return;
-   if(!response.ok)throw new Error('News service unavailable');
-   const feed=await response.json();
+   let feed;
+   if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicNews==='function'){
+    if(choose.value==='stocktwits'){status.textContent='This publisher does not have a verified native RSS feed. Open the source below.';return;}
+    feed=await new Promise((resolve,reject)=>{
+     const id=Date.now()+Math.floor(Math.random()*1000);
+     const timer=setTimeout(()=>{delete window.__newviewNewsResult;reject(Error('News timeout'));},20000);
+     window.__newviewNewsResult=(received,data)=>{if(received!==id)return;clearTimeout(timer);delete window.__newviewNewsResult;if(data?.error)reject(Error(data.error));else resolve(data);};
+     window.NewViewNative.fetchPublicNews(choose.value,id);
+    });
+   }else{
+    const response=await fetch('/api/news?source='+encodeURIComponent(choose.value),{signal:current.signal});
+    if(!response.ok)throw new Error('News service unavailable');
+    feed=await response.json();
+   }
    if(current!==controller)return;
    if(!Array.isArray(feed.items)||!feed.items.length){status.textContent='No headlines returned by this source. Check the original publisher.';return;}
    for(const item of feed.items){
@@ -36,7 +45,7 @@
     container.append(article);
    }
    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:choose.value,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
-   const fetched=new Date(feed.fetchedAt);
+   const fetched=new Date(typeof feed.fetchedAt==='number'?feed.fetchedAt:feed.fetchedAt);
    const age=Date.now()-fetched.getTime();
    const freshness=Number.isFinite(age)&&age>=0&&age<=3600000?'Recently fetched':'Fetch time unavailable or older than one hour';
    status.textContent=container.children.length?'Source-linked headlines · '+freshness+' · fetched '+(Number.isFinite(fetched.getTime())?fetched.toLocaleString():'unknown'):'No valid announcements returned by this source';
