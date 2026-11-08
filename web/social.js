@@ -4,7 +4,9 @@
  const SOURCES=Object.freeze({
   x:Object.freeze({label:'X',hosts:['x.com','www.x.com','twitter.com','www.twitter.com'],root:'https://x.com/'}),
   tiktok:Object.freeze({label:'TikTok',hosts:['tiktok.com','www.tiktok.com','m.tiktok.com'],root:'https://www.tiktok.com/'}),
-  facebook:Object.freeze({label:'Facebook',hosts:['facebook.com','www.facebook.com','m.facebook.com'],root:'https://www.facebook.com/'})
+  facebook:Object.freeze({label:'Facebook',hosts:['facebook.com','www.facebook.com','m.facebook.com'],root:'https://www.facebook.com/'}),
+  truth:Object.freeze({label:'Truth Social',hosts:['truthsocial.com','www.truthsocial.com'],root:'https://truthsocial.com/'}),
+  stocktwits:Object.freeze({label:'Stocktwits',hosts:['stocktwits.com','www.stocktwits.com'],root:'https://stocktwits.com/'})
  });
  const KEY='newview.social.links.v1',MAX=24;
  const GEO=Object.freeze({SA:['SA','ar'],US:['US','en'],GB:['GB','en'],AE:['AE','ar'],IN:['IN','en'],GLOBAL:['US','en']});
@@ -34,6 +36,14 @@
    if(platform==='tiktok'){
     if(parts.length!==1||!/^@[A-Za-z0-9._]{2,25}$/.test(parts[0]))return null;
     return {platform,url:'https://www.tiktok.com/'+parts[0],name:parts[0]};
+   }
+   if(platform==='truth'){
+    if(parts.length!==1||!/^@[A-Za-z0-9_]{1,30}$/.test(parts[0]))return null;
+    return {platform,url:'https://truthsocial.com/'+parts[0],name:parts[0]};
+   }
+   if(platform==='stocktwits'){
+    if(parts.length!==1||!(/^[A-Za-z0-9_]{1,30}$/.test(parts[0]))||['login','signup','streams','symbol','news','search'].includes(parts[0].toLowerCase()))return null;
+    return {platform,url:'https://stocktwits.com/'+parts[0],name:'@'+parts[0]};
    }
    if(parts.length!==1||!(/^[A-Za-z0-9.]{5,70}$/.test(parts[0]))||['login','share','groups','watch','reel','profile.php','plugins'].includes(parts[0].toLowerCase()))return null;
    return {platform,url:'https://www.facebook.com/'+parts[0],name:parts[0]};
@@ -88,7 +98,7 @@
  form.addEventListener('submit',event=>{
   event.preventDefault();
   const item=validate(platform.value,url.value);
-  if(!item){status.textContent='Enter an HTTPS profile URL for X, TikTok or Facebook. Public profiles only.';return;}
+  if(!item){status.textContent='Enter a valid HTTPS public profile URL for the selected platform.';return;}
   if(items.some(x=>x.url===item.url)){status.textContent='This profile is already saved.';return;}
   if(items.length>=MAX){status.textContent='Maximum 24 saved profiles.';return;}
   items=save([...items,item]);url.value='';status.textContent='Profile saved on this device. No social feed has been fetched.';render();
