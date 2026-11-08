@@ -178,10 +178,18 @@ public final class ChartsView extends WebView {
                         }
                         String body=new String(buffer.toByteArray(),StandardCharsets.UTF_8);
                         if(!body.startsWith("#EXTM3U"))throw new Exception("Invalid playlist");
-                        result.put("content",body);
+                        // Stream bounded chunks to WebView rather than one multi-megabyte evaluateJavascript call.
+                        final int chunkSize=48000;
+                        for(int start=0;start<body.length();start+=chunkSize){
+                            final String chunk=body.substring(start,Math.min(body.length(),start+chunkSize));
+                            final boolean last=start+chunkSize>=body.length();
+                            final String encoded=JSONObject.quote(chunk);
+                            post(()->{if(!closed)evaluateJavascript("window.__newviewPlaylistChunk&&window.__newviewPlaylistChunk("+id+","+encoded+","+last+",null)",null);});
+                        }
+                        return;
                     }finally{connection.disconnect();}
                 }catch(Exception ex){try{result.put("error","Channel directory unavailable");}catch(Exception ignored){}}
-                post(()->{if(!closed)evaluateJavascript("window.__newviewPlaylistResult&&window.__newviewPlaylistResult("+id+","+result.toString()+")",null);});
+                post(()->{if(!closed)evaluateJavascript("window.__newviewPlaylistChunk&&window.__newviewPlaylistChunk("+id+",null,true,"+JSONObject.quote(result.optString("error","Directory unavailable"))+")",null);});
             });
         }
         @JavascriptInterface public void playStream(String raw){
