@@ -40,7 +40,7 @@
  category?.parentElement?.append(directory);
  let allChannels=[];let lastFetch=0;let loading=null;
  function renderChannels(){
-  if(location.protocol==='file:'){status.textContent='Android APK: use the official playlist link with an external IPTV player.';return;}
+  if(location.protocol==='file:'){list.replaceChildren();open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Android APK: use the official playlist link with an external IPTV player.';return;}
   if(!preferred?.filterChannels)return;
   const chosen=preferred.filterChannels(allChannels,currentDashboard(),window.NewViewShell?.loadFirstLaunch?.()?.interests);
   const narrowed=category?.value?chosen.filter(c=>c.category.toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):chosen;
@@ -63,7 +63,7 @@
    const content=await response.text();if(content.length>16000000)throw Error('Playlist too large');
    const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
    allChannels=parsed;lastFetch=Date.now();renderChannels();
-  }catch(error){allChannels=[];lastFetch=0;list.replaceChildren();open.hidden=true;open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
+  }catch(error){allChannels=[];lastFetch=0;list.replaceChildren();open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
   finally{loading=null;}})();return loading;
  }
  refresh.addEventListener('click',()=>loadDirectory(true));
