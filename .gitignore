@@ -7,3 +7,12 @@ build/
 *.apk
 *.idsig
 
+# Local tooling, caches, reports and generated packages
+.gradle/
+.idea/
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
