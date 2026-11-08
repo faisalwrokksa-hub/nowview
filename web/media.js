@@ -15,12 +15,27 @@
   }catch{return null;}
  }
  const category=document.getElementById('live-tv-category');
+ const preferred=window.NewViewChannels;
+ function currentDashboard(){return document.body.dataset.currentWorkspace||'myview';}
+ function syncDashboardCategories(){
+  if(!category||!preferred)return;
+  const types=preferred.categoriesFor(currentDashboard());
+  const valid=types.filter(x=>preferred.playlistUrl(x));
+  if(!valid.length)return;
+  const previous=category.value;
+  category.replaceChildren(...valid.map(x=>{const o=document.createElement('option');o.value=x;o.textContent=x.charAt(0).toUpperCase()+x.slice(1);return o;}));
+  category.value=valid.includes(previous)?previous:valid[0];
+  category.dispatchEvent(new Event('change'));
+ }
+
  const playlist=document.getElementById('live-tv-playlist');
  if(category&&playlist){category.addEventListener('change',()=>{
   const permitted=new Set(['news','business','sports','documentary','education','kids','music','movies','entertainment','weather','general']);
   const chosen=permitted.has(category.value)?category.value:'news';
   playlist.href='https://iptv-org.github.io/iptv/categories/'+chosen+'.m3u';
  });}
+ document.addEventListener('click',e=>{if(e.target.closest?.('[data-workspace-target]'))setTimeout(syncDashboardCategories,0);});
+ syncDashboardCategories();
  const input=document.getElementById('media-url');
  const output=document.getElementById('media-status');
  const frame=document.getElementById('media-frame');
