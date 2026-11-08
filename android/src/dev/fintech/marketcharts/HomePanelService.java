@@ -30,7 +30,7 @@ public final class HomePanelService extends AccessibilityService {
         if(pkg.equals("dev.plume")&&!type.contains("Dialog")&&!type.contains("Popup"))show();else hide();
     }
     private void show(){
-        if(panel!=null||!Settings.canDrawOverlays(this)||!getSharedPreferences("charts",0).getBoolean("homePanel",true))return;
+        if(panel!=null||!Settings.canDrawOverlays(this)||!getSharedPreferences("charts",0).getBoolean("homePanel",false))return;
         int w=getResources().getDisplayMetrics().widthPixels,h=getResources().getDisplayMetrics().heightPixels;
         WindowManager.LayoutParams p=new WindowManager.LayoutParams((int)(w*.90),(int)(h*.46),WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,PixelFormat.TRANSLUCENT);
         p.gravity=Gravity.TOP|Gravity.CENTER_HORIZONTAL;p.y=(int)(h*.22);p.alpha=.8f;
