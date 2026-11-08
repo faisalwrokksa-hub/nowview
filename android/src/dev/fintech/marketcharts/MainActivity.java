@@ -1,6 +1,7 @@
 package app.nowview.markets;
 import android.app.Activity;
 import android.os.Bundle;
+import android.content.Intent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -13,5 +14,9 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onResume(){super.onResume();HomePanelService.hidePanel();if(web!=null)web.onResume();}
     @Override protected void onPause(){super.onPause();if(web!=null)web.onPause();}
+    @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        if(web!=null)web.handleActivityResult(requestCode,resultCode,data);
+    }
     @Override protected void onDestroy(){if(web!=null)web.destroy();super.onDestroy();}
 }
