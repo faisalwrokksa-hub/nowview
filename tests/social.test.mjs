@@ -95,3 +95,13 @@ test('display profiles validate workspace IDs, refresh intervals and persistence
  assert.match(shell,/profiles\.slice\(0,5\)/);
  assert.match(shell,/document\.hidden/);
 });
+
+test('customer wallpaper controls are local and constrained',()=>{
+ const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
+ const personal=fs.readFileSync(new URL('../web/myview.js',import.meta.url),'utf8');
+ for(const id of ['wallpaper-file','wallpaper-remove','wallpaper-shade','wallpaper-status'])assert.ok(html.includes('id="'+id+'"'));
+ assert.match(personal,/newview\.home\.wallpaper\.v1/);
+ assert.match(personal,/file\.size>950000/);
+ assert.match(personal,/localStorage\.setItem\(wallpaperKey/);
+ assert.match(personal,/localStorage\.removeItem\(wallpaperKey/);
+});
