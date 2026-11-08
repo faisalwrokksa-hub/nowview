@@ -39,3 +39,34 @@ header h1{letter-spacing:-.045em}
 @media(max-width:920px){.board-grid{grid-template-columns:1fr}.board-card[data-group=token]{grid-column:auto}.stock-board{overflow:auto}.board-row{grid-template-columns:minmax(0,1fr) minmax(60px,.7fr) minmax(120px,1fr)}}
 @media(max-width:500px){.board-card{padding:13px}.board-row{grid-template-columns:minmax(0,1.1fr) 70px minmax(92px,1fr);gap:7px}.board-heading{flex-wrap:wrap}.board-name strong{font-size:15px}.board-price{font-size:13px}.board-change{font-size:12px}}
 .home-panel .stock-board{display:none}
+
+/* Shared dark-green and muted-gold NowView design tokens. */
+:root{--bg:#081410;--panel:#14261c;--line:#4b4939;--muted:#bfb29a;--text:#f6efe0;--cyan:#dfbf80;--green:#79d5a0;--red:#ee8b70}
+body{background:radial-gradient(ellipse at 85% 0%,#234333 0,transparent 50%),var(--bg)}
+.workspace{background:linear-gradient(145deg,#192b21,#0c1814);border-color:#4a4939}
+button{background:#19291f;border-color:#56533e;color:#e5dbc7}
+button.active{background:#393729;color:#f5dea8;border-color:#ab935f}
+button:focus-visible{outline:3px solid #f6dfad;outline-offset:3px}
+.brand-dot{background:#dcba78}
+.workspace-switcher{display:flex;gap:8px;overflow-x:auto;flex-shrink:0;padding:4px 0 8px}
+.workspace-tab{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:9px 12px;border-radius:10px}
+.workspace-tab.selected{background:#3c4230;border-color:#c7aa76;color:#f5dfa9}
+.workspace-tab span{color:#dabe85;font-size:20px}
+#workspace-intro{display:flex;justify-content:space-between;align-items:center;min-height:38px}
+#workspace-title{font-size:clamp(20px,2vw,34px);font-weight:500;margin:0}
+#shell-market-actions{display:flex;gap:8px}
+#market-shell{display:flex;flex-direction:column;flex:1;min-height:0;gap:1vh}
+#market-shell[hidden],.shell-page[hidden],[hidden]{display:none!important}
+.shell-page{flex:1;min-height:0;overflow:auto}
+.shell-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.shell-card{border:1px solid #4d4936;border-radius:16px;background:linear-gradient(145deg,#182e22,#0f1d17);padding:clamp(18px,2.2vw,28px);min-height:175px}
+.shell-card.shell-feature{grid-column:1/-1;min-height:195px}
+.shell-eyebrow{color:#ddc184;letter-spacing:.13em;font-size:clamp(11px,1vw,16px)}
+.shell-card h3{font-size:clamp(20px,2vw,31px);font-weight:500;color:#f6efe0;margin:12px 0}
+.shell-card p{font-size:clamp(13px,1.05vw,18px);color:#c5bead;line-height:1.6}
+.shell-primary{margin-top:8px;background:#bc9b60;color:#142017;font-weight:600}
+.home-panel .workspace-switcher,.home-panel #workspace-intro,.home-panel .shell-page{display:none!important}
+.home-panel #market-shell{height:100%}
+.home-panel #market-shell nav{display:none}
+@media(max-width:850px){.workspace-tab{flex:0 0 auto}.shell-grid{grid-template-columns:1fr}.shell-card.shell-feature{grid-column:auto}}
+@media(max-width:500px){.workspace-tab{min-height:42px;font-size:12px}.workspace-tab span{font-size:16px}.shell-card{min-height:150px}}

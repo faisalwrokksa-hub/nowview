@@ -1,12 +1,10 @@
 /* NowView Markets stock board.
  * Independent implementation of a compact TV market card design.
- * Saudi/US securities are labels only until licensed quote providers are enabled.
+ * U.S. securities are labels only until licensed quote providers are enabled.
  */
 'use strict';
 (function () {
   const groups = [
-    {id:'sa', title:'الأسهم السعودية', subtitle:'Tadawul · SAR', lang:'ar',
-      items:[['2222','أرامكو'],['1120','الراجحي'],['2010','سابك'],['7010','stc']]},
     {id:'us', title:'U.S. Stocks', subtitle:'U.S. exchanges · USD', lang:'en',
       items:[['AAPL','Apple'],['NVDA','NVIDIA'],['MSFT','Microsoft'],['AMD','AMD']]},
     {id:'token', title:'Binance Spot', subtitle:'Exchange-listed token / crypto pairs · USDT', lang:'en', items:[]}
@@ -49,7 +47,6 @@
       const card=element('section','board-card');
       card.dataset.group=group.id;
       card.lang=group.lang;
-      if(group.id==='sa')card.dir='rtl';
       const heading=element('header','board-heading');
       const title=element('h3','',group.title);
       const sub=element('span','board-subtitle',group.subtitle);
