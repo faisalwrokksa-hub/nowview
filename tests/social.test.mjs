@@ -84,3 +84,14 @@ test('region and topic preferences persist locally and fall back safely',()=>{
  assert.match(source,/Object\.hasOwn\(GEO,p\.geo\)/);
  assert.match(source,/Object\.hasOwn\(TOPICS,p\.topic\)/);
 });
+
+test('display profiles validate workspace IDs, refresh intervals and persistence controls',()=>{
+ const shell=fs.readFileSync(new URL('../web/workspace-shell.js',import.meta.url),'utf8');
+ const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
+ for(const id of ['display-profile','display-save','display-fullscreen','display-next','display-refresh','display-status'])assert.ok(html.includes('id="'+id+'"'));
+ assert.match(shell,/newview\.display\.profiles\.v1/);
+ assert.match(shell,/list\.filter\(v=>views\.includes\(v\)\)/);
+ assert.match(shell,/\[0,30,60,120,300\]\.includes\(seconds\)/);
+ assert.match(shell,/profiles\.slice\(0,5\)/);
+ assert.match(shell,/document\.hidden/);
+});
