@@ -105,6 +105,14 @@ public final class ChartsView extends WebView {
         callback.onReceiveValue(chosen==null?null:new Uri[]{chosen});
     }
     public final class Bridge {
+        @JavascriptInterface public void playStream(String raw){
+            if(raw==null||raw.length()>2048)return;
+            try{
+                Uri uri=Uri.parse(raw);
+                if(!"https".equalsIgnoreCase(uri.getScheme())||uri.getHost()==null||uri.getUserInfo()!=null||uri.getPort()!=-1)return;
+                post(()->{if(closed)return;Intent intent=new Intent(getContext(),StreamPlayerActivity.class);intent.setData(uri);try{getContext().startActivity(intent);}catch(Exception ignored){}});
+            }catch(Exception ignored){}
+        }
         @JavascriptInterface public void openApprovedUrl(String raw){
             if(raw==null||raw.length()>2048)return;
             try{openApprovedUri(Uri.parse(raw));}catch(Exception ignored){}
