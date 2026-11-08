@@ -26,7 +26,7 @@
 <article class="shell-card social-intro"><div class="shell-eyebrow">SOCIAL INTELLIGENCE · PUBLIC PROFILES</div>
 <h3>Follow public creators and organizations</h3>
 <p>Save profile links from X, TikTok and Facebook. Open each profile on its original platform. No social posts are collected, scraped or displayed as a live feed.</p>
-<form id="social-add" class="social-form">
+<div class="social-form"><label for="social-geo">Discovery region</label><select id="social-geo"><option value="SA">Saudi Arabia</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="AE">United Arab Emirates</option><option value="IN">India</option><option value="GLOBAL">Global</option></select><label for="social-topic">Topic</label><select id="social-topic"><option value="all">All news</option><option value="business">Business</option><option value="markets">Markets</option><option value="technology">Technology</option></select></div><p id="social-discovery-status" role="status">Official news discovery links; not verified social-platform trends.</p><div id="social-discovery" class="social-links" aria-label="Regional news discovery"></div><form id="social-add" class="social-form">
 <label for="social-platform">Platform</label>
 <select id="social-platform"><option value="x">X</option><option value="tiktok">TikTok</option><option value="facebook">Facebook</option></select>
 <label for="social-url">Public profile URL</label><input type="url" id="social-url" required placeholder="https://x.com/example" autocomplete="off" maxlength="500"/>
