@@ -35,7 +35,7 @@ test('geo and topic selection produces regional discovery links without claiming
  const {discoveryUrl,discoveryLinks}=window.NewViewSocial;
  const ca=new URL(discoveryUrl('CA','markets'));
  assert.equal(ca.hostname,'news.google.com');assert.equal(ca.searchParams.get('gl'),'CA');
- assert.equal(sa.searchParams.get('q'),'financial markets');
+ assert.equal(ca.searchParams.get('q'),'financial markets');
  assert.equal(new URL(discoveryUrl('US','technology')).searchParams.get('gl'),'US');
  assert.equal(new URL(discoveryUrl('UNKNOWN','all')).searchParams.get('gl'),'US');
  assert.equal(discoveryLinks('GB','all').length,5);
