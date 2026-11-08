@@ -50,3 +50,11 @@ test('Truth Social and Stocktwits allow only canonical public profile URLs',()=>
  assert.equal(validate('stocktwits','https://stocktwits.com/symbol/BTC'),null);
  assert.equal(validate('truth','https://truthsocial.com.evil.example/@example'),null);
 });
+
+test('Polymarket only permits canonical public wallet profiles, never market or trade URLs',()=>{
+ const wallet='0x'+'a'.repeat(40);
+ assert.equal(validate('polymarket','https://polymarket.com/profile/'+wallet).url,'https://polymarket.com/profile/'+wallet);
+ assert.equal(validate('polymarket','https://polymarket.com/event/example'),null);
+ assert.equal(validate('polymarket','https://polymarket.com/profile/not-a-wallet'),null);
+ assert.equal(validate('polymarket','https://polymarket.com.evil.example/profile/'+wallet),null);
+});
