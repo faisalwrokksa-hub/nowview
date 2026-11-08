@@ -157,3 +157,5 @@ button:focus-visible{outline:3px solid #f6dfad;outline-offset:3px}
  footer{flex-shrink:0}
 }
 @media(hover:none){button,.workspace-tab,.myview-widget-actions button,.social-profile-link{min-height:44px}}
+
+.myview-insight{border-top:1px solid #5b553c;padding-top:12px;font-size:clamp(12px,1vw,16px)!important;color:#f0d8a6!important;overflow-wrap:anywhere}

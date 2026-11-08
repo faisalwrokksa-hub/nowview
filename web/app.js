@@ -53,7 +53,8 @@ function button(text,active,onClick){const b=document.createElement('button');b.
 const date=(t,zone='Asia/Riyadh',short=false)=>new Intl.DateTimeFormat('en-GB',{timeZone:zone,month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',...(short?{}:{year:'numeric'})}).format(new Date(t*1000));
 function money(value,currency='USDT'){return new Intl.NumberFormat('en-US',{maximumFractionDigits:2,minimumFractionDigits:2}).format(value)+' '+currency;}
 function render(){
- if(window.NowViewBoard)window.NowViewBoard.update(data);
+ if(data&&typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:market',{detail:{symbol:data.symbol,price:data.price,currency:data.currency,quoteTime:data.quoteTime,changePercent:data.changePercent}}));
+ if(window.NewViewBoard)window.NewViewBoard.update(data);
  $('security').textContent=data.symbol+' / USDT · '+data.name;
  $('price').textContent=money(data.price,data.currency);
  const c=data.changePercent;$('change').textContent=c==null?'24-hour change unavailable':(c>=0?'+':'')+c.toFixed(2)+'% · rolling 24h';$('change').className=c==null?'':c>=0?'positive':'negative';
@@ -121,11 +122,11 @@ document.addEventListener('keydown',event=>{
  if(best){best.focus();best.scrollIntoView({block:'nearest',inline:'nearest'});event.preventDefault();}
 });
 if(window.Fintech&&window.Fintech.getPanelEnabled&&!compact){const ready=window.Fintech.getPanelReady();const b=button(ready?'Home panel: '+(window.Fintech.getPanelEnabled()?'on':'off'):'Home panel: setup needed',false,()=>{if(!window.Fintech.getPanelReady())return;const enabled=!window.Fintech.getPanelEnabled();window.Fintech.setPanelEnabled(enabled);b.textContent='Home panel: '+(enabled?'on':'off');});b.disabled=!ready;document.querySelector('.chart-tools').prepend(b);}
-if(!compact && window.NowViewBoard){
- window.NowViewBoard.build();
+if(!compact && window.NewViewBoard){
+ window.NewViewBoard.build();
  const boardButton=button('Stock board',false,()=>{
   const isBoard=!document.body.classList.contains('board-active');
-  window.NowViewBoard.toggle(isBoard);
+  window.NewViewBoard.toggle(isBoard);
   boardButton.textContent=isBoard?'Full chart':'Stock board';
   boardButton.setAttribute('aria-pressed',String(isBoard));
   if(!isBoard)requestAnimationFrame(draw);

@@ -30,3 +30,9 @@ The Android TV and mobile application now uses the new package ID `app.newview.d
 - Social: locally stored public profile links; not a live post ingestion or sentiment platform.
 
 The checklist describes **preview-code readiness only**. Passing automation alone is insufficient for a public commercial product.
+
+## Integration snapshot QA batch
+- MyView now renders minimal in-memory snapshots derived from the actual Markets quote, locally imported Business CSV, official RSS result and local social bookmarks. Media stays launch-only. No sample price/revenue data is substituted.
+- Snapshots are volatile and not stored or uploaded. Social counts are local. Market quote timestamps are displayed.
+- Markets calls the actual `window.NewViewBoard` export rather than obsolete `window.NowViewBoard`.
+- Source snapshots remain subject to actual-browser layout, accessibility and Android TV focus tests.

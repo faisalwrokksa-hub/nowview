@@ -58,9 +58,10 @@
  if(!status||!picker||!cards||!bars){window.NewViewBusiness={parseCsv,parseBusinessCsv,summarize};return;}
  const el=(tag,klass,value)=>{const x=document.createElement(tag);if(klass)x.className=klass;x.textContent=value;return x;};
  const fmt=n=>new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(n);
- function reset(){cards.replaceChildren();bars.replaceChildren();status.textContent='No company data loaded. CSV is processed locally and is not uploaded.';picker.value='';}
+ function reset(){if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));cards.replaceChildren();bars.replaceChildren();status.textContent='No company data loaded. CSV is processed locally and is not uploaded.';picker.value='';}
  function render(rows){
   const result=summarize(rows);
+  if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:{revenue:result.revenue,cost:result.cost,orders:result.orders,asOf:result.asOf,count:result.count}}));
   cards.replaceChildren();
   const metrics=[
    ['Revenue',fmt(result.revenue)],['Costs',fmt(result.cost)],['Revenue − Costs',fmt(result.difference)],
@@ -85,6 +86,7 @@
  picker.addEventListener('change',async()=>{
   const file=picker.files?.[0];if(!file)return;
   cards.replaceChildren();bars.replaceChildren();
+  if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));
   if(file.size>limitBytes){status.textContent='File too large: maximum 1 MB';picker.value='';return;}
   try{const text=await file.text();const rows=parseBusinessCsv(text);render(rows);}
   catch(error){status.textContent='CSV rejected: '+error.message;}

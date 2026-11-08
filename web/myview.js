@@ -23,6 +23,14 @@
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
  if(!root||!editor){window.NewViewPersonal={catalog,sanitize,load,save};return;}
  let chosen=load();
+ const snapshots={market:null,business:null,news:null,social:null};
+ const preview={
+  market:v=>v&&Number.isFinite(v.price)?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():'No verified quote received',
+  business:v=>v&&Number.isFinite(v.revenue)?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+v.orders+' orders · '+v.asOf:'Upload a CSV in Business to view session KPIs',
+  news:v=>v&&v.count?v.count+' '+(v.source==='fed'?'Federal Reserve':'SEC')+' announcements · '+(v.headline||''):'Load official announcements in News',
+  social:v=>v?v.count+' locally saved public profiles':'No public profiles saved',
+  media:()=> 'Open a video in Media; no playback is started here'
+ };
  function text(tag,cls,value){const el=document.createElement(tag);if(cls)el.className=cls;el.textContent=value;return el;}
  function render(){
   root.replaceChildren();editor.replaceChildren();
@@ -42,6 +50,8 @@
    const heading=text('h3','',widget.title);
    const eyebrow=text('div','shell-eyebrow',widget.label);
    const description=text('p','',widget.description);
+   const insight=text('p','myview-insight',preview[id](snapshots[id]));
+   insight.setAttribute('aria-label',widget.title+' source snapshot');
    const actions=document.createElement('div');actions.className='myview-widget-actions';
    const button=text('button','shell-primary','Open '+widget.title);
    button.type='button';button.setAttribute('aria-label','Open NewView'+widget.title);
@@ -51,10 +61,14 @@
    const index=chosen.indexOf(id);up.disabled=index===0;down.disabled=index===chosen.length-1;
    function move(delta){const next=[...chosen],at=next.indexOf(id);if(at+delta<0||at+delta>=next.length)return;[next[at],next[at+delta]]=[next[at+delta],next[at]];chosen=save(next);render();}
    up.addEventListener('click',()=>move(-1));down.addEventListener('click',()=>move(1));
-   actions.append(button,up,down);item.append(eyebrow,heading,description,actions);root.append(item);
+   actions.append(button,up,down);item.append(eyebrow,heading,description,insight,actions);root.append(item);
   }
  }
  document.getElementById('myview-reset')?.addEventListener('click',()=>{chosen=save(defaults);render();});
- window.NewViewPersonal={catalog,sanitize,load,save,render};
+ for(const id of ['market','business','news','social'])window.addEventListener('newview:'+id,event=>{
+  snapshots[id]=event.detail&&typeof event.detail==='object'?event.detail:null;
+  if(document.body.dataset.currentWorkspace==='myview')render();
+ });
+ window.NewViewPersonal={catalog,sanitize,load,save,render,preview};
  render();
 })();

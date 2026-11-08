@@ -14,6 +14,7 @@
   if(controller)controller.abort();
   controller=new AbortController();
   sourceLink();status.textContent='Loading official announcements…';container.replaceChildren();
+  if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:null}));
   if(location.protocol==='file:'){status.textContent='Live RSS is available through the web backend. Open the official source below on this device.';return;}
   try{
    const response=await fetch('/api/news?source='+encodeURIComponent(choose.value),{signal:controller.signal});
@@ -30,6 +31,7 @@
     article.append(link,line('small','news-meta',item.source+' · '+stamp));
     container.append(article);
    }
+   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:choose.value,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
    status.textContent='Official announcements · fetched '+new Date(feed.fetchedAt).toLocaleTimeString();
   }catch(err){
    if(err.name==='AbortError')return;
