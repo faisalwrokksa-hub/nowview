@@ -10,19 +10,19 @@
   polymarket:Object.freeze({label:'Polymarket',hosts:['polymarket.com','www.polymarket.com'],root:'https://polymarket.com/'})
  });
  const KEY='newview.social.links.v1',PREF_KEY='newview.social.discovery.v1',MAX=24;
- function preferences(){try{const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}');return {geo:Object.hasOwn(GEO,p.geo)?p.geo:'SA',topic:Object.hasOwn(TOPICS,p.topic)?p.topic:'all'};}catch{return {geo:'SA',topic:'all'};}}
+ function preferences(){try{const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}');return {geo:Object.hasOwn(GEO,p.geo)?p.geo:'GLOBAL',topic:Object.hasOwn(TOPICS,p.topic)?p.topic:'all'};}catch{return {geo:'GLOBAL',topic:'all'};}}
  function savePreferences(geo,topic){try{localStorage.setItem(PREF_KEY,JSON.stringify({geo,topic}));}catch{}}
- const GEO=Object.freeze({SA:['SA','ar'],US:['US','en'],GB:['GB','en'],AE:['AE','ar'],IN:['IN','en'],GLOBAL:['US','en']});
- const TOPICS=Object.freeze({all:'',business:'business',markets:'financial markets',technology:'technology'});
+ const GEO=Object.freeze({US:['US','en'],CA:['CA','en'],AU:['AU','en'],GB:['GB','en'],GLOBAL:['US','en']});
+ const TOPICS=Object.freeze({all:'trending',business:'business',markets:'financial markets',technology:'technology',ai:'artificial intelligence',news:'breaking news',sports:'sports',entertainment:'entertainment',gaming:'gaming',science:'science'});
  function discoveryUrl(region,topic){
-  const geo=GEO[region]||GEO.SA;
+  const geo=GEO[region]||GEO.GLOBAL;
   const q=TOPICS[topic]===undefined?'':TOPICS[topic];
   const url=new URL('https://news.google.com/search');
-  url.searchParams.set('q',q||'latest news');
+  url.searchParams.set('q',q||'trending');
   if(region!=='GLOBAL'){url.searchParams.set('hl',geo[1]);url.searchParams.set('gl',geo[0]);url.searchParams.set('ceid',geo[0]+':'+geo[1]);}
   return url.href;
  }
- function discoveryLinks(region,topic){return [{label:region==='GLOBAL'?'Global news search':'Regional news search',url:discoveryUrl(region,topic)},{label:'Google Trends — explore region',url:'https://trends.google.com/trends/explore?geo='+encodeURIComponent(region==='GLOBAL'?'':GEO[region]?.[0]||'SA')},{label:'Reddit communities',url:'https://www.reddit.com/r/popular/'}];}
+ function discoveryLinks(region,topic){const query=TOPICS[topic]||'trending';return [{label:region==='GLOBAL'?'Global news search':'Regional news search',url:discoveryUrl(region,topic)},{label:'Bluesky — public topic search',url:'https://bsky.app/search?q='+encodeURIComponent(query)},{label:'Mastodon — public hashtag discovery',url:'https://mastodon.social/tags/'+encodeURIComponent((query==='trending'?'news':query).replace(/[^a-z0-9]/gi,''))},{label:'Google Trends — explore region',url:'https://trends.google.com/trends/explore?geo='+encodeURIComponent(region==='GLOBAL'?'':GEO[region]?.[0]||'US')},{label:'Reddit communities',url:'https://www.reddit.com/r/popular/'}];}
 
  function validate(platform,value){
   const source=SOURCES[platform];if(!source||typeof value!=='string'||value.length>500)return null;
@@ -78,7 +78,7 @@
  const text=(tag,className,value)=>{const e=document.createElement(tag);if(className)e.className=className;e.textContent=value;return e;};
  function renderDiscovery(){
   if(!geoPicker||!topicPicker||!discovery)return;
-  const region=Object.hasOwn(GEO,geoPicker.value)?geoPicker.value:'SA';
+  const region=Object.hasOwn(GEO,geoPicker.value)?geoPicker.value:'GLOBAL';
   const topic=Object.hasOwn(TOPICS,topicPicker.value)?topicPicker.value:'all';
   savePreferences(region,topic);
   discovery.replaceChildren();
@@ -114,6 +114,6 @@
  });
  document.getElementById('social-clear')?.addEventListener('click',()=>{items=save([]);status.textContent='All saved profiles cleared from this device.';render();});
  window.NewViewSocial={validate,sanitize,load,save,render,discoveryUrl,discoveryLinks};
- const pref=preferences();if(geoPicker)geoPicker.value=pref.geo;if(topicPicker)topicPicker.value=pref.topic;
+ const pref=preferences();if(geoPicker){for(const [value,label] of [['GLOBAL','Global'],['US','United States'],['CA','Canada'],['AU','Australia'],['GB','United Kingdom']]){if(!Array.from(geoPicker.options).some(o=>o.value===value)){const option=document.createElement('option');option.value=value;option.textContent=label;geoPicker.append(option);}}for(const option of Array.from(geoPicker.options)){if(!Object.hasOwn(GEO,option.value))option.remove();}geoPicker.value=pref.geo;}if(topicPicker){for(const [value,label] of [['ai','AI'],['news','Breaking News'],['sports','Sports'],['entertainment','Entertainment'],['gaming','Gaming'],['science','Science']]){if(!Array.from(topicPicker.options).some(o=>o.value===value)){const option=document.createElement('option');option.value=value;option.textContent=label;topicPicker.append(option);}}topicPicker.value=pref.topic;}
  render();renderDiscovery();
 })();
