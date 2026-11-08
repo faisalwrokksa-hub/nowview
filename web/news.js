@@ -4,7 +4,7 @@
  const container=document.getElementById('news-items'),status=document.getElementById('news-status');
  const choose=document.getElementById('news-source'),refresh=document.getElementById('news-refresh');
  if(!container||!choose||!refresh)return;
- const external={'fed':'https://www.federalreserve.gov/newsevents/pressreleases.htm','sec':'https://www.sec.gov/newsroom/press-releases'};
+ const external={'fed':'https://www.federalreserve.gov/newsevents/pressreleases.htm','sec':'https://www.sec.gov/newsroom/press-releases','stocktwits':'https://stocktwits.com/'};
  let controller=null;
  const line=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;n.textContent=text;return n;};
  function sourceLink(){
@@ -14,7 +14,7 @@
   if(controller)controller.abort();
   controller=new AbortController();
   const current=controller;
-  sourceLink();status.textContent='Loading official announcements…';container.replaceChildren();
+  sourceLink();status.textContent='Loading source-linked headlines…';container.replaceChildren();
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:null}));
   if(location.protocol==='file:'){status.textContent='Live RSS is available through the web backend. Open the official source below on this device.';return;}
   try{
@@ -27,7 +27,7 @@
    for(const item of feed.items){
     let url;
     try{url=new URL(item.url);}catch{continue;}
-    if(url.protocol!=='https:'||url.username||url.password||url.port||!['www.sec.gov','www.federalreserve.gov'].includes(url.hostname))continue;
+    if(url.protocol!=='https:'||url.username||url.password||url.port||!['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com'].includes(url.hostname))continue;
     const article=line('article','news-item','');
     const link=line('a','news-link',item.title);
     link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';
@@ -36,7 +36,7 @@
     container.append(article);
    }
    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:choose.value,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
-   status.textContent=container.children.length?'Official announcements · fetched '+new Date(feed.fetchedAt).toLocaleTimeString():'No valid announcements returned by this source';
+   status.textContent=container.children.length?'Source-linked headlines · fetched '+new Date(feed.fetchedAt).toLocaleTimeString():'No valid announcements returned by this source';
   }catch(err){
    if(current!==controller||err.name==='AbortError')return;
    status.textContent='Headlines unavailable. Open the official source below.';
