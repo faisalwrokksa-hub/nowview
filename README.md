@@ -28,4 +28,8 @@ NowView is a customizable, multi-screen dashboard product. Start with a **commer
 - No trade execution and no false equivalence between Binance tokenized instruments and actual US shares.
 - Release only after testing on real TV hardware and completing the checklist in the master prompt.
 
-**Current status:** initial planning scaffold; the Fintech dashboard code has **not yet been migrated**.
+**Current status:** market-dashboard code has been migrated on the review branch [`feat/market-dashboard-baseline`](https://github.com/faisalwrokksa-hub/nowview/pull/1). A test APK build has passed automated CI; commercial data rights, signing continuity and hardware QA remain unverified. No PR has been merged or deployed.
+
+## Release signing
+
+Production signing is a separate owner-controlled process. Read [Android release policy](docs/ANDROID_RELEASE_POLICY.md); CI APKs are test-only and must never be sold as stable upgradeable releases.
