@@ -14,8 +14,10 @@
  function renderItems(){
   container.replaceChildren();const term=search.value.trim().toLowerCase().slice(0,120);
   for(const item of lastItems){if(term&&!item.title.toLowerCase().includes(term))continue;
+   let url;try{url=new URL(item.url);}catch{continue;}
+   if(url.protocol!=='https:'||url.username||url.password||url.port||!['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com'].includes(url.hostname))continue;
    const article=line('article','news-item','');const link=line('a','news-link',item.title);
-   link.href=item.url;link.target='_blank';link.rel='noopener noreferrer';
+   link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';
    const date=item.publishedAt?new Date(item.publishedAt):null;
    const stamp=date&&Number.isFinite(date.getTime())?date.toLocaleString('en-US',{dateStyle:'medium'}):'Date unavailable';
    article.append(link,line('small','news-meta',item.source+' · '+stamp));container.append(article);
