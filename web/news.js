@@ -8,7 +8,7 @@
  let controller=null;
  const line=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;n.textContent=text;return n;};
  function sourceLink(){
-  const link=document.getElementById('news-original');link.href=external[choose.value]||external.fed;
+  const link=document.getElementById('news-original');if(link)link.href=external[choose.value]||external.fed;
  }
  async function refreshNews(){
   if(controller)controller.abort();
