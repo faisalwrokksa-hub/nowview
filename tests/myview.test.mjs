@@ -4,7 +4,7 @@ function setup(value=null){
  const window={};const document={getElementById:()=>null};let saved=value;
  const localStorage={getItem:()=>saved,setItem:(k,v)=>{saved=v;}};
  vm.runInNewContext(src,{window,document,localStorage});
- return {api:window.NowViewPersonal,saved:()=>saved};
+ return {api:window.NewViewPersonal,saved:()=>saved};
 }
 test('MyView presets include Markets, News and Media',()=>{const {api}=setup();assert.deepEqual([...api.load()],['market','news','media']);});
 test('MyView excludes unrecognized widget IDs and duplicate entries',()=>{

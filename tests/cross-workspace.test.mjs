@@ -11,7 +11,7 @@ test('remote navigation filters hidden/disabled workspaces and respects text ent
 });
 test('market board action hides outside Markets and media is stopped on exit',()=>{
  assert.match(shell,/chartToggle\.hidden=view!=='markets'/);
- assert.match(shell,/view!=='media'&&window\.NowViewMedia\?\.stopPlayback/);
+ assert.match(shell,/view!=='media'&&window\.NewViewMedia\?\.stopPlayback/);
  assert.match(css,/#shell-market-actions button\[hidden\]/);
 });
 test('workspace tab current state and scrolling support mobile and television',()=>{

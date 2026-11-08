@@ -11,8 +11,8 @@ test('MyView is default and invalid saved workspaces fail closed',()=>{
  const window={};const document={body:{classList:{contains:()=>false}},readyState:'loading',addEventListener:()=>{}};
  const localStorage={getItem:()=>null,setItem:()=>{}};
  vm.runInNewContext(source,{window,document,localStorage});
- assert.equal(window.NowViewShell.getStored(),'myview');
- assert.equal(window.NowViewShell.views.length,6);
+ assert.equal(window.NewViewShell.getStored(),'myview');
+ assert.equal(window.NewViewShell.views.length,6);
 });
 test('workspace and stock board remain separate from market engine',()=>{
  const board=fs.readFileSync(new URL('../web/stock-board.js',import.meta.url),'utf8');

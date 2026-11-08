@@ -5,7 +5,7 @@ const build=fs.readFileSync(new URL('../cloud/build.mjs',import.meta.url),'utf8'
 test('official video URL parsing rejects invalid and hostile URLs',()=>{
  const window={},document={getElementById:()=>null};
  vm.runInNewContext(js,{window,document,URL});
- const parse=window.NowViewMedia.parse;
+ const parse=window.NewViewMedia.parse;
  assert.equal(parse('https://youtu.be/dQw4w9WgXcQ').id,'dQw4w9WgXcQ');
  assert.equal(parse('https://www.youtube.com/watch?v=dQw4w9WgXcQ').id,'dQw4w9WgXcQ');
  for(const u of ['javascript:alert(1)','https://youtube.com.evil.test/watch?v=dQw4w9WgXcQ','http://youtube.com/watch?v=dQw4w9WgXcQ','https://youtu.be/not-a-valid-id'])assert.equal(parse(u),null);

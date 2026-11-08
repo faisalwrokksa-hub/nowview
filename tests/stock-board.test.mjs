@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const src=fs.readFileSync(new URL('../web/stock-board.js', import.meta.url),'utf8');
 const window={};
 vm.runInNewContext(src,{window});
-const {points}=window.NowViewBoard;
+const {points}=window.NewViewBoard;
 
 test('stock-board sparkline uses no fake prices for empty data',()=>{
  assert.equal(points([]),'');

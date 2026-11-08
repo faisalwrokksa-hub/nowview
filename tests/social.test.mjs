@@ -3,7 +3,7 @@ const source=fs.readFileSync(new URL('../web/social.js',import.meta.url),'utf8')
 const window={},document={getElementById:()=>null};const store=new Map();
 const localStorage={getItem:key=>store.get(key)||null,setItem:(key,value)=>store.set(key,value)};
 vm.runInNewContext(source,{window,document,localStorage,URL});
-const {validate,sanitize,save,load}=window.NowViewSocial;
+const {validate,sanitize,save,load}=window.NewViewSocial;
 test('accepts HTTPS platform profile links only',()=>{
  assert.equal(validate('x','https://x.com/OpenAI').url,'https://x.com/OpenAI');
  assert.equal(validate('tiktok','https://www.tiktok.com/@example').name,'@example');

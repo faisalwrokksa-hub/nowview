@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 const src=fs.readFileSync(new URL('../web/business.js',import.meta.url),'utf8');
 const ctx={window:{},document:{getElementById:()=>null},TextEncoder,Date};
 vm.runInNewContext(src,ctx);
-const {parseBusinessCsv,summarize,parseCsv}=ctx.window.NowViewBusiness;
+const {parseBusinessCsv,summarize,parseCsv}=ctx.window.NewViewBusiness;
 const header='date,revenue,cost,orders,customers\n';
 test('parses, sorts, aggregates only supplied records',()=>{
  const rows=parseBusinessCsv(header+'2026-11-08,120,50,5,20\n2026-11-07,100,60,4,18\n');

@@ -7,7 +7,7 @@ const build=fs.readFileSync(new URL('../cloud/build.mjs',import.meta.url),'utf8'
 test('Android outgoing links are bounded to trusted HTTPS hosts',()=>{
  const window={},document={addEventListener:()=>{}};
  vm.runInNewContext(js,{window,document,URL});
- const valid=window.NowViewExternal.approved;
+ const valid=window.NewViewExternal.approved;
  assert.equal(valid('https://www.sec.gov/newsroom/press-releases'),true);
  assert.equal(valid('https://x.com/OpenAI'),true);
  for(const u of ['http://x.com/a','https://x.com.evil.test/abc','https://www.sec.gov:8443/a','https://u:p@x.com/a','javascript:alert(1)','file:///etc/passwd'])assert.equal(valid(u),false);
