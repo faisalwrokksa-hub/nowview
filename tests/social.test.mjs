@@ -62,7 +62,7 @@ test('Polymarket only permits canonical public wallet profiles, never market or 
 test('external browser policies cover discovery and Polymarket on web and Android',()=>{
  const web=fs.readFileSync(new URL('../web/external-links.js',import.meta.url),'utf8');
  const android=fs.readFileSync(new URL('../android/src/dev/fintech/marketcharts/ChartsView.java',import.meta.url),'utf8');
- for(const host of ['polymarket.com','stocktwits.com','truthsocial.com','news.google.com','trends.google.com','www.reddit.com']){
+ for(const host of ['polymarket.com','stocktwits.com','truthsocial.com','news.google.com','trends.google.com','www.reddit.com','bsky.app','mastodon.social']){
   assert.ok(web.includes("'"+host+"'"),host+' missing from web');
   assert.ok(android.includes('host.equals("'+host+'")'),host+' missing from Android');
  }
