@@ -1,5 +1,5 @@
 'use strict';
-/* NowViewMedia: safe external Android TV PipeTv handoff or official web embed. */
+/* NewViewMedia: safe external Android TV PipeTv handoff or official web embed. */
 (function(){
  function parse(input){
   try{
@@ -17,7 +17,7 @@
  const input=document.getElementById('media-url');
  const output=document.getElementById('media-status');
  const frame=document.getElementById('media-frame');
- if(!input||!output||!frame){window.NowViewMedia={parse};return;}
+ if(!input||!output||!frame){window.NewViewMedia={parse};return;}
  const play=document.getElementById('media-play'),pipe=document.getElementById('media-pipe'),stop=document.getElementById('media-stop'),original=document.getElementById('media-original');
  const native=()=>!!(window.Fintech&&typeof window.Fintech.openPipeTv==='function');
  function validate(){
@@ -38,11 +38,11 @@
  stop.addEventListener('click',()=>{clear();output.textContent='Playback stopped.';});
  pipe.disabled=!native();
  pipe.addEventListener('click',()=>{
-  if(!native()){output.textContent='PipeTv handoff requires the NowView Android TV app.';return;}
+  if(!native()){output.textContent='PipeTv handoff requires the NewView Android TV app.';return;}
   if(!window.Fintech.isPipeTvInstalled()){output.textContent='PipeTv is not installed. Install it independently before launching.';return;}
   window.Fintech.openPipeTv();
   output.textContent='Opening PipeTv. Find the video using PipeTv search.';
  });
  validate();
- window.NowViewMedia={parse,stopPlayback:clear};
+ window.NewViewMedia={parse,stopPlayback:clear};
 })();

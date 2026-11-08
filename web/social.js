@@ -1,12 +1,12 @@
 'use strict';
-/* NowViewSocial: local-only approved-platform bookmarks; no scraping or impersonated API feeds. */
+/* NewViewSocial: local-only approved-platform bookmarks; no scraping or impersonated API feeds. */
 (function(){
  const SOURCES=Object.freeze({
   x:Object.freeze({label:'X',hosts:['x.com','www.x.com','twitter.com','www.twitter.com'],root:'https://x.com/'}),
   tiktok:Object.freeze({label:'TikTok',hosts:['tiktok.com','www.tiktok.com','m.tiktok.com'],root:'https://www.tiktok.com/'}),
   facebook:Object.freeze({label:'Facebook',hosts:['facebook.com','www.facebook.com','m.facebook.com'],root:'https://www.facebook.com/'})
  });
- const KEY='nowview.social.links.v1',MAX=24;
+ const KEY='newview.social.links.v1',MAX=24;
  function validate(platform,value){
   const source=SOURCES[platform];if(!source||typeof value!=='string'||value.length>500)return null;
   try{
@@ -42,7 +42,7 @@
  function load(){try{return sanitize(JSON.parse(localStorage.getItem(KEY)||'[]'));}catch{return [];}}
  function save(items){const safe=sanitize(items);try{localStorage.setItem(KEY,JSON.stringify(safe));}catch{}return safe;}
  const form=document.getElementById('social-add'),links=document.getElementById('social-links');
- if(!form||!links){window.NowViewSocial={validate,sanitize,load,save};return;}
+ if(!form||!links){window.NewViewSocial={validate,sanitize,load,save};return;}
  const platform=document.getElementById('social-platform'),url=document.getElementById('social-url'),status=document.getElementById('social-status');
  let items=load();
  const text=(tag,className,value)=>{const e=document.createElement(tag);if(className)e.className=className;e.textContent=value;return e;};
@@ -69,6 +69,6 @@
   items=save([...items,item]);url.value='';status.textContent='Profile saved on this device. No social feed has been fetched.';render();
  });
  document.getElementById('social-clear')?.addEventListener('click',()=>{items=save([]);status.textContent='All saved profiles cleared from this device.';render();});
- window.NowViewSocial={validate,sanitize,load,save,render};
+ window.NewViewSocial={validate,sanitize,load,save,render};
  render();
 })();

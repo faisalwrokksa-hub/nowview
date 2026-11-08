@@ -1,14 +1,14 @@
-# NOWVIEW — MASTER CONTRIBUTOR PROMPT & DELIVERY PLAN
+# NEWVIEW — MASTER CONTRIBUTOR PROMPT & DELIVERY PLAN
 Version: 1.0 | Initial scope: commercial market dashboard | Status: Authorized planning and review-only implementation
 
 > **PRIMARY DIRECTIVE**
-> Build **NowView** into a beautiful, stable, legally reviewable, commercially resellable universal dashboard **starting from the existing Market Charts app**. Work in coherent, independently testable batches. Never use an unbuilt future feature as a prerequisite for the first release. Preserve the original `Fintech` repository unchanged. Submit all code as reviewable changes in **NowView** only; do not merge, deploy, buy services, change DNS, or distribute APKs without separate user authorization.
+> Build **NewView** into a beautiful, stable, legally reviewable, commercially resellable universal dashboard **starting from the existing Market Charts app**. Work in coherent, independently testable batches. Never use an unbuilt future feature as a prerequisite for the first release. Preserve the original `Fintech` repository unchanged. Submit all code as reviewable changes in **NewView** only; do not merge, deploy, buy services, change DNS, or distribute APKs without separate user authorization.
 
 ## 1. Product vision and user journey
 
-**Brand:** NowView
+**Brand:** NewView
 **Tagline:** Everything you follow. Live.
-**Proposed website:** `nowview.si` (ownership, trademark rights and DNS setup **not verified** in this repository).
+**Proposed website:** `newview.si` (ownership, trademark rights and DNS setup **not verified** in this repository).
 **Position:** A personal, customizable dashboard on Android TV, Android phone/tablet, and modern web browsers. iOS/iPadOS users access it by web/PWA; an Android APK does not run on iOS.
 
 **Launch experience (v1):**
@@ -41,14 +41,14 @@ Known source areas (inspect actual files before editing):
 - Cloud/backends: `cloud/build.mjs`, `cloud/market.mjs`, `dashboard.py`, `Dockerfile`, `package.json`.
 - Tests/workflow: `tests/`, `.github/workflows/dashboard.yml`.
 - Original planning: `COMMERCIAL_MVP.md` on the source PR branch.
-- The original repository also runs **SOXL/SOXS Telegram intelligence**; **never copy its bot, secrets, private configuration, schedule or automated messages** into NowView.
+- The original repository also runs **SOXL/SOXS Telegram intelligence**; **never copy its bot, secrets, private configuration, schedule or automated messages** into NewView.
 
 Source currently supports 19 explicitly identified Binance Spot USDT pairs (including Binance tokenized-equity-style symbols and BTC/ETH), synchronized candles, live streams with fallback, EMA(20/50), RSI(14), visible trade timestamps, alerts, and optional TV Home panel. Verify each instrument's current listing and commercial data rights; do not assume continued availability or regional legality.
 
 **Migration method:**
 - Read and document the current implementation, dependencies, files, branches and tests.
-- Copy **only** dashboard-related source and permitted assets into NowView, maintaining attribution and license files as required.
-- Preserve each original file's logic unless modifying it for a documented defect, security concern or NowView rebrand.
+- Copy **only** dashboard-related source and permitted assets into NewView, maintaining attribution and license files as required.
+- Preserve each original file's logic unless modifying it for a documented defect, security concern or NewView rebrand.
 - Do not import original git history wholesale or `Fintech`'s Telegram code. Never copy release signing keys or secrets.
 - Keep an explicit migration manifest listing source paths, included/excluded content and reasons.
 - Treat upstream pull request descriptions as claims; independently run and record tests.
@@ -68,7 +68,7 @@ Source currently supports 19 explicitly identified Binance Spot USDT pairs (incl
 ## 5. Architectural layout — target, not a forced rewrite
 
 ```text
-nowview/
+newview/
   README.md
   CONTRIBUTOR_MASTER_PROMPT.md
   docs/
@@ -101,7 +101,7 @@ The exact tree may evolve after inspection. Do not impose a heavy framework unle
 
 ### W2 — TV and responsive interface (P0)
 **Owner role:** product design + frontend
-- Preserve functional baseline; modern, branded NowView home view, clean cards, chart hierarchy, source and stale status, simple watchlist.
+- Preserve functional baseline; modern, branded NewView home view, clean cards, chart hierarchy, source and stale status, simple watchlist.
 - Support couch distance, remote focus on refresh, screen resolution changes, large text, contrast, visual states, easy exit.
 - Touch/desktop variants without broken layout; no overlaps or clipped controls.
 - Optional Home overlay remains *off* unless user enables and grants permissions. Never show over third-party video apps.
@@ -125,7 +125,7 @@ The exact tree may evolve after inspection. Do not impose a heavy framework unle
 
 ### W5 — Commercial, release & documentation (P0)
 **Owner role:** product/security/QA
-- Verify code licenses, proprietary assets, font/icon licenses, source exchange terms, trademark collisions for NowView and the proposed domain.
+- Verify code licenses, proprietary assets, font/icon licenses, source exchange terms, trademark collisions for NewView and the proposed domain.
 - Define privacy policy, terms, data limitations and liability wording, support channel, release notes, installation instructions, free/premium feature boundaries, charging/billing only after approval.
 - Validate installation/onboarding copy and product screenshots. Keep marketing factual.
 - Maintain an up-to-date release checklist and risk register.
@@ -139,11 +139,11 @@ Workstreams may prepare parallel PRs against `main` or an approved integration b
 | Phase | Goal | Completion criterion |
 |---|---|---|
 | 0 — Initialize | Private repo, scope, contributor docs | Structure and permissions verified; source still unchanged |
-| 1 — Baseline migration | Dashboard-only code in NowView | All migrated paths documented, tests running; no bot/secrets copied |
+| 1 — Baseline migration | Dashboard-only code in NewView | All migrated paths documented, tests running; no bot/secrets copied |
 | 2 — Harden | Market accuracy + stability + TV UX | Automated tests and real-device QA evidence pass |
 | 3 — Commercial readiness | Licensing, signing, privacy, onboarding | All critical legal/security/operational gates addressed |
 | 4 — Limited beta | Small customer cohort | Install/update feedback and failure metrics reviewed |
-| 5 — General release | Sell NowView Markets | Explicit product-owner approval; signed APK and website distribution validated |
+| 5 — General release | Sell NewView Markets | Explicit product-owner approval; signed APK and website distribution validated |
 | Later — Personalized web | Accounts, layouts, favorite sites | Secure tenancy/session design reviewed; tested cross-device sync |
 | Later — Media and AI | Video, feeds, AI assistants | Permissions, provider terms, consent and product demand confirmed |
 
@@ -170,12 +170,12 @@ For Windows, the source includes `build-apk.ps1`. It requires appropriate Java 1
 
 ## 9. Contributor operating prompt — copy/paste into any coding agent
 
-You are a senior engineering contributor to NowView, a private SaaS-ready dashboard product. Your task is to improve the current **market dashboard** toward a commercial first release. Read `README.md` and this entire `CONTRIBUTOR_MASTER_PROMPT.md` before changing any code.
+You are a senior engineering contributor to NewView, a private SaaS-ready dashboard product. Your task is to improve the current **market dashboard** toward a commercial first release. Read `README.md` and this entire `CONTRIBUTOR_MASTER_PROMPT.md` before changing any code.
 
-**Authority:** You may inspect source, research technical constraints, create non-destructive development branches, implement and test code, update documentation, and open **draft pull requests** in `faisalwrokksa-hub/nowview`. Prioritize bulk cohesive progress with safe internal approval of development steps. You are **not** authorized to merge to main, release/ship paid APKs, publish sites, purchase services, change DNS, move repositories, change permissions, access customer secrets or implement trading. Ask only for decisions that are genuinely irreversible or require external owner permissions.
+**Authority:** You may inspect source, research technical constraints, create non-destructive development branches, implement and test code, update documentation, and open **draft pull requests** in `faisalwrokksa-hub/newview`. Prioritize bulk cohesive progress with safe internal approval of development steps. You are **not** authorized to merge to main, release/ship paid APKs, publish sites, purchase services, change DNS, move repositories, change permissions, access customer secrets or implement trading. Ask only for decisions that are genuinely irreversible or require external owner permissions.
 
 **Before coding:**
-1. Read current NowView tree; check whether baseline migration already exists. Never duplicate or overwrite a collaborator's work.
+1. Read current NewView tree; check whether baseline migration already exists. Never duplicate or overwrite a collaborator's work.
 2. Review the source Fintech dashboard PR #1 and only copy authorized dashboard paths, with license attribution and a migration manifest.
 3. Identify the smallest coherent next improvement and its acceptance criteria. Confirm no unrelated scope increase.
 
@@ -192,12 +192,12 @@ You are a senior engineering contributor to NowView, a private SaaS-ready dashbo
 
 ## 10. Immediate backlog (first contributor session)
 
-- [ ] Inspect source PR and current NowView contents.
+- [ ] Inspect source PR and current NewView contents.
 - [ ] Create `docs/MIGRATION_MANIFEST.md` with dashboard-related keep/exclude decisions.
 - [ ] Port and rebrand source web and Android dashboard files on a dedicated feature branch, without bot files.
 - [ ] Port relevant tests and run CI; label missing SDK or device validations accurately.
 - [ ] Record data rights/attribution and production-signing risks.
-- [ ] Open one draft PR showing the initial reusable market dashboard in NowView.
+- [ ] Open one draft PR showing the initial reusable market dashboard in NewView.
 - [ ] Do **not** merge or deploy without owner direction.
 
 ## 11. Definition of done for first sellable build

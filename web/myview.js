@@ -10,7 +10,7 @@
  ]);
  const ids=new Set(catalog.map(x=>x.id));
  const defaults=['market','news','media'];
- const key='nowview.myview.widgets.v1';
+ const key='newview.myview.widgets.v1';
  function sanitize(input){
   if(!Array.isArray(input))return [...defaults];
   const out=[];for(const id of input){
@@ -21,7 +21,7 @@
  function load(){try{const raw=localStorage.getItem(key);return raw===null?[...defaults]:sanitize(JSON.parse(raw));}catch{return [...defaults];}}
  function save(selected){const safe=sanitize(selected);try{localStorage.setItem(key,JSON.stringify(safe));}catch{}return safe;}
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
- if(!root||!editor){window.NowViewPersonal={catalog,sanitize,load,save};return;}
+ if(!root||!editor){window.NewViewPersonal={catalog,sanitize,load,save};return;}
  let chosen=load();
  function text(tag,cls,value){const el=document.createElement(tag);if(cls)el.className=cls;el.textContent=value;return el;}
  function render(){
@@ -44,8 +44,8 @@
    const description=text('p','',widget.description);
    const actions=document.createElement('div');actions.className='myview-widget-actions';
    const button=text('button','shell-primary','Open '+widget.title);
-   button.type='button';button.setAttribute('aria-label','Open NowView'+widget.title);
-   button.addEventListener('click',()=>window.NowViewShell?.select(widget.view));
+   button.type='button';button.setAttribute('aria-label','Open NewView'+widget.title);
+   button.addEventListener('click',()=>window.NewViewShell?.select(widget.view));
    const up=text('button','','↑');up.type='button';up.title='Move '+widget.title+' earlier';up.setAttribute('aria-label','Move '+widget.title+' earlier');
    const down=text('button','','↓');down.type='button';down.title='Move '+widget.title+' later';down.setAttribute('aria-label','Move '+widget.title+' later');
    const index=chosen.indexOf(id);up.disabled=index===0;down.disabled=index===chosen.length-1;
@@ -55,6 +55,6 @@
   }
  }
  document.getElementById('myview-reset')?.addEventListener('click',()=>{chosen=save(defaults);render();});
- window.NowViewPersonal={catalog,sanitize,load,save,render};
+ window.NewViewPersonal={catalog,sanitize,load,save,render};
  render();
 })();

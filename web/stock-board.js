@@ -1,4 +1,4 @@
-/* NowView Markets stock board.
+/* NewView Markets stock board.
  * Independent implementation of a compact TV market card design.
  * U.S. securities are labels only until licensed quote providers are enabled.
  */
@@ -104,5 +104,5 @@
     if(workspace)workspace.hidden=show;
     document.body.classList.toggle('board-active',show);
   }
-  window.NowViewBoard={build,update,toggle,points};
+  window.NewViewBoard={build,update,toggle,points};
 })();

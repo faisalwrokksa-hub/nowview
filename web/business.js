@@ -55,7 +55,7 @@
     customers:latest?latest.customers:null,asOf:latest?latest.date:null,count:rows.length};
  }
  const status=document.getElementById('business-status'),picker=document.getElementById('business-file'),cards=document.getElementById('business-kpis'),bars=document.getElementById('business-trend'),clear=document.getElementById('business-clear');
- if(!status||!picker||!cards||!bars){window.NowViewBusiness={parseCsv,parseBusinessCsv,summarize};return;}
+ if(!status||!picker||!cards||!bars){window.NewViewBusiness={parseCsv,parseBusinessCsv,summarize};return;}
  const el=(tag,klass,value)=>{const x=document.createElement(tag);if(klass)x.className=klass;x.textContent=value;return x;};
  const fmt=n=>new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(n);
  function reset(){cards.replaceChildren();bars.replaceChildren();status.textContent='No company data loaded. CSV is processed locally and is not uploaded.';picker.value='';}
@@ -90,5 +90,5 @@
   catch(error){status.textContent='CSV rejected: '+error.message;}
  });
  clear?.addEventListener('click',reset);
- window.NowViewBusiness={parseCsv,parseBusinessCsv,summarize,reset};
+ window.NewViewBusiness={parseCsv,parseBusinessCsv,summarize,reset};
 })();
