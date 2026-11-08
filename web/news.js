@@ -6,6 +6,25 @@
  if(!container||!choose||!refresh)return;
  const external={'fed':'https://www.federalreserve.gov/newsevents/pressreleases.htm','sec':'https://www.sec.gov/newsroom/press-releases','stocktwits':'https://stocktwits.com/'};
  let controller=null;
+ let lastItems=[];let lastFetchLabel='';
+ const search=document.createElement('input');search.type='search';search.placeholder='Filter headlines';search.setAttribute('aria-label','Filter news headlines');
+ const auto=document.createElement('input');auto.type='checkbox';auto.id='news-auto-refresh';
+ const autoLabel=document.createElement('label');autoLabel.htmlFor=auto.id;autoLabel.textContent='Auto refresh every 5 minutes';
+ refresh.parentElement?.append(search,autoLabel,auto);
+ function renderItems(){
+  container.replaceChildren();const term=search.value.trim().toLowerCase().slice(0,120);
+  for(const item of lastItems){if(term&&!item.title.toLowerCase().includes(term))continue;
+   const article=line('article','news-item','');const link=line('a','news-link',item.title);
+   link.href=item.url;link.target='_blank';link.rel='noopener noreferrer';
+   const date=item.publishedAt?new Date(item.publishedAt):null;
+   const stamp=date&&Number.isFinite(date.getTime())?date.toLocaleString('en-US',{dateStyle:'medium'}):'Date unavailable';
+   article.append(link,line('small','news-meta',item.source+' · '+stamp));container.append(article);
+  }
+  status.textContent=container.children.length+' matching headlines'+(lastFetchLabel?' · '+lastFetchLabel:'');
+ }
+ search.addEventListener('input',renderItems);
+ auto.addEventListener('change',()=>{if(auto.checked)refreshNews();});
+ setInterval(()=>{if(auto.checked&&document.body.dataset.currentWorkspace==='news')refreshNews();},300000);
  const line=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;n.textContent=text;return n;};
  function sourceLink(){
   const link=document.getElementById('news-original');if(link)link.href=external[choose.value]||external.fed;
@@ -14,7 +33,7 @@
   if(controller)controller.abort();
   controller=new AbortController();
   const current=controller;
-  sourceLink();status.textContent='Loading source-linked headlines…';container.replaceChildren();
+  sourceLink();status.textContent='Loading source-linked headlines…';container.replaceChildren();lastItems=[];
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:null}));
   try{
    let feed;
@@ -33,22 +52,13 @@
    }
    if(current!==controller)return;
    if(!Array.isArray(feed.items)||!feed.items.length){status.textContent='No headlines returned by this source. Check the original publisher.';return;}
-   for(const item of feed.items){
-    let url;
-    try{url=new URL(item.url);}catch{continue;}
-    if(url.protocol!=='https:'||url.username||url.password||url.port||!['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com'].includes(url.hostname))continue;
-    const article=line('article','news-item','');
-    const link=line('a','news-link',item.title);
-    link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';
-    const stamp=item.publishedAt?new Date(item.publishedAt).toLocaleString('en-US',{dateStyle:'medium'}):'Date unavailable';
-    article.append(link,line('small','news-meta',item.source+' · '+stamp));
-    container.append(article);
-   }
+   lastItems=feed.items.filter(item=>{try{const url=new URL(item.url);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com'].includes(url.hostname)&&typeof item.title==='string'&&item.title.trim();}catch{return false;}}).slice(0,100);
+   renderItems();
    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:choose.value,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
    const fetched=new Date(typeof feed.fetchedAt==='number'?feed.fetchedAt:feed.fetchedAt);
    const age=Date.now()-fetched.getTime();
    const freshness=Number.isFinite(age)&&age>=0&&age<=3600000?'Recently fetched':'Fetch time unavailable or older than one hour';
-   status.textContent=container.children.length?'Source-linked headlines · '+freshness+' · fetched '+(Number.isFinite(fetched.getTime())?fetched.toLocaleString():'unknown'):'No valid announcements returned by this source';
+   lastFetchLabel=freshness+' · fetched '+(Number.isFinite(fetched.getTime())?fetched.toLocaleString():'unknown');renderItems();
   }catch(err){
    if(current!==controller||err.name==='AbortError')return;
    status.textContent='Headlines unavailable. Open the official source below.';
