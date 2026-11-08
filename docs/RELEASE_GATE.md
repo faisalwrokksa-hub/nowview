@@ -55,3 +55,9 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 - D / QA: npm test now discovers all `tests/*.test.mjs` rather than excluding news/social regression files. Android and web allowlists are aligned. Full CI after these commits remains required.
 - E / Release: draft PR only; CI preview APK is test-signed, not production-signed. Device QA, licensing review, production signing, and owner authorization remain release blockers.
 - Never claim commercial readiness from source-code commits alone; no merge, deployment, app distribution, purchases, or DNS modifications authorized.
+
+## Customized display / casting scope
+- Implemented: device-local display profiles (maximum five), local profile save/load, fullscreen-style presentation, next-workspace control, and active News/Markets refresh interval. Preferences do not leave the browser or TV.
+- Not implemented: Google Cast receiver/sender integration, WebRTC screen mirroring, remote pairing, multi-TV orchestration, cross-device profile sync, arbitrary widget grid composition, or automatic workspace playlist rotation.
+- Do not describe the local presentation mode as true casting. Real casting requires an independently tested receiver and secure pairing; no open remote-control endpoint should be exposed without authentication.
+- Physical TV acceptance and automated CI must be repeated after display controls are added.
