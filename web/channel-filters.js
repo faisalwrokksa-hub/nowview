@@ -25,7 +25,8 @@
   const lines=input.split(/\r?\n/);const channels=[];let meta=null;
   for(const raw of lines){const line=raw.trim();if(line.startsWith('#EXTINF:')){
    const attrs={};for(const match of line.matchAll(/([\w-]+)="([^"]*)"/g))attrs[match[1]]=match[2];
-   const comma=line.indexOf(',');meta={name:(comma<0?'':line.slice(comma+1)).trim().slice(0,160),category:(attrs['group-title']||'general').trim().toLowerCase(),logo:attrs['tvg-logo']||'',id:attrs['tvg-id']||''};
+   let comma=-1,quoted=false;for(let i=8;i<line.length;i++){if(line[i]==='\"')quoted=!quoted;else if(line[i]===','&&!quoted){comma=i;break;}}
+   meta={name:(comma<0?'':line.slice(comma+1)).trim().slice(0,160),category:(attrs['group-title']||'general').trim().toLowerCase(),logo:attrs['tvg-logo']||'',id:attrs['tvg-id']||''};
   }else if(line.startsWith('#'))continue;
   else if(meta){try{const url=new URL(line);if((url.protocol==='https:'||url.protocol==='http:')&&!url.username&&!url.password&&url.hostname)channels.push({...meta,url:url.href});}catch{}meta=null;}
   }
