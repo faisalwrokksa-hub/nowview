@@ -34,24 +34,28 @@
  const heading=document.createElement('h3');heading.textContent='Free live TV directory';
  const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Channel directory not loaded yet.';
  const list=document.createElement('select');list.setAttribute('aria-label','Available IPTV channels');
+ const nativeStream=()=>typeof window.NewViewNative?.playStream==='function';
+ const playChannel=document.createElement('button');playChannel.type='button';playChannel.textContent='Play selected channel in NewView';playChannel.hidden=!nativeStream();playChannel.disabled=true;
  const open=document.createElement('a');open.textContent='Open selected stream';open.target='_blank';open.rel='noopener noreferrer';open.hidden=true;
  const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Refresh channels';
- directory.append(heading,status,list,open,refresh);
+ directory.append(heading,status,list,playChannel,open,refresh);
  category?.parentElement?.append(directory);
  let allChannels=[];let lastFetch=0;let loading=null;
  function renderChannels(){
-  if(location.protocol==='file:'){list.replaceChildren();open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Android APK: use the official playlist link with an external IPTV player.';return;}
+  if(location.protocol==='file:'){list.replaceChildren();playChannel.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Android APK: use the official playlist link with an external IPTV player.';return;}
   if(!preferred?.filterChannels)return;
   const chosen=preferred.filterChannels(allChannels,currentDashboard(),window.NewViewShell?.loadFirstLaunch?.()?.interests);
   const narrowed=category?.value?chosen.filter(c=>c.category.toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):chosen;
   const visible=narrowed;
   list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
   open.hidden=!visible.length;
+  playChannel.disabled=!visible.length;
   open.setAttribute('aria-disabled',String(!visible.length));
   if(visible.length){open.href=visible[0].url;status.textContent=visible.length+' channels in this view. Availability and rights vary by channel.';}
   else{open.removeAttribute('href');status.textContent=allChannels.length?'No channels match this category. Select another category.':'No channels loaded. Try refresh.';}
  }
  list.addEventListener('change',()=>{if(list.value)open.href=list.value;});
+ playChannel.addEventListener('click',()=>{if(!nativeStream()||!list.value)return;try{const url=new URL(list.value);if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port)window.NewViewNative.playStream(url.href);}catch{}});
  async function loadDirectory(force=false){
   if(loading)return loading;
   if(location.protocol==='file:'){status.textContent='Android APK: open the official playlist in a compatible external player.';return;}
@@ -63,7 +67,7 @@
    const content=await response.text();if(content.length>16000000)throw Error('Playlist too large');
    const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
    allChannels=parsed;lastFetch=Date.now();renderChannels();
-  }catch(error){allChannels=[];lastFetch=0;list.replaceChildren();open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
+  }catch(error){allChannels=[];lastFetch=0;list.replaceChildren();playChannel.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
   finally{loading=null;}})();return loading;
  }
  refresh.addEventListener('click',()=>loadDirectory(true));
