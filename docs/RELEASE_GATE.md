@@ -85,3 +85,8 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 - Added android/src/app/newview/dashboard/LauncherAppsBridge.java with scoped LEANBACK_LAUNCHER/LAUNCHER discovery and validated package launch methods. Manifest now declares corresponding package visibility queries, not QUERY_ALL_PACKAGES.
 - IMPORTANT: The helper is not yet registered on MainActivity's WebView. Integrate only after inspecting the actual Java MainActivity and its trusted-content navigation policy: e.g. webView.addJavascriptInterface(new LauncherAppsBridge(this), "NewViewApps"); update frontend to use this distinct bridge or explicitly delegate methods in existing NewViewNative. Never expose this bridge to arbitrary untrusted websites.
 - No native app-launch claim until Android CI passes and the user verifies a real TV. Do not merge/deploy.
+
+## Native bridge wiring (2026-11-08)
+- Located actual Android WebView host at android/src/dev/fintech/marketcharts/ChartsView.java. Registered separate NewViewApps JavascriptInterface and remove it on destroy; frontend now detects that bridge.
+- Android system file picker now accepts JPEG/PNG/WebP alongside CSV; JavaScript still applies wallpaper MIME and 950 KB size validation.
+- Outstanding verification: Android CI compilation, user-click app launches, WebView bridge trust isolation, Home-button recovery and OEM support. No production release approval.
