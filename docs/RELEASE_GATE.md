@@ -61,3 +61,9 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 - Not implemented: Google Cast receiver/sender integration, WebRTC screen mirroring, remote pairing, multi-TV orchestration, cross-device profile sync, arbitrary widget grid composition, or automatic workspace playlist rotation.
 - Do not describe the local presentation mode as true casting. Real casting requires an independently tested receiver and secure pairing; no open remote-control endpoint should be exposed without authentication.
 - Physical TV acceptance and automated CI must be repeated after display controls are added.
+
+## Optional Android HOME launcher
+- Android manifest now advertises HOME and DEFAULT on the existing MainActivity, alongside regular app/Leanback launcher categories. This only makes NewView eligible for the user's launcher chooser on compatible devices; it does not silently change the device default.
+- Do not disable, uninstall, or hide the OEM launcher. Keep the stock launcher as a recovery path.
+- Pending: installed-app discovery and launch grid, settings/recovery entry, user-facing launcher selection guidance, TV manufacturer compatibility, physical Home-button/reboot tests, and updated Android CI artifact.
+- This is not a verified production launcher. Google TV OEM restrictions may prevent choosing a third-party default HOME app.
