@@ -1,0 +1,46 @@
+name: Market Charts TV and web
+on:
+  push:
+    paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', '.github/workflows/dashboard.yml']
+  pull_request:
+    paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', '.github/workflows/dashboard.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline validation
+        run: python -m unittest discover -s tests -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate and build cloud dashboard
+        run: |
+          node --test tests/cloud.test.mjs tests/live.test.mjs tests/indicators.test.mjs
+          node --check web/app.js
+          node cloud/build.mjs
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Android SDK packages
+        uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: '11076708'
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+      - name: Build universal TV and phone APK
+        run: bash build-apk.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: market-charts-test-apk
+          path: |
+            build/market-charts.apk
+            build/market-charts-unsigned.apk
+          retention-days: 14

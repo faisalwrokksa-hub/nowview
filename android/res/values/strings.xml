@@ -1,0 +1,1 @@
+<resources><string name="home_panel_description">Shows a read-only market chart only when Plume Home is in front. Checks app package names; does not retrieve screen contents.</string></resources>

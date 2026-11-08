@@ -1,0 +1,9 @@
+.git
+.github
+build
+build-tools
+android
+tests
+__pycache__
+*.jks
+*.keystore
