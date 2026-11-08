@@ -67,3 +67,8 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 - Do not disable, uninstall, or hide the OEM launcher. Keep the stock launcher as a recovery path.
 - Pending: installed-app discovery and launch grid, settings/recovery entry, user-facing launcher selection guidance, TV manufacturer compatibility, physical Home-button/reboot tests, and updated Android CI artifact.
 - This is not a verified production launcher. Google TV OEM restrictions may prevent choosing a third-party default HOME app.
+
+## Customer home-screen photography
+- Added customer-selected JPEG/PNG/WebP wallpaper on MyView only, maximum 950 KB, stored in the local browser/TV WebView storage. Includes removal and three contrast-shading settings.
+- No photo uploads or network photo sync. No bundled stock images or reuse of assets from earlier projects has been performed.
+- Pending: physical Android TV file-picker acceptance, storage-quota testing, wallpaper UI/contrast review, and new CI run.
