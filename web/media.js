@@ -42,7 +42,6 @@
  category?.parentElement?.append(directory);
  let allChannels=[];let lastFetch=0;let loading=null;
  function renderChannels(){
-  if(location.protocol==='file:'){list.replaceChildren();playChannel.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Android APK: use the official playlist link with an external IPTV player.';return;}
   if(!preferred?.filterChannels)return;
   const chosen=preferred.filterChannels(allChannels,currentDashboard(),window.NewViewShell?.loadFirstLaunch?.()?.interests);
   const narrowed=category?.value?chosen.filter(c=>c.category.toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):chosen;
@@ -58,13 +57,23 @@
  playChannel.addEventListener('click',()=>{if(!nativeStream()||!list.value)return;try{const url=new URL(list.value);if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port)window.NewViewNative.playStream(url.href);}catch{}});
  async function loadDirectory(force=false){
   if(loading)return loading;
-  if(location.protocol==='file:'){status.textContent='Android APK: open the official playlist in a compatible external player.';return;}
   if(!force&&allChannels.length&&Date.now()-lastFetch<3600000){renderChannels();return;}
   status.textContent='Loading public IPTV directory…';
   loading=(async()=>{try{
-   const response=await fetch(preferred.MAIN_PLAYLIST,{cache:'no-store'});
-   if(!response.ok)throw Error('HTTP '+response.status);
-   const content=await response.text();if(content.length>16000000)throw Error('Playlist too large');
+   let content;
+   if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicPlaylist==='function'){
+    content=await new Promise((resolve,reject)=>{
+     const id=Date.now()+Math.floor(Math.random()*1000);
+     const timer=setTimeout(()=>{delete window.__newviewPlaylistResult;reject(Error('Directory timeout'));},20000);
+     window.__newviewPlaylistResult=(received,data)=>{if(received!==id)return;clearTimeout(timer);delete window.__newviewPlaylistResult;if(data?.error)reject(Error(data.error));else resolve(data?.content||'');};
+     window.NewViewNative.fetchPublicPlaylist(id);
+    });
+   }else{
+    const response=await fetch(preferred.MAIN_PLAYLIST,{cache:'no-store'});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    content=await response.text();
+   }
+   if(content.length>16000000)throw Error('Playlist too large');
    const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
    allChannels=parsed;lastFetch=Date.now();renderChannels();
   }catch(error){allChannels=[];lastFetch=0;list.replaceChildren();playChannel.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
