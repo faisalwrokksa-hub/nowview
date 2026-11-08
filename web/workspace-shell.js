@@ -9,12 +9,18 @@
   const market=document.getElementById('market-shell');
   const chart=document.querySelector('.workspace');
   const board=document.getElementById('stock-board');
+  const chartToggle=document.getElementById('board-toggle');
+  if(chartToggle)chartToggle.hidden=view!=='markets';
+  if(view!=='media'&&window.NowViewMedia?.stopPlayback)window.NowViewMedia.stopPlayback();
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
   for(const el of document.querySelectorAll('[data-view-button]')){
    const active=el.dataset.viewButton===view;el.setAttribute('aria-pressed',String(active));el.classList.toggle('selected',active);
   }
   document.getElementById('workspace-title').textContent=names[view];
   document.body.dataset.currentWorkspace=view;
+  const activeTab=document.querySelector('[data-view-button="'+view+'"]');
+  if(activeTab)activeTab.setAttribute('aria-current','page');
+  document.querySelectorAll('[data-view-button]').forEach(tab=>{if(tab!==activeTab)tab.removeAttribute('aria-current');});
   if(view==='markets'){
     market.hidden=false;
     const isBoard=document.body.classList.contains('board-active');
@@ -22,6 +28,8 @@
     if(!isBoard)requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
   }else{market.hidden=true;board.hidden=true;chart.hidden=true;}
   try{localStorage.setItem('nowview.workspace',view);}catch{}
+  const page=document.querySelector('[data-workspace="'+view+'"]');
+  if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'instant'});
   return true;
  }
  function install(){

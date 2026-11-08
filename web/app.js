@@ -94,7 +94,32 @@ function clocks(){const now=new Date();$('riyadh').textContent=new Intl.DateTime
 $('refresh').onclick=()=>load();$('mode').onclick=()=>{candles=!candles;$('mode').textContent=candles?'Candles':'Line chart';if(data)render();};
 $('alerts').onclick=()=>{alertsEnabled=!alertsEnabled;localStorage.setItem('alerts',alertsEnabled?'on':'off');signalTimes.clear();if(!alertsEnabled){$('alert-toast').hidden=true;clearTimeout(lightTimer);$('alert-light').className='alert-light';}alertControls();};
 $('test-alert').onclick=()=>notify({tone:'up'},true);alertControls();
-document.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;const buttons=[...document.querySelectorAll('button:not(:disabled)')];const current=document.activeElement;if(!buttons.includes(current)){buttons[0].focus();event.preventDefault();return;}const r=current.getBoundingClientRect(),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;let best=null,score=Infinity;buttons.forEach(b=>{if(b===current)return;const q=b.getBoundingClientRect(),dx=(q.left+q.right)/2-cx,dy=(q.top+q.bottom)/2-cy;const horizontal=event.key==='ArrowLeft'||event.key==='ArrowRight',forward=event.key==='ArrowLeft'?dx< -2:event.key==='ArrowRight'?dx>2:event.key==='ArrowUp'?dy< -2:dy>2;if(!forward)return;const s=horizontal?Math.abs(dx)+Math.abs(dy)*5:Math.abs(dy)+Math.abs(dx)*.2;if(s<score){score=s;best=b;}});if(best){best.focus();best.scrollIntoView({block:'nearest',inline:'nearest'});}event.preventDefault();});
+// Spatial TV remote navigation must ignore hidden workspaces and native text-input controls.
+function visibleFocusable(element){
+ if(element.disabled||element.hidden||element.closest('[hidden], [inert], [aria-hidden="true"]'))return false;
+ const style=getComputedStyle(element);
+ return style.visibility!=='hidden'&&style.display!=='none'&&element.getClientRects().length>0;
+}
+document.addEventListener('keydown',event=>{
+ if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)||event.altKey||event.ctrlKey||event.metaKey)return;
+ const current=document.activeElement;
+ if(current&&current.matches('input, textarea, select, [contenteditable="true"]'))return;
+ const controls=[...document.querySelectorAll('button:not(:disabled), a[href], [tabindex="0"]')].filter(visibleFocusable);
+ if(!controls.length)return;
+ if(!controls.includes(current)){controls[0].focus();event.preventDefault();return;}
+ const r=current.getBoundingClientRect(),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;
+ let best=null,score=Infinity;
+ for(const b of controls){
+  if(b===current)continue;
+  const q=b.getBoundingClientRect(),dx=(q.left+q.right)/2-cx,dy=(q.top+q.bottom)/2-cy;
+  const horizontal=event.key==='ArrowLeft'||event.key==='ArrowRight';
+  const forward=event.key==='ArrowLeft'?dx< -2:event.key==='ArrowRight'?dx>2:event.key==='ArrowUp'?dy< -2:dy>2;
+  if(!forward)continue;
+  const s=horizontal?Math.abs(dx)+Math.abs(dy)*5:Math.abs(dy)+Math.abs(dx)*.3;
+  if(s<score){score=s;best=b;}
+ }
+ if(best){best.focus();best.scrollIntoView({block:'nearest',inline:'nearest'});event.preventDefault();}
+});
 if(window.Fintech&&window.Fintech.getPanelEnabled&&!compact){const ready=window.Fintech.getPanelReady();const b=button(ready?'Home panel: '+(window.Fintech.getPanelEnabled()?'on':'off'):'Home panel: setup needed',false,()=>{if(!window.Fintech.getPanelReady())return;const enabled=!window.Fintech.getPanelEnabled();window.Fintech.setPanelEnabled(enabled);b.textContent='Home panel: '+(enabled?'on':'off');});b.disabled=!ready;document.querySelector('.chart-tools').prepend(b);}
 if(!compact && window.NowViewBoard){
  window.NowViewBoard.build();
@@ -106,7 +131,7 @@ if(!compact && window.NowViewBoard){
   if(!isBoard)requestAnimationFrame(draw);
  });
  boardButton.id='board-toggle';
- boardButton.setAttribute('aria-label','Toggle UrTV-style market board and full chart');
+ boardButton.setAttribute('aria-label','Switch between stock board and detailed market chart');
  document.querySelector('.chart-tools').prepend(boardButton);
 }
 window.addEventListener('resize',draw);clocks();setInterval(clocks,1000);setInterval(()=>{if(!document.hidden&&liveState!=='live')load(true);},30000);
