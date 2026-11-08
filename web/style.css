@@ -7,3 +7,35 @@
 .product-label{font-weight:400;color:var(--muted)}
 header h1{letter-spacing:-.045em}
 @media(max-width:650px){header{gap:12px}header h1{font-size:clamp(23px,5.5vw,32px)}.clocks{font-size:11px}.workspace{padding:18px 14px}.chart-tools{flex-wrap:wrap}.toolbar{align-items:flex-start}nav{gap:7px}button{padding:9px 12px;min-height:40px}#alert-state{width:100%}}
+
+/* NowView Market Board: RTL Saudi/U.S. stock rows inspired by UrTV's information hierarchy.
+   Implemented independently; uses no UrTV assets/fonts/source code. */
+[hidden]{display:none!important}
+.stock-board{flex:1;min-height:0;overflow:auto}
+.board-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.board-card{background:linear-gradient(145deg,#101d23,#0c171b);border:1px solid #4a4235;border-radius:16px;padding:18px;min-width:0;box-shadow:0 10px 26px #0002}
+.board-card[data-group=token]{grid-column:1/-1}
+.board-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid #62533a;padding-bottom:12px;margin-bottom:5px}
+.board-heading h3{font-size:clamp(19px,1.6vw,29px);font-weight:500;color:#dfbd7a;margin:0}
+.board-subtitle{font-size:clamp(11px,.85vw,15px);color:#b9ac97}
+.board-list{display:flex;flex-direction:column}
+.board-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(70px,.8fr) minmax(135px,1.2fr);grid-template-rows:auto auto;align-items:center;column-gap:12px;min-height:68px;padding:9px 5px;border-bottom:1px solid #ffffff16;direction:ltr}
+.board-card[dir=rtl] .board-row{direction:rtl}
+.board-row:last-child{border-bottom:0}
+.board-name{display:flex;flex-direction:column;gap:3px;min-width:0;text-align:start}
+.board-name strong{color:#f2ebdc;font-size:clamp(15px,1.15vw,22px);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board-name small{color:#b3a58d;font-size:clamp(11px,.8vw,15px)}
+.board-spark{width:100%;height:27px;max-width:125px;stroke:#8f999c;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;justify-self:center}
+.board-numeric{display:flex;flex-direction:column;gap:5px;text-align:end;font-variant-numeric:tabular-nums;direction:ltr}
+.board-price{font-size:clamp(14px,1.1vw,21px);color:#f6ead4;white-space:nowrap}
+.board-change{font-size:clamp(12px,.94vw,18px);color:#b5b8b7}
+.board-up .board-change,.board-up .board-spark{color:#78d5a1;stroke:#78d5a1}
+.board-down .board-change,.board-down .board-spark{color:#ed8979;stroke:#ed8979}
+.board-old{opacity:.62}
+.board-row-status{grid-column:1/-1;text-align:start;color:#aaa18c;font-size:clamp(10px,.72vw,13px);padding-top:5px}
+.board-note{font-size:12px;line-height:1.5;color:#b8ab90;margin:10px 0 0}
+.board-card[dir=rtl] .board-note{text-align:right}
+.board-active main{height:100vh}
+@media(max-width:920px){.board-grid{grid-template-columns:1fr}.board-card[data-group=token]{grid-column:auto}.stock-board{overflow:auto}.board-row{grid-template-columns:minmax(0,1fr) minmax(60px,.7fr) minmax(120px,1fr)}}
+@media(max-width:500px){.board-card{padding:13px}.board-row{grid-template-columns:minmax(0,1.1fr) 70px minmax(92px,1fr);gap:7px}.board-heading{flex-wrap:wrap}.board-name strong{font-size:15px}.board-price{font-size:13px}.board-change{font-size:12px}}
+.home-panel .stock-board{display:none}

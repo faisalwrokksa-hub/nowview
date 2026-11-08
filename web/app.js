@@ -53,6 +53,7 @@ function button(text,active,onClick){const b=document.createElement('button');b.
 const date=(t,zone='Asia/Riyadh',short=false)=>new Intl.DateTimeFormat('en-GB',{timeZone:zone,month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',...(short?{}:{year:'numeric'})}).format(new Date(t*1000));
 function money(value,currency='USDT'){return new Intl.NumberFormat('en-US',{maximumFractionDigits:2,minimumFractionDigits:2}).format(value)+' '+currency;}
 function render(){
+ if(window.NowViewBoard)window.NowViewBoard.update(data);
  $('security').textContent=data.symbol+' / USDT · '+data.name;
  $('price').textContent=money(data.price,data.currency);
  const c=data.changePercent;$('change').textContent=c==null?'24-hour change unavailable':(c>=0?'+':'')+c.toFixed(2)+'% · rolling 24h';$('change').className=c==null?'':c>=0?'positive':'negative';
@@ -95,6 +96,19 @@ $('alerts').onclick=()=>{alertsEnabled=!alertsEnabled;localStorage.setItem('aler
 $('test-alert').onclick=()=>notify({tone:'up'},true);alertControls();
 document.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;const buttons=[...document.querySelectorAll('button:not(:disabled)')];const current=document.activeElement;if(!buttons.includes(current)){buttons[0].focus();event.preventDefault();return;}const r=current.getBoundingClientRect(),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;let best=null,score=Infinity;buttons.forEach(b=>{if(b===current)return;const q=b.getBoundingClientRect(),dx=(q.left+q.right)/2-cx,dy=(q.top+q.bottom)/2-cy;const horizontal=event.key==='ArrowLeft'||event.key==='ArrowRight',forward=event.key==='ArrowLeft'?dx< -2:event.key==='ArrowRight'?dx>2:event.key==='ArrowUp'?dy< -2:dy>2;if(!forward)return;const s=horizontal?Math.abs(dx)+Math.abs(dy)*5:Math.abs(dy)+Math.abs(dx)*.2;if(s<score){score=s;best=b;}});if(best){best.focus();best.scrollIntoView({block:'nearest',inline:'nearest'});}event.preventDefault();});
 if(window.Fintech&&window.Fintech.getPanelEnabled&&!compact){const ready=window.Fintech.getPanelReady();const b=button(ready?'Home panel: '+(window.Fintech.getPanelEnabled()?'on':'off'):'Home panel: setup needed',false,()=>{if(!window.Fintech.getPanelReady())return;const enabled=!window.Fintech.getPanelEnabled();window.Fintech.setPanelEnabled(enabled);b.textContent='Home panel: '+(enabled?'on':'off');});b.disabled=!ready;document.querySelector('.chart-tools').prepend(b);}
+if(!compact && window.NowViewBoard){
+ window.NowViewBoard.build();
+ const boardButton=button('Stock board',false,()=>{
+  const isBoard=!document.body.classList.contains('board-active');
+  window.NowViewBoard.toggle(isBoard);
+  boardButton.textContent=isBoard?'Full chart':'Stock board';
+  boardButton.setAttribute('aria-pressed',String(isBoard));
+  if(!isBoard)requestAnimationFrame(draw);
+ });
+ boardButton.id='board-toggle';
+ boardButton.setAttribute('aria-label','Toggle UrTV-style market board and full chart');
+ document.querySelector('.chart-tools').prepend(boardButton);
+}
 window.addEventListener('resize',draw);clocks();setInterval(clocks,1000);setInterval(()=>{if(!document.hidden&&liveState!=='live')load(true);},30000);
 setInterval(()=>{if(data&&!document.hidden){render();liveDirty=false;}},1000);
 window.addEventListener('pagehide',()=>{if(stopLive)stopLive();liveKey='';});
