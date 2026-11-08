@@ -48,3 +48,9 @@ test('Stocktwits publisher RSS is allowlisted and keeps same-host article links'
  assert.equal(parseNewsXml(xml,'stocktwits').length,1);
  assert.equal(parseNewsXml(xml,'stocktwits')[0].source,'Stocktwits News');
 });
+
+test('RSS article links reject credentials and nonstandard ports',()=>{
+ const xml='<rss><channel><item><title>Bad port</title><link>https://stocktwits.com:8443/news</link></item><item><title>Credentials</title><link>https://user:pass@stocktwits.com/news</link></item><item><title>Good</title><link>https://stocktwits.com/news</link></item></channel></rss>';
+ const items=parseNewsXml(xml,'stocktwits');
+ assert.equal(items.length,1);assert.equal(items[0].title,'Good');
+});
