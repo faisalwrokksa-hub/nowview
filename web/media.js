@@ -60,7 +60,7 @@
    const content=await response.text();if(content.length>16000000)throw Error('Playlist too large');
    const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
    allChannels=parsed;lastFetch=Date.now();renderChannels();
-  }catch(error){status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
+  }catch(error){allChannels=[];lastFetch=0;list.replaceChildren();open.hidden=true;open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
   finally{loading=null;}})();return loading;
  }
  refresh.addEventListener('click',()=>loadDirectory(true));
