@@ -13,5 +13,5 @@
   event.preventDefault();
   if(approved(href))window.Fintech.openApprovedUrl(href);
  });
- window.NowViewExternal={approved};
+ window.NewViewExternal={approved};
 })();
