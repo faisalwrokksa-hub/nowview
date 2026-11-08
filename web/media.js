@@ -29,6 +29,7 @@
   category.dispatchEvent(new Event('change'));
  }
 
+ if(typeof document.createElement==='function'){
  const directory=document.createElement('section');directory.id='newview-channel-directory';directory.setAttribute('aria-label','IPTV-org channel directory');
  const heading=document.createElement('h3');heading.textContent='Free live TV directory';
  const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Channel directory not loaded yet.';
@@ -76,6 +77,7 @@
  if(typeof document.addEventListener==='function')document.addEventListener('newview:workspace-change',syncDashboardCategories);
  if(typeof window.addEventListener==='function')window.addEventListener('newview:preferences-change',syncDashboardCategories);
  syncDashboardCategories();
+ }
  const input=document.getElementById('media-url');
  const output=document.getElementById('media-status');
  const frame=document.getElementById('media-frame');
