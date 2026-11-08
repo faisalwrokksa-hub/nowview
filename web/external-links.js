@@ -10,8 +10,9 @@
   const a=event.target?.closest?.('a[href]');
   if(!a||!window.NewViewNative||typeof window.NewViewNative.openApprovedUrl!=='function')return;
   const href=a.href;
+  if(!approved(href))return;
   event.preventDefault();
-  if(approved(href))window.NewViewNative.openApprovedUrl(href);
+  window.NewViewNative.openApprovedUrl(href);
  });
  window.NewViewExternal={approved};
 })();
