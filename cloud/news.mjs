@@ -1,7 +1,8 @@
 // Read-only source-allowlisted news. Never serve arbitrary remote URLs.
 export const NEWS_SOURCES=Object.freeze({
  fed:Object.freeze({name:'Federal Reserve',url:'https://www.federalreserve.gov/feeds/press_all.xml',host:'www.federalreserve.gov',homepage:'https://www.federalreserve.gov/newsevents/pressreleases.htm'}),
- sec:Object.freeze({name:'U.S. SEC',url:'https://www.sec.gov/news/pressreleases.rss',host:'www.sec.gov',homepage:'https://www.sec.gov/newsroom/press-releases'})
+ sec:Object.freeze({name:'U.S. SEC',url:'https://www.sec.gov/news/pressreleases.rss',host:'www.sec.gov',homepage:'https://www.sec.gov/newsroom/press-releases'}),
+ stocktwits:Object.freeze({name:'Stocktwits News',url:'https://stocktwits.com/sitemap/rss_feed.xml',host:'stocktwits.com',homepage:'https://stocktwits.com/'})
 });
 const xmlDecode=s=>String(s).replace(/&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos);/gi,(whole,key)=>{
  if(key[0]==='#'){const n=key[1]?.toLowerCase()==='x'?parseInt(key.slice(2),16):parseInt(key.slice(1),10);
