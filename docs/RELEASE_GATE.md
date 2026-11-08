@@ -25,9 +25,9 @@ The Android TV and mobile application now uses the new package ID `app.newview.d
 - MyView: local widget selector and layout storage; no account sync.
 - Markets: token chart sourced from Binance public data; U.S. securities watchlist has no verified licensed quote feed.
 - Business: local CSV analysis; no server-side customer record management.
-- News: allowlisted Federal Reserve and SEC RSS headlines.
+- News: allowlisted Federal Reserve, SEC, and Stocktwits publisher RSS headlines on the hosted backend; live source reachability and redistribution rights are not verified.
 - Media: external installed PipeTv handoff on Android TV; hosted web official YouTube embeds may show ads.
-- Social: locally stored public profile links; not a live post ingestion or sentiment platform.
+- Social: locally stored X, TikTok, Facebook, Truth Social, Stocktwits and Polymarket public profile links; regional news discovery links and persisted geo/topic preferences; not live social ingestion or sentiment.
 
 The checklist describes **preview-code readiness only**. Passing automation alone is insufficient for a public commercial product.
 
@@ -47,3 +47,11 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 - Automatic URL redirects cannot launch external apps from main-frame navigation; allowed explicit user-gesture links continue through the existing audited allowlist.
 - Recognizes the app-local file URL with either null or empty URI authority, preventing an Android URI normalization mismatch.
 - See `docs/DEVICE_ACCEPTANCE.md` for an owner-run hardware test matrix; no device test is claimed to have executed.
+
+## Packages A–E implementation and blockers (2026-11-08)
+- A / Data: server-side RSS source allowlist, timeout and size guards, browser freshness and source links. No provider SLA or live Stocktwits retrieval verified; no Polymarket market-data adapter yet.
+- B / Workspaces: six existing workspaces and basic social discovery. Curated IPTV channel ingestion, live social sentiment, and embedded prediction probabilities remain unimplemented.
+- C / Experience: NewView branding, local personalization, geographic/topic preference persistence and responsive workspace shell. Physical D-pad and accessibility acceptance remain pending.
+- D / QA: npm test now discovers all `tests/*.test.mjs` rather than excluding news/social regression files. Android and web allowlists are aligned. Full CI after these commits remains required.
+- E / Release: draft PR only; CI preview APK is test-signed, not production-signed. Device QA, licensing review, production signing, and owner authorization remain release blockers.
+- Never claim commercial readiness from source-code commits alone; no merge, deployment, app distribution, purchases, or DNS modifications authorized.
