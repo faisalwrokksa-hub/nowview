@@ -39,6 +39,7 @@
   const source=document.getElementById('footer-source');
   if(source)source.textContent=sourceNotes[view];
   document.body.dataset.currentWorkspace=view;
+  document.dispatchEvent(new CustomEvent('newview:workspace-change',{detail:{view}}));
   const activeTab=document.querySelector('[data-view-button="'+view+'"]');
   if(activeTab)activeTab.setAttribute('aria-current','page');
   document.querySelectorAll('[data-view-button]').forEach(tab=>{if(tab!==activeTab)tab.removeAttribute('aria-current');});
