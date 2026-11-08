@@ -4,6 +4,6 @@
   "type": "module",
   "scripts": {
     "build": "node cloud/build.mjs",
-    "test": "node --test tests/cloud.test.mjs tests/live.test.mjs tests/indicators.test.mjs tests/stock-board.test.mjs"
+    "test": "node --test tests/*.test.mjs"
   }
 }
