@@ -68,7 +68,12 @@ public final class ChartsView extends WebView {
             ||host.equals("www.tiktok.com")||host.equals("tiktok.com")
             ||host.equals("www.facebook.com")||host.equals("facebook.com")
             ||host.equals("www.youtube.com")||host.equals("youtube.com")||host.equals("youtu.be")
-            ||host.equals("www.sec.gov")||host.equals("www.federalreserve.gov");
+            ||host.equals("www.sec.gov")||host.equals("www.federalreserve.gov")
+            ||host.equals("stocktwits.com")||host.equals("www.stocktwits.com")
+            ||host.equals("truthsocial.com")||host.equals("www.truthsocial.com")
+            ||host.equals("polymarket.com")||host.equals("www.polymarket.com")
+            ||host.equals("news.google.com")||host.equals("trends.google.com")
+            ||host.equals("www.reddit.com");
     }
     private boolean routeNavigation(Uri uri){
         if(isInternal(uri))return false;
