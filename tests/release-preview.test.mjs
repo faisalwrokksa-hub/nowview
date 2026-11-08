@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL(path,import.meta.url),'utf8');
-test('app has unified branding without changing its installed package identifier',()=>{
+test('app has unified branding with a distinct renamed package identifier',()=>{
  const manifest=read('../android/AndroidManifest.xml');
  assert.match(manifest,/android:label="NewView"/);
  assert.match(manifest,/package="app\.newview\.markets"/);

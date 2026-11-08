@@ -29,9 +29,9 @@ class AppIdentityTest(unittest.TestCase):
         workflow = (ROOT / '.github/workflows/dashboard.yml').read_text(encoding='utf-8')
         for label, content in [('bash',bash),('powershell',powershell),('workflow',workflow)]:
             with self.subTest(label=label):
-                self.assertIn('newview-markets.apk', content)
+                self.assertIn('newview.apk', content)
                 self.assertNotIn('market-charts.apk',content)
-        self.assertIn('newview-markets-test-apk',workflow)
+        self.assertIn('newview-test-apk',workflow)
 
 if __name__ == '__main__':
     unittest.main()
