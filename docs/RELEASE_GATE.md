@@ -72,3 +72,7 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 - Added customer-selected JPEG/PNG/WebP wallpaper on MyView only, maximum 950 KB, stored in the local browser/TV WebView storage. Includes removal and three contrast-shading settings.
 - No photo uploads or network photo sync. No bundled stock images or reuse of assets from earlier projects has been performed.
 - Pending: physical Android TV file-picker acceptance, storage-quota testing, wallpaper UI/contrast review, and new CI run.
+
+## Home launcher quick-launch iteration
+- MyView now offers a PipeTv native bridge shortcut when separately installed, an external YouTube website link, and original-launcher recovery instructions. These do not constitute Android installed-app enumeration, native YouTube app launching, or guaranteed launcher replacement.
+- Pending: complete installed-app grid and package discovery, tested default HOME chooser and settings navigation, and Android TV QA.
