@@ -6,7 +6,11 @@ cd "$(dirname "$0")"
 tools="$ANDROID_HOME/build-tools/34.0.0"
 platform="$ANDROID_HOME/platforms/android-34/android.jar"
 mkdir -p build
+# Remove only generated intermediates; preserve the aligned unsigned release input and local test keystore.
+rm -f build/resources.zip build/unsigned.apk
 stage="$(mktemp -d "$PWD/build/obj.XXXXXX")"
+cleanup() { rm -rf "$stage"; rm -f build/resources.zip build/unsigned.apk; }
+trap cleanup EXIT
 mkdir -p "$stage/classes" "$stage/dex"
 "$tools/aapt2" compile --dir android/res -o build/resources.zip
 "$tools/aapt2" link -o build/unsigned.apk -I "$platform" --manifest android/AndroidManifest.xml -A web build/resources.zip
