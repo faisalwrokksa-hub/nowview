@@ -21,7 +21,6 @@
  function load(){try{const raw=localStorage.getItem(key);return raw===null?[...defaults]:sanitize(JSON.parse(raw));}catch{return [...defaults];}}
  function save(selected){const safe=sanitize(selected);try{localStorage.setItem(key,JSON.stringify(safe));}catch{}return safe;}
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
- if(!root||!editor){window.NewViewPersonal={catalog,sanitize,load,save,preview};return;}
  let chosen=load();
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
@@ -31,6 +30,7 @@
   social:v=>v?v.count+' locally saved public profiles':'No public profiles saved',
   media:()=> 'Open a video in Media; no playback is started here'
  };
+ if(!root||!editor){window.NewViewPersonal={catalog,sanitize,load,save,preview};return;}
  function text(tag,cls,value){const el=document.createElement(tag);if(cls)el.className=cls;el.textContent=value;return el;}
  function render(){
   root.replaceChildren();editor.replaceChildren();
