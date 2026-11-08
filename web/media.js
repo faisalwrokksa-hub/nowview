@@ -43,10 +43,11 @@
   if(location.protocol==='file:'){status.textContent='Android APK: use the official playlist link with an external IPTV player.';return;}
   if(!preferred?.filterChannels)return;
   const chosen=preferred.filterChannels(allChannels,currentDashboard(),window.NewViewShell?.loadFirstLaunch?.()?.interests);
-  const narrowed=category?.value?chosen.filter(c=>c.category.split(/[;,|]/).some(group=>group.trim()===category.value)):chosen;
+  const narrowed=category?.value?chosen.filter(c=>c.category.toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):chosen;
   const visible=narrowed;
   list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
   open.hidden=!visible.length;
+  open.setAttribute('aria-disabled',String(!visible.length));
   if(visible.length){open.href=visible[0].url;status.textContent=visible.length+' channels in this view. Availability and rights vary by channel.';}
   else{open.removeAttribute('href');status.textContent=allChannels.length?'No channels match this category. Select another category.':'No channels loaded. Try refresh.';}
  }
