@@ -76,3 +76,7 @@ The checklist describes **preview-code readiness only**. Passing automation alon
 ## Home launcher quick-launch iteration
 - MyView now offers a PipeTv native bridge shortcut when separately installed, an external YouTube website link, and original-launcher recovery instructions. These do not constitute Android installed-app enumeration, native YouTube app launching, or guaranteed launcher replacement.
 - Pending: complete installed-app grid and package discovery, tested default HOME chooser and settings navigation, and Android TV QA.
+
+## Installed-app grid integration boundary
+- MyView now includes an accessible installed-app grid, refresh action, validated package identifiers, duplicate filtering, and explicit unsupported-APK messaging.
+- This frontend requires Android bridge methods listLaunchableApps() and launchApp(packageName); these native methods are NOT implemented or verified. Do not claim installed-app discovery is functional until native support is built, package visibility is scoped, and physical TV QA passes.
