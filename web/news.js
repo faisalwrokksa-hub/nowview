@@ -48,5 +48,6 @@
  refresh.addEventListener('click',refreshNews);
  choose.addEventListener('change',refreshNews);
  sourceLink();
- document.querySelector('[data-view-button="news"]')?.addEventListener('click',()=>{if(!container.children.length)refreshNews();},{once:true});
+ document.addEventListener('newview:workspace-change',event=>{if(event.detail?.view==='news'&&!container.children.length)refreshNews();});
+ if(document.body.dataset.currentWorkspace==='news')refreshNews();
 })();
