@@ -20,6 +20,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.json.JSONObject;
+import org.json.JSONArray;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
 
 public final class ChartsView extends WebView {
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
@@ -109,7 +114,49 @@ public final class ChartsView extends WebView {
         if(chosen!=null&&!"content".equals(chosen.getScheme()))chosen=null;
         callback.onReceiveValue(chosen==null?null:new Uri[]{chosen});
     }
+    private static String tagText(Element e,String tag){NodeList n=e.getElementsByTagName(tag);return n.getLength()>0?n.item(0).getTextContent().trim():"";}
     public final class Bridge {
+        @JavascriptInterface public void fetchPublicNews(String source,int id){
+            worker.execute(()->{
+                JSONObject result=new JSONObject();JSONArray items=new JSONArray();
+                String feed="fed".equals(source)?"https://www.federalreserve.gov/feeds/press_all.xml":
+                            "sec".equals(source)?"https://www.sec.gov/news/pressreleases.rss":null;
+                try{
+                    if(feed==null)throw new Exception("No approved native feed");
+                    HttpURLConnection connection=(HttpURLConnection)new URL(feed).openConnection();
+                    connection.setConnectTimeout(9000);connection.setReadTimeout(12000);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestProperty("User-Agent","NewView/1.0 (public RSS reader)");
+                    try{
+                        if(connection.getResponseCode()!=200)throw new Exception("Feed unavailable");
+                        ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+                        try(InputStream stream=connection.getInputStream()){
+                            byte[] chunk=new byte[4096];int n;
+                            while((n=stream.read(chunk))!=-1){if(buffer.size()+n>1000000)throw new Exception("Feed too large");buffer.write(chunk,0,n);}
+                        }
+                        DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+                        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+                        factory.setFeature("http://xml.org/sax/features/external-general-entities",false);
+                        factory.setFeature("http://xml.org/sax/features/external-parameter-entities",false);
+                        factory.setXIncludeAware(false);factory.setExpandEntityReferences(false);
+                        Document doc=factory.newDocumentBuilder().parse(new java.io.ByteArrayInputStream(buffer.toByteArray()));
+                        NodeList nodes=doc.getElementsByTagName("item");
+                        for(int i=0;i<Math.min(nodes.getLength(),40);i++){
+                            Element item=(Element)nodes.item(i);
+                            String title=tagText(item,"title"),link=tagText(item,"link");
+                            Uri uri=Uri.parse(link);
+                            if(!approvedUrl(uri)||title.isEmpty())continue;
+                            JSONObject row=new JSONObject();
+                            row.put("title",title);row.put("url",link);
+                            row.put("source","fed".equals(source)?"Federal Reserve":"SEC");
+                            row.put("publishedAt",tagText(item,"pubDate"));items.put(row);
+                        }
+                    }finally{connection.disconnect();}
+                    result.put("items",items);result.put("fetchedAt",System.currentTimeMillis());
+                }catch(Exception ex){try{result.put("error","Official news feed unavailable");}catch(Exception ignored){}}
+                post(()->{if(!closed)evaluateJavascript("window.__newviewNewsResult&&window.__newviewNewsResult("+id+","+result.toString()+")",null);});
+            });
+        }
         @JavascriptInterface public void fetchPublicPlaylist(int id){
             worker.execute(()->{
                 JSONObject result=new JSONObject();
