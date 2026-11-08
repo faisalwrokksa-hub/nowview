@@ -9,7 +9,9 @@
   stocktwits:Object.freeze({label:'Stocktwits',hosts:['stocktwits.com','www.stocktwits.com'],root:'https://stocktwits.com/'}),
   polymarket:Object.freeze({label:'Polymarket',hosts:['polymarket.com','www.polymarket.com'],root:'https://polymarket.com/'})
  });
- const KEY='newview.social.links.v1',MAX=24;
+ const KEY='newview.social.links.v1',PREF_KEY='newview.social.discovery.v1',MAX=24;
+ function preferences(){try{const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}');return {geo:Object.hasOwn(GEO,p.geo)?p.geo:'SA',topic:Object.hasOwn(TOPICS,p.topic)?p.topic:'all'};}catch{return {geo:'SA',topic:'all'};}}
+ function savePreferences(geo,topic){try{localStorage.setItem(PREF_KEY,JSON.stringify({geo,topic}));}catch{}}
  const GEO=Object.freeze({SA:['SA','ar'],US:['US','en'],GB:['GB','en'],AE:['AE','ar'],IN:['IN','en'],GLOBAL:['US','en']});
  const TOPICS=Object.freeze({all:'',business:'business',markets:'financial markets',technology:'technology'});
  function discoveryUrl(region,topic){
@@ -78,6 +80,7 @@
   if(!geoPicker||!topicPicker||!discovery)return;
   const region=Object.hasOwn(GEO,geoPicker.value)?geoPicker.value:'SA';
   const topic=Object.hasOwn(TOPICS,topicPicker.value)?topicPicker.value:'all';
+  savePreferences(region,topic);
   discovery.replaceChildren();
   for(const entry of discoveryLinks(region,topic)){
    const a=text('a','social-profile-link',entry.label);a.href=entry.url;a.target='_blank';a.rel='noopener noreferrer';discovery.append(a);
@@ -111,5 +114,6 @@
  });
  document.getElementById('social-clear')?.addEventListener('click',()=>{items=save([]);status.textContent='All saved profiles cleared from this device.';render();});
  window.NewViewSocial={validate,sanitize,load,save,render,discoveryUrl,discoveryLinks};
+ const pref=preferences();if(geoPicker)geoPicker.value=pref.geo;if(topicPicker)topicPicker.value=pref.topic;
  render();renderDiscovery();
 })();
