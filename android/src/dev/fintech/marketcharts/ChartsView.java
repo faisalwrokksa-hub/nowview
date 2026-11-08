@@ -75,7 +75,8 @@ public final class ChartsView extends WebView {
             ||host.equals("polymarket.com")||host.equals("www.polymarket.com")
             ||host.equals("news.google.com")||host.equals("trends.google.com")
             ||host.equals("www.reddit.com")
-            ||host.equals("bsky.app")||host.equals("mastodon.social");
+            ||host.equals("bsky.app")||host.equals("mastodon.social")
+            ||host.equals("iptv-org.github.io");
     }
     private boolean routeNavigation(Uri uri){
         if(isInternal(uri))return false;
