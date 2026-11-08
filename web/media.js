@@ -19,7 +19,8 @@
  function currentDashboard(){return document.body.dataset.currentWorkspace||'myview';}
  function syncDashboardCategories(){
   if(!category||!preferred)return;
-  const types=preferred.categoriesFor(currentDashboard());
+  const preferences=window.NewViewShell?.loadFirstLaunch?.();
+  const types=preferred.categoriesFor(currentDashboard(),preferences?.interests);
   const valid=types.filter(x=>preferred.playlistUrl(x));
   if(!valid.length)return;
   const previous=category.value;
@@ -35,6 +36,7 @@
   playlist.href='https://iptv-org.github.io/iptv/categories/'+chosen+'.m3u';
  });}
  document.addEventListener('newview:workspace-change',syncDashboardCategories);
+ window.addEventListener('newview:preferences-change',syncDashboardCategories);
  syncDashboardCategories();
  const input=document.getElementById('media-url');
  const output=document.getElementById('media-status');
