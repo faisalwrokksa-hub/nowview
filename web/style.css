@@ -181,3 +181,18 @@ body.has-home-wallpaper[data-current-workspace="myview"][data-wallpaper-shade="d
 .home-apps{margin:14px 0;min-height:0}.home-app-actions{display:flex;flex-wrap:wrap;gap:10px}.home-app-actions a{display:inline-flex;align-items:center;padding:10px 14px;min-height:44px;border:1px solid #8a774e;border-radius:9px;color:#f5d79c;text-decoration:none;background:#223628}.home-app-actions :is(a,button):focus-visible{outline:3px solid #f3d390;outline-offset:2px}
 
 .home-installed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin:14px 0}.home-installed-app{min-height:68px;white-space:normal;text-align:center;overflow-wrap:anywhere;background:#223628;border:1px solid #8a774e}.home-installed-app:focus-visible{outline:3px solid #f3d390;outline-offset:2px}
+
+/* Android TV and large-screen usability: visible D-pad focus, generous hit areas, reduced motion. */
+@media (min-width: 960px) and (min-height: 540px){
+ .workspace-tab{min-height:56px;padding:12px 18px}
+ button,select,input,a[href]{scroll-margin:32px}
+ .shell-card{min-height:200px}
+}
+:where(button,a[href],input,select,textarea,[tabindex]):focus-visible{
+ outline:3px solid #ffe4a4!important;outline-offset:4px!important;
+ box-shadow:0 0 0 7px #101a13,0 0 0 10px #d6ac62!important;
+ position:relative;z-index:2;
+}
+:where(button,a[href],input,select,textarea):disabled{opacity:.5;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+@media (max-width:650px){main{height:auto;min-height:100dvh}.shell-page{overflow:visible}.workspace{min-height:55vh}}
