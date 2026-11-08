@@ -21,11 +21,11 @@
   if(!category||!preferred)return;
   const preferences=window.NewViewShell?.loadFirstLaunch?.();
   const types=preferred.categoriesFor(currentDashboard(),preferences?.interests);
-  const valid=types.filter(x=>preferred.playlistUrl(x));
+  const valid=['all',...types.filter(x=>preferred.playlistUrl(x))];
   if(!valid.length)return;
   const previous=category.value;
   category.replaceChildren(...valid.map(x=>{const o=document.createElement('option');o.value=x;o.textContent=x.charAt(0).toUpperCase()+x.slice(1);return o;}));
-  category.value=valid.includes(previous)?previous:valid[0];
+  category.value=valid.includes(previous)?previous:'all';
   category.dispatchEvent(new Event('change'));
  }
 
@@ -46,16 +46,15 @@
  let allChannels=[];let lastFetch=0;let loading=null;
  function renderChannels(){
   if(!preferred?.filterChannels)return;
-  const chosen=preferred.filterChannels(allChannels,currentDashboard(),window.NewViewShell?.loadFirstLaunch?.()?.interests);
-  const narrowed=category?.value?chosen.filter(c=>c.category.toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):chosen;
+  const narrowed=category?.value&&category.value!=='all'&&category.value!=='favorites'?allChannels.filter(c=>c.category.toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):allChannels;
   const term=search.value.trim().toLowerCase().slice(0,120);
   const visible=narrowed.filter(c=>(!secureOnly.checked||c.url.startsWith('https://'))&&(!term||(c.name+' '+c.id).toLowerCase().includes(term)));
   list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
   open.hidden=!visible.length;
   playChannel.disabled=!visible.length;
   open.setAttribute('aria-disabled',String(!visible.length));
-  if(visible.length){open.href=visible[0].url;status.textContent=visible.length+' matching channels (showing first 1500). Availability and rights vary by channel.';}
-  else{open.removeAttribute('href');status.textContent=allChannels.length?'No channels match this category. Select another category.':'No channels loaded. Try refresh.';}
+  if(visible.length){open.href=visible[0].url;status.textContent=allChannels.length+' loaded · '+visible.length+' matching (first 1500 displayed). Streams may be unavailable.';}
+  else{open.removeAttribute('href');status.textContent=allChannels.length?allChannels.length+' loaded · 0 matching. Choose All channels, disable HTTPS-only, or clear search.':'No channels loaded. Try refresh.';}
  }
  list.addEventListener('change',()=>{if(list.value)open.href=list.value;});
  search.addEventListener('input',renderChannels);
@@ -70,8 +69,17 @@
    if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicPlaylist==='function'){
     content=await new Promise((resolve,reject)=>{
      const id=Date.now()+Math.floor(Math.random()*1000);
-     const timer=setTimeout(()=>{delete window.__newviewPlaylistResult;reject(Error('Directory timeout'));},20000);
-     window.__newviewPlaylistResult=(received,data)=>{if(received!==id)return;clearTimeout(timer);delete window.__newviewPlaylistResult;if(data?.error)reject(Error(data.error));else resolve(data?.content||'');};
+     let parts=[],total=0;
+     const cleanup=()=>{clearTimeout(timer);delete window.__newviewPlaylistChunk;parts=[];};
+     const timer=setTimeout(()=>{cleanup();reject(Error('Directory timeout'));},45000);
+     window.__newviewPlaylistChunk=(received,chunk,last,error)=>{
+      if(received!==id)return;
+      if(error){cleanup();reject(Error(error));return;}
+      if(typeof chunk!=='string'){cleanup();reject(Error('Invalid playlist response'));return;}
+      total+=chunk.length;if(total>16000000){cleanup();reject(Error('Playlist exceeds size limit'));return;}
+      parts.push(chunk);
+      if(last){const content=parts.join('');cleanup();resolve(content);}
+     };
      window.NewViewNative.fetchPublicPlaylist(id);
     });
    }else{
