@@ -23,3 +23,24 @@ test('Five-workspace navigation and MyView editable controls are in bundled UI',
  assert.match(cloud,/myview\.js/);
  assert.doesNotMatch(src,/Math\.random|fakePrice|sampleRevenue/);
 });
+
+test('MyView preset layouts are allowlisted, immutable defaults and locally selectable',()=>{
+ const {api}=setup();
+ assert.deepEqual([...api.preset('balanced')],['market','news','media']);
+ assert.deepEqual([...api.preset('markets')],['market','news','business']);
+ assert.deepEqual([...api.preset('media')],['media','news','social']);
+ assert.equal(api.preset('unknown'),null);
+ const first=api.preset('balanced');first.pop();
+ assert.deepEqual([...api.preset('balanced')],['market','news','media']);
+});
+test('News and video widgets open their sections inside five-workspace Watch & News',()=>{
+ const {api}=setup();
+ const news=api.catalog.find(w=>w.id==='news'),media=api.catalog.find(w=>w.id==='media');
+ assert.equal(news.view,'media');
+ assert.equal(news.section,'headlines');
+ assert.equal(media.section,'videos');
+ const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
+ assert.match(html,/id="myview-presets"/);
+ assert.match(src,/\[data-reorder=/);
+ assert.match(src,/target\.focus\(\)/);
+});
