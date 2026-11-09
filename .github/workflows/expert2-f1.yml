@@ -7,6 +7,8 @@ on:
       - 'tools/test_import_f1_direct_apk.py'
       - 'tools/f1_dependency_audit.py'
       - 'tools/test_f1_dependency_audit.py'
+      - 'tools/check_apk_frontend_dependencies.py'
+      - 'tools/test_check_apk_frontend_dependencies.py'
       - 'tools/test_import_f1_apk_assets.py'
       - 'tools/verify_apk_web_assets.py'
       - 'web/**'
