@@ -22,7 +22,7 @@ test('built Worker health endpoint reports only application readiness, not upstr
  const {default:worker}=await import(pathToFileURL(path.join(root,'dist/server/index.js')).href+'?health-test='+Date.now());
  const response=await worker.fetch(new Request('https://example.test/healthz'));
  assert.equal(response.status,200);
- assert.match(response.headers.get('content-type')||'',/application\\/json/);
+ assert.match(response.headers.get('content-type')||'',/application\/json/);
  assert.equal(response.headers.get('cache-control'),'no-store');
  const data=await response.json();
  assert.deepEqual(data,{status:'ok',app:'newview',scope:'worker-only',upstreamsChecked:false});
