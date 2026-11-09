@@ -1,0 +1,6 @@
+{
+  "name": "nowview",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2026-11-09",
+  "workers_dev": false
+}
