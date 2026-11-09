@@ -1,14 +1,13 @@
 'use strict';
-/* Shared NewView shell: six workspaces, with no fake financial/social data. */
+/* Shared NewView shell: five workspaces, with no fake financial/social data. */
 (function(){
- const views=['myview','markets','business','news','media','social'];
- const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',news:'NewViewNews',media:'NewViewMedia',social:'NewViewSocial'};
+ const views=['myview','markets','business','media','social'];
+ const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',media:'Watch & News',social:'NewViewSocial'};
  const sourceNotes={
   myview:'MyView · preferences stored on this device',
   markets:'Binance public token prices in USDT · U.S. stock quotes unavailable without authorized feed',
   business:'Business · CSV processed locally and never uploaded',
-  news:'News · official RSS announcements, source-linked',
-  media:'Media · official YouTube embeds may contain ads · PipeTv external on Android TV',
+  media:'Watch & News · publisher-linked headlines and official video embeds; source rights vary',
   social:'Social · saved public profile links only, no live feeds'
  };
  const FIRST_LAUNCH_KEY='newview.first-launch.v1';
@@ -43,17 +42,17 @@
   const target=document.getElementById('workspace-intro');target?.parentNode?.insertBefore(container,target);
  }
  const DISPLAY_KEY='newview.display.profiles.v1';
- const DISPLAY_DEFAULT={name:'Default TV',views:['myview','markets','business','news','media','social'],refreshSeconds:60,fullscreen:false};
+ const DISPLAY_DEFAULT={name:'Default TV',views:['myview','markets','business','media','social'],refreshSeconds:60,fullscreen:false};
  function sanitizeDisplay(value){
   if(!value||typeof value!=='object')return {...DISPLAY_DEFAULT,views:[...DISPLAY_DEFAULT.views]};
   const list=Array.isArray(value.views)?value.views:DISPLAY_DEFAULT.views;
-  const selected=[...new Set(list.filter(v=>views.includes(v)))];
+  const selected=[...new Set(list.map(v=>v==='news'?'media':v).filter(v=>views.includes(v)))];
   const seconds=Number(value.refreshSeconds);
   return {name:typeof value.name==='string'?value.name.slice(0,40):DISPLAY_DEFAULT.name,views:selected.length?selected:[...DISPLAY_DEFAULT.views],refreshSeconds:[0,30,60,120,300].includes(seconds)?seconds:60,fullscreen:value.fullscreen===true};
  }
  function loadDisplays(){try{const x=JSON.parse(localStorage.getItem(DISPLAY_KEY)||'[]');return Array.isArray(x)?x.slice(0,5).map(sanitizeDisplay):[];}catch{return [];}}
  function saveDisplays(profiles){const safe=profiles.slice(0,5).map(sanitizeDisplay);try{localStorage.setItem(DISPLAY_KEY,JSON.stringify(safe));}catch{}return safe;}
- const getStored=()=>{try{const v=localStorage.getItem('newview.workspace');return views.includes(v)?v:'myview';}catch{return 'myview';}};
+ const getStored=()=>{try{const v=localStorage.getItem('newview.workspace');return v==='news'?'media':views.includes(v)?v:'myview';}catch{return 'myview';}};
  function select(view){
   if(!views.includes(view)||document.body.classList.contains('home-panel'))return false;
   const market=document.getElementById('market-shell');
@@ -93,7 +92,7 @@
   function report(message){status.textContent=message;}
   function apply(profile){active=sanitizeDisplay(profile);refresh.value=String(active.refreshSeconds);document.body.classList.toggle('display-mode',active.fullscreen);schedule();report('Profile: '+active.name+' · stored on this device only');}
   function renderProfiles(){picker.replaceChildren();const options=profiles.length?profiles:[active];options.forEach((p,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=p.name||'Display '+(i+1);picker.append(o);});}
-  function refreshVisible(){const view=document.body.dataset.currentWorkspace;if(view==='news')document.getElementById('news-refresh')?.click();else if(view==='markets')document.getElementById('refresh')?.click();}
+  function refreshVisible(){const view=document.body.dataset.currentWorkspace;if(view==='media'&&window.NewViewWatch?.currentSection?.()==='headlines')document.getElementById('news-refresh')?.click();else if(view==='markets')document.getElementById('refresh')?.click();}
   function schedule(){if(timer)clearInterval(timer);timer=null;if(active.refreshSeconds)timer=setInterval(()=>{if(!document.hidden)refreshVisible();},active.refreshSeconds*1000);}
   picker.addEventListener('change',()=>apply(profiles[Number(picker.value)]||active));
   refresh.addEventListener('change',()=>{active=sanitizeDisplay({...active,refreshSeconds:Number(refresh.value)});schedule();report('Refresh interval changed; save profile to retain it');});
