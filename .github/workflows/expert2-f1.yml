@@ -13,6 +13,7 @@ on:
       - 'tools/verify_apk_web_assets.py'
       - 'web/**'
       - 'cloud/**'
+      - 'tests/connectivity.test.mjs'
       - 'package.json'
       - '.github/workflows/expert2-f1.yml'
   workflow_dispatch:
@@ -40,6 +41,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Browser connectivity module tests
+        run: node --test tests/connectivity.test.mjs
       - name: Build Cloudflare Pages staging artifact (no deployment)
         run: |
           npm run build:pages
