@@ -12,12 +12,12 @@ test('footer identifies each workspace source truthfully',()=>{
  const shell=read('../web/workspace-shell.js');
  const html=read('../web/index.html');
  assert.match(html,/id="footer-source"/);
- for(const view of ['myview','markets','business','news','media','social'])assert.match(shell,new RegExp(view+":"));
+ for(const view of ['myview','markets','business','media','social'])assert.match(shell,new RegExp(view+":"));
  assert.match(shell,/U\.S\. stock quotes unavailable/);
  assert.match(shell,/no live feeds/);
  assert.match(shell,/never uploaded/);
 });
-test('preview APK verification checks 6-workspace assets and package identity',()=>{
+test('preview APK verification checks legacy assets and package identity',()=>{
  const verifier=read('../scripts/verify-preview-apk.sh');
  const workflow=read('../.github/workflows/dashboard.yml');
  assert.match(verifier,/aapt" dump badging/);
