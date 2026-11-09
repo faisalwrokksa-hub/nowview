@@ -12,6 +12,8 @@ on:
       - 'tools/test_import_f1_apk_assets.py'
       - 'tools/verify_apk_web_assets.py'
       - 'web/**'
+      - 'cloud/**'
+      - 'package.json'
       - '.github/workflows/expert2-f1.yml'
   workflow_dispatch:
 
@@ -34,6 +36,15 @@ jobs:
             test -f "$file" || continue
             node --check "$file"
           done
+      - name: Configure Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build Cloudflare Pages staging artifact (no deployment)
+        run: |
+          npm run build:pages
+          node --check dist/pages/_worker.js
+          test -s dist/pages/_worker.js
       - name: Asset reference status
         run: |
           echo "Reference APK must be supplied by owner for the separate binary comparison."
