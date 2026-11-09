@@ -9,7 +9,7 @@ test('Cloudflare Worker build has explicit Wrangler entrypoint and valid bundle'
  assert.equal(config.name,'nowview');
  assert.equal(config.main,'dist/server/index.js');
  assert.equal(config.workers_dev,false);
- assert.match(config.compatibility_date,/^20\\d{2}-\\d{2}-\\d{2}$/);
+ assert.match(config.compatibility_date,/^20\d{2}-\d{2}-\d{2}$/);
  execFileSync(process.execPath,[path.join(root,'cloud/build.mjs')],{cwd:root,stdio:'pipe'});
  const generated=fs.readFileSync(path.join(root,config.main),'utf8');
  assert.match(generated,/export default \{async fetch\(request\)/);
