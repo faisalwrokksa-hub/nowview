@@ -5,12 +5,17 @@
  const limitBytes=1048576,limitRows=5000;
  function parseCsv(raw){
   if(typeof raw!=='string'||new TextEncoder().encode(raw).length>limitBytes)throw new Error('CSV must be under 1 MB');
-  const output=[];let row=[],cell='',quote=false;
+  const output=[];let row=[],cell='',quote=false,closedQuote=false;
   const pushRow=()=>{row.push(cell);cell='';if(row.some(x=>x.trim()!==''))output.push(row);row=[];if(output.length>limitRows+1)throw new Error('Too many CSV rows (maximum 5,000)');};
   for(let i=0;i<raw.length;i++){
-   const c=raw[i];if(quote){
+   const c=raw[i];if(closedQuote){
+    if(c===','){row.push(cell);cell='';closedQuote=false;continue;}
+    if(c==='\n'||c==='\r'){if(c==='\r'&&raw[i+1]==='\n')i++;closedQuote=false;pushRow();continue;}
+    throw new Error('Unexpected character after closing CSV quote');
+   }
+   if(quote){
     if(c==='"'&&raw[i+1]==='"'){cell+='"';i++;}
-    else if(c==='"')quote=false;
+    else if(c==='"'){quote=false;closedQuote=true;}
     else cell+=c;
    }else if(c==='"'&&cell==='')quote=true;
    else if(c===','){row.push(cell);cell='';}
