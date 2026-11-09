@@ -7,6 +7,7 @@ on:
       - 'web/**'
       - 'package.json'
       - 'tests/cloudflare-worker-build.test.mjs'
+      - 'tools/smoke-public-newview.mjs'
       - '.github/workflows/cloudflare-worker-preflight.yml'
   workflow_dispatch:
 permissions:
@@ -24,6 +25,8 @@ jobs:
         run: npm run build
       - name: Test Worker entrypoint and required frontend assets
         run: node --test tests/cloudflare-worker-build.test.mjs
+      - name: Verify public smoke checker syntax (no network)
+        run: node --check tools/smoke-public-newview.mjs
       - name: Verify Wrangler deployment bundle without deploying
         run: npx --yes wrangler@4.158.0 deploy --dry-run --outdir /tmp/newview-worker-preflight
       - name: Confirm dry-run generated output
