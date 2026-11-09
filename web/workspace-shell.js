@@ -122,16 +122,22 @@
   // Roving tab focus: arrow keys navigate workspaces on keyboard and TV remotes.
   // Keep ordinary arrow-key behavior inside content widgets and forms.
   nav.addEventListener('keydown',event=>{
+   if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
    const current=event.target.closest('[data-view-button]');
-   if(!current)return;
-   const tabs=[...nav.querySelectorAll('[data-view-button]:not([disabled])')];
+   if(!current||!nav.contains(current)||event.target!==current)return;
+   const tabs=[...nav.querySelectorAll('[data-view-button]')].filter(tab=>!tab.disabled&&!tab.hidden&&tab.getAttribute('aria-disabled')!=='true');
    const index=tabs.indexOf(current);
    if(index<0||!tabs.length)return;
+   // Respect RTL direction for left/right D-pad navigation without changing DOM order.
+   const rtl=getComputedStyle(nav).direction==='rtl';
+   const delta=(event.key==='ArrowRight'?1:-1)*(rtl?-1:1);
    const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:
-    (index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+    (index+delta+tabs.length)%tabs.length;
    event.preventDefault();
-   tabs[next].focus();
+   if(tabs[next]===current)return;
+   tabs[next].focus({preventScroll:true});
+   tabs[next].scrollIntoView?.({block:'nearest',inline:'nearest',behavior:'auto'});
    select(tabs[next].dataset.viewButton);
   });
   document.querySelectorAll('[data-open-markets]').forEach(b=>b.addEventListener('click',()=>select('markets')));
