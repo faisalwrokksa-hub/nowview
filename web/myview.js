@@ -136,7 +136,9 @@
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(preview[id](next)===preview[id](snapshots[id]))return; // Do not reset TV focus on unchanged quotes.
   snapshots[id]=next;
-  if(document.body.dataset.currentWorkspace==='myview')render();
+  // Update only the live insight text: rebuilding the grid would steal TV remote/keyboard focus.
+  const insight=root.querySelector('[data-widget="'+id+'"] .myview-insight');
+  if(insight)insight.textContent=preview[id](next);
  });
  window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
  installPresets();render();
