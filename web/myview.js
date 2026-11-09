@@ -104,7 +104,7 @@
    const row=document.createElement('label');row.className='myview-option';
    const input=document.createElement('input');input.type='checkbox';input.checked=chosen.includes(widget.id);
    input.setAttribute('aria-label','Show '+widget.title+' widget');
-   input.addEventListener('change',()=>{chosen=save(input.checked?[...chosen,widget.id]:chosen.filter(x=>x!==widget.id));render();});
+   input.addEventListener('change',()=>{chosen=save(input.checked?[...chosen,widget.id]:chosen.filter(x=>x!==widget.id));render();const restored=[...editor.querySelectorAll('input[type="checkbox"]')].find(el=>el.getAttribute('aria-label')==='Show '+widget.title+' widget');restored?.focus();});
    row.append(input,text('span','',widget.title));editor.appendChild(row);
   }
   if(!chosen.length){root.append(text('p','myview-empty','No widgets selected. Choose a widget above to customize this dashboard.'));return;}
