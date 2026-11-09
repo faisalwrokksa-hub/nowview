@@ -13,5 +13,9 @@ test('Native app bridge has a unified NewView name on both sides',()=>{
 test('MyView avoids recreating tiles on identical source updates',()=>{
  const source=read('../web/myview.js');
  assert.match(source,/preview\[id\]\(next\)===preview\[id\]\(snapshots\[id\]\)/);
- assert.match(source,/document\.body\.dataset\.currentWorkspace==='myview'/);
+ // Refresh only the insight text, without rebuilding the widget grid or stealing TV focus.
+ assert.match(source,/root\.querySelector\('\[data-widget=/);
+ assert.match(source,/insight\.textContent=preview\[id\]\(next\)/);
+ const handler=source.slice(source.indexOf("window.addEventListener('newview:'+id"),source.indexOf('window.NewViewPersonal=',source.indexOf("window.addEventListener('newview:'+id")));
+ assert.doesNotMatch(handler,/\brender\s*\(/);
 });
