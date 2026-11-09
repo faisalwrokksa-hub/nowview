@@ -23,7 +23,7 @@ jobs:
           node-version: '22'
       - name: Validate and build cloud dashboard
         run: |
-          node --test tests/cloud.test.mjs tests/live.test.mjs tests/indicators.test.mjs tests/stock-board.test.mjs tests/workspace-shell.test.mjs tests/news.test.mjs tests/media.test.mjs tests/myview.test.mjs tests/business.test.mjs tests/social.test.mjs tests/cross-workspace.test.mjs tests/android-integration.test.mjs tests/release-preview.test.mjs tests/integration-snapshots.test.mjs tests/brand-runtime.test.mjs tests/device-security.test.mjs tests/tv-home-repair.test.mjs tests/watch-workspace.test.mjs
+          node --test tests/cloud.test.mjs tests/live.test.mjs tests/indicators.test.mjs tests/stock-board.test.mjs tests/workspace-shell.test.mjs tests/news.test.mjs tests/media.test.mjs tests/myview.test.mjs tests/business.test.mjs tests/social.test.mjs tests/cross-workspace.test.mjs tests/android-integration.test.mjs tests/release-preview.test.mjs tests/integration-snapshots.test.mjs tests/brand-runtime.test.mjs tests/device-security.test.mjs tests/tv-home-repair.test.mjs tests/watch-workspace.test.mjs tests/cloudflare-worker-build.test.mjs
           node --check web/app.js
           node --check web/stock-board.js
           node --check web/workspace-shell.js
