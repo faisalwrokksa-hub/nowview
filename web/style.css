@@ -253,3 +253,12 @@ body.tv-launcher[data-current-workspace="myview"] .home-installed-grid{grid-temp
 #nv-watch-channels,#nv-watch-videos,#nv-watch-headlines{min-width:0}
 #nv-watch-headlines{overflow:auto;overscroll-behavior:contain}
 @media(max-width:600px){.nv-watch-sections{gap:6px}.nv-watch-sections button{flex-basis:95px}}
+
+/* MyView presets and directional-remote-friendly widget controls. */
+.myview-preset-group{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0}
+.myview-preset-group>span{color:var(--muted);font-size:clamp(12px,1vw,16px)}
+.myview-presets{display:flex;gap:8px;flex-wrap:wrap}
+.myview-presets button{min-height:44px;padding:9px 14px}
+.myview-widget-actions button{min-width:44px;min-height:44px}
+.myview-widget-actions button:disabled{opacity:.42;cursor:not-allowed}
+@media(max-width:600px){.myview-presets{width:100%}.myview-presets button{flex:1 1 auto}}
