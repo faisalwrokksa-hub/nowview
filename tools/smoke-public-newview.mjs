@@ -5,17 +5,17 @@ import assert from 'node:assert/strict';
 const target=process.env.NEWVIEW_URL||'https://nowview.faisalwrokksa.workers.dev';
 const base=new URL(target);
 if(base.protocol!=='https:'||base.username||base.password||base.port||
- !/^(?:[a-z0-9-]+\\.)+workers\\.dev$/.test(base.hostname)){
+ !/^(?:[a-z0-9-]+\.)+workers\.dev$/.test(base.hostname)){
  console.error('NEWVIEW_URL must be an HTTPS workers.dev deployment URL');process.exit(2);
 }
 const required=[
- ['/',/text\\/html/i,/<(?:!doctype\\s+html|html\\b)/i],
- ['/index.html',/text\\/html/i,/NewView/i],
+ ['/',/text\/html/i,/<(?:!doctype\s+html|html\b)/i],
+ ['/index.html',/text\/html/i,/NewView/i],
  ['/workspace-shell.js',/javascript/i,/myview/i],
  ['/watch.js',/javascript/i,/Watch & News/i],
  ['/myview.js',/javascript/i,/myview/i],
  ['/connectivity.js',/javascript/i,/online/i],
- ['/healthz',/application\\/json/i,null]
+ ['/healthz',/application\/json/i,null]
 ];
 const failures=[];
 for(const [path,type,bodyPattern] of required){
