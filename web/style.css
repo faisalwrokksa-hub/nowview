@@ -238,3 +238,9 @@ body.tv-launcher[data-current-workspace="myview"] .home-installed-grid{grid-temp
  body.tv-launcher[data-current-workspace="myview"] .tv-home-favorites{position:relative;bottom:auto;left:auto;right:auto;flex-wrap:wrap;margin:14px 0}
  .tv-home-favorites button{min-width:125px;min-height:60px}
 }
+
+/* Accessible low-distraction browser network hint; not an API availability test. */
+.newview-network-indicator{font-size:12px;color:var(--muted);padding:6px 9px;border:1px solid var(--line);border-radius:12px;max-width:260px;line-height:1.35}
+.newview-network-indicator[data-network=offline]{color:#ffd18d;border-color:#8b6233}
+@media(max-width:720px){.newview-network-indicator{font-size:11px;max-width:100%;padding:5px 7px}}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
