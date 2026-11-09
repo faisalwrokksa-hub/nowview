@@ -42,3 +42,17 @@ test('stale asynchronous CSV reads cannot restore cleared or replaced data',()=>
  assert.match(src,/if\(version!==selectionVersion\)return/);
  assert.match(src,/if\(version===selectionVersion\)status\.textContent/);
 });
+
+test('rejects unexpected characters after a closed quoted CSV field',()=>{
+ for(const csv of [
+  'a,b\n"value"garbage,2\n',
+  'a,b\n"value" "other",2\n',
+  'a,b\n"value"\\t,2\n'
+ ])assert.throws(()=>parseCsv(csv),/Unexpected character after closing CSV quote/);
+});
+test('preserves valid quoted CSV fields at end of line and end of file',()=>{
+ const rows=parseCsv('a,b\n"first","second"\n"third","fourth"');
+ assert.equal(rows.length,3);
+ assert.equal(rows[1][1],'second');
+ assert.equal(rows[2][1],'fourth');
+});
