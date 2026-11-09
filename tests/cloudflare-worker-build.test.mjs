@@ -28,4 +28,9 @@ test('built Worker health endpoint reports only application readiness, not upstr
  assert.deepEqual(data,{status:'ok',app:'newview',scope:'worker-only',upstreamsChecked:false});
  const blocked=await worker.fetch(new Request('https://example.test/healthz',{method:'POST'}));
  assert.equal(blocked.status,405);
+ assert.equal(response.headers.get('x-frame-options'),'DENY');
+ const invalidNews=await worker.fetch(new Request('https://example.test/api/news?source=untrusted'));
+ assert.equal(invalidNews.status,400);
+ const invalidMarket=await worker.fetch(new Request('https://example.test/api/chart?symbol=NOT-A-PAIR&range=1D'));
+ assert.equal(invalidMarket.status,400);
 });
