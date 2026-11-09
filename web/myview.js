@@ -92,7 +92,7 @@
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
   market:v=>v&&Number.isFinite(v.price)&&typeof v.symbol==='string'?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+(Number.isFinite(v.quoteTime)&&v.quoteTime>0?' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():' · quote time unavailable'):'No verified quote received',
-  business:v=>v&&Number.isFinite(v.revenue)?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+v.orders+' orders · '+v.asOf:'Upload a CSV in Business to view session KPIs',
+  business:v=>v&&Number.isFinite(v.revenue)?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+(Number.isFinite(v.cost)&&v.revenue>0?'margin '+new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format((v.revenue-v.cost)/v.revenue*100)+'% · ':'')+v.orders+' orders · '+v.asOf:'Upload a CSV in Business to view session KPIs',
   news:v=>v&&v.count?v.count+' '+(v.source==='fed'?'Federal Reserve':'SEC')+' announcements · '+(v.headline||''):'Load official announcements in Watch & News',
   social:v=>v?v.count+' locally saved public profiles':'No public profiles saved',
   media:()=> 'Open a video in Watch & News; no playback is started here'
@@ -106,7 +106,7 @@
    const row=document.createElement('label');row.className='myview-option';
    const input=document.createElement('input');input.type='checkbox';input.checked=chosen.includes(widget.id);
    input.setAttribute('aria-label','Show '+widget.title+' widget');
-   input.addEventListener('change',()=>{chosen=save(input.checked?[...chosen,widget.id]:chosen.filter(x=>x!==widget.id));render();});
+   input.addEventListener('change',()=>{chosen=save(input.checked?[...chosen,widget.id]:chosen.filter(x=>x!==widget.id));render();const restored=[...editor.querySelectorAll('input[type="checkbox"]')].find(el=>el.getAttribute('aria-label')==='Show '+widget.title+' widget');restored?.focus();});
    row.append(input,text('span','',widget.title));editor.appendChild(row);
   }
   if(!chosen.length){root.append(text('p','myview-empty','No widgets selected. Choose a widget above to customize this dashboard.'));return;}
@@ -131,7 +131,14 @@
    function move(delta){const next=[...chosen],at=next.indexOf(id);if(at+delta<0||at+delta>=next.length)return;[next[at],next[at+delta]]=[next[at+delta],next[at]];chosen=save(next);render();const moved=root.querySelector('[data-widget="'+id+'"]');const target=moved?.querySelector(delta<0?'[data-reorder="up"]':'[data-reorder="down"]');if(target&&!target.disabled)target.focus();else moved?.querySelector('button:not([disabled])')?.focus();}
    up.dataset.reorder='up';down.dataset.reorder='down';
    up.addEventListener('click',()=>move(-1));down.addEventListener('click',()=>move(1));
-   actions.append(button,up,down);item.append(eyebrow,heading,description,insight,actions);root.append(item);
+   actions.append(button,up,down);
+   if(id==='news'){
+    const source=text('a','myview-source-link','SEC source');
+    source.href='https://www.sec.gov/newsroom';source.target='_blank';source.rel='noopener noreferrer';
+    source.dataset.sourceLink='news';source.setAttribute('aria-label','Open official news publisher');
+    actions.append(source);
+   }
+   item.append(eyebrow,heading,description,insight,actions);root.append(item);
   }
  }
  function installPresets(){if(!presetBar)return;for(const [name,label] of [['balanced','Balanced'],['markets','Markets first'],['media','Watch & News first']]){const button=text('button','',''+label);button.type='button';button.dataset.preset=name;button.addEventListener('click',()=>{chosen=save(preset(name));render();button.focus();});presetBar.append(button);}}
@@ -143,6 +150,10 @@
   // Refresh only the affected text: rebuilding cards on every quote disrupts TV/keyboard focus.
   const live=root.querySelector('[data-widget="'+id+'"] [data-snapshot="'+id+'"]');
   if(live)live.textContent=preview[id](next);
+  if(id==='news'){
+   const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
+   if(link){const fed=next?.source==='fed';link.href=fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom';link.textContent=fed?'Federal Reserve source':'SEC source';}
+  }
  });
  window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
  installPresets();render();
