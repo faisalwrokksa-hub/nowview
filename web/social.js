@@ -75,6 +75,8 @@
  const platform=document.getElementById('social-platform'),url=document.getElementById('social-url'),status=document.getElementById('social-status');
  const geoPicker=document.getElementById('social-geo'),topicPicker=document.getElementById('social-topic'),discovery=document.getElementById('social-discovery'),discoveryStatus=document.getElementById('social-discovery-status');
  let items=load();
+ const filter=document.createElement('input');filter.type='search';filter.id='social-saved-search';filter.placeholder='Search saved profiles';filter.setAttribute('aria-label','Search saved social profiles');links.parentElement?.insertBefore(filter,links);
+ filter.addEventListener('input',()=>render());
  const text=(tag,className,value)=>{const e=document.createElement(tag);if(className)e.className=className;e.textContent=value;return e;};
  function renderDiscovery(){
   if(!geoPicker||!topicPicker||!discovery)return;
@@ -93,7 +95,10 @@
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:social',{detail:{count:items.length}}));
   links.replaceChildren();
   if(!items.length){links.append(text('p','social-empty','No public profiles saved. Add a public profile URL to open it from your dashboard.'));return;}
-  for(const item of items){
+  const term=filter.value.trim().toLowerCase().slice(0,100);
+  const matching=items.filter(item=>!term||(item.name+' '+SOURCES[item.platform].label+' '+item.url).toLowerCase().includes(term));
+  if(!matching.length){links.append(text('p','social-empty','No saved profiles match your search.'));return;}
+  for(const item of matching){
    const article=text('article','social-link-card','');
    const title=text('h3','',SOURCES[item.platform].label+' · '+item.name);
    const a=text('a','social-profile-link','Open original profile');

@@ -46,17 +46,17 @@
  let allChannels=[];let lastFetch=0;let loading=null;
  function renderChannels(){
   if(!preferred?.filterChannels)return;
-  const narrowed=category?.value&&category.value!=='all'&&category.value!=='favorites'?allChannels.filter(c=>c.category.toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):allChannels;
+  const narrowed=category?.value&&category.value!=='all'&&category.value!=='favorites'?allChannels.filter(c=>String(c.category||'').toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):allChannels;
   const term=search.value.trim().toLowerCase().slice(0,120);
   const visible=narrowed.filter(c=>(!secureOnly.checked||c.url.startsWith('https://'))&&(!term||(c.name+' '+c.id).toLowerCase().includes(term)));
   list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
   open.hidden=!visible.length;
   playChannel.disabled=!visible.length;
   open.setAttribute('aria-disabled',String(!visible.length));
-  if(visible.length){open.href=visible[0].url;status.textContent=allChannels.length+' loaded · '+visible.length+' matching (first 1500 displayed). Streams may be unavailable.';}
+  if(visible.length){open.href=list.value;status.textContent=allChannels.length+' loaded · '+visible.length+' matching (first 1500 displayed). Streams may be unavailable.';}
   else{open.removeAttribute('href');status.textContent=allChannels.length?allChannels.length+' loaded · 0 matching. Choose All channels, disable HTTPS-only, or clear search.':'No channels loaded. Try refresh.';}
  }
- list.addEventListener('change',()=>{if(list.value)open.href=list.value;});
+ list.addEventListener('change',()=>{if(list.value){open.href=list.value;open.hidden=false;}else{open.hidden=true;open.removeAttribute('href');}playChannel.disabled=!list.value;});
  search.addEventListener('input',renderChannels);
  secureOnly.addEventListener('change',renderChannels);
  playChannel.addEventListener('click',()=>{if(!nativeStream()||!list.value)return;try{const url=new URL(list.value);if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port)window.NewViewNative.playStream(url.href);}catch{}});
