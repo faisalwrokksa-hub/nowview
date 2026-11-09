@@ -24,3 +24,11 @@ test('workspace and stock board remain separate from market engine',()=>{
  assert.match(html,/id="business-kpis"/);
  assert.match(html,/id="social-add"/);
 });
+
+test('TV remote and keyboard navigation keeps workspace focus operable',()=>{
+ assert.match(source,/nav\.addEventListener\('keydown'/);
+ for(const key of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'])assert.ok(source.includes("'"+key+"'"));
+ assert.match(source,/event\.preventDefault\(\)/);
+ assert.match(source,/buttons\[next\]\.focus\(\)/);
+ assert.match(source,/select\(buttons\[next\]\.dataset\.viewButton\)/);
+});

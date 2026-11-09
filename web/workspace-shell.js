@@ -119,6 +119,20 @@
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
   nav.addEventListener('click',event=>{const b=event.target.closest('[data-view-button]');if(b)select(b.dataset.viewButton);});
+  // Roving focus for keyboard and Android TV remotes; native Tab remains available.
+  nav.addEventListener('keydown',event=>{
+   if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
+   const target=event.target.closest?.('[data-view-button]');
+   if(!target||!nav.contains(target))return;
+   const buttons=[...nav.querySelectorAll('[data-view-button]')].filter(button=>!button.disabled&&!button.hidden);
+   const index=buttons.indexOf(target);
+   if(index<0||!buttons.length)return;
+   const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:
+    (index+(event.key==='ArrowLeft'||event.key==='ArrowUp'?-1:1)+buttons.length)%buttons.length;
+   event.preventDefault();
+   buttons[next].focus();
+   select(buttons[next].dataset.viewButton);
+  });
   document.querySelectorAll('[data-open-markets]').forEach(b=>b.addEventListener('click',()=>select('markets')));
   const boardButton=document.getElementById('board-toggle');
   if(boardButton)document.getElementById('shell-market-actions').appendChild(boardButton);

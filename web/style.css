@@ -262,3 +262,36 @@ body.tv-launcher[data-current-workspace="myview"] .home-installed-grid{grid-temp
 .myview-widget-actions button{min-width:44px;min-height:44px}
 .myview-widget-actions button:disabled{opacity:.42;cursor:not-allowed}
 @media(max-width:600px){.myview-presets{width:100%}.myview-presets button{flex:1 1 auto}}
+
+
+/* NewView accessibility and compact-screen safeguards — 2026-11-10.
+   Additive rules: preserve all existing dashboard/TV behavior. */
+:where(button, a, input, select, textarea, [tabindex="0"]):focus-visible {
+  outline: 3px solid var(--cyan, #56e0d0);
+  outline-offset: 3px;
+}
+:where(button, a, [role="button"]):focus-visible {
+  position: relative;
+  z-index: 1;
+}
+:where(button, [role="button"]):disabled,
+:where(button, [role="button"])[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+@media (hover: none) and (pointer: coarse) {
+  :where(button, [role="button"], nav a) { min-height: 44px; }
+}
+@media (max-width: 390px) {
+  main { min-width: 0; padding-inline: max(12px, 3vw); }
+  header, .workspace, nav { min-width: 0; }
+  .workspace { padding-inline: 12px; }
+  nav { -webkit-overflow-scrolling: touch; overscroll-behavior-inline: contain; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
