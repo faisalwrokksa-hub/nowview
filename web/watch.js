@@ -1,4 +1,61 @@
 'use strict';
-(function(){function setup(){const media=document.querySelector('[data-workspace="media"]'),news=document.querySelector('[data-workspace="news"]'),tab=document.querySelector('[data-view-button="media"]'),oldTab=document.querySelector('[data-view-button="news"]');if(!media||!news)return;oldTab.hidden=true;tab.textContent='▷ Watch & News';news.removeAttribute('data-workspace');news.classList.remove('shell-page');news.id='nv-watch-headlines';news.hidden=true;const channels=document.createElement('div');channels.id='nv-watch-channels';while(media.firstChild)channels.append(media.firstChild);const bar=document.createElement('nav');bar.className='nv-watch-tabs';function select(name){channels.hidden=name!=='channels';news.hidden=name!=='headlines';for(const b of bar.children)b.setAttribute('aria-pressed',String(b.dataset.section===name));if(name==='headlines')document.getElementById('news-refresh')?.click();}for(const [name,label]of [['channels','Live TV'],['videos','Videos'],['headlines','Headlines']]){const b=document.createElement('button');b.textContent=label;b.dataset.section=name;b.onclick=()=>name==='videos'?window.NewViewHome.player():select(name);bar.append(b);}media.append(bar,channels,news);window.NewViewWatch={select};select('channels');const hint=document.createElement('p');hint.className='nv-panel-status';hint.textContent='Choose a channel. Playback stays in the adjacent panel as you browse.';channels.prepend(hint);}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();})();
+/* Five-workspace Watch & News: retain existing News and Media controllers. */
+(function () {
+  function install() {
+    const media = document.querySelector('[data-workspace="media"]');
+    const news = document.querySelector('[data-workspace="news"]');
+    if (!media || !news || document.getElementById('nv-watch-sections')) return;
+    const channelPanel = media.querySelector('.shell-card');
+    const videoPanel = media.querySelector('.shell-grid');
+    if (!channelPanel || !videoPanel) return;
 
+    // Keep the existing publisher and player DOM nodes intact so their
+    // already-installed event handlers, request cancellation and states survive.
+    const tabs = document.createElement('nav');
+    tabs.id = 'nv-watch-sections';
+    tabs.className = 'nv-watch-sections';
+    tabs.setAttribute('aria-label', 'Watch & News sections');
+    const sections = [
+      { id: 'channels', label: 'Live TV', panel: channelPanel },
+      { id: 'videos', label: 'Videos', panel: videoPanel },
+      { id: 'headlines', label: 'Headlines', panel: news }
+    ];
+    news.removeAttribute('data-workspace');
+    news.classList.remove('shell-page');
+    news.id = 'nv-watch-headlines';
+    media.appendChild(news);
+    media.insertBefore(tabs, media.firstChild);
+
+    let active = 'channels';
+    function select(id) {
+      if (!sections.some(section => section.id === id)) return false;
+      active = id;
+      for (const section of sections) {
+        section.panel.hidden = section.id !== id;
+        section.button?.setAttribute('aria-pressed', String(section.id === id));
+      }
+      if (id === 'headlines' && !document.getElementById('news-items')?.children.length) {
+        document.getElementById('news-refresh')?.click();
+      }
+      return true;
+    }
+    for (const section of sections) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.watchSection = section.id;
+      button.textContent = section.label;
+      button.setAttribute('aria-controls', section.id === 'headlines'
+        ? 'nv-watch-headlines' : (section.id === 'channels' ? 'nv-watch-channels' : 'nv-watch-videos'));
+      button.addEventListener('click', () => select(section.id));
+      section.button = button;
+      tabs.appendChild(button);
+    }
+    channelPanel.id = 'nv-watch-channels';
+    videoPanel.id = 'nv-watch-videos';
+    window.NewViewWatch = { select, currentSection: () => active };
+    select('channels');
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', install, { once: true });
+  } else install();
+})();
