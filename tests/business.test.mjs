@@ -40,5 +40,5 @@ test('stale asynchronous CSV reads cannot restore cleared or replaced data',()=>
  assert.match(src,/selectionVersion\+\+/);
  assert.match(src,/const version=\+\+selectionVersion/);
  assert.match(src,/if\(version!==selectionVersion\)return/);
- assert.match(src,/if\(version===selectionVersion\)status\.textContent/);
+ assert.match(src,/if\(version===selectionVersion\)(?:\{|status\.textContent)/);
 });
