@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../web/workspace-shell.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
-test('six accessible workspaces have selector tabs',()=>{
- for(const id of ['myview','markets','business','news','media','social']){
+test('five accessible workspaces have selector tabs',()=>{
+ for(const id of ['myview','markets','business','media','social']){
   assert.match(html,new RegExp('data-workspace="'+id+'"'));
   assert.match(html,new RegExp('data-view-button="'+id+'"'));
  }
@@ -12,7 +12,7 @@ test('MyView is default and invalid saved workspaces fail closed',()=>{
  const localStorage={getItem:()=>null,setItem:()=>{}};
  vm.runInNewContext(source,{window,document,localStorage});
  assert.equal(window.NewViewShell.getStored(),'myview');
- assert.equal(window.NewViewShell.views.length,6);
+ assert.equal(window.NewViewShell.views.length,5);
 });
 test('workspace and stock board remain separate from market engine',()=>{
  const board=fs.readFileSync(new URL('../web/stock-board.js',import.meta.url),'utf8');
