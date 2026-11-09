@@ -1,0 +1,44 @@
+name: NewView staging public smoke (read-only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      staging_url:
+        description: "NewView workers.dev staging URL"
+        required: false
+        default: "https://nowview.faisalwrokksa.workers.dev"
+        type: string
+  schedule:
+    - cron: "20 2 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: newview-staging-public-smoke
+  cancel-in-progress: false
+
+jobs:
+  public-smoke:
+    name: Validate deployed staging routes
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check smoke script syntax
+        run: node --check tools/smoke-public-newview.mjs
+      - name: Smoke-test deployed staging (no mutations)
+        env:
+          NEWVIEW_URL: ${{ inputs.staging_url || 'https://nowview.faisalwrokksa.workers.dev' }}
+        run: npm run smoke:public
+      - name: Record tested source revision
+        if: always()
+        run: |
+          echo "Smoke test script source SHA: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "This workflow validates public staging behavior, not Cloudflare deployed SHA." >> "$GITHUB_STEP_SUMMARY"
+          echo "Confirm active Cloudflare deployment SHA separately before release sign-off." >> "$GITHUB_STEP_SUMMARY"
