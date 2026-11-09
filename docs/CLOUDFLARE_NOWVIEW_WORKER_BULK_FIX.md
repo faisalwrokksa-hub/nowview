@@ -6,10 +6,10 @@
 - Git source `faisalwrokksa-hub/nowview`, branch `main`.
 - Build command **empty**, deploy command `npx wrangler deploy`, root `/`.
 - Last recorded Cloudflare build FAILED: Wrangler could not detect a static asset directory, since no configured entrypoint/bundle was available.
-- `workers.dev` was **disabled**; no route/custom domain configured.
+- `workers.dev` was **disabled** at the last dashboard check, but `wrangler.json` now requests `workers_dev=true` on this draft branch for the requested public website launch.
 
 ## Ready in Draft PR #3 review branch
-- `wrangler.json` with `main=dist/server/index.js` and `workers_dev=false`.
+- `wrangler.json` with `main=dist/server/index.js` and `workers_dev=true`.
 - `npm run build` already produces the Worker bundle for cloud APIs and embedded frontend assets.
 - Tests: `tests/cloudflare-worker-build.test.mjs`; GitHub Android/web and Expert2 safety workflows have passed.
 - Preflight workflow `.github/workflows/cloudflare-worker-preflight.yml` executes Wrangler 4.158.0 `deploy --dry-run` and does **not deploy**.
@@ -29,9 +29,12 @@ Create a separate Workers/Pages **staging** project tied to a staging branch and
 
 ## Validation after owner applies settings
 1. Check latest Cloudflare build logs for `Success` and deployed version.
-2. Distinguish successful deploy from URL activation: `workers.dev` is disabled until separately enabled.
+2. Distinguish successful deploy from URL activation: `workers.dev` is configured on the review branch; after deployment, check in Cloudflare whether the public subdomain is enabled and accessible.
 3. When an isolated staging URL exists, validate `/`, `/index.html`, `/workspace-shell.js`, `/watch.js`, `/api/chart` and `/api/news`, plus response content types, no sensitive source leakage, five tabs and mobile/TV behavior.
 4. Crosscheck Cloudflare build commit/branch against PR #3 head; do not infer main was updated.
 5. No production merge, DNS change, installed APK replacement or sign-off until separate user approval.
 
 This is a **verified configuration repair**, not a claim that Cloudflare build was fixed remotely. The connected browser has read-only access.
+
+## Website launch authorization update
+On 2026-11-09 the owner explicitly requested a publicly accessible website now. The draft branch therefore sets `workers_dev: true`. This does **not** publish anything until the selected Cloudflare project builds that branch. Paid subscriptions, live backend accounts, native Android features and API auth remain separate from the public dashboard. Do not describe these as live merely because the Worker is live.
