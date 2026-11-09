@@ -5,6 +5,8 @@ on:
       - 'tools/import_f1_apk_assets.py'
       - 'tools/import_f1_direct_apk.py'
       - 'tools/test_import_f1_direct_apk.py'
+      - 'tools/f1_dependency_audit.py'
+      - 'tools/test_f1_dependency_audit.py'
       - 'tools/test_import_f1_apk_assets.py'
       - 'tools/verify_apk_web_assets.py'
       - 'web/**'
@@ -23,7 +25,7 @@ jobs:
       - name: Python version
         run: python3 --version
       - name: Verify tampered assets are rejected and originals preserved
-        run: python3 -m unittest discover -s tools -p 'test_import_f1*.py' -v
+        run: python3 -m unittest discover -s tools -p 'test_*.py' -v
       - name: Validate tracked JavaScript syntax
         run: |
           for file in web/*.js web/*.mjs; do
