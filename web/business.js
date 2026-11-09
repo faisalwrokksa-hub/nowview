@@ -58,8 +58,28 @@
  if(!status||!picker||!cards||!bars){window.NewViewBusiness={parseCsv,parseBusinessCsv,summarize};return;}
  const el=(tag,klass,value)=>{const x=document.createElement(tag);if(klass)x.className=klass;x.textContent=value;return x;};
  const fmt=n=>new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(n);
- let selectionVersion=0;
- function reset(){selectionVersion++;if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));cards.replaceChildren();bars.replaceChildren();status.textContent='No company data loaded. CSV is processed locally and is not uploaded.';picker.value='';}
+ let selectionVersion=0,loadedRows=null;
+ // Filters use the most recent CSV date, not today's date, so historical files remain useful.
+ const period=document.createElement('select');
+ period.id='business-period';period.setAttribute('aria-label','Business reporting period');
+ for(const [value,label] of [['all','All records'],['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days']]){
+  const option=document.createElement('option');option.value=value;option.textContent=label;period.append(option);
+ }
+ const periodLabel=document.createElement('label');
+ periodLabel.className='business-period-control';periodLabel.htmlFor='business-period';periodLabel.textContent='Reporting period ';
+ periodLabel.append(period);periodLabel.hidden=true;
+ cards.parentNode.insertBefore(periodLabel,cards);
+ function selectedRows(){
+  if(!loadedRows)return [];
+  if(period.value==='all')return loadedRows;
+  const latest=loadedRows[loadedRows.length-1].date;
+  const start=new Date(latest+'T00:00:00Z');
+  start.setUTCDate(start.getUTCDate()-Number(period.value)+1);
+  const first=start.toISOString().slice(0,10);
+  return loadedRows.filter(row=>row.date>=first);
+ }
+ period.addEventListener('change',()=>{if(loadedRows)render(selectedRows());});
+ function reset(){selectionVersion++;loadedRows=null;period.value='all';periodLabel.hidden=true;if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));cards.replaceChildren();bars.replaceChildren();status.textContent='No company data loaded. CSV is processed locally and is not uploaded.';picker.value='';}
  function render(rows){
   const result=summarize(rows);
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:{revenue:result.revenue,cost:result.cost,orders:result.orders,asOf:result.asOf,count:result.count}}));
@@ -90,8 +110,8 @@
   cards.replaceChildren();bars.replaceChildren();
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));
   if(file.size>limitBytes){status.textContent='File too large: maximum 1 MB';picker.value='';return;}
-  try{const text=await file.text();if(version!==selectionVersion)return;const rows=parseBusinessCsv(text);render(rows);}
-  catch(error){if(version===selectionVersion)status.textContent='CSV rejected: '+error.message;}
+  try{const text=await file.text();if(version!==selectionVersion)return;const rows=parseBusinessCsv(text);loadedRows=rows;period.value='all';periodLabel.hidden=false;render(selectedRows());}
+  catch(error){if(version===selectionVersion){loadedRows=null;periodLabel.hidden=true;status.textContent='CSV rejected: '+error.message;}}
  });
  clear?.addEventListener('click',reset);
  window.NewViewBusiness={parseCsv,parseBusinessCsv,summarize,reset};
