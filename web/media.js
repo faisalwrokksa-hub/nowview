@@ -40,23 +40,34 @@
  const nativeStream=()=>typeof window.NewViewNative?.playStream==='function';
  const playChannel=document.createElement('button');playChannel.type='button';playChannel.textContent='Play selected channel in NewView';playChannel.hidden=!nativeStream();playChannel.disabled=true;
  const open=document.createElement('a');open.textContent='Open selected stream';open.target='_blank';open.rel='noopener noreferrer';open.hidden=true;
+ const FAV_KEY='newview.media.channel-favorites.v1';
+ function readFavorites(){try{const value=JSON.parse(localStorage.getItem(FAV_KEY)||'[]');return new Set(Array.isArray(value)?value.filter(x=>typeof x==='string'&&x.length<2048&&x.startsWith('https://')).slice(0,200):[]);}catch{return new Set();}}
+ let favorites=readFavorites();
+ function saveFavorites(){try{localStorage.setItem(FAV_KEY,JSON.stringify([...favorites].slice(0,200)));return true;}catch{return false;}}
+ const favorite=document.createElement('button');favorite.type='button';favorite.textContent='Save favorite';favorite.disabled=true;
+ const favoritesOnly=document.createElement('input');favoritesOnly.type='checkbox';favoritesOnly.id='newview-favorites-only';
+ const favoritesLabel=document.createElement('label');favoritesLabel.htmlFor=favoritesOnly.id;favoritesLabel.textContent='Favorites only';
  const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Refresh channels';
- directory.append(heading,status,search,secureLabel,secureOnly,list,playChannel,open,refresh);
+ directory.append(heading,status,search,secureLabel,secureOnly,favoritesLabel,favoritesOnly,list,favorite,playChannel,open,refresh);
  category?.parentElement?.append(directory);
  let allChannels=[];let lastFetch=0;let loading=null;
  function renderChannels(){
   if(!preferred?.filterChannels)return;
-  const narrowed=category?.value&&category.value!=='all'&&category.value!=='favorites'?allChannels.filter(c=>String(c.category||'').toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):allChannels;
+  const narrowed=category?.value==='favorites'||favoritesOnly.checked?allChannels.filter(c=>favorites.has(c.url)):category?.value&&category.value!=='all'?allChannels.filter(c=>String(c.category||'').toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):allChannels;
   const term=search.value.trim().toLowerCase().slice(0,120);
   const visible=narrowed.filter(c=>(!secureOnly.checked||c.url.startsWith('https://'))&&(!term||(c.name+' '+c.id).toLowerCase().includes(term)));
   list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
   open.hidden=!visible.length;
   playChannel.disabled=!visible.length;
+  favorite.disabled=!visible.length;
+  favorite.textContent=visible.length&&favorites.has(list.value)?'Remove favorite':'Save favorite';
   open.setAttribute('aria-disabled',String(!visible.length));
   if(visible.length){open.href=list.value;status.textContent=allChannels.length+' loaded · '+visible.length+' matching (first 1500 displayed). Streams may be unavailable.';}
   else{open.removeAttribute('href');status.textContent=allChannels.length?allChannels.length+' loaded · 0 matching. Choose All channels, disable HTTPS-only, or clear search.':'No channels loaded. Try refresh.';}
  }
- list.addEventListener('change',()=>{if(list.value){open.href=list.value;open.hidden=false;}else{open.hidden=true;open.removeAttribute('href');}playChannel.disabled=!list.value;});
+ list.addEventListener('change',()=>{if(list.value){open.href=list.value;open.hidden=false;}else{open.hidden=true;open.removeAttribute('href');}playChannel.disabled=!list.value;favorite.disabled=!list.value;favorite.textContent=favorites.has(list.value)?'Remove favorite':'Save favorite';});
+ favorite.addEventListener('click',()=>{const url=list.value;if(!url)return;if(favorites.has(url))favorites.delete(url);else if(favorites.size<200)favorites.add(url);else{status.textContent='Maximum 200 favorite channels.';return;}if(!saveFavorites()){status.textContent='Favorites could not be saved on this device.';return;}renderChannels();});
+ favoritesOnly.addEventListener('change',renderChannels);
  search.addEventListener('input',renderChannels);
  secureOnly.addEventListener('change',renderChannels);
  playChannel.addEventListener('click',()=>{if(!nativeStream()||!list.value)return;try{const url=new URL(list.value);if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port)window.NewViewNative.playStream(url.href);}catch{}});
