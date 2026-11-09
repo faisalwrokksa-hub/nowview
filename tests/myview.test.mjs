@@ -16,7 +16,7 @@ test('MyView preserves an intentionally empty layout and safe order',()=>{
  assert.deepEqual(JSON.parse(s.saved()),['social','market']);
 });
 test('MyView falls back to defaults if storage is corrupt',()=>{const s=setup('{');assert.deepEqual([...s.api.load()],['market','news','media']);});
-test('All six tabs and MyView editable controls are in bundled UI',()=>{
+test('Five-workspace navigation and MyView editable controls are in bundled UI',()=>{
  const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
  const cloud=fs.readFileSync(new URL('../cloud/build.mjs',import.meta.url),'utf8');
  for(const id of ['myview-editor','myview-grid','myview-reset','myview-count'])assert.match(html,new RegExp('id="'+id+'"'));
