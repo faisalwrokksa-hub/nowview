@@ -14,6 +14,7 @@ on:
       - 'web/**'
       - 'cloud/**'
       - 'tests/connectivity.test.mjs'
+      - 'tests/watch-workspace.test.mjs'
       - 'package.json'
       - '.github/workflows/expert2-f1.yml'
   workflow_dispatch:
@@ -42,7 +43,7 @@ jobs:
         with:
           node-version: '22'
       - name: Browser connectivity module tests
-        run: node --test tests/connectivity.test.mjs
+        run: node --test tests/connectivity.test.mjs tests/watch-workspace.test.mjs
       - name: Build Cloudflare Pages staging artifact (no deployment)
         run: |
           npm run build:pages
