@@ -262,3 +262,27 @@ body.tv-launcher[data-current-workspace="myview"] .home-installed-grid{grid-temp
 .myview-widget-actions button{min-width:44px;min-height:44px}
 .myview-widget-actions button:disabled{opacity:.42;cursor:not-allowed}
 @media(max-width:600px){.myview-presets{width:100%}.myview-presets button{flex:1 1 auto}}
+
+
+/* NewView responsive shell and accessible focus enhancements (2026-11-10).
+   Keep the five navigation destinations available without hiding them on mobile. */
+html{min-width:0}
+body{min-width:0}
+.workspace-switcher{scrollbar-width:thin;scroll-padding-inline:12px;overscroll-behavior-inline:contain}
+.workspace-switcher .workspace-tab{min-height:44px;flex:0 0 auto}
+.workspace-switcher .workspace-tab[aria-current="page"]{border-color:var(--cyan);color:var(--text)}
+.workspace-switcher .workspace-tab:focus-visible,
+a:focus-visible,select:focus-visible,input:focus-visible,
+summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.shell-page,.shell-card,.workspace,.myview-grid{min-width:0}
+.shell-page img,.shell-card img{max-width:100%;height:auto}
+.shell-page pre,.shell-card pre{max-width:100%;overflow-x:auto}
+@media(max-width:700px){
+ main{height:auto;min-height:100dvh;padding:14px 12px 20px;gap:12px}
+ .workspace-switcher{gap:8px;max-width:100%;margin-inline:-4px;padding:6px 4px 10px}
+ .workspace-switcher .workspace-tab{min-height:44px;padding:10px 13px}
+ .shell-page{width:100%}
+ .workspace{min-height:300px}
+ .display-controls,.wallpaper-controls{max-width:100%;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.workspace-switcher{scroll-behavior:auto}}
