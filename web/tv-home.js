@@ -12,7 +12,7 @@
  const apps=document.querySelector('.home-apps'),grid=document.getElementById('home-installed-grid');
  const settings=action('Settings',()=>{document.body.classList.toggle('tv-home-settings');if(document.body.classList.contains('tv-home-settings'))document.getElementById('wallpaper-file')?.focus();});
  action('Markets',()=>document.querySelector('[data-view-button="markets"]')?.click());
- action('News',()=>document.querySelector('[data-view-button="news"]')?.click());
+ action('News',()=>{document.querySelector('[data-view-button="media"]')?.click();window.NewViewWatch?.select('headlines');});
  action('TV',()=>document.querySelector('[data-view-button="media"]')?.click());
  const all=action('All apps',()=>{document.body.classList.toggle('tv-all-apps');if(document.body.classList.contains('tv-all-apps')){document.getElementById('home-refresh-apps')?.click();grid?.querySelector('button')?.focus();}});
  bar.append(clock,actions);home.prepend(bar);
