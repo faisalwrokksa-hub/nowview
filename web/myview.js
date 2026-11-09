@@ -9,8 +9,10 @@
   Object.freeze({id:'social',title:'Social',description:'Save and open public social profile bookmarks.',view:'social',label:'Social discovery'})
  ]);
  const ids=new Set(catalog.map(x=>x.id));
- const defaults=['market','news','media'];
- const presets=Object.freeze({balanced:Object.freeze(['market','news','media']),markets:Object.freeze(['market','news','business']),media:Object.freeze(['media','news','social'])});
+ // Daily Brief starts with markets, official headlines and local business KPIs.
+ // Previously saved selections remain untouched by load().
+ const defaults=['market','news','business'];
+ const presets=Object.freeze({balanced:Object.freeze(['market','news','business']),markets:Object.freeze(['market','business','news']),media:Object.freeze(['media','news','social'])});
  function preset(name){return Object.hasOwn(presets,name)?[...presets[name]]:null;}
  const key='newview.myview.widgets.v1';
  function sanitize(input){
@@ -89,7 +91,7 @@
  let chosen=load();
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
-  market:v=>v&&Number.isFinite(v.price)?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():'No verified quote received',
+  market:v=>v&&Number.isFinite(v.price)&&typeof v.symbol==='string'?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+(Number.isFinite(v.quoteTime)&&v.quoteTime>0?' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():' · quote time unavailable'):'No verified quote received',
   business:v=>v&&Number.isFinite(v.revenue)?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+v.orders+' orders · '+v.asOf:'Upload a CSV in Business to view session KPIs',
   news:v=>v&&v.count?v.count+' '+(v.source==='fed'?'Federal Reserve':'SEC')+' announcements · '+(v.headline||''):'Load official announcements in Watch & News',
   social:v=>v?v.count+' locally saved public profiles':'No public profiles saved',
@@ -117,6 +119,8 @@
    const description=text('p','',widget.description);
    const insight=text('p','myview-insight',preview[id](snapshots[id]));
    insight.setAttribute('aria-label',widget.title+' source snapshot');
+   insight.dataset.snapshot=id;
+   insight.setAttribute('aria-live','off');
    const actions=document.createElement('div');actions.className='myview-widget-actions';
    const button=text('button','shell-primary','Open '+widget.title);
    button.type='button';button.setAttribute('aria-label','Open NewView'+widget.title);
@@ -136,7 +140,9 @@
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(preview[id](next)===preview[id](snapshots[id]))return; // Do not reset TV focus on unchanged quotes.
   snapshots[id]=next;
-  if(document.body.dataset.currentWorkspace==='myview')render();
+  // Refresh only the affected text: rebuilding cards on every quote disrupts TV/keyboard focus.
+  const live=root.querySelector('[data-widget="'+id+'"] [data-snapshot="'+id+'"]');
+  if(live)live.textContent=preview[id](next);
  });
  window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
  installPresets();render();
