@@ -119,6 +119,21 @@
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
   nav.addEventListener('click',event=>{const b=event.target.closest('[data-view-button]');if(b)select(b.dataset.viewButton);});
+  // Roving tab focus: arrow keys navigate workspaces on keyboard and TV remotes.
+  // Keep ordinary arrow-key behavior inside content widgets and forms.
+  nav.addEventListener('keydown',event=>{
+   if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+   const current=event.target.closest('[data-view-button]');
+   if(!current)return;
+   const tabs=[...nav.querySelectorAll('[data-view-button]:not([disabled])')];
+   const index=tabs.indexOf(current);
+   if(index<0||!tabs.length)return;
+   const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:
+    (index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+   event.preventDefault();
+   tabs[next].focus();
+   select(tabs[next].dataset.viewButton);
+  });
   document.querySelectorAll('[data-open-markets]').forEach(b=>b.addEventListener('click',()=>select('markets')));
   const boardButton=document.getElementById('board-toggle');
   if(boardButton)document.getElementById('shell-market-actions').appendChild(boardButton);
