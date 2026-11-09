@@ -244,3 +244,12 @@ body.tv-launcher[data-current-workspace="myview"] .home-installed-grid{grid-temp
 .newview-network-indicator[data-network=offline]{color:#ffd18d;border-color:#8b6233}
 @media(max-width:720px){.newview-network-indicator{font-size:11px;max-width:100%;padding:5px 7px}}
 @media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Watch & News: three sections within the five-workspace navigation. */
+.nv-watch-sections{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px;overflow:visible}
+.nv-watch-sections button{flex:1 1 120px;min-height:44px}
+.nv-watch-sections button[aria-pressed="true"]{border-color:var(--cyan);color:var(--text);background:var(--panel)}
+.nv-watch-sections button:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+#nv-watch-channels,#nv-watch-videos,#nv-watch-headlines{min-width:0}
+#nv-watch-headlines{overflow:auto;overscroll-behavior:contain}
+@media(max-width:600px){.nv-watch-sections{gap:6px}.nv-watch-sections button{flex-basis:95px}}
