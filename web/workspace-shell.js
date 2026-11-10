@@ -61,6 +61,9 @@
   const chartToggle=document.getElementById('board-toggle');
   if(chartToggle)chartToggle.hidden=view!=='markets';
   if(view!=='media'&&window.NewViewMedia?.stopPlayback)window.NewViewMedia.stopPlayback();
+  const previouslyFocused=document.activeElement;
+  const hiddenFocusPanel=previouslyFocused instanceof Element?previouslyFocused.closest('[data-workspace]'):null;
+  const focusWasInHiddenPanel=Boolean(hiddenFocusPanel&&hiddenFocusPanel.dataset.workspace!==view);
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
   for(const el of document.querySelectorAll('[data-view-button]')){
    const active=el.dataset.viewButton===view;el.setAttribute('aria-pressed',String(active));el.classList.toggle('selected',active);
@@ -72,6 +75,7 @@
   document.dispatchEvent(new CustomEvent('newview:workspace-change',{detail:{view}}));
   const activeTab=document.querySelector('[data-view-button="'+view+'"]');
   if(activeTab)activeTab.setAttribute('aria-current','page');
+  if(focusWasInHiddenPanel&&activeTab){try{activeTab.focus({preventScroll:true});}catch{activeTab.focus();}}
   document.querySelectorAll('[data-view-button]').forEach(tab=>{if(tab!==activeTab)tab.removeAttribute('aria-current');});
   if(view==='markets'){
     market.hidden=false;
