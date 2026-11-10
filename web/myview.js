@@ -26,12 +26,12 @@
   const status=document.getElementById('home-app-status'),grid=document.getElementById('home-installed-grid');
   if(!grid||!status)return;
   grid.replaceChildren();
-  const native=window.NewViewApps||window.NewViewNative;
+  const native=[window.NewViewApps,window.NewViewNative].find(bridge=>bridge&&typeof bridge.listLaunchableApps==='function'&&typeof bridge.launchApp==='function');
   if(!native||typeof native.listLaunchableApps!=='function'||typeof native.launchApp!=='function'){
    status.textContent='Installed-app discovery is not supported by this APK yet.';return;
   }
   let apps;
-  try{apps=JSON.parse(native.listLaunchableApps());}catch{status.textContent='Unable to read installed TV apps';return;}
+  try{const response=native.listLaunchableApps();apps=typeof response==='string'?JSON.parse(response):response;}catch{status.textContent='Unable to read installed TV apps';return;}
   if(!Array.isArray(apps)){status.textContent='Invalid installed-app list';return;}
   const seen=new Set();let count=0;
   for(const app of apps){
@@ -51,8 +51,9 @@
   document.getElementById('home-pipetv')?.addEventListener('click',()=>{
    const bridge=window.NewViewNative;
    if(!bridge||typeof bridge.isPipeTvInstalled!=='function'||typeof bridge.openPipeTv!=='function'){if(status)status.textContent='PipeTv launch requires NewView on Android TV.';return;}
-   if(!bridge.isPipeTvInstalled()){if(status)status.textContent='PipeTv is not installed on this TV.';return;}
-   bridge.openPipeTv();if(status)status.textContent='Opening the separately installed PipeTv app.';
+   try{if(!bridge.isPipeTvInstalled()){if(status)status.textContent='PipeTv is not installed on this TV.';return;}
+   bridge.openPipeTv();if(status)status.textContent='Opening the separately installed PipeTv app.';}
+   catch{if(status)status.textContent='Unable to launch PipeTv on this TV.';}
   });
   document.getElementById('home-guide')?.addEventListener('click',()=>{const el=document.getElementById('home-recovery');if(el)el.hidden=!el.hidden;});
  }
