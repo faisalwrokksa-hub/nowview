@@ -5,9 +5,16 @@ cd "$(dirname "$0")"
 : "${ANDROID_HOME:?Set ANDROID_HOME to an Android SDK containing platform 34 and build-tools 34.0.0}"
 tools="$ANDROID_HOME/build-tools/34.0.0"
 platform="$ANDROID_HOME/platforms/android-34/android.jar"
+for executable in aapt2 d8 zipalign apksigner; do
+  if [[ ! -x "$tools/$executable" ]]; then echo "Missing Android SDK build tool: $tools/$executable" >&2; exit 1; fi
+done
+if [[ ! -f "$platform" ]]; then echo "Missing Android platform: $platform" >&2; exit 1; fi
+for executable in javac jar keytool; do
+  if ! command -v "$executable" >/dev/null 2>&1; then echo "Missing JDK tool: $executable" >&2; exit 1; fi
+done
 mkdir -p build
 # Remove only generated intermediates; preserve the aligned unsigned release input and local test keystore.
-rm -f build/resources.zip build/unsigned.apk
+rm -f build/resources.zip build/unsigned.apk build/newview.apk build/newview-unsigned.apk
 stage="$(mktemp -d "$PWD/build/obj.XXXXXX")"
 cleanup() { rm -rf "$stage"; rm -f build/resources.zip build/unsigned.apk; }
 trap cleanup EXIT
@@ -15,6 +22,7 @@ mkdir -p "$stage/classes" "$stage/dex"
 "$tools/aapt2" compile --dir android/res -o build/resources.zip
 "$tools/aapt2" link -o build/unsigned.apk -I "$platform" --manifest android/AndroidManifest.xml -A web build/resources.zip
 mapfile -t sources < <(find android/src -name '*.java' | sort)
+if (( ${#sources[@]} == 0 )); then echo "No Android Java sources found" >&2; exit 1; fi
 javac -encoding UTF-8 -source 8 -target 8 -classpath "$platform" -d "$stage/classes" "${sources[@]}"
 mapfile -t classes < <(find "$stage/classes" -name '*.class' | sort)
 "$tools/d8" --lib "$platform" --min-api 24 --output "$stage/dex" "${classes[@]}"
