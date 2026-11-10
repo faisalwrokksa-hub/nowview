@@ -26,8 +26,8 @@
   const status=document.getElementById('home-app-status'),grid=document.getElementById('home-installed-grid');
   if(!grid||!status)return;
   grid.replaceChildren();
-  const native=window.NewViewApps||window.NewViewNative;
-  if(!native||typeof native.listLaunchableApps!=='function'||typeof native.launchApp!=='function'){
+  const native=[window.NewViewApps,window.NewViewNative].find(bridge=>bridge&&typeof bridge.listLaunchableApps==='function'&&typeof bridge.launchApp==='function');
+  if(!native){
    status.textContent='Installed-app discovery is not supported by this APK yet.';return;
   }
   let apps;
@@ -36,7 +36,8 @@
   const seen=new Set();let count=0;
   for(const app of apps){
    if(!app||typeof app.label!=='string'||typeof app.packageName!=='string'||!/^([A-Za-z][A-Za-z0-9_]*\.)+[A-Za-z][A-Za-z0-9_]*$/.test(app.packageName)||seen.has(app.packageName))continue;
-   seen.add(app.packageName);if(++count>100)break;
+   if(count>=100)break;
+   seen.add(app.packageName);count++;
    const button=document.createElement('button');button.type='button';button.className='home-installed-app';
    button.textContent=app.label.slice(0,50);button.title=app.packageName;
    button.addEventListener('click',()=>{try{native.launchApp(app.packageName);}catch{status.textContent='Could not launch '+app.label.slice(0,50);}});
