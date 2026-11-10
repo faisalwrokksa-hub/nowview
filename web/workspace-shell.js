@@ -61,7 +61,12 @@
   const chartToggle=document.getElementById('board-toggle');
   if(chartToggle)chartToggle.hidden=view!=='markets';
   if(view!=='media'&&window.NewViewMedia?.stopPlayback)window.NewViewMedia.stopPlayback();
+  // If a workspace is hidden while it owns keyboard focus, return focus to navigation.
+  const focused=document.activeElement;
+  const focusedWorkspace=focused?.closest?.('[data-workspace]');
+  const restoreFocus=focusedWorkspace&&focusedWorkspace.dataset.workspace!==view;
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
+  if(restoreFocus)document.querySelector('[data-view-button="'+view+'"]')?.focus();
   for(const el of document.querySelectorAll('[data-view-button]')){
    const active=el.dataset.viewButton===view;el.setAttribute('aria-pressed',String(active));el.classList.toggle('selected',active);
   }
