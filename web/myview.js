@@ -26,7 +26,7 @@
   const status=document.getElementById('home-app-status'),grid=document.getElementById('home-installed-grid');
   if(!grid||!status)return;
   grid.replaceChildren();
-  const native=window.NewViewApps||window.NewViewNative;
+  const native=[window.NewViewApps,window.NewViewNative].find(bridge=>bridge&&typeof bridge.listLaunchableApps==='function'&&typeof bridge.launchApp==='function');
   if(!native||typeof native.listLaunchableApps!=='function'||typeof native.launchApp!=='function'){
    status.textContent='Installed-app discovery is not supported by this APK yet.';return;
   }
