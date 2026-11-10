@@ -75,6 +75,9 @@
   }
   for(const el of document.querySelectorAll('[data-view-button]')){
    const active=el.dataset.viewButton===view;el.setAttribute('aria-pressed',String(active));el.classList.toggle('selected',active);
+   // A single tab stop keeps TV remotes and keyboard users from traversing every workspace tab.
+   // Arrow/Home/End keys still provide direct access to all available workspaces.
+   el.tabIndex=active?0:-1;
   }
   document.getElementById('workspace-title').textContent=names[view];
   const source=document.getElementById('footer-source');
