@@ -440,3 +440,16 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
  .workspace-switcher{scroll-padding-inline:12px}
  .workspace-switcher [data-view-button]{min-width:44px;max-width:none}
 }
+
+/* Task 1: safe-area and keyboard scroll affordances (2026-11-11). */
+/* Keep primary controls usable on notched phones and overscanned TV browsers. */
+@supports (padding: env(safe-area-inset-left)) {
+ main { padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right));padding-bottom:max(12px,env(safe-area-inset-bottom)); }
+}
+/* Workspace tabs remain keyboard-scrollable without trapping page focus. */
+.workspace-switcher {scroll-padding-inline:16px;overscroll-behavior-inline:contain;}
+.workspace-tab {scroll-margin-inline:16px;}
+.workspace-switcher:focus-within {scroll-behavior:smooth;}
+@media (prefers-reduced-motion:reduce){.workspace-switcher:focus-within{scroll-behavior:auto}}
+/* Error/status text may contain long source URLs or localized words. */
+:where([role="alert"],[role="status"],[aria-live="polite"],[aria-live="assertive"]){overflow-wrap:anywhere;min-width:0;}
