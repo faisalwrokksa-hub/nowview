@@ -47,6 +47,18 @@
       button.setAttribute('aria-controls', section.id === 'headlines'
         ? 'nv-watch-headlines' : (section.id === 'channels' ? 'nv-watch-channels' : 'nv-watch-videos'));
       button.addEventListener('click', () => select(section.id));
+      button.addEventListener('keydown', event => {
+        const index = sections.findIndex(item => item.id === section.id);
+        let next = index;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % sections.length;
+        else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index + sections.length - 1) % sections.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = sections.length - 1;
+        else return;
+        event.preventDefault();
+        select(sections[next].id);
+        sections[next].button?.focus();
+      });
       section.button = button;
       tabs.appendChild(button);
     }
