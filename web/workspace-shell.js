@@ -66,8 +66,9 @@
   const previouslyFocused=document.activeElement;
   const focusedWorkspace=previouslyFocused?.closest?.('[data-workspace]:not([hidden])');
   const focusedMarketPanel=previouslyFocused?.closest?.('#market-shell, #stock-board, .workspace');
+  const marketPanelWillHide=view!=='markets'&&!(view==='myview'&&document.body.classList.contains('tv-launcher'));
   const focusWasInHiddenPanel=!!(focusedWorkspace&&focusedWorkspace.dataset.workspace!==view) ||
-   !!(focusedMarketPanel&&view!=='markets'&&!(view==='myview'&&document.body.classList.contains('tv-launcher')));
+   !!(focusedMarketPanel&&marketPanelWillHide);
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
   if(focusWasInHiddenPanel){
    const destination=document.querySelector('[data-view-button="'+view+'"]');
@@ -88,12 +89,12 @@
   if(activeTab)activeTab.setAttribute('aria-current','page');
   document.querySelectorAll('[data-view-button]').forEach(tab=>{if(tab!==activeTab)tab.removeAttribute('aria-current');});
   if(view==='markets'){
-    market.hidden=false;
+    if(market)market.hidden=false;
     const isBoard=document.body.classList.contains('board-active');
-    board.hidden=!isBoard;chart.hidden=isBoard;
+    if(board)board.hidden=!isBoard;if(chart)chart.hidden=isBoard;
     if(!isBoard)requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
-  }else if(view==='myview'&&document.body.classList.contains('tv-launcher')){market.hidden=false;board.hidden=true;chart.hidden=false;requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));}
-  else{market.hidden=true;board.hidden=true;chart.hidden=true;}
+  }else if(view==='myview'&&document.body.classList.contains('tv-launcher')){if(market)market.hidden=false;if(board)board.hidden=true;if(chart)chart.hidden=false;requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));}
+  else{if(market)market.hidden=true;if(board)board.hidden=true;if(chart)chart.hidden=true;}
   try{localStorage.setItem('newview.workspace',view);}catch{}
   const page=document.querySelector('[data-workspace="'+view+'"]');
   if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'instant'});
