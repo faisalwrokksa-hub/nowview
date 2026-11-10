@@ -310,3 +310,16 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){
  .workspace-switcher,.shell-page,.shell-card{scroll-behavior:auto!important}
 }
+
+/* High-contrast and compact landscape navigation: preserve visible selection and focus. */
+@media (forced-colors:active){
+ .workspace-tab.selected,.workspace-tab[aria-current="page"]{border:2px solid Highlight;color:Highlight;forced-color-adjust:auto}
+ :where(.workspace-tab,button,a[href],input,select,textarea):focus-visible{outline:3px solid Highlight!important;outline-offset:3px!important;box-shadow:none!important}
+ .workspace-tab[aria-pressed="true"]{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+}
+@media (max-height:520px) and (orientation:landscape){
+ .workspace-switcher{flex-shrink:0;max-width:100%;scrollbar-width:thin}
+ .workspace-tab{min-height:44px;padding:7px 12px}
+ #workspace-intro{min-height:0}
+ .shell-page{min-height:0;overscroll-behavior:contain}
+}
