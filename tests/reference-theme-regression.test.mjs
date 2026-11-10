@@ -84,3 +84,17 @@ test('IPTV launch reports secure-stream and bridge errors', () => {
   assert.match(media, /Could not launch this stream/);
   assert.match(media, /Native IPTV playback is not available/);
 });
+
+
+test('TV installed-app discovery selects a capable bridge and caps rendering', () => {
+  const myview=read('web/myview.js');
+  assert.match(myview, /\[window\.NewViewApps,window\.NewViewNative\]\.find/);
+  assert.match(myview, /if\(count>=100\)break/);
+});
+
+test('IPTV directory tolerates missing native category and playlist capabilities', () => {
+  const media=read('web/media.js');
+  assert.match(media, /typeof preferred\.categoriesFor==='function'/);
+  assert.match(media, /typeof preferred\?\.parseM3U!=='function'/);
+  assert.match(media, /Array\.isArray\(parsed\)/);
+});
