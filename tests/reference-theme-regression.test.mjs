@@ -110,3 +110,10 @@ test('Cloudflare build includes every local script referenced by the dashboard',
   }
   assert.ok(assets.includes('tv-home.js'));
 });
+
+
+test('TV launcher uses local clock and tolerates missing optional Watch API', () => {
+  assert.match(tv, /Local device time/);
+  assert.doesNotMatch(tv, /timeZone:'Asia\/Riyadh'/);
+  assert.match(tv, /NewViewWatch\?\.select\?\./);
+});
