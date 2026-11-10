@@ -639,3 +639,22 @@ body main{border:1px solid rgba(213,151,110,.16);border-radius:22px}
 #newview-channel-directory [hidden]{display:none!important}
 @media(max-width:620px){#newview-channel-directory{grid-template-columns:minmax(0,1fr);padding:14px}#newview-channel-directory h3,#newview-channel-directory [role="status"]{grid-column:1}}
 @media(forced-colors:active){#newview-channel-directory{background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+/* Release: visual-first home. Settings remain accessible, but never dominate the viewport. */
+.newview-settings{flex-shrink:0;align-self:flex-end;max-width:100%;position:relative;z-index:4}
+.newview-settings>summary,.newview-personalize>summary{cursor:pointer;color:#e9d2a5;border:1px solid #80694d;border-radius:10px;padding:9px 14px;background:#18271f;list-style-position:inside}
+.newview-settings-content{display:grid;gap:12px;padding:14px 0;max-height:55vh;overflow:auto}
+.newview-settings:not([open]){max-height:44px}
+.newview-personalize{margin:16px 0 4px}
+.newview-personalize[open]>.myview-controls{margin-top:14px}
+.newview-home-hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:center;border:1px solid #8b7352;background:linear-gradient(115deg,#172d27,#12201c 70%,#31271d);border-radius:18px;padding:clamp(18px,2.5vw,32px);margin-bottom:16px;min-width:0}
+.newview-hero-copy h3{font-size:clamp(24px,2.7vw,46px);line-height:1.12;letter-spacing:-.035em;margin:10px 0;color:#f7ead2}
+.newview-hero-copy p{font-size:clamp(13px,1.1vw,18px);color:#c5bda9;line-height:1.55;margin:0}
+.newview-home-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.newview-home-quick button{white-space:normal;text-align:left;min-height:62px;font-size:clamp(13px,1.1vw,18px);background:#253a30;border:1px solid #71644b;color:#f4e1b9}
+body:not(.tv-launcher) [data-workspace="myview"] .myview-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+body:not(.tv-launcher) [data-workspace="myview"] .myview-widget{min-height:245px}
+body:not(.tv-launcher) [data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:span 2;min-height:290px;background:linear-gradient(135deg,#193c33,#10251f)}
+body:not(.tv-launcher) [data-workspace="myview"] .myview-widget[data-widget="media"]{background:linear-gradient(135deg,#26352c,#1b201c)}
+@media(max-width:1050px){.newview-home-hero{grid-template-columns:1fr}body:not(.tv-launcher) [data-workspace="myview"] .myview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.newview-home-hero{padding:16px;gap:16px}.newview-home-quick{grid-template-columns:1fr 1fr}.newview-home-quick button{min-height:50px;padding:9px}body:not(.tv-launcher) [data-workspace="myview"] .myview-grid{grid-template-columns:1fr}body:not(.tv-launcher) [data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:auto;min-height:240px}}

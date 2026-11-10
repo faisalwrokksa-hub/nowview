@@ -119,6 +119,7 @@
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
   nav.addEventListener('click',event=>{const b=event.target.closest('[data-view-button]');if(b)select(b.dataset.viewButton);});
+  document.querySelector('[data-workspace="myview"]')?.addEventListener('click',event=>{const b=event.target.closest('[data-home-view]');if(!b)return;const view=b.dataset.homeView;if(!views.includes(view))return;select(view);if(b.dataset.homeSection)window.NewViewWatch?.select(b.dataset.homeSection);});
   // Roving focus for keyboard and Android TV remotes; native Tab remains available.
   nav.addEventListener('keydown',event=>{
    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
