@@ -99,6 +99,16 @@
  };
  if(!root||!editor){window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,preview};return;}
  function text(tag,cls,value){const el=document.createElement(tag);if(cls)el.className=cls;el.textContent=value;return el;}
+ function updateMarketSourceLink(){
+  const link=root.querySelector('[data-widget="market"] [data-source-link="market"]');
+  if(!link)return;
+  const quote=snapshots.market;
+  const valid=quote&&Number.isFinite(quote.price)&&quote.price>=0&&typeof quote.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(quote.symbol.trim());
+  link.hidden=!valid;
+  if(!valid){link.removeAttribute('href');link.textContent='Source unavailable';return;}
+  link.href='https://www.binance.com/en/markets';
+  link.textContent='Binance market overview';
+ }
  function updateNewsSourceLink(){
   const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
   if(!link)return;
@@ -143,6 +153,12 @@
    up.dataset.reorder='up';down.dataset.reorder='down';
    up.addEventListener('click',()=>move(-1));down.addEventListener('click',()=>move(1));
    actions.append(button,up,down);
+   if(id==='market'){
+    const source=text('a','myview-source-link','Source unavailable');
+    source.hidden=true;source.target='_blank';source.rel='noopener noreferrer';
+    source.dataset.sourceLink='market';source.setAttribute('aria-label','Open Binance market overview');
+    actions.append(source);
+   }
    if(id==='news'){
     const source=text('a','myview-source-link','SEC source');
     source.hidden=true;source.removeAttribute('href');source.target='_blank';source.rel='noopener noreferrer';
@@ -151,7 +167,7 @@
    }
    item.append(eyebrow,heading,description,insight,actions);root.append(item);
   }
-  updateNewsSourceLink();
+  updateNewsSourceLink();updateMarketSourceLink();
  }
  function installPresets(){if(!presetBar)return;for(const [name,label] of [['balanced','Balanced'],['markets','Markets first'],['media','Watch & News first']]){const button=text('button','',''+label);button.type='button';button.dataset.preset=name;button.addEventListener('click',()=>{chosen=save(preset(name));render();button.focus();});presetBar.append(button);}}
  document.getElementById('myview-reset')?.addEventListener('click',()=>{chosen=save(defaults);render();});
@@ -163,6 +179,7 @@
   const live=root.querySelector('[data-widget="'+id+'"] [data-snapshot="'+id+'"]');
   if(live)live.textContent=preview[id](next);
   if(id==='news')updateNewsSourceLink();
+  if(id==='market')updateMarketSourceLink();
  });
  window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
  installPresets();render();
