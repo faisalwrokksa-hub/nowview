@@ -36,7 +36,8 @@ export async function getChart(symbol,period){
  })();pending.set(key,promise);try{return await promise;}catch(error){
   // Preserve the last *verified* exchange trade when an upstream request fails.
   // Never present it as a fresh quote or silently substitute a different asset.
-  if(previous&&previous.symbol===symbol&&previous.period===period&&Number.isFinite(previous.quoteTime)){
+  // Discard trades older than 24 hours rather than display indefinitely stale prices.
+  if(previous&&previous.symbol===symbol&&previous.period===period&&Number.isFinite(previous.quoteTime)&&previous.quoteTime>0&&Date.now()/1000-previous.quoteTime<=86400){
    const ageSeconds=Math.max(0,Math.floor(Date.now()/1000-previous.quoteTime));
    return {...previous,ageSeconds,status:'Historical / stale · live refresh unavailable',refreshError:'Binance data temporarily unavailable; showing last verified trade'};
   }
