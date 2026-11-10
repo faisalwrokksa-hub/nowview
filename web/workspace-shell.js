@@ -64,8 +64,10 @@
   // When switching views from a shortcut or TV remote, never strand keyboard focus
   // inside a panel that becomes hidden. Preserve focus for ordinary tab clicks.
   const previouslyFocused=document.activeElement;
-  const focusWasInHiddenPanel=!!previouslyFocused?.closest?.('[data-workspace]:not([hidden])') &&
-   previouslyFocused.closest('[data-workspace]').dataset.workspace!==view;
+  const focusedWorkspace=previouslyFocused?.closest?.('[data-workspace]:not([hidden])');
+  const focusedMarketPanel=previouslyFocused?.closest?.('#market-shell, #stock-board, .workspace');
+  const focusWasInHiddenPanel=!!(focusedWorkspace&&focusedWorkspace.dataset.workspace!==view) ||
+   !!(focusedMarketPanel&&view!=='markets'&&!(view==='myview'&&document.body.classList.contains('tv-launcher')));
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
   if(focusWasInHiddenPanel){
    const destination=document.querySelector('[data-view-button="'+view+'"]');
