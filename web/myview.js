@@ -91,7 +91,7 @@
  let chosen=load();
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
-  market:v=>v&&Number.isFinite(v.price)&&typeof v.symbol==='string'?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+(Number.isSafeInteger(v.quoteTime)&&v.quoteTime>0&&v.quoteTime<=8640000000?' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():' · quote time unavailable'):'No verified quote received',
+  market:v=>v&&Number.isFinite(v.price)&&v.price>=0&&typeof v.symbol==='string'&&v.symbol.trim()?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+(Number.isSafeInteger(v.quoteTime)&&v.quoteTime>0&&v.quoteTime<=8640000000?' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():' · quote time unavailable'):'No verified quote received',
   business:v=>v&&Number.isFinite(v.revenue)&&v.revenue>=0?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+(Number.isFinite(v.cost)&&v.cost>=0&&v.revenue>0?'margin '+new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format((v.revenue-v.cost)/v.revenue*100)+'% · ':'')+(Number.isSafeInteger(v.orders)&&v.orders>=0?v.orders+' orders':'order count unavailable')+(typeof v.asOf==='string'&&v.asOf.trim()?' · '+v.asOf.slice(0,60):' · period unavailable'):'Upload a CSV in Business to view session KPIs',
   news:v=>v&&Number.isSafeInteger(v.count)&&v.count>0?v.count+' '+(v.source==='fed'?'Federal Reserve':v.source==='sec'?'SEC':'source-unverified')+' announcements'+(typeof v.headline==='string'&&v.headline.trim()?' · '+v.headline.trim().slice(0,180):''):'Load official announcements in Watch & News',
   social:v=>v&&Number.isSafeInteger(v.count)&&v.count>=0?v.count+' locally saved public profiles':'No verified public-profile count available',
@@ -103,7 +103,7 @@
   const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
   if(!link)return;
   const snapshot=snapshots.news;
-  const verified=Number.isFinite(snapshot?.count)&&snapshot.count>0&&(snapshot.source==='fed'||snapshot.source==='sec');
+  const verified=Number.isSafeInteger(snapshot?.count)&&snapshot.count>0&&(snapshot.source==='fed'||snapshot.source==='sec');
   link.hidden=!verified;
   if(!verified){link.removeAttribute('href');link.textContent='Source unavailable';return;}
   const fed=snapshot.source==='fed';
