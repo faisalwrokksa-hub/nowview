@@ -286,3 +286,27 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
  .display-controls,.wallpaper-controls{max-width:100%;flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){.workspace-switcher{scroll-behavior:auto}}
+
+
+/* Accessible focus, touch and overflow hardening for compact and TV layouts.
+   Preserve native focus indicators for forced-color/high-contrast users. */
+.workspace-switcher{min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.workspace-switcher [data-view-button]:focus-visible{position:relative;z-index:2}
+.workspace-switcher [data-view-button][aria-current="page"]{font-weight:700}
+.shell-page,.shell-card,.workspace{overflow-wrap:anywhere}
+.shell-page table,.shell-card table{max-width:100%}
+.shell-page :is(button,a,input,select,textarea),
+.shell-card :is(button,a,input,select,textarea){max-width:100%}
+@media(pointer:coarse){
+ .workspace-switcher [data-view-button]{min-height:48px}
+ .myview-widget-actions button{min-width:48px;min-height:48px}
+}
+@media(forced-colors:active){
+ .workspace-switcher [data-view-button][aria-current="page"]{border:2px solid Highlight;color:Highlight}
+ .workspace-switcher [data-view-button]:focus-visible,
+ .shell-page :focus-visible,.shell-card :focus-visible{outline:3px solid Highlight;outline-offset:2px}
+ .myview-widget-actions button:disabled{opacity:1;color:GrayText}
+}
+@media(prefers-reduced-motion:reduce){
+ .workspace-switcher,.shell-page,.shell-card{scroll-behavior:auto!important}
+}
