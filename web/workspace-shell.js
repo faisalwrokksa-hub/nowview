@@ -97,7 +97,7 @@
   else{if(market)market.hidden=true;if(board)board.hidden=true;if(chart)chart.hidden=true;}
   try{localStorage.setItem('newview.workspace',view);}catch{}
   const page=document.querySelector('[data-workspace="'+view+'"]');
-  if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'instant'});
+  if(page&&page.scrollTo){try{page.scrollTo({top:0,behavior:'instant'});}catch{page.scrollTop=0;}}
   return true;
  }
  function installDisplay(){
