@@ -406,3 +406,24 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
 }
 /* Long localized labels should wrap rather than overflow narrow cards. */
 .shell-page :is(h1,h2,h3,p),.shell-card :is(h1,h2,h3,p){overflow-wrap:break-word}
+
+
+/* Task 1: keyboard-accessible asynchronous status and horizontal data surfaces. */
+.shell-page :is([aria-busy="true"],[role="status"]),
+.shell-card :is([aria-busy="true"],[role="status"]){
+  min-width:0;overflow-wrap:anywhere;
+}
+.shell-page :is([role="alert"],.error-message,[data-error]),
+.shell-card :is([role="alert"],.error-message,[data-error]){
+  overflow-wrap:anywhere;
+}
+.shell-page :is([role="region"][tabindex="0"],[data-scroll-region]):focus-visible,
+.shell-card :is([role="region"][tabindex="0"],[data-scroll-region]):focus-visible{
+  outline:3px solid var(--cyan,#56e0d0);outline-offset:2px;
+}
+@media (forced-colors:active){
+ .shell-page :is([role="region"][tabindex="0"],[data-scroll-region]):focus-visible,
+ .shell-card :is([role="region"][tabindex="0"],[data-scroll-region]):focus-visible{
+  outline-color:Highlight;
+ }
+}
