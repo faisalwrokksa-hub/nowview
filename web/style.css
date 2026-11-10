@@ -447,3 +447,16 @@ body{
 @media(forced-colors:active){
  :where(.shell-card,.myview-card,.widget-card){border-color:CanvasText;background:Canvas;color:CanvasText}
 }
+
+
+/* Shared five-workspace SVG icon sizing, TV focus and mobile layout. */
+.nv-nav-icon{display:inline-block;width:1.15em;height:1.15em;flex:none;vertical-align:-.12em;pointer-events:none}
+.workspace-switcher .workspace-tab{gap:.55em;white-space:nowrap}
+.workspace-switcher .workspace-tab:focus-visible .nv-nav-icon{stroke-width:2.25}
+@media(min-width:1200px) and (pointer:coarse){
+ .workspace-switcher .nv-nav-icon{width:1.35em;height:1.35em}
+}
+@media(max-width:700px){
+ .workspace-switcher .workspace-tab{font-size:clamp(13px,3.5vw,16px)}
+ .nv-nav-icon{width:18px;height:18px}
+}
