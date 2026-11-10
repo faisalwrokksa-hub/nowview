@@ -111,7 +111,13 @@
       parts.push(chunk);
       if(last){const content=parts.join('');cleanup();resolve(content);}
      };
-     window.NewViewNative.fetchPublicPlaylist(id);
+     try {
+      Promise.resolve(window.NewViewNative.fetchPublicPlaylist(id)).catch(error=>{
+       cleanup();reject(Error('Native playlist request failed: '+String(error?.message||error)));
+      });
+     } catch(error) {
+      cleanup();reject(Error('Native playlist request failed: '+String(error?.message||error)));
+     }
     });
    }else{
     const controller=new AbortController();
