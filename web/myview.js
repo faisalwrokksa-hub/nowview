@@ -107,7 +107,7 @@
   link.hidden=!valid;
   if(!valid){link.removeAttribute('href');link.textContent='Source unavailable';return;}
   link.href='https://www.binance.com/en/markets';
-  link.textContent='Binance market overview';
+  link.textContent='Binance markets (general reference, not quote verification)';
  }
  function updateNewsSourceLink(){
   const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
@@ -156,7 +156,7 @@
    if(id==='market'){
     const source=text('a','myview-source-link','Source unavailable');
     source.hidden=true;source.target='_blank';source.rel='noopener noreferrer';
-    source.dataset.sourceLink='market';source.setAttribute('aria-label','Open Binance market overview');
+    source.dataset.sourceLink='market';source.setAttribute('aria-label','Open Binance markets general reference; does not verify displayed quote');
     actions.append(source);
    }
    if(id==='news'){
