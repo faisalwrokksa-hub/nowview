@@ -15,7 +15,7 @@ const cache=new Map(),pending=new Map();let blockedUntil=0;
 export async function getChart(symbol,period){
  if(!symbols.includes(symbol)||!ranges[period])throw new Error('Unsupported token or range');
  const key=symbol+':'+period,previous=cache.get(key),now=Date.now()/1000;
- if(previous&&now-previous.fetchedAt<30){
+ if(previous&&now-previous.fetchedAt<30&&Number.isFinite(previous.quoteTime)&&previous.quoteTime>0&&now-previous.quoteTime<=86400){
   // Cached quotes must not retain a frozen freshness label as wall-clock time advances.
   const ageSeconds=Math.max(0,Math.floor(now-previous.quoteTime));
   return {...previous,ageSeconds,status:ageSeconds>120?'Historical / stale':'Recent exchange trade'};
