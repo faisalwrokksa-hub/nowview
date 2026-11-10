@@ -7,6 +7,9 @@ on:
   pull_request:
     paths:
       - 'web/**'
+      - 'android/**'
+      - 'build-apk.sh'
+      - 'scripts/verify-preview-apk.sh'
       - 'tests/**'
       - 'cloud/**'
       - 'package.json'
@@ -62,6 +65,10 @@ jobs:
         with:
           cmdline-tools-version: '11076708'
           packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+      - name: Validate Android build scripts
+        run: |
+          bash -n build-apk.sh
+          bash -n scripts/verify-preview-apk.sh
       - name: Build development APK
         run: bash build-apk.sh
       - name: Verify APK identity and bundled assets
