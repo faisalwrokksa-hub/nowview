@@ -113,7 +113,8 @@
     }finally{clearTimeout(timeout);}
    }
    if(content.length>16000000)throw Error('Playlist too large');
-   const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
+   if(typeof preferred?.parseM3U!=='function')throw Error('Playlist parser unavailable');
+   const parsed=preferred.parseM3U(content);if(!Array.isArray(parsed)||!parsed.length)throw Error('No valid channels');
    allChannels=parsed;lastFetch=Date.now();renderChannels();
   }catch(error){
    const reason=error?.name==='AbortError'?'request timed out':String(error?.message||error);
