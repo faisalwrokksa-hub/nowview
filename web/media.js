@@ -57,8 +57,14 @@
   const term=search.value.trim().toLowerCase().slice(0,120);
   const visible=narrowed.filter(c=>(!secureOnly.checked||c.url.startsWith('https://'))&&(!term||(c.name+' '+c.id).toLowerCase().includes(term)));
   const selectedBefore=list.value;
-  list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
-  if(selectedBefore&&visible.some(c=>c.url===selectedBefore))list.value=selectedBefore;
+  // Keep the selected channel in the displayed options even if it falls outside the first 1500 results.
+  const displayed=visible.slice(0,1500);
+  if(selectedBefore&&!displayed.some(c=>c.url===selectedBefore)){
+   const retained=visible.find(c=>c.url===selectedBefore);
+   if(retained)displayed.push(retained);
+  }
+  list.replaceChildren(...displayed.map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
+  if(selectedBefore&&displayed.some(c=>c.url===selectedBefore))list.value=selectedBefore;
   open.hidden=!visible.length;
   playChannel.disabled=!visible.length;
   favorite.disabled=!visible.length;
