@@ -33,5 +33,13 @@ export async function getChart(symbol,period){
   const [interval,seconds]=ranges[period];
   const [klines,ticker,trades]=await Promise.all([read('klines',{symbol:pair,interval,limit:'1000',startTime:String(Math.floor((now-seconds)*1000))}),read('ticker/24hr',{symbol:pair}),read('trades',{symbol:pair,limit:'1'})]);
   const answer=normalise(klines,ticker,trades,info,symbol,period,Date.now()/1000);cache.set(key,answer);return answer;
- })();pending.set(key,promise);try{return await promise;}finally{pending.delete(key);}
+ })();pending.set(key,promise);try{return await promise;}catch(error){
+  // Preserve the last *verified* exchange trade when an upstream request fails.
+  // Never present it as a fresh quote or silently substitute a different asset.
+  if(previous&&previous.symbol===symbol&&previous.period===period&&Number.isFinite(previous.quoteTime)){
+   const ageSeconds=Math.max(0,Math.floor(Date.now()/1000-previous.quoteTime));
+   return {...previous,ageSeconds,status:'Historical / stale · live refresh unavailable',refreshError:'Binance data temporarily unavailable; showing last verified trade'};
+  }
+  throw error;
+ }finally{pending.delete(key);}
 }
