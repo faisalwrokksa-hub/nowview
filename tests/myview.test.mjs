@@ -27,7 +27,7 @@ test('Five-workspace navigation and MyView editable controls are in bundled UI',
 test('MyView preset layouts are allowlisted, immutable defaults and locally selectable',()=>{
  const {api}=setup();
  assert.deepEqual([...api.preset('balanced')],['market','news','business']);
- assert.deepEqual([...api.preset('markets')],['market','news','business']);
+ assert.deepEqual([...api.preset('markets')],['market','business','news']);
  assert.deepEqual([...api.preset('media')],['media','news','social']);
  assert.equal(api.preset('unknown'),null);
  const first=api.preset('balanced');first.pop();
