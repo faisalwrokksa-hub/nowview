@@ -295,3 +295,347 @@ body.tv-launcher[data-current-workspace="myview"] .home-installed-grid{grid-temp
     transition-duration: 0.01ms !important;
   }
 }
+
+/* NewView integrated reference theme — responsive shell and accessible focus enhancements (2026-11-10).
+   Preserve production accessibility rules and all five navigation destinations on mobile. */
+html{min-width:0}
+body{min-width:0}
+.workspace-switcher{scrollbar-width:thin;scroll-padding-inline:12px;overscroll-behavior-inline:contain}
+.workspace-switcher .workspace-tab{min-height:44px;flex:0 0 auto}
+.workspace-switcher .workspace-tab[aria-current="page"]{border-color:var(--cyan);color:var(--text)}
+.workspace-switcher .workspace-tab:focus-visible,
+a:focus-visible,select:focus-visible,input:focus-visible,
+summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.shell-page,.shell-card,.workspace,.myview-grid{min-width:0}
+.shell-page img,.shell-card img{max-width:100%;height:auto}
+.shell-page pre,.shell-card pre{max-width:100%;overflow-x:auto}
+@media(max-width:700px){
+ main{height:auto;min-height:100dvh;padding:14px 12px 20px;gap:12px}
+ .workspace-switcher{gap:8px;max-width:100%;margin-inline:-4px;padding:6px 4px 10px}
+ .workspace-switcher .workspace-tab{min-height:44px;padding:10px 13px}
+ .shell-page{width:100%}
+ .workspace{min-height:300px}
+ .display-controls,.wallpaper-controls{max-width:100%;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.workspace-switcher{scroll-behavior:auto}}
+
+
+/* Accessible focus, touch and overflow hardening for compact and TV layouts.
+   Preserve native focus indicators for forced-color/high-contrast users. */
+.workspace-switcher{min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.workspace-switcher [data-view-button]:focus-visible{position:relative;z-index:2}
+.workspace-switcher [data-view-button][aria-current="page"]{font-weight:700}
+.shell-page,.shell-card,.workspace{overflow-wrap:anywhere}
+.shell-page table,.shell-card table{max-width:100%}
+.shell-page :is(button,a,input,select,textarea),
+.shell-card :is(button,a,input,select,textarea){max-width:100%}
+@media(pointer:coarse){
+ .workspace-switcher [data-view-button]{min-height:48px}
+ .myview-widget-actions button{min-width:48px;min-height:48px}
+}
+@media(forced-colors:active){
+ .workspace-switcher [data-view-button][aria-current="page"]{border:2px solid Highlight;color:Highlight}
+ .workspace-switcher [data-view-button]:focus-visible,
+ .shell-page :focus-visible,.shell-card :focus-visible{outline:3px solid Highlight;outline-offset:2px}
+ .myview-widget-actions button:disabled{opacity:1;color:GrayText}
+}
+@media(prefers-reduced-motion:reduce){
+ .workspace-switcher,.shell-page,.shell-card{scroll-behavior:auto!important}
+}
+
+/* High-contrast and compact landscape navigation: preserve visible selection and focus. */
+@media (forced-colors:active){
+ .workspace-tab.selected,.workspace-tab[aria-current="page"]{border:2px solid Highlight;color:Highlight;forced-color-adjust:auto}
+ :where(.workspace-tab,button,a[href],input,select,textarea):focus-visible{outline:3px solid Highlight!important;outline-offset:3px!important;box-shadow:none!important}
+ .workspace-tab[aria-pressed="true"]{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+}
+@media (max-height:520px) and (orientation:landscape){
+ .workspace-switcher{flex-shrink:0;max-width:100%;scrollbar-width:thin}
+ .workspace-tab{min-height:44px;padding:7px 12px}
+ #workspace-intro{min-height:0}
+ .shell-page{min-height:0;overscroll-behavior:contain}
+}
+
+/* Task 1: safe-area and status visibility on notched phones and TV overscan. */
+@supports (padding: max(0px)){
+ @media(max-width:700px){main{padding-inline:max(12px,env(safe-area-inset-left)) max(12px,env(safe-area-inset-right));padding-bottom:max(20px,env(safe-area-inset-bottom))}}
+}
+.workspace-switcher:focus-within{scroll-padding-inline:16px}
+.workspace-switcher [data-view-button][aria-current="page"]{text-underline-offset:4px}
+@media(prefers-contrast:more){
+ .workspace-switcher [data-view-button][aria-current="page"]{text-decoration:underline;text-decoration-thickness:2px}
+ .workspace-switcher [data-view-button]:focus-visible{outline-width:4px}
+}
+@media(max-width:380px){.workspace-switcher{gap:6px}.workspace-switcher [data-view-button]{padding-inline:10px}}
+
+
+/* NewView reference-theme pass — original CSS, visually aligned to the supplied
+   dark copper/terracotta dashboard reference. No third-party assets or scripts.
+   Shared web assets are intended to be reused by the Android WebView host. */
+:root{
+ color-scheme:dark;
+ --bg:#110d0d;--panel:#211817;--line:#52372e;
+ --muted:#c5aaa0;--text:#fff3ec;
+ --cyan:#d98a5d;--green:#a7d4aa;--red:#f1a49c;
+ --nv-accent:#b36535;--nv-accent-strong:#e3a078;
+ --nv-surface-raised:#30211d;--nv-focus:#ffd0a0;
+}
+body{
+ background:radial-gradient(ellipse at 82% 0%,rgba(149,87,64,.25),transparent 52%),#110d0d;
+ color:var(--text);
+}
+:where(.shell-card,.myview-card,.widget-card,.workspace-panel){
+ border-color:var(--line);
+}
+:where(button,.workspace-tab,.shell-card,.myview-card){
+ transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+:where(button,.workspace-tab)[aria-current="page"],
+:where(button,.workspace-tab)[aria-selected="true"],
+.workspace-tab.selected{
+ border-color:var(--nv-accent-strong);
+ background:linear-gradient(135deg,#633725,#3b2420);
+ color:#fff6ee;
+}
+:where(button,a[href],input,select,textarea,[tabindex]):focus-visible{
+ outline:3px solid var(--nv-focus);
+ outline-offset:3px;
+ box-shadow:0 0 0 6px rgba(179,101,53,.22);
+}
+:where(button,a[href],input,select,textarea):disabled{
+ cursor:not-allowed;opacity:.52;
+}
+:where(.shell-card,.myview-card,.widget-card) :where(h2,h3){
+ color:#fff1e8;
+}
+:where(.workspace-switcher,.shell-page,.shell-card,.myview-grid){min-width:0}
+@media(max-width:700px){
+ :where(.shell-card,.myview-card,.widget-card){border-radius:14px}
+ .workspace-switcher{scroll-snap-type:x proximity}
+ .workspace-switcher .workspace-tab{scroll-snap-align:start;min-height:48px}
+}
+@media(min-width:1200px) and (min-height:650px) and (pointer:coarse){
+ .workspace-switcher .workspace-tab{min-height:58px;padding:14px 20px}
+ :where(button,a[href],[tabindex]):focus-visible{
+  outline-width:4px;outline-offset:4px;
+  box-shadow:0 0 0 9px rgba(179,101,53,.3);
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ :where(button,.workspace-tab,.shell-card,.myview-card){transition:none!important}
+}
+@media(forced-colors:active){
+ :where(button,a[href],input,select,textarea,[tabindex]):focus-visible{
+  outline:3px solid Highlight;box-shadow:none;
+ }
+ :where(button,.workspace-tab)[aria-current="page"],
+ :where(button,.workspace-tab)[aria-selected="true"]{
+  border:2px solid Highlight;background:Canvas;color:CanvasText;
+ }
+}
+
+
+/* Reference fidelity pass: verified colors from uploaded Nourva dashboard HTML.
+   This is an original NewView implementation, not copied site CSS. */
+:root{
+ --nv-ref-f0:#b36535;--nv-ref-f1:#a9552b;--nv-ref-f2:#96472a;
+ --nv-ref-f3:#7a3a25;--nv-ref-f4:#5e2e26;--nv-ref-f5:#4e2927;
+ --nv-ref-f6:#472a29;--nv-ref-f7:#3e2626;
+ --nv-ref-w0:#955740;--nv-ref-w1:#7a3f1c;
+ --nv-ref-deep:#6b2f16;
+ --nv-bg-primary:#110d0d;--nv-bg-secondary:#191212;
+ --nv-surface:#211817;--nv-surface-raised:#30211d;
+ --nv-text-primary:#fff3ec;--nv-text-secondary:#c5aaa0;
+ --nv-border:#52372e;--nv-focus:#ffd0a0;
+ --nv-radius-card:16px;--nv-spacing-unit:8px;
+ --nv-accent:var(--nv-ref-f0);--nv-accent-hover:var(--nv-ref-f1);
+ --nv-accent-strong:#e3a078;
+}
+:where(.shell-card,.myview-card,.widget-card){
+ background-color:var(--nv-surface);
+ border:1px solid var(--nv-border);
+ border-radius:var(--nv-radius-card);
+}
+:where(.workspace-switcher .workspace-tab,nav button){
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+:where(.workspace-switcher .workspace-tab,nav button):hover:not(:disabled){
+ border-color:var(--nv-ref-f1);background-color:var(--nv-surface-raised);
+}
+:where(.workspace-switcher .workspace-tab,nav button)[aria-current="page"],
+:where(.workspace-switcher .workspace-tab,nav button)[aria-selected="true"]{
+ border-color:var(--nv-ref-f0);
+}
+:where(.shell-card,.myview-card,.widget-card) :where(svg,.lucide){
+ flex-shrink:0;
+}
+:where(.shell-card,.myview-card,.widget-card) :where(button,a):focus-visible{
+ position:relative;z-index:1;
+}
+@media(max-width:390px){
+ :where(.shell-card,.myview-card,.widget-card){padding-inline:12px}
+ .workspace-switcher .workspace-tab{white-space:nowrap}
+}
+@media(forced-colors:active){
+ :where(.shell-card,.myview-card,.widget-card){border-color:CanvasText;background:Canvas;color:CanvasText}
+}
+
+
+/* Shared five-workspace SVG icon sizing, TV focus and mobile layout. */
+.nv-nav-icon{display:inline-block;width:1.15em;height:1.15em;flex:none;vertical-align:-.12em;pointer-events:none}
+.workspace-switcher .workspace-tab{gap:.55em;white-space:nowrap}
+.workspace-switcher .workspace-tab:focus-visible .nv-nav-icon{stroke-width:2.25}
+@media(min-width:1200px) and (pointer:coarse){
+ .workspace-switcher .nv-nav-icon{width:1.35em;height:1.35em}
+}
+@media(max-width:700px){
+ .workspace-switcher .workspace-tab{font-size:clamp(13px,3.5vw,16px)}
+ .nv-nav-icon{width:18px;height:18px}
+}
+
+
+/* NewView dashboard framing: reference-inspired copper borders, capsule icons,
+   and channel/media surfaces. Presentation only; no launcher or playback changes. */
+:root{
+ --nv-frame-edge:rgba(213,151,110,.38);
+ --nv-frame-highlight:rgba(255,239,225,.12);
+ --nv-channel-surface:rgba(23,17,19,.76);
+}
+body main{border:1px solid rgba(213,151,110,.16);border-radius:22px}
+.workspace-switcher{
+ border:1px solid var(--nv-frame-edge);
+ border-radius:20px;
+ background:linear-gradient(145deg,rgba(52,32,27,.94),rgba(16,17,21,.92));
+ box-shadow:inset 0 1px 0 var(--nv-frame-highlight),0 16px 34px rgba(0,0,0,.2);
+}
+.workspace-switcher .workspace-tab{
+ border-radius:999px;
+ border:1px solid rgba(213,151,110,.2);
+ background:rgba(255,255,255,.035);
+}
+.workspace-switcher .nv-nav-icon{
+ border-radius:9px;
+ filter:drop-shadow(0 1px 3px rgba(213,151,110,.18));
+}
+.workspace-switcher .workspace-tab:is(.selected,[aria-current="page"],[aria-pressed="true"]){
+ border-color:#d5976e;
+ box-shadow:inset 0 1px 0 rgba(255,245,233,.18),0 0 0 1px rgba(213,151,110,.18);
+}
+:where(.shell-card,.myview-card,.widget-card,.workspace-panel){
+ border:1px solid var(--nv-frame-edge);
+ border-radius:20px;
+ background:linear-gradient(145deg,rgba(38,29,29,.92),rgba(15,17,22,.92));
+ box-shadow:inset 0 1px 0 var(--nv-frame-highlight),0 12px 32px rgba(0,0,0,.17);
+}
+:where(.media-actions,.media-input,#media-frame,#media-status){
+ border-radius:16px;
+}
+#media-frame{
+ border:1px solid var(--nv-frame-edge);
+ background:var(--nv-channel-surface);
+ overflow:hidden;
+}
+:where(.media-actions,.home-app-actions,.home-installed-grid) :where(button,a[href]){
+ border-radius:999px;
+}
+:where(.media-actions,.home-app-actions,.home-installed-grid) :where(button,a[href]):focus-visible{
+ outline:3px solid #ffd0a0;
+ outline-offset:3px;
+}
+@media(max-width:700px){
+ body main{border-radius:14px}
+ .workspace-switcher{border-radius:14px}
+ :where(.shell-card,.myview-card,.widget-card,.workspace-panel){border-radius:16px}
+}
+@media(forced-colors:active){
+ body main,.workspace-switcher,:where(.shell-card,.myview-card,.widget-card,.workspace-panel),#media-frame{
+ border:1px solid CanvasText;background:Canvas;box-shadow:none
+ }
+}
+
+/* NewView reference refinement, Nov 2026: self-contained dashboard styling.
+   No third-party fonts, scripts, trackers, or proprietary runtime dependencies. */
+:root{
+ --nv-ui-surface:#191619;
+ --nv-ui-surface-raised:#242025;
+ --nv-ui-stroke:rgba(255,255,255,.12);
+ --nv-ui-stroke-strong:rgba(201,165,152,.5);
+ --nv-ui-ink:#f5f3ef;
+ --nv-ui-muted:#cdc9c3;
+ --nv-ui-accent:#c9a598;
+ --nv-ui-radius:16px;
+}
+:where(.workspace-switcher,.shell-card,.myview-card,.widget-card,.workspace-panel){
+ transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease;
+}
+:where(.shell-card,.myview-card,.widget-card,.workspace-panel):focus-within{
+ border-color:var(--nv-ui-stroke-strong);
+}
+:where(.workspace-switcher .workspace-tab,.media-actions button,.home-app-actions button){
+ min-height:44px;
+ transition:background-color .16s ease,border-color .16s ease,transform .16s ease;
+}
+:where(.workspace-switcher .workspace-tab,.media-actions button,.home-app-actions button):focus-visible{
+ outline:3px solid #fcd4b5;
+ outline-offset:3px;
+}
+:where(.workspace-switcher .workspace-tab,.media-actions button,.home-app-actions button):active{
+ transform:scale(.98);
+}
+:where(.workspace-switcher .workspace-tab)[aria-selected="true"],
+:where(.workspace-switcher .workspace-tab)[aria-current="page"],
+:where(.workspace-switcher .workspace-tab)[aria-pressed="true"]{
+ background:rgba(201,165,152,.16);
+ border-color:var(--nv-ui-stroke-strong);
+ color:var(--nv-ui-ink);
+}
+:where(#media-frame,.media-input,.media-actions){
+ border-color:var(--nv-ui-stroke);
+}
+:where(.media-actions button,.home-app-actions button)[aria-pressed="true"],
+:where(.media-actions button,.home-app-actions button)[aria-selected="true"]{
+ border-color:var(--nv-ui-stroke-strong);
+ box-shadow:inset 0 0 0 1px rgba(201,165,152,.16);
+}
+@media(hover:hover){
+ :where(.workspace-switcher .workspace-tab,.media-actions button,.home-app-actions button):hover{
+  border-color:var(--nv-ui-stroke-strong);
+  background-color:rgba(201,165,152,.12);
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ :where(.workspace-switcher,.shell-card,.myview-card,.widget-card,.workspace-panel,.workspace-switcher .workspace-tab,.media-actions button,.home-app-actions button){
+  transition:none!important;
+ }
+}
+
+/* NewView channel directory — scoped to the app's own markup. */
+#newview-channel-directory{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;
+ gap:12px 14px;margin-block:16px 8px;padding:18px;
+ border:1px solid var(--nv-ui-stroke-strong);border-radius:var(--nv-ui-radius);
+ background:linear-gradient(145deg,rgba(43,32,33,.9),rgba(16,18,24,.93));
+ box-shadow:inset 0 1px rgba(255,255,255,.09),0 12px 28px rgba(0,0,0,.17);
+}
+#newview-channel-directory h3,#newview-channel-directory [role="status"]{
+ grid-column:1/-1;margin:0;
+}
+#newview-channel-directory [role="status"]{font-size:.88rem;opacity:.86}
+#newview-channel-directory input[type="search"],#newview-channel-directory select{
+ grid-column:1/-1;min-width:0;width:100%;border:1px solid var(--nv-ui-stroke);
+ border-radius:12px;min-height:44px;padding:9px 12px;
+}
+#newview-channel-directory label{display:inline-flex;align-items:center;gap:8px;min-width:0}
+#newview-channel-directory input[type="checkbox"]{width:18px;height:18px;accent-color:var(--nv-ui-accent)}
+#newview-channel-directory button,#newview-channel-directory a{
+ display:inline-flex;justify-content:center;align-items:center;text-align:center;
+ min-height:44px;min-width:0;padding:8px 14px;border:1px solid var(--nv-ui-stroke-strong);
+ border-radius:999px;text-decoration:none;
+}
+#newview-channel-directory :is(button,a,input,select):focus-visible{
+ outline:3px solid #fcd4b5;outline-offset:3px;
+}
+#newview-channel-directory button:disabled{opacity:.5;cursor:not-allowed}
+#newview-channel-directory [hidden]{display:none!important}
+@media(max-width:620px){#newview-channel-directory{grid-template-columns:minmax(0,1fr);padding:14px}#newview-channel-directory h3,#newview-channel-directory [role="status"]{grid-column:1}}
+@media(forced-colors:active){#newview-channel-directory{background:Canvas;color:CanvasText;border-color:CanvasText}}
