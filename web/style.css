@@ -705,3 +705,12 @@ body>main>[data-workspace="myview"] #myview-grid{overscroll-behavior:contain}
 @media(min-width:651px) and (max-width:900px){body>main>[data-workspace="myview"] .newview-panel-tabs{flex-wrap:wrap}body>main>[data-workspace="myview"] .newview-panel-tabs button{flex:1 1 18%;min-width:0;padding:8px 3px}body>main>[data-workspace="myview"] #myview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}body>main>[data-workspace="myview"] #myview-grid>.myview-widget[data-panel-active="true"]{display:block!important}body>main>[data-workspace="myview"] #myview-grid>.myview-widget[data-widget="market"]{grid-column:span 2}}
 @media(max-width:650px){body>main>.workspace-switcher{padding-bottom:max(3px,env(safe-area-inset-bottom))}body>main>[data-workspace="myview"] .newview-panel-tabs{flex-wrap:wrap}body>main>[data-workspace="myview"] .newview-panel-tabs button{flex:1 1 18%;min-width:0}body>main>[data-workspace="myview"] #myview-grid>.myview-widget[data-panel-active="true"]{display:block!important}body>main>[data-workspace="myview"] #myview-grid>.myview-widget[data-widget="market"]{grid-column:auto}}
 @media(max-height:600px){body>main{padding-block:4px}body>main>header .eyebrow,body>main>footer{display:none}body>main>[data-workspace="myview"] .newview-home-hero{max-height:18%}body>main>[data-workspace="myview"] .newview-personalize{display:none}}
+
+/* Unified MyView live widgets: actual observed quote sparkline and explicit media handoff. */
+.myview-live-chart{min-height:104px;display:flex;flex-direction:column;gap:6px;margin:8px 0;min-width:0}
+.myview-live-chart svg{width:100%;height:90px;display:block;overflow:visible}
+.myview-chart-caption{font-size:11px;color:var(--muted,#9ca9bc)}
+.myview-video-panel{border:1px solid rgba(150,170,190,.24);border-radius:10px;padding:10px;display:grid;gap:6px}
+.myview-video-panel p{margin:0;font-size:12px}
+@media(pointer:fine){.myview-widget[draggable="true"]{cursor:grab}.myview-widget[draggable="true"]:active{cursor:grabbing}}
+@media(pointer:coarse){.myview-widget[draggable="true"]{cursor:default}}
