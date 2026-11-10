@@ -355,3 +355,18 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
  .shell-page :where([role="alert"],[data-state="error"]),
  .shell-card :where([role="alert"],[data-state="error"]){border:2px solid CanvasText;border-inline-start:4px solid Highlight;background:Canvas;color:CanvasText}
 }
+
+/* Keep keyboard and TV focus visible when cards scroll horizontally. */
+@supports (scrollbar-gutter:stable){.workspace-switcher{scrollbar-gutter:stable}}
+.workspace-switcher [data-view-button]:focus-visible{scroll-margin-inline:16px}
+.shell-page :is(button,[role="button"],a[href],select,input,textarea):focus-visible,
+.shell-card :is(button,[role="button"],a[href],select,input,textarea):focus-visible{
+ outline:3px solid var(--cyan);outline-offset:3px;
+}
+.shell-page :is(button,[role="button"]):disabled,
+.shell-card :is(button,[role="button"]):disabled{cursor:not-allowed}
+@media(forced-colors:active){
+ .shell-page [aria-busy="true"],.shell-card [aria-busy="true"]{outline:1px dashed CanvasText;outline-offset:2px}
+ .shell-page :is(button,[role="button"],a[href],select,input,textarea):focus-visible,
+ .shell-card :is(button,[role="button"],a[href],select,input,textarea):focus-visible{outline-color:Highlight}
+}
