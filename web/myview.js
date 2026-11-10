@@ -93,7 +93,7 @@
  const preview={
   market:v=>v&&Number.isFinite(v.price)&&typeof v.symbol==='string'?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+(Number.isFinite(v.quoteTime)&&v.quoteTime>0?' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():' · quote time unavailable'):'No verified quote received',
   business:v=>v&&Number.isFinite(v.revenue)&&v.revenue>=0?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+(Number.isFinite(v.cost)&&v.cost>=0&&v.revenue>0?'margin '+new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format((v.revenue-v.cost)/v.revenue*100)+'% · ':'')+(Number.isSafeInteger(v.orders)&&v.orders>=0?v.orders+' orders':'order count unavailable')+(typeof v.asOf==='string'&&v.asOf.trim()?' · '+v.asOf.slice(0,60):' · period unavailable'):'Upload a CSV in Business to view session KPIs',
-  news:v=>v&&Number.isFinite(v.count)&&v.count>0?v.count+' '+(v.source==='fed'?'Federal Reserve':v.source==='sec'?'SEC':'source-unverified')+' announcements'+(typeof v.headline==='string'&&v.headline?' · '+v.headline:''):'Load official announcements in Watch & News',
+  news:v=>v&&Number.isSafeInteger(v.count)&&v.count>0?v.count+' '+(v.source==='fed'?'Federal Reserve':v.source==='sec'?'SEC':'source-unverified')+' announcements'+(typeof v.headline==='string'&&v.headline.trim()?' · '+v.headline.trim().slice(0,180):''):'Load official announcements in Watch & News',
   social:v=>v&&Number.isSafeInteger(v.count)&&v.count>=0?v.count+' locally saved public profiles':'No verified public-profile count available',
   media:()=> 'Open a video in Watch & News; no playback is started here'
  };
