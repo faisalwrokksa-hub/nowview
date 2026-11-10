@@ -80,7 +80,7 @@
    // Arrow/Home/End keys still provide direct access to all available workspaces.
    el.tabIndex=active?0:-1;
   }
-  document.getElementById('workspace-title').textContent=names[view];
+  const workspaceTitle=document.getElementById('workspace-title');if(workspaceTitle)workspaceTitle.textContent=names[view];
   const source=document.getElementById('footer-source');
   if(source)source.textContent=sourceNotes[view];
   document.body.dataset.currentWorkspace=view;
@@ -97,7 +97,7 @@
   else{if(market)market.hidden=true;if(board)board.hidden=true;if(chart)chart.hidden=true;}
   try{localStorage.setItem('newview.workspace',view);}catch{}
   const page=document.querySelector('[data-workspace="'+view+'"]');
-  if(page&&page.scrollTo){try{page.scrollTo({top:0,behavior:'instant'});}catch{page.scrollTop=0;}}
+  if(page){try{if(typeof page.scrollTo==='function')page.scrollTo({top:0,behavior:'instant'});else page.scrollTop=0;}catch{page.scrollTop=0;}}
   return true;
  }
  function installDisplay(){
