@@ -92,8 +92,8 @@
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
   market:v=>v&&Number.isFinite(v.price)&&typeof v.symbol==='string'?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+(Number.isFinite(v.quoteTime)&&v.quoteTime>0?' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():' · quote time unavailable'):'No verified quote received',
-  business:v=>v&&Number.isFinite(v.revenue)?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+(Number.isFinite(v.cost)&&v.revenue>0?'margin '+new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format((v.revenue-v.cost)/v.revenue*100)+'% · ':'')+v.orders+' orders · '+v.asOf:'Upload a CSV in Business to view session KPIs',
-  news:v=>v&&v.count?v.count+' '+(v.source==='fed'?'Federal Reserve':'SEC')+' announcements · '+(v.headline||''):'Load official announcements in Watch & News',
+  business:v=>v&&Number.isFinite(v.revenue)?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+(Number.isFinite(v.cost)&&v.revenue>0?'margin '+new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format((v.revenue-v.cost)/v.revenue*100)+'% · ':'')+v.orders+' orders'+(typeof v.asOf==='string'&&v.asOf.trim()?' · '+v.asOf:' · period unavailable'):'Upload a CSV in Business to view session KPIs',
+  news:v=>v&&Number.isFinite(v.count)&&v.count>0?v.count+' '+(v.source==='fed'?'Federal Reserve':v.source==='sec'?'SEC':'source-unverified')+' announcements'+(typeof v.headline==='string'&&v.headline?' · '+v.headline:''):'Load official announcements in Watch & News',
   social:v=>v?v.count+' locally saved public profiles':'No public profiles saved',
   media:()=> 'Open a video in Watch & News; no playback is started here'
  };
