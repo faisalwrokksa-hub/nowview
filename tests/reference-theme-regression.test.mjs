@@ -74,4 +74,13 @@ test('Watch and News restores keyboard focus when switching hidden panels', () =
   const watch = read('web/watch.js');
   assert.match(watch, /focusInsideHiddenPanel/);
   assert.match(watch, /focus\(\{preventScroll:true\}\)/);
+  assert.match(watch, /catch\{target\?\.focus\(\);\}/);
+});
+
+
+test('IPTV launch reports secure-stream and bridge errors', () => {
+  const media = read('web/media.js');
+  assert.match(media, /Only secure HTTPS streams can be launched/);
+  assert.match(media, /Could not launch this stream/);
+  assert.match(media, /Native IPTV playback is not available/);
 });
