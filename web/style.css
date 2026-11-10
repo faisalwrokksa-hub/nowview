@@ -335,3 +335,69 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
  .workspace-switcher [data-view-button]:focus-visible{outline-width:4px}
 }
 @media(max-width:380px){.workspace-switcher{gap:6px}.workspace-switcher [data-view-button]{padding-inline:10px}}
+
+
+/* NewView reference-theme pass — original CSS, visually aligned to the supplied
+   dark copper/terracotta dashboard reference. No third-party assets or scripts.
+   Shared web assets are intended to be reused by the Android WebView host. */
+:root{
+ color-scheme:dark;
+ --bg:#110d0d;--panel:#211817;--line:#52372e;
+ --muted:#c5aaa0;--text:#fff3ec;
+ --cyan:#d98a5d;--green:#a7d4aa;--red:#f1a49c;
+ --nv-accent:#b36535;--nv-accent-strong:#e3a078;
+ --nv-surface-raised:#30211d;--nv-focus:#ffd0a0;
+}
+body{
+ background:radial-gradient(ellipse at 82% 0%,rgba(149,87,64,.25),transparent 52%),#110d0d;
+ color:var(--text);
+}
+:where(.shell-card,.myview-card,.widget-card,.workspace-panel){
+ border-color:var(--line);
+}
+:where(button,.workspace-tab,.shell-card,.myview-card){
+ transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+:where(button,.workspace-tab)[aria-current="page"],
+:where(button,.workspace-tab)[aria-selected="true"],
+.workspace-tab.selected{
+ border-color:var(--nv-accent-strong);
+ background:linear-gradient(135deg,#633725,#3b2420);
+ color:#fff6ee;
+}
+:where(button,a[href],input,select,textarea,[tabindex]):focus-visible{
+ outline:3px solid var(--nv-focus);
+ outline-offset:3px;
+ box-shadow:0 0 0 6px rgba(179,101,53,.22);
+}
+:where(button,a[href],input,select,textarea):disabled{
+ cursor:not-allowed;opacity:.52;
+}
+:where(.shell-card,.myview-card,.widget-card) :where(h2,h3){
+ color:#fff1e8;
+}
+:where(.workspace-switcher,.shell-page,.shell-card,.myview-grid){min-width:0}
+@media(max-width:700px){
+ :where(.shell-card,.myview-card,.widget-card){border-radius:14px}
+ .workspace-switcher{scroll-snap-type:x proximity}
+ .workspace-switcher .workspace-tab{scroll-snap-align:start;min-height:48px}
+}
+@media(min-width:1200px) and (min-height:650px) and (pointer:coarse){
+ .workspace-switcher .workspace-tab{min-height:58px;padding:14px 20px}
+ :where(button,a[href],[tabindex]):focus-visible{
+  outline-width:4px;outline-offset:4px;
+  box-shadow:0 0 0 9px rgba(179,101,53,.3);
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ :where(button,.workspace-tab,.shell-card,.myview-card){transition:none!important}
+}
+@media(forced-colors:active){
+ :where(button,a[href],input,select,textarea,[tabindex]):focus-visible{
+  outline:3px solid Highlight;box-shadow:none;
+ }
+ :where(button,.workspace-tab)[aria-current="page"],
+ :where(button,.workspace-tab)[aria-selected="true"]{
+  border:2px solid Highlight;background:Canvas;color:CanvasText;
+ }
+}
