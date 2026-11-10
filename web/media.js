@@ -78,7 +78,17 @@
  favoritesOnly.addEventListener('change',renderChannels);
  search.addEventListener('input',renderChannels);
  secureOnly.addEventListener('change',renderChannels);
- playChannel.addEventListener('click',()=>{if(!nativeStream()||!list.value)return;try{const url=new URL(list.value);if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port)window.NewViewNative.playStream(url.href);}catch{}});
+ playChannel.addEventListener('click',()=>{
+  if(!nativeStream()||!list.value){status.textContent='No playable channel selected on this device.';return;}
+  try{
+   const url=new URL(list.value);
+   if(url.protocol!=='https:'||url.username||url.password||url.port){status.textContent='Only secure HTTPS streams can be launched inside NewView.';return;}
+   window.NewViewNative.playStream(url.href);
+   status.textContent='Opening selected stream in the Android TV player. Availability depends on the external source.';
+  }catch{
+   status.textContent='Could not launch the Android TV player. Try the selected stream link or choose another channel.';
+  }
+ });
  async function loadDirectory(force=false){
   if(loading)return loading;
   if(!force&&allChannels.length&&Date.now()-lastFetch<3600000){renderChannels();return;}
