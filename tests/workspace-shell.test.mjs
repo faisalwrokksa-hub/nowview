@@ -32,3 +32,8 @@ test('TV remote and keyboard navigation keeps workspace focus operable',()=>{
  assert.match(source,/buttons\[next\]\.focus\(\)/);
  assert.match(source,/select\(buttons\[next\]\.dataset\.viewButton\)/);
 });
+
+test('TV navigation does not hijack shortcuts or editable controls',()=>{
+ assert.match(source,/event\.defaultPrevented\|\|event\.altKey\|\|event\.ctrlKey\|\|event\.metaKey\|\|event\.shiftKey/);
+ assert.match(source,/input, textarea, select/);
+});
