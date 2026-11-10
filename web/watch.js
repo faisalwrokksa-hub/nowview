@@ -29,11 +29,15 @@
     let active = 'channels';
     function select(id) {
       if (!sections.some(section => section.id === id)) return false;
+      const previousFocus=document.activeElement;
+      const focusInsideHiddenPanel=sections.some(section=>section.id!==id&&section.panel.contains(previousFocus));
       active = id;
       for (const section of sections) {
         section.panel.hidden = section.id !== id;
         section.button?.setAttribute('aria-pressed', String(section.id === id));
+        if(section.button)section.button.tabIndex=section.id===id?0:-1;
       }
+      if(focusInsideHiddenPanel)sections.find(section=>section.id===id)?.button?.focus({preventScroll:true});
       if (id === 'headlines' && !document.getElementById('news-items')?.children.length) {
         document.getElementById('news-refresh')?.click();
       }
