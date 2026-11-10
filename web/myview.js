@@ -87,6 +87,20 @@
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
  const presetBar=document.getElementById('myview-presets');
  let chosen=load();
+ const quoteHistory=new Map();
+ const maxQuotePoints=36;
+ function chartFor(symbol){
+  const points=quoteHistory.get(symbol)||[];
+  const container=document.createElement('div');container.className='myview-live-chart';
+  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two verified quotes';
+  container.append(title);
+  if(points.length<2)return container;
+  const min=Math.min(...points),max=Math.max(...points),range=max-min||1;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 320 90');svg.setAttribute('role','img');svg.setAttribute('aria-label',symbol+' observed session quote trend');
+  const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','#24b9a2');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');line.setAttribute('points',points.map((v,i)=>(i*320/(points.length-1)).toFixed(1)+','+(82-(v-min)/range*74).toFixed(1)).join(' '));svg.append(line);container.append(svg);return container;
+ }
+ function refreshChart(){const card=root.querySelector('[data-widget="market"]');if(!card)return;card.querySelector('.myview-live-chart')?.replaceWith(chartFor(snapshots.market?.symbol||'Market'));}
+
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
   market:v=>v&&Number.isFinite(v.price)?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():'No verified quote received',
@@ -112,6 +126,11 @@
    const widget=catalog.find(x=>x.id===id);
    const item=document.createElement('article');item.className='myview-widget';
    item.dataset.widget=id;
+   item.draggable=true;
+   item.setAttribute('aria-label',widget.title+' widget. Use move earlier or later buttons for keyboard and TV.');
+   item.addEventListener('dragstart',e=>{e.dataTransfer?.setData('text/plain',id);if(e.dataTransfer)e.dataTransfer.effectAllowed='move';});
+   item.addEventListener('dragover',e=>{if(e.dataTransfer?.types.includes('text/plain'))e.preventDefault();});
+   item.addEventListener('drop',e=>{e.preventDefault();const from=e.dataTransfer?.getData('text/plain');if(!ids.has(from)||!chosen.includes(from)||from===id)return;const next=chosen.filter(x=>x!==from);next.splice(next.indexOf(id),0,from);chosen=save(next);render();root.querySelector('[data-widget="'+from+'"] button')?.focus();});
    const heading=text('h3','',widget.title);
    const eyebrow=text('div','shell-eyebrow',widget.label);
    const description=text('p','',widget.description);
@@ -127,7 +146,15 @@
    function move(delta){const next=[...chosen],at=next.indexOf(id);if(at+delta<0||at+delta>=next.length)return;[next[at],next[at+delta]]=[next[at+delta],next[at]];chosen=save(next);render();const moved=root.querySelector('[data-widget="'+id+'"]');const target=moved?.querySelector(delta<0?'[data-reorder="up"]':'[data-reorder="down"]');if(target&&!target.disabled)target.focus();else moved?.querySelector('button:not([disabled])')?.focus();}
    up.dataset.reorder='up';down.dataset.reorder='down';
    up.addEventListener('click',()=>move(-1));down.addEventListener('click',()=>move(1));
-   actions.append(button,up,down);item.append(eyebrow,heading,description,insight,actions);root.append(item);
+   actions.append(button,up,down);item.append(eyebrow,heading,description,insight);
+   if(id==='market')item.append(chartFor(snapshots.market?.symbol||'Market'));
+   if(id==='media'){
+    const player=document.createElement('div');player.className='myview-video-panel';
+    const label=text('p','','Video playback is available in Watch & News; native IPTV requires Android TV support.');
+    const open=text('button','shell-primary','Open video player');open.type='button';open.addEventListener('click',()=>{window.NewViewShell?.select('media');window.NewViewWatch?.select('videos');});
+    player.append(label,open);item.append(player);
+   }
+   item.append(actions);root.append(item);
   }
  }
  function installPresets(){if(!presetBar)return;for(const [name,label] of [['balanced','Balanced'],['markets','Markets first'],['media','Watch & News first']]){const button=text('button','',''+label);button.type='button';button.dataset.preset=name;button.addEventListener('click',()=>{chosen=save(preset(name));render();button.focus();});presetBar.append(button);}}
@@ -136,6 +163,11 @@
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(preview[id](next)===preview[id](snapshots[id]))return; // Do not reset TV focus on unchanged quotes.
   snapshots[id]=next;
+  if(id==='market'&&next&&typeof next.symbol==='string'&&Number.isFinite(next.price)&&Number.isFinite(next.quoteTime)){
+   const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
+   if(!points.length||points[points.length-1]!==next.price){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);}
+   refreshChart();
+  }
   // Update only the live insight text: rebuilding the grid would steal TV remote/keyboard focus.
   const insight=root.querySelector('[data-widget="'+id+'"] .myview-insight');
   if(insight)insight.textContent=preview[id](next);
