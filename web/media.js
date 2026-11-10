@@ -20,8 +20,8 @@
  function syncDashboardCategories(){
   if(!category||!preferred)return;
   const preferences=window.NewViewShell?.loadFirstLaunch?.();
-  const types=preferred.categoriesFor(currentDashboard(),preferences?.interests);
-  const valid=['all',...types.filter(x=>preferred.playlistUrl(x))];
+  const types=typeof preferred.categoriesFor==='function'?preferred.categoriesFor(currentDashboard(),preferences?.interests):[];
+  const valid=['all',...(Array.isArray(types)?types:[]).filter(x=>typeof x==='string'&&typeof preferred.playlistUrl==='function'&&preferred.playlistUrl(x))];
   if(!valid.length)return;
   const previous=category.value;
   category.replaceChildren(...valid.map(x=>{const o=document.createElement('option');o.value=x;o.textContent=x.charAt(0).toUpperCase()+x.slice(1);return o;}));
@@ -90,7 +90,8 @@
     content=await response.text();
    }
    if(content.length>16000000)throw Error('Playlist too large');
-   const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
+   if(typeof preferred?.parseM3U!=='function')throw Error('Playlist parser unavailable');
+   const parsed=preferred.parseM3U(content);if(!Array.isArray(parsed)||!parsed.length)throw Error('No valid channels');
    allChannels=parsed;lastFetch=Date.now();renderChannels();
   }catch(error){allChannels=[];lastFetch=0;list.replaceChildren();playChannel.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
   finally{loading=null;}})();return loading;
