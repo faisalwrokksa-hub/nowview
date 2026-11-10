@@ -56,7 +56,9 @@
   const narrowed=category?.value==='favorites'||favoritesOnly.checked?allChannels.filter(c=>favorites.has(c.url)):category?.value&&category.value!=='all'?allChannels.filter(c=>String(c.category||'').toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):allChannels;
   const term=search.value.trim().toLowerCase().slice(0,120);
   const visible=narrowed.filter(c=>(!secureOnly.checked||c.url.startsWith('https://'))&&(!term||(c.name+' '+c.id).toLowerCase().includes(term)));
+  const selectedBefore=list.value;
   list.replaceChildren(...visible.slice(0,1500).map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
+  if(selectedBefore&&visible.some(c=>c.url===selectedBefore))list.value=selectedBefore;
   open.hidden=!visible.length;
   playChannel.disabled=!visible.length;
   favorite.disabled=!visible.length;
@@ -94,14 +96,24 @@
      window.NewViewNative.fetchPublicPlaylist(id);
     });
    }else{
-    const response=await fetch(preferred.MAIN_PLAYLIST,{cache:'no-store'});
-    if(!response.ok)throw Error('HTTP '+response.status);
-    content=await response.text();
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),15000);
+    try{
+     const response=await fetch(preferred.MAIN_PLAYLIST,{cache:'no-store',signal:controller.signal});
+     if(!response.ok)throw Error('HTTP '+response.status);
+     const declaredSize=Number(response.headers.get('content-length'));
+     if(Number.isFinite(declaredSize)&&declaredSize>16000000)throw Error('Playlist too large');
+     content=await response.text();
+    }finally{clearTimeout(timeout);}
    }
    if(content.length>16000000)throw Error('Playlist too large');
    const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
    allChannels=parsed;lastFetch=Date.now();renderChannels();
-  }catch(error){allChannels=[];lastFetch=0;list.replaceChildren();playChannel.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+String(error.message||error)+'). Use the official playlist link or retry.';}
+  }catch(error){
+   const reason=error?.name==='AbortError'?'request timed out':String(error?.message||error);
+   if(allChannels.length){renderChannels();status.textContent='Refresh failed ('+reason+'). Showing '+allChannels.length+' previously loaded channels; stream availability is not guaranteed.';}
+   else{lastFetch=0;list.replaceChildren();playChannel.disabled=true;favorite.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+reason+'). Use the official playlist link or retry.';}
+  }
   finally{loading=null;}})();return loading;
  }
  refresh.addEventListener('click',()=>loadDirectory(true));
