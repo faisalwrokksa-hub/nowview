@@ -37,7 +37,7 @@
         section.button?.setAttribute('aria-pressed', String(section.id === id));
         if(section.button)section.button.tabIndex=section.id===id?0:-1;
       }
-      if(focusInsideHiddenPanel)sections.find(section=>section.id===id)?.button?.focus({preventScroll:true});
+      if(focusInsideHiddenPanel){const target=sections.find(section=>section.id===id)?.button;try{target?.focus({preventScroll:true});}catch{target?.focus();}}
       if (id === 'headlines' && !document.getElementById('news-items')?.children.length) {
         document.getElementById('news-refresh')?.click();
       }
