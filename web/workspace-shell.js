@@ -159,7 +159,8 @@
  function install(){
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
-  nav.addEventListener('click',event=>{const b=event.target instanceof Element?event.target.closest('[data-view-button]'):null;if(b&&nav.contains(b)&&!b.disabled&&b.getAttribute('aria-disabled')!=='true')select(b.dataset.viewButton);});
+  nav.addEventListener('click',event=>{const b=event.target instanceof Element?event.target.closest('[data-view-button]'):null;if(b&&nav.contains(b)&&!b.disabled&&!b.hidden&&b.getAttribute('aria-disabled')!=='true'&&
+   !b.closest('[hidden],[inert],[aria-hidden="true"]')&&b.getClientRects().length>0)select(b.dataset.viewButton);});
   // Roving tab focus: arrow keys navigate workspaces on keyboard and TV remotes.
   // Keep ordinary arrow-key behavior inside content widgets and forms.
   nav.addEventListener('keydown',event=>{
