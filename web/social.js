@@ -69,7 +69,7 @@
   return result;
  }
  function load(){try{return sanitize(JSON.parse(localStorage.getItem(KEY)||'[]'));}catch{return [];}}
- function save(items){const safe=sanitize(items);try{localStorage.setItem(KEY,JSON.stringify(safe));}catch{}return safe;}
+ function save(items){const safe=sanitize(items);try{localStorage.setItem(KEY,JSON.stringify(safe));return safe;}catch{return null;}}
  const META_KEY='newview.social.metadata.v1';
  function cleanLabel(value){return typeof value==='string'?value.trim().slice(0,32).replace(/[^a-zA-Z0-9 _-]/g,''):'';}
  function loadMetadata(){try{const raw=JSON.parse(localStorage.getItem(META_KEY)||'{}');if(!raw||typeof raw!=='object'||Array.isArray(raw))return {};const result={};for(const [key,value] of Object.entries(raw).slice(0,MAX)){if(typeof key!=='string'||key.length>500||!value||typeof value!=='object')continue;const tag=cleanLabel(value.tag),collection=cleanLabel(value.collection);if(tag||collection)result[key]={tag,collection};}return result;}catch{return {};}}
@@ -115,7 +115,7 @@
    a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';
    const remove=text('button','','Remove');
    remove.type='button';remove.setAttribute('aria-label','Remove '+item.name);
-   remove.addEventListener('click',()=>{items=save(items.filter(x=>x.url!==item.url));delete metadata[item.url];persistMetadata();render();status.textContent='Profile removed locally.';});
+   remove.addEventListener('click',()=>{const next=save(items.filter(x=>x.url!==item.url));if(!next){status.textContent='Could not remove profile: device storage is unavailable.';return;}items=next;delete metadata[item.url];persistMetadata();render();status.textContent='Profile removed locally.';});
    const tag=document.createElement('input');tag.type='text';tag.maxLength=32;tag.placeholder='Tag (optional)';tag.setAttribute('aria-label','Tag for '+item.name);tag.value=metadata[item.url]?.tag||'';
    const collection=document.createElement('input');collection.type='text';collection.maxLength=32;collection.placeholder='Collection (optional)';collection.setAttribute('aria-label','Collection for '+item.name);collection.value=metadata[item.url]?.collection||'';
    const saveLabels=text('button','','Save labels');saveLabels.type='button';
@@ -129,9 +129,9 @@
   if(!item){status.textContent='Enter a valid HTTPS public profile URL for the selected platform.';return;}
   if(items.some(x=>x.url===item.url)){status.textContent='This profile is already saved.';return;}
   if(items.length>=MAX){status.textContent='Maximum 24 saved profiles.';return;}
-  items=save([...items,item]);url.value='';status.textContent='Profile saved on this device. No social feed has been fetched.';render();
+  const next=save([...items,item]);if(!next){status.textContent='Could not save profile: device storage is unavailable.';return;}items=next;url.value='';status.textContent='Profile saved on this device. No social feed has been fetched.';render();
  });
- document.getElementById('social-clear')?.addEventListener('click',()=>{items=save([]);metadata={};persistMetadata();status.textContent='All saved profiles cleared from this device.';render();});
+ document.getElementById('social-clear')?.addEventListener('click',()=>{const next=save([]);if(!next){status.textContent='Could not clear profiles: device storage is unavailable.';return;}items=next;metadata={};persistMetadata();status.textContent='All saved profiles cleared from this device.';render();});
  window.NewViewSocial={validate,sanitize,load,save,render,discoveryUrl,discoveryLinks};
  const pref=preferences();if(geoPicker){for(const [value,label] of [['GLOBAL','Global'],['US','United States'],['CA','Canada'],['AU','Australia'],['GB','United Kingdom']]){if(!Array.from(geoPicker.options).some(o=>o.value===value)){const option=document.createElement('option');option.value=value;option.textContent=label;geoPicker.append(option);}}for(const option of Array.from(geoPicker.options)){if(!Object.hasOwn(GEO,option.value))option.remove();}geoPicker.value=pref.geo;}if(topicPicker){for(const [value,label] of [['ai','AI'],['news','Breaking News'],['sports','Sports'],['entertainment','Entertainment'],['gaming','Gaming'],['science','Science']]){if(!Array.from(topicPicker.options).some(o=>o.value===value)){const option=document.createElement('option');option.value=value;option.textContent=label;topicPicker.append(option);}}topicPicker.value=pref.topic;}
  render();renderDiscovery();
