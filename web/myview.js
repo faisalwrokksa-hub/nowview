@@ -173,7 +173,7 @@
  document.getElementById('myview-reset')?.addEventListener('click',()=>{chosen=save(defaults);render();});
  for(const id of ['market','business','news','social'])window.addEventListener('newview:'+id,event=>{
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
-  if(id!=='news'&&preview[id](next)===preview[id](snapshots[id]))return; // News source validity may change without changing preview text.
+  if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
   // Refresh only the affected text: rebuilding cards on every quote disrupts TV/keyboard focus.
   const live=root.querySelector('[data-widget="'+id+'"] [data-snapshot="'+id+'"]');
