@@ -72,3 +72,12 @@ test('Market Watch does not display future-dated quote timestamps as current',()
  const recent=Math.floor(Date.now()/1000)-60;
  assert.match(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:recent}),/ · quote (?!time unavailable)/);
 });
+
+
+test('Market Watch hides stale quote times without treating old timestamps as current',()=>{
+ const {api}=setup();
+ const stale=Math.floor(Date.now()/1000)-25*60*60;
+ assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:stale}),'BTCUSDT · 120 USDT · quote time unavailable');
+ const recent=Math.floor(Date.now()/1000)-60;
+ assert.match(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:recent}),/ · quote (?!time unavailable)/);
+});
