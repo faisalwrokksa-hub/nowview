@@ -14,7 +14,7 @@ test('MyView snapshots show source-data empty states',()=>{
  assert.match(p.preview.market(null),/No verified quote/);
  assert.match(p.preview.news(null),/Load official/);
  assert.match(p.preview.business(null),/Upload a CSV/);
- assert.match(p.preview.social(null),/No public profiles/);
+ assert.match(p.preview.social(null),/No verified public-profile count/);
  assert.match(p.preview.media(),/no playback/);
 });
 test('Every source forwards minimal session data without fake records',()=>{
