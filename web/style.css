@@ -335,3 +335,23 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
  .workspace-switcher [data-view-button]:focus-visible{outline-width:4px}
 }
 @media(max-width:380px){.workspace-switcher{gap:6px}.workspace-switcher [data-view-button]{padding-inline:10px}}
+
+/* Shared, non-blocking feedback states for every workspace. */
+.shell-page :where([role="alert"],[data-state="error"]),
+.shell-card :where([role="alert"],[data-state="error"]){
+ border-inline-start:3px solid #e99a77;
+ padding:10px 12px;
+ border-radius:4px;
+ background:rgba(233,154,119,.09);
+ overflow-wrap:anywhere;
+}
+.shell-page :where([role="status"],[data-state="loading"]),
+.shell-card :where([role="status"],[data-state="loading"]){
+ min-height:1.5em;
+ overflow-wrap:anywhere;
+}
+.shell-page [aria-busy="true"],.shell-card [aria-busy="true"]{cursor:progress}
+@media(forced-colors:active){
+ .shell-page :where([role="alert"],[data-state="error"]),
+ .shell-card :where([role="alert"],[data-state="error"]){border:2px solid CanvasText;border-inline-start:4px solid Highlight;background:Canvas;color:CanvasText}
+}
