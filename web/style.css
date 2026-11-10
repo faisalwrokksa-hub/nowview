@@ -401,3 +401,49 @@ body{
   border:2px solid Highlight;background:Canvas;color:CanvasText;
  }
 }
+
+
+/* Reference fidelity pass: verified colors from uploaded Nourva dashboard HTML.
+   This is an original NewView implementation, not copied site CSS. */
+:root{
+ --nv-ref-f0:#b36535;--nv-ref-f1:#a9552b;--nv-ref-f2:#96472a;
+ --nv-ref-f3:#7a3a25;--nv-ref-f4:#5e2e26;--nv-ref-f5:#4e2927;
+ --nv-ref-f6:#472a29;--nv-ref-f7:#3e2626;
+ --nv-ref-w0:#955740;--nv-ref-w1:#7a3f1c;
+ --nv-ref-deep:#6b2f16;
+ --nv-bg-primary:#110d0d;--nv-bg-secondary:#191212;
+ --nv-surface:#211817;--nv-surface-raised:#30211d;
+ --nv-text-primary:#fff3ec;--nv-text-secondary:#c5aaa0;
+ --nv-border:#52372e;--nv-focus:#ffd0a0;
+ --nv-radius-card:16px;--nv-spacing-unit:8px;
+ --nv-accent:var(--nv-ref-f0);--nv-accent-hover:var(--nv-ref-f1);
+ --nv-accent-strong:#e3a078;
+}
+:where(.shell-card,.myview-card,.widget-card){
+ background-color:var(--nv-surface);
+ border:1px solid var(--nv-border);
+ border-radius:var(--nv-radius-card);
+}
+:where(.workspace-switcher .workspace-tab,nav button){
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+:where(.workspace-switcher .workspace-tab,nav button):hover:not(:disabled){
+ border-color:var(--nv-ref-f1);background-color:var(--nv-surface-raised);
+}
+:where(.workspace-switcher .workspace-tab,nav button)[aria-current="page"],
+:where(.workspace-switcher .workspace-tab,nav button)[aria-selected="true"]{
+ border-color:var(--nv-ref-f0);
+}
+:where(.shell-card,.myview-card,.widget-card) :where(svg,.lucide){
+ flex-shrink:0;
+}
+:where(.shell-card,.myview-card,.widget-card) :where(button,a):focus-visible{
+ position:relative;z-index:1;
+}
+@media(max-width:390px){
+ :where(.shell-card,.myview-card,.widget-card){padding-inline:12px}
+ .workspace-switcher .workspace-tab{white-space:nowrap}
+}
+@media(forced-colors:active){
+ :where(.shell-card,.myview-card,.widget-card){border-color:CanvasText;background:Canvas;color:CanvasText}
+}
