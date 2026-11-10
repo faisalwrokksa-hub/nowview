@@ -120,8 +120,13 @@
   });
   document.getElementById('display-fullscreen')?.addEventListener('click',()=>{
    active=sanitizeDisplay({...active,fullscreen:!active.fullscreen});document.body.classList.toggle('display-mode',active.fullscreen);
-   if(active.fullscreen&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>report('Fullscreen not supported; display mode is active'));
-   if(!active.fullscreen&&document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+   if(active.fullscreen&&document.documentElement.requestFullscreen){
+    try{Promise.resolve(document.documentElement.requestFullscreen()).catch(()=>report('Fullscreen not supported; display mode is active'));}
+    catch{report('Fullscreen not supported; display mode is active');}
+   }
+   if(!active.fullscreen&&document.fullscreenElement&&document.exitFullscreen){
+    try{Promise.resolve(document.exitFullscreen()).catch(()=>{});}catch{}
+   }
    report('Display mode '+(active.fullscreen?'on':'off')+'; save profile to retain it');
   });
   document.getElementById('display-next')?.addEventListener('click',()=>{
