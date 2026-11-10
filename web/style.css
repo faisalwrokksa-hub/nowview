@@ -370,3 +370,25 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
  .shell-page :is(button,[role="button"],a[href],select,input,textarea):focus-visible,
  .shell-card :is(button,[role="button"],a[href],select,input,textarea):focus-visible{outline-color:Highlight}
 }
+
+
+/* Task 1: prevent wide embedded content from forcing horizontal page scrolling.
+   Scroll only the affected data surface; preserve keyboard access and layout. */
+.shell-page :is(table,iframe,video,canvas),
+.shell-card :is(table,iframe,video,canvas){max-width:100%}
+.shell-page :is(iframe,video),.shell-card :is(iframe,video){display:block}
+.shell-page :is(pre,code),.shell-card :is(pre,code){overflow-wrap:anywhere}
+.shell-page :is([role="region"][tabindex="0"],[data-scroll-region]),
+.shell-card :is([role="region"][tabindex="0"],[data-scroll-region]){
+ max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;
+}
+@media(max-width:600px){
+ .shell-page :is(input,select,textarea),.shell-card :is(input,select,textarea){min-width:0}
+ .shell-page :is(.chart-container,.table-container),
+ .shell-card :is(.chart-container,.table-container){max-width:100%;overflow-x:auto}
+}
+@media(prefers-reduced-motion:reduce){
+ .shell-page *, .shell-card *, .workspace-switcher *{
+  scroll-behavior:auto!important;
+ }
+}
