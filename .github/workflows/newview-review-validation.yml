@@ -1,0 +1,86 @@
+name: NewView review validation
+
+on:
+  push:
+    branches:
+      - fix/newview-production-ci-reconcile-20261110
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'android/**'
+      - 'build-apk.sh'
+      - 'scripts/verify-preview-apk.sh'
+      - 'tests/**'
+      - 'cloud/**'
+      - 'package.json'
+      - '.github/workflows/newview-review-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          find web cloud tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -r -n1 node --check
+      - name: Run repository tests
+        run: npm test
+      - name: Build web
+        run: npm run build
+      - name: Build Pages
+        run: npm run build:pages
+      - name: Verify build outputs
+        run: |
+          test -s dist/server/index.js
+          test -s dist/pages/_worker.js
+          grep -q 'tv-home.js' dist/server/index.js
+      - name: Upload review-only web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: newview-web-review-${{ github.sha }}
+          path: |
+            dist/server/index.js
+            dist/pages/_worker.js
+          if-no-files-found: error
+          retention-days: 7
+
+  android-debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: '11076708'
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+      - name: Validate Android build scripts
+        run: |
+          bash -n build-apk.sh
+          bash -n scripts/verify-preview-apk.sh
+      - name: Build development APK
+        run: bash build-apk.sh
+      - name: Verify APK identity and bundled assets
+        run: bash scripts/verify-preview-apk.sh
+      - name: Record SHA-256
+        run: sha256sum build/newview.apk > build/newview.apk.sha256
+      - name: Upload development APK (not production-signed)
+        uses: actions/upload-artifact@v4
+        with:
+          name: newview-debug-apk-${{ github.sha }}
+          path: |
+            build/newview.apk
+            build/newview.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
