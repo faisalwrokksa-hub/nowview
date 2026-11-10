@@ -453,3 +453,28 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.workspace-switcher:focus-within{scroll-behavior:auto}}
 /* Error/status text may contain long source URLs or localized words. */
 :where([role="alert"],[role="status"],[aria-live="polite"],[aria-live="assertive"]){overflow-wrap:anywhere;min-width:0;}
+
+/* Task 1: make asynchronous panels legible without blocking focus (2026-11-11). */
+:where(.shell-page,.shell-card) :is([aria-busy="true"],[role="status"],[role="alert"]){
+  max-inline-size:100%;
+  overflow-wrap:anywhere;
+}
+:where(.shell-page,.shell-card) [aria-busy="true"]{
+  cursor:progress;
+}
+:where(.shell-page,.shell-card) :is([role="alert"],.error-message,[data-error]){
+  border-inline-start:3px solid var(--warning,#e7a74d);
+  padding-inline-start:.75rem;
+}
+:where(.shell-page,.shell-card) :is(button,[role="button"],a,[tabindex="0"]):focus-visible{
+  outline:3px solid var(--cyan,#56e0d0);
+  outline-offset:3px;
+}
+@media (forced-colors:active){
+  :where(.shell-page,.shell-card) :is(button,[role="button"],a,[tabindex="0"]):focus-visible{
+    outline-color:Highlight;
+  }
+  :where(.shell-page,.shell-card) :is([role="alert"],.error-message,[data-error]){
+    border-inline-start-color:Mark;
+  }
+}
