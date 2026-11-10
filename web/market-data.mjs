@@ -25,7 +25,7 @@ export async function getChart(symbol,period){
   const read=async(path,params)=>{
    if(Date.now()/1000<blockedUntil)throw new Error('Binance rate-limit cooldown; try again later');
    const response=await fetch('https://data-api.binance.vision/api/v3/'+path+'?'+new URLSearchParams(params),{headers:{Accept:'application/json'},signal:AbortSignal.timeout(10000)});
-   if(response.status===418||response.status===429){const wait=Number(response.headers.get('Retry-After'));blockedUntil=Date.now()/1000+Math.max(60,Math.min(86400,Number.isFinite(wait)?wait:60));}
+   if(response.status===418||response.status===429){const retryAfter=response.headers.get('Retry-After');const seconds=retryAfter===null?NaN:Number(retryAfter);const dateSeconds=retryAfter===null?NaN:(Date.parse(retryAfter)-Date.now())/1000;const wait=Number.isFinite(seconds)?seconds:dateSeconds;blockedUntil=Date.now()/1000+Math.max(60,Math.min(86400,Number.isFinite(wait)?wait:60));}
    if(!response.ok)throw new Error('Binance data unavailable or rate-limited');return response.json();
   };
   const pair=symbol+'USDT',metadata=await read('exchangeInfo',{symbol:pair}),info=metadata.symbols?.[0];
