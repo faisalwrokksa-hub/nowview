@@ -109,8 +109,8 @@
   });
   document.getElementById('display-fullscreen')?.addEventListener('click',()=>{
    active=sanitizeDisplay({...active,fullscreen:!active.fullscreen});document.body.classList.toggle('display-mode',active.fullscreen);
-   if(active.fullscreen&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>report('Fullscreen not supported; display mode is active'));
-   if(!active.fullscreen&&document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+   if(active.fullscreen&&document.documentElement.requestFullscreen){try{Promise.resolve(document.documentElement.requestFullscreen()).catch(()=>report('Fullscreen not supported; display mode is active'));}catch{report('Fullscreen not supported; display mode is active');}}
+   if(!active.fullscreen&&document.fullscreenElement&&document.exitFullscreen){try{Promise.resolve(document.exitFullscreen()).catch(()=>{});}catch{}}
    report('Display mode '+(active.fullscreen?'on':'off')+'; save profile to retain it');
   });
   document.getElementById('display-next')?.addEventListener('click',()=>{
@@ -122,7 +122,7 @@
  function install(){
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
-  nav.addEventListener('click',event=>{const b=event.target.closest('[data-view-button]');if(b)select(b.dataset.viewButton);});
+  nav.addEventListener('click',event=>{const b=(event.target instanceof Element?event.target.closest('[data-view-button]'):null);if(b)select(b.dataset.viewButton);});
   // Roving focus for keyboard and Android TV remotes; native Tab remains available.
   nav.addEventListener('keydown',event=>{
    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
