@@ -20,8 +20,8 @@
  function syncDashboardCategories(){
   if(!category||!preferred)return;
   const preferences=window.NewViewShell?.loadFirstLaunch?.();
-  const types=preferred.categoriesFor(currentDashboard(),preferences?.interests);
-  const valid=['all',...types.filter(x=>preferred.playlistUrl(x))];
+  const types=typeof preferred.categoriesFor==='function'?preferred.categoriesFor(currentDashboard(),preferences?.interests):[];
+  const valid=['all',...(Array.isArray(types)?types:[]).filter(x=>typeof x==='string'&&typeof preferred.playlistUrl==='function'&&preferred.playlistUrl(x))];
   if(!valid.length)return;
   const previous=category.value;
   category.replaceChildren(...valid.map(x=>{const o=document.createElement('option');o.value=x;o.textContent=x.charAt(0).toUpperCase()+x.slice(1);return o;}));
@@ -83,8 +83,6 @@
   if(loading)return loading;
   if(!force&&allChannels.length&&Date.now()-lastFetch<3600000){renderChannels();return;}
   status.textContent='Loading public IPTV directory…';
-  refresh.disabled=true;
-  refresh.setAttribute('aria-busy','true');
   loading=(async()=>{try{
    let content;
    if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicPlaylist==='function'){
@@ -115,14 +113,15 @@
     }finally{clearTimeout(timeout);}
    }
    if(content.length>16000000)throw Error('Playlist too large');
-   const parsed=preferred.parseM3U(content);if(!parsed.length)throw Error('No valid channels');
+   if(typeof preferred?.parseM3U!=='function')throw Error('Playlist parser unavailable');
+   const parsed=preferred.parseM3U(content);if(!Array.isArray(parsed)||!parsed.length)throw Error('No valid channels');
    allChannels=parsed;lastFetch=Date.now();renderChannels();
   }catch(error){
    const reason=error?.name==='AbortError'?'request timed out':String(error?.message||error);
    if(allChannels.length){renderChannels();status.textContent='Refresh failed ('+reason+'). Showing '+allChannels.length+' previously loaded channels; stream availability is not guaranteed.';}
    else{lastFetch=0;list.replaceChildren();playChannel.disabled=true;favorite.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+reason+'). Use the official playlist link or retry.';}
   }
-  finally{loading=null;refresh.disabled=false;refresh.removeAttribute('aria-busy');}})();return loading;
+  finally{loading=null;}})();return loading;
  }
  refresh.addEventListener('click',()=>loadDirectory(true));
  category?.addEventListener('change',renderChannels);
@@ -164,15 +163,8 @@
  pipe.disabled=!native();
  pipe.addEventListener('click',()=>{
   if(!native()){output.textContent='PipeTv handoff requires the NewView Android TV app.';return;}
-  try{
-   if(typeof window.NewViewNative.isPipeTvInstalled!=='function'||!window.NewViewNative.isPipeTvInstalled()){
-    output.textContent='PipeTv is not installed or cannot be detected. Install it independently before launching.';return;
-   }
-   window.NewViewNative.openPipeTv();
-   output.textContent='Opening PipeTv. Find the video using PipeTv search.';
-  }catch{
-   output.textContent='Could not open PipeTv on this device. Use the official YouTube link instead.';
-  }
+  if(typeof window.NewViewNative.isPipeTvInstalled!=='function'||!window.NewViewNative.isPipeTvInstalled()){output.textContent='PipeTv is not installed. Install it independently before launching.';return;}
+  try{if(typeof window.NewViewNative.openPipeTv!=='function')throw new Error('Unavailable');window.NewViewNative.openPipeTv();output.textContent='Opening PipeTv. Find the video using PipeTv search.';}catch{output.textContent='Unable to open PipeTv on this device.';}
  });
  validate();
  window.NewViewMedia={parse,stopPlayback:clear};
