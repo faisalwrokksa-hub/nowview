@@ -59,3 +59,8 @@ test('Market Watch rejects malformed symbols instead of displaying misleading qu
   assert.equal(api.preview.market({symbol,price:120,currency:'USDT'}),'No verified quote received');
  }
 });
+
+test('Market Watch general reference does not claim to verify a specific quote',()=>{
+ assert.match(src,/Binance markets \(general reference, not quote verification\)/);
+ assert.match(src,/does not verify displayed quote/);
+});
