@@ -77,7 +77,8 @@
   const focusedMarketPanel=previouslyFocused?.closest?.('#market-shell, #stock-board, .workspace');
   const marketPanelWillHide=view!=='markets'&&!(view==='myview'&&document.body.classList.contains('tv-launcher'));
   const focusWasInHiddenPanel=!!(focusedWorkspace&&focusedWorkspace.dataset.workspace!==view) ||
-   !!(focusedMarketPanel&&marketPanelWillHide);
+   !!(focusedMarketPanel&&marketPanelWillHide) ||
+   !!(chartToggle&&previouslyFocused===chartToggle&&view!=='markets');
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
   if(focusWasInHiddenPanel){
    const destination=document.querySelector('[data-view-button="'+view+'"]');
