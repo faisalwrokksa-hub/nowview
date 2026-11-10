@@ -10,6 +10,9 @@
  const actions=document.createElement('nav');actions.className='tv-home-actions';actions.setAttribute('aria-label','TV Home actions');
  function action(name,handler){const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',handler);actions.append(b);return b;}
  const apps=document.querySelector('.home-apps'),grid=document.getElementById('home-installed-grid');
+ const status=document.getElementById('home-app-status');
+ function report(message){if(status)status.textContent=message;}
+ function restoreFocus(target){if(target?.isConnected&&!target.disabled)target.focus();}
  const settings=action('Settings',()=>{document.body.classList.toggle('tv-home-settings');if(document.body.classList.contains('tv-home-settings'))document.getElementById('wallpaper-file')?.focus();});
  action('Markets',()=>document.querySelector('[data-view-button="markets"]')?.click());
  action('News',()=>{document.querySelector('[data-view-button="media"]')?.click();window.NewViewWatch?.select('headlines');});
@@ -25,9 +28,9 @@
    try{
     const installed=JSON.parse(window.NewViewApps.listLaunchableApps());
     const app=installed.find(x=>item.match.test(x.label+' '+x.packageName));
-    if(app)window.NewViewApps.launchApp(app.packageName);
-    else document.getElementById('home-app-status').textContent=item.name+' is not installed or not discoverable. Open All apps.';
-   }catch{document.getElementById('home-app-status').textContent='Unable to launch '+item.name;}
+    if(app&&typeof window.NewViewApps.launchApp==='function')window.NewViewApps.launchApp(app.packageName);
+    else report(item.name+' is not installed or not discoverable. Open All apps.');
+   }catch{report('Unable to launch '+item.name);}
   });favorites.append(button);
  }
  home.append(favorites);
@@ -35,9 +38,10 @@
  tick();const timer=setInterval(()=>{if(!document.hidden)tick();},30000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});
  document.addEventListener('keydown',e=>{
-  if(e.key!=='Escape'&&e.key!=='Backspace')return;
-  if(document.body.classList.contains('tv-all-apps')){document.body.classList.remove('tv-all-apps');all.focus();e.preventDefault();}
-  else if(document.body.classList.contains('tv-home-settings')){document.body.classList.remove('tv-home-settings');settings.focus();e.preventDefault();}
+  if(e.defaultPrevented||e.key!=='Escape'&&e.key!=='Backspace')return;
+  if(e.key==='Backspace'&&e.target?.closest?.('input,textarea,select,[contenteditable="true"]'))return;
+  if(document.body.classList.contains('tv-all-apps')){document.body.classList.remove('tv-all-apps');restoreFocus(all);e.preventDefault();}
+  else if(document.body.classList.contains('tv-home-settings')){document.body.classList.remove('tv-home-settings');restoreFocus(settings);e.preventDefault();}
  });
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
 })();
