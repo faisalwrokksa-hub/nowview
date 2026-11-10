@@ -133,9 +133,11 @@
  pipe.disabled=!native();
  pipe.addEventListener('click',()=>{
   if(!native()){output.textContent='PipeTv handoff requires the NewView Android TV app.';return;}
-  if(!window.NewViewNative.isPipeTvInstalled()){output.textContent='PipeTv is not installed. Install it independently before launching.';return;}
-  window.NewViewNative.openPipeTv();
-  output.textContent='Opening PipeTv. Find the video using PipeTv search.';
+  try{
+   if(typeof window.NewViewNative.isPipeTvInstalled!=='function'||!window.NewViewNative.isPipeTvInstalled()){output.textContent='PipeTv is not installed or installation detection is unavailable.';return;}
+   window.NewViewNative.openPipeTv();
+   output.textContent='Opening PipeTv. Find the video using PipeTv search.';
+  }catch{output.textContent='Unable to open PipeTv on this device.';}
  });
  validate();
  window.NewViewMedia={parse,stopPlayback:clear};
