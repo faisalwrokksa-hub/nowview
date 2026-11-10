@@ -61,7 +61,7 @@
  list.addEventListener('change',()=>{if(list.value)open.href=list.value;});
  search.addEventListener('input',renderChannels);
  secureOnly.addEventListener('change',renderChannels);
- playChannel.addEventListener('click',()=>{if(!nativeStream()||!list.value)return;try{const url=new URL(list.value);if(url.protocol==='https:'&&!url.username&&!url.password&&!url.port)window.NewViewNative.playStream(url.href);}catch{}});
+ playChannel.addEventListener('click',()=>{if(!nativeStream()){status.textContent='Native IPTV playback is not available on this device.';return;}if(!list.value){status.textContent='Select a channel first.';return;}try{const url=new URL(list.value);if(url.protocol!=='https:'||url.username||url.password||url.port){status.textContent='Only secure HTTPS streams can be launched in NewView.';return;}window.NewViewNative.playStream(url.href);status.textContent='Opening selected channel. Playback depends on stream availability.';}catch{status.textContent='Could not launch this stream. Try another channel.';}});
  async function loadDirectory(force=false){
   if(loading)return loading;
   if(!force&&allChannels.length&&Date.now()-lastFetch<3600000){renderChannels();return;}
