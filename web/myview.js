@@ -35,7 +35,7 @@
   if(!Array.isArray(apps)){status.textContent='Invalid installed-app list';return;}
   const seen=new Set();let count=0;
   for(const app of apps){
-   if(!app||typeof app.label!=='string'||typeof app.packageName!=='string'||!/^([A-Za-z][A-Za-z0-9_]*\\.)+[A-Za-z][A-Za-z0-9_]*$/.test(app.packageName)||seen.has(app.packageName))continue;
+   if(!app||typeof app.label!=='string'||typeof app.packageName!=='string'||!/^([A-Za-z][A-Za-z0-9_]*\.)+[A-Za-z][A-Za-z0-9_]*$/.test(app.packageName)||seen.has(app.packageName))continue;
    seen.add(app.packageName);if(++count>100)break;
    const button=document.createElement('button');button.type='button';button.className='home-installed-app';
    button.textContent=app.label.slice(0,50);button.title=app.packageName;
