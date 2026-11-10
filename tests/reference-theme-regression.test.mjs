@@ -102,8 +102,8 @@ test('IPTV directory tolerates missing native category and playlist capabilities
 
 test('Cloudflare build includes every local script referenced by the dashboard', () => {
   const build=read('cloud/build.mjs');
-  const assets=[...build.matchAll(/'([^']+\\.(?:js|mjs|css|html))'/g)].map(match=>match[1]);
-  const scripts=[...html.matchAll(/<script\\b[^>]*\\bsrc="([^"]+)"/g)].map(match=>match[1]);
+  const assets=[...build.matchAll(/'([^']+\.(?:js|mjs|css|html))'/g)].map(match=>match[1]);
+  const scripts=[...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(match=>match[1]);
   for(const script of scripts){
     if(script.startsWith('https://'))continue;
     assert.ok(assets.includes(script), 'Missing bundled dashboard script: '+script);
