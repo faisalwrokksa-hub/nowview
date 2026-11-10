@@ -134,7 +134,7 @@
    actions.append(button,up,down);
    if(id==='news'){
     const source=text('a','myview-source-link','SEC source');
-    source.href='https://www.sec.gov/newsroom';source.target='_blank';source.rel='noopener noreferrer';
+    source.hidden=true;source.removeAttribute('href');source.target='_blank';source.rel='noopener noreferrer';
     source.dataset.sourceLink='news';source.setAttribute('aria-label','Open official news publisher');
     actions.append(source);
    }
@@ -152,7 +152,7 @@
   if(live)live.textContent=preview[id](next);
   if(id==='news'){
    const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
-   if(link){const fed=next?.source==='fed';link.href=fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom';link.textContent=fed?'Federal Reserve source':'SEC source';}
+   if(link){const verified=next?.source==='fed'||next?.source==='sec';link.hidden=!verified;if(verified){const fed=next.source==='fed';link.href=fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom';link.textContent=fed?'Federal Reserve source':'SEC source';}else{link.removeAttribute('href');link.textContent='Source unavailable';}}
   }
  });
  window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
