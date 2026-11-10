@@ -6,7 +6,7 @@ function setup(value=null){
  vm.runInNewContext(src,{window,document,localStorage});
  return {api:window.NewViewPersonal,saved:()=>saved};
 }
-test('MyView presets include Markets, News and Media',()=>{const {api}=setup();assert.deepEqual([...api.load()],['market','news','business']);});
+test('MyView Daily Brief defaults include Markets, News and Business',()=>{const {api}=setup();assert.deepEqual([...api.load()],['market','news','business']);});
 test('MyView excludes unrecognized widget IDs and duplicate entries',()=>{
  const {api}=setup();assert.deepEqual([...api.sanitize(['market','bad','news','market','business'])],['market','news','business']);
 });
