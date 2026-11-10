@@ -83,6 +83,8 @@
  filter.addEventListener('input',()=>render());
  const collectionFilter=document.createElement('select');collectionFilter.setAttribute('aria-label','Filter saved profiles by collection');links.parentElement?.insertBefore(collectionFilter,links);
  collectionFilter.addEventListener('change',()=>render());
+ const tagFilter=document.createElement('select');tagFilter.setAttribute('aria-label','Filter saved profiles by tag');links.parentElement?.insertBefore(tagFilter,links);
+ tagFilter.addEventListener('change',()=>render());
  const text=(tag,className,value)=>{const e=document.createElement(tag);if(className)e.className=className;e.textContent=value;return e;};
  function renderDiscovery(){
   if(!geoPicker||!topicPicker||!discovery)return;
@@ -101,12 +103,16 @@
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:social',{detail:{count:items.length}}));
   links.replaceChildren();
   const selectedCollection=collectionFilter.value;
+  const selectedTag=tagFilter.value;
   const collections=[...new Set(items.map(item=>metadata[item.url]?.collection).filter(Boolean))].sort();
   collectionFilter.replaceChildren(...[['','All collections'],...collections.map(x=>[x,x])].map(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;return option;}));
   collectionFilter.value=collections.includes(selectedCollection)?selectedCollection:'';
+  const tags=[...new Set(items.map(item=>metadata[item.url]?.tag).filter(Boolean))].sort();
+  tagFilter.replaceChildren(...[['','All tags'],...tags.map(x=>[x,x])].map(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;return option;}));
+  tagFilter.value=tags.includes(selectedTag)?selectedTag:'';
   if(!items.length){links.append(text('p','social-empty','No public profiles saved. Add a public profile URL to open it from your dashboard.'));return;}
   const term=filter.value.trim().toLowerCase().slice(0,100);
-  const matching=items.filter(item=>(!collectionFilter.value||metadata[item.url]?.collection===collectionFilter.value)&&(!term||(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||'')).toLowerCase().includes(term)));
+  const matching=items.filter(item=>(!collectionFilter.value||metadata[item.url]?.collection===collectionFilter.value)&&(!tagFilter.value||metadata[item.url]?.tag===tagFilter.value)&&(!term||(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||'')).toLowerCase().includes(term)));
   if(!matching.length){links.append(text('p','social-empty','No saved profiles match your search.'));return;}
   for(const item of matching){
    const article=text('article','social-link-card','');
