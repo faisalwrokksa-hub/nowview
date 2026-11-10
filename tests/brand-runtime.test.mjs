@@ -13,5 +13,5 @@ test('Native app bridge has a unified NewView name on both sides',()=>{
 test('MyView avoids recreating tiles on identical source updates',()=>{
  const source=read('../web/myview.js');
  assert.match(source,/preview\[id\]\(next\)===preview\[id\]\(snapshots\[id\]\)/);
- assert.match(source,/document\.body\.dataset\.currentWorkspace==='myview'/);
+ assert.match(source,/if\(live\)live\.textContent=preview\[id\]\(next\)/);
 });
