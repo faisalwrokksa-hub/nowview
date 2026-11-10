@@ -57,7 +57,7 @@ test('media and MyView tolerate missing or failing Android bridges', () => {
 
 test('installed app package validator accepts normal Android package IDs', () => {
   const source = read('web/myview.js');
-  assert.ok(source.includes(String.raw`/^([A-Za-z][A-Za-z0-9_]*\\.)+[A-Za-z][A-Za-z0-9_]*$/`));
+  assert.ok(source.includes(String.raw`/^([A-Za-z][A-Za-z0-9_]*\.)+[A-Za-z][A-Za-z0-9_]*$/`));
   const pattern = /^([A-Za-z][A-Za-z0-9_]*\.)+[A-Za-z][A-Za-z0-9_]*$/;
   assert.equal(pattern.test('com.example.tv'), true);
   assert.equal(pattern.test('com\\example\\tv'), false);
