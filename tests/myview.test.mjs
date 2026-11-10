@@ -44,3 +44,10 @@ test('News and video widgets open their sections inside five-workspace Watch & N
  assert.match(src,/\[data-reorder=/);
  assert.match(src,/target\.focus\(\)/);
 });
+
+test('Daily Brief omits empty sanitized official headlines without inventing text',()=>{
+ const {api}=setup();
+ assert.equal(api.preview.news({source:'fed',count:2,headline:'\\u0000\\u001f'}),'2 Federal Reserve announcements');
+ assert.equal(api.preview.news({source:'sec',count:1,headline:'  SEC   update  '}),'1 SEC announcements · SEC update');
+ assert.equal(api.preview.news({source:'unknown',count:1,headline:'Unverified'}),'Load verified official announcements in Watch & News');
+});
