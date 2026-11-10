@@ -103,7 +103,7 @@
   const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
   if(!link)return;
   const snapshot=snapshots.news;
-  const verified=Number.isFinite(snapshot?.count)&&snapshot.count>0&&(snapshot.source==='fed'||snapshot.source==='sec');
+  const verified=Number.isSafeInteger(snapshot?.count)&&snapshot.count>0&&(snapshot.source==='fed'||snapshot.source==='sec');
   link.hidden=!verified;
   if(!verified){link.removeAttribute('href');link.textContent='Source unavailable';return;}
   const fed=snapshot.source==='fed';
