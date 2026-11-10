@@ -6,16 +6,16 @@
  const home=document.querySelector('[data-workspace="myview"]');
  if(!home)return;
  const bar=document.createElement('div');bar.className='tv-home-top';
- const clock=document.createElement('div');clock.className='tv-home-clock';clock.setAttribute('aria-label','Riyadh time');
+ const clock=document.createElement('div');clock.className='tv-home-clock';clock.setAttribute('aria-label','Local device time');
  const actions=document.createElement('nav');actions.className='tv-home-actions';actions.setAttribute('aria-label','TV Home actions');
  function action(name,handler){const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',handler);actions.append(b);return b;}
  const grid=document.getElementById('home-installed-grid');
  const status=document.getElementById('home-app-status');
  function report(message){if(status)status.textContent=message;}
- function restoreFocus(target){if(target?.isConnected&&!target.disabled)target.focus();}
+ function restoreFocus(target){if(target?.isConnected&&!target.disabled){try{target.focus({preventScroll:true});}catch{target.focus();}}}
  const settings=action('Settings',()=>{document.body.classList.toggle('tv-home-settings');if(document.body.classList.contains('tv-home-settings'))document.getElementById('wallpaper-file')?.focus();});
  action('Markets',()=>document.querySelector('[data-view-button="markets"]')?.click());
- action('News',()=>{document.querySelector('[data-view-button="media"]')?.click();window.NewViewWatch?.select('headlines');});
+ action('News',()=>{document.querySelector('[data-view-button="media"]')?.click();window.NewViewWatch?.select?.('headlines');});
  action('TV',()=>document.querySelector('[data-view-button="media"]')?.click());
  const all=action('All apps',()=>{document.body.classList.toggle('tv-all-apps');if(document.body.classList.contains('tv-all-apps')){document.getElementById('home-refresh-apps')?.click();grid?.querySelector('button')?.focus();}});
  bar.append(clock,actions);home.prepend(bar);
@@ -37,7 +37,7 @@
   });favorites.append(button);
  }
  home.append(favorites);
- function tick(){const now=new Date();try{clock.textContent=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}).format(now)+' · Riyadh';}catch{clock.textContent=now.toLocaleString()+' · Device time';}}
+ function tick(){const now=new Date();try{clock.textContent=new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}).format(now)+' · Local';}catch{clock.textContent=now.toLocaleString()+' · Local';}}
  tick();const timer=setInterval(()=>{if(!document.hidden)tick();},30000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});
  document.addEventListener('keydown',e=>{
