@@ -70,13 +70,19 @@
  }
  function load(){try{return sanitize(JSON.parse(localStorage.getItem(KEY)||'[]'));}catch{return [];}}
  function save(items){const safe=sanitize(items);try{localStorage.setItem(KEY,JSON.stringify(safe));}catch{}return safe;}
+ const META_KEY='newview.social.metadata.v1';
+ function cleanLabel(value){return typeof value==='string'?value.trim().slice(0,32).replace(/[^a-zA-Z0-9 _-]/g,''):'';}
+ function loadMetadata(){try{const raw=JSON.parse(localStorage.getItem(META_KEY)||'{}');if(!raw||typeof raw!=='object'||Array.isArray(raw))return {};const result={};for(const [key,value] of Object.entries(raw).slice(0,MAX)){if(typeof key!=='string'||key.length>500||!value||typeof value!=='object')continue;const tag=cleanLabel(value.tag),collection=cleanLabel(value.collection);if(tag||collection)result[key]={tag,collection};}return result;}catch{return {};}}
+ function persistMetadata(){try{localStorage.setItem(META_KEY,JSON.stringify(metadata));return true;}catch{return false;}}
  const form=document.getElementById('social-add'),links=document.getElementById('social-links');
  if(!form||!links){window.NewViewSocial={validate,sanitize,load,save,discoveryUrl,discoveryLinks};return;}
  const platform=document.getElementById('social-platform'),url=document.getElementById('social-url'),status=document.getElementById('social-status');
  const geoPicker=document.getElementById('social-geo'),topicPicker=document.getElementById('social-topic'),discovery=document.getElementById('social-discovery'),discoveryStatus=document.getElementById('social-discovery-status');
- let items=load();
+ let items=load();let metadata=loadMetadata();
  const filter=document.createElement('input');filter.type='search';filter.id='social-saved-search';filter.placeholder='Search saved profiles';filter.setAttribute('aria-label','Search saved social profiles');links.parentElement?.insertBefore(filter,links);
  filter.addEventListener('input',()=>render());
+ const collectionFilter=document.createElement('select');collectionFilter.setAttribute('aria-label','Filter saved profiles by collection');links.parentElement?.insertBefore(collectionFilter,links);
+ collectionFilter.addEventListener('change',()=>render());
  const text=(tag,className,value)=>{const e=document.createElement(tag);if(className)e.className=className;e.textContent=value;return e;};
  function renderDiscovery(){
   if(!geoPicker||!topicPicker||!discovery)return;
@@ -94,9 +100,13 @@
  function render(){
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:social',{detail:{count:items.length}}));
   links.replaceChildren();
+  const selectedCollection=collectionFilter.value;
+  const collections=[...new Set(items.map(item=>metadata[item.url]?.collection).filter(Boolean))].sort();
+  collectionFilter.replaceChildren(...[['','All collections'],...collections.map(x=>[x,x])].map(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;return option;}));
+  collectionFilter.value=collections.includes(selectedCollection)?selectedCollection:'';
   if(!items.length){links.append(text('p','social-empty','No public profiles saved. Add a public profile URL to open it from your dashboard.'));return;}
   const term=filter.value.trim().toLowerCase().slice(0,100);
-  const matching=items.filter(item=>!term||(item.name+' '+SOURCES[item.platform].label+' '+item.url).toLowerCase().includes(term));
+  const matching=items.filter(item=>(!collectionFilter.value||metadata[item.url]?.collection===collectionFilter.value)&&(!term||(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||'')).toLowerCase().includes(term)));
   if(!matching.length){links.append(text('p','social-empty','No saved profiles match your search.'));return;}
   for(const item of matching){
    const article=text('article','social-link-card','');
@@ -105,8 +115,12 @@
    a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';
    const remove=text('button','','Remove');
    remove.type='button';remove.setAttribute('aria-label','Remove '+item.name);
-   remove.addEventListener('click',()=>{items=save(items.filter(x=>x.url!==item.url));render();status.textContent='Profile removed locally.';});
-   article.append(title,a,remove);links.append(article);
+   remove.addEventListener('click',()=>{items=save(items.filter(x=>x.url!==item.url));delete metadata[item.url];persistMetadata();render();status.textContent='Profile removed locally.';});
+   const tag=document.createElement('input');tag.type='text';tag.maxLength=32;tag.placeholder='Tag (optional)';tag.setAttribute('aria-label','Tag for '+item.name);tag.value=metadata[item.url]?.tag||'';
+   const collection=document.createElement('input');collection.type='text';collection.maxLength=32;collection.placeholder='Collection (optional)';collection.setAttribute('aria-label','Collection for '+item.name);collection.value=metadata[item.url]?.collection||'';
+   const saveLabels=text('button','','Save labels');saveLabels.type='button';
+   saveLabels.addEventListener('click',()=>{const previous=metadata[item.url];const next={tag:cleanLabel(tag.value),collection:cleanLabel(collection.value)};if(next.tag||next.collection)metadata[item.url]=next;else delete metadata[item.url];if(!persistMetadata()){if(previous)metadata[item.url]=previous;else delete metadata[item.url];status.textContent='Could not save labels on this device.';return;}status.textContent='Profile labels saved locally.';render();});
+   article.append(title,a,tag,collection,saveLabels,remove);links.append(article);
   }
  }
  form.addEventListener('submit',event=>{
@@ -117,7 +131,7 @@
   if(items.length>=MAX){status.textContent='Maximum 24 saved profiles.';return;}
   items=save([...items,item]);url.value='';status.textContent='Profile saved on this device. No social feed has been fetched.';render();
  });
- document.getElementById('social-clear')?.addEventListener('click',()=>{items=save([]);status.textContent='All saved profiles cleared from this device.';render();});
+ document.getElementById('social-clear')?.addEventListener('click',()=>{items=save([]);metadata={};persistMetadata();status.textContent='All saved profiles cleared from this device.';render();});
  window.NewViewSocial={validate,sanitize,load,save,render,discoveryUrl,discoveryLinks};
  const pref=preferences();if(geoPicker){for(const [value,label] of [['GLOBAL','Global'],['US','United States'],['CA','Canada'],['AU','Australia'],['GB','United Kingdom']]){if(!Array.from(geoPicker.options).some(o=>o.value===value)){const option=document.createElement('option');option.value=value;option.textContent=label;geoPicker.append(option);}}for(const option of Array.from(geoPicker.options)){if(!Object.hasOwn(GEO,option.value))option.remove();}geoPicker.value=pref.geo;}if(topicPicker){for(const [value,label] of [['ai','AI'],['news','Breaking News'],['sports','Sports'],['entertainment','Entertainment'],['gaming','Gaming'],['science','Science']]){if(!Array.from(topicPicker.options).some(o=>o.value===value)){const option=document.createElement('option');option.value=value;option.textContent=label;topicPicker.append(option);}}topicPicker.value=pref.topic;}
  render();renderDiscovery();
