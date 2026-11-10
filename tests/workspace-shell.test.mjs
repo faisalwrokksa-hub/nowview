@@ -37,3 +37,9 @@ test('TV navigation does not hijack shortcuts or editable controls',()=>{
  assert.match(source,/event\.defaultPrevented\|\|event\.altKey\|\|event\.ctrlKey\|\|event\.metaKey\|\|event\.shiftKey/);
  assert.match(source,/input, textarea, select/);
 });
+
+test('workspace switch restores focus before hiding the previously active workspace',()=>{
+ assert.match(source,/const focusedWorkspace=focused\?\.closest\?\.\('\[data-workspace\]'\)/);
+ assert.match(source,/if\(restoreFocus\)document\.querySelector\(/);
+ assert.match(source,/\?\.focus\(\)/);
+});
