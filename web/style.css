@@ -323,3 +323,15 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
  #workspace-intro{min-height:0}
  .shell-page{min-height:0;overscroll-behavior:contain}
 }
+
+/* Task 1: safe-area and status visibility on notched phones and TV overscan. */
+@supports (padding: max(0px)){
+ @media(max-width:700px){main{padding-inline:max(12px,env(safe-area-inset-left)) max(12px,env(safe-area-inset-right));padding-bottom:max(20px,env(safe-area-inset-bottom))}}
+}
+.workspace-switcher:focus-within{scroll-padding-inline:16px}
+.workspace-switcher [data-view-button][aria-current="page"]{text-underline-offset:4px}
+@media(prefers-contrast:more){
+ .workspace-switcher [data-view-button][aria-current="page"]{text-decoration:underline;text-decoration-thickness:2px}
+ .workspace-switcher [data-view-button]:focus-visible{outline-width:4px}
+}
+@media(max-width:380px){.workspace-switcher{gap:6px}.workspace-switcher [data-view-button]{padding-inline:10px}}
