@@ -102,7 +102,7 @@
   refresh.addEventListener('change',()=>{active=sanitizeDisplay({...active,refreshSeconds:Number(refresh.value)});schedule();report('Refresh interval changed; save profile to retain it');});
   document.getElementById('display-save')?.addEventListener('click',()=>{
    const chosen=prompt('Display profile name (saved only on this TV/browser)',active.name);
-   if(chosen===null)return;const name=chosen.trim().slice(0,40);if(!name){report('Enter a profile name');return;}
+   if(typeof chosen!=='string')return;const name=chosen.trim().slice(0,40);if(!name){report('Enter a profile name');return;}
    const updated=sanitizeDisplay({...active,name});const index=profiles.findIndex(p=>p.name===name);
    if(index>=0)profiles[index]=updated;else if(profiles.length<5)profiles.push(updated);else{report('Maximum five profiles. Reuse an existing name.');return;}
    profiles=saveDisplays(profiles);renderProfiles();picker.value=String(profiles.findIndex(p=>p.name===name));apply(updated);
