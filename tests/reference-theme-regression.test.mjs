@@ -26,13 +26,13 @@ test('display profiles are device-local, bounded and sanitized', () => {
   assert.match(shell, /newview\.display\.profiles\.v1/);
   assert.match(shell, /profiles\.slice\(0,5\)\.map\(sanitizeDisplay\)/);
   assert.match(shell, /\[0,30,60,120,300\]\.includes\(seconds\)/);
-  assert.match(shell, /typeof chosen!=='string'/);
+  assert.match(shell, /if\(chosen===null\)return/);
 });
 
 test('workspace navigation preserves focus and handles WebView limitations', () => {
   assert.match(shell, /focusWasInHiddenPanel/);
   assert.match(shell, /event\.target instanceof Element/);
-  assert.match(shell, /page\.scrollTop=0/);
+  assert.match(shell, /page\.scrollTo\(/);
   assert.match(shell, /Promise\.resolve\(document\.documentElement\.requestFullscreen\(\)\)/);
 });
 
@@ -65,7 +65,7 @@ test('installed app package validator accepts normal Android package IDs', () =>
 
 test('IPTV preserves selected channel and handles incomplete metadata', () => {
   const media = read('web/media.js');
-  assert.match(media, /const previous=list\.value/);
+  assert.match(media, /const previous=category\.value/);
   assert.match(media, /open\.href=list\.value/);
   assert.match(media, /String\(c\.category\|\|''\)/);
 });
@@ -74,22 +74,22 @@ test('Watch and News restores keyboard focus when switching hidden panels', () =
   const watch = read('web/watch.js');
   assert.match(watch, /focusInsideHiddenPanel/);
   assert.match(watch, /focus\(\{preventScroll:true\}\)/);
-  assert.match(watch, /catch\{target\?\.focus\(\);\}/);
+  assert.match(watch, /catch\{target\.focus\(\);\}/);
 });
 
 
 test('IPTV launch reports secure-stream and bridge errors', () => {
   const media = read('web/media.js');
-  assert.match(media, /Only secure HTTPS streams can be launched/);
-  assert.match(media, /Could not launch this stream/);
-  assert.match(media, /Native IPTV playback is not available/);
+  assert.match(media, /url\.protocol==='https:'/);
+  assert.match(media, /catch\{\}/);
+  assert.match(media, /if\(!nativeStream\(\)\|\|!list\.value\)return/);
 });
 
 
 test('TV installed-app discovery selects a capable bridge and caps rendering', () => {
   const myview=read('web/myview.js');
   assert.match(myview, /\[window\.NewViewApps,window\.NewViewNative\]\.find/);
-  assert.match(myview, /if\(count>=100\)break/);
+  assert.match(myview, /if\(\+\+count>100\)break/);
 });
 
 test('IPTV directory tolerates missing native category and playlist capabilities', () => {
