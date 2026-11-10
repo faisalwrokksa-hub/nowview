@@ -91,7 +91,7 @@
  let chosen=load();
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
-  market:v=>v&&Number.isFinite(v.price)&&typeof v.symbol==='string'?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+(Number.isFinite(v.quoteTime)&&v.quoteTime>0?' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():' · quote time unavailable'):'No verified quote received',
+  market:v=>v&&Number.isFinite(v.price)&&typeof v.symbol==='string'?v.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.price)+' '+(v.currency||'USDT')+(Number.isSafeInteger(v.quoteTime)&&v.quoteTime>0&&v.quoteTime<=8640000000?' · quote '+new Date(v.quoteTime*1000).toLocaleTimeString():' · quote time unavailable'):'No verified quote received',
   business:v=>v&&Number.isFinite(v.revenue)&&v.revenue>=0?'Revenue '+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v.revenue)+' · '+(Number.isFinite(v.cost)&&v.cost>=0&&v.revenue>0?'margin '+new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format((v.revenue-v.cost)/v.revenue*100)+'% · ':'')+(Number.isSafeInteger(v.orders)&&v.orders>=0?v.orders+' orders':'order count unavailable')+(typeof v.asOf==='string'&&v.asOf.trim()?' · '+v.asOf.slice(0,60):' · period unavailable'):'Upload a CSV in Business to view session KPIs',
   news:v=>v&&Number.isSafeInteger(v.count)&&v.count>0?v.count+' '+(v.source==='fed'?'Federal Reserve':v.source==='sec'?'SEC':'source-unverified')+' announcements'+(typeof v.headline==='string'&&v.headline.trim()?' · '+v.headline.trim().slice(0,180):''):'Load official announcements in Watch & News',
   social:v=>v&&Number.isSafeInteger(v.count)&&v.count>=0?v.count+' locally saved public profiles':'No verified public-profile count available',
@@ -112,7 +112,7 @@
  }
  function render(){
   root.replaceChildren();editor.replaceChildren();
-  summary.textContent=chosen.length+' of '+catalog.length+' widgets selected · saved on this device';
+  if(summary)summary.textContent=chosen.length+' of '+catalog.length+' widgets selected · saved on this device';
   for(const widget of catalog){
    const row=document.createElement('label');row.className='myview-option';
    const input=document.createElement('input');input.type='checkbox';input.checked=chosen.includes(widget.id);
