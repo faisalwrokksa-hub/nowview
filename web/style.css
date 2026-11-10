@@ -296,9 +296,8 @@ body.tv-launcher[data-current-workspace="myview"] .home-installed-grid{grid-temp
   }
 }
 
-/* NewView integrated reference theme — preserved production accessibility rules */
-responsive shell and accessible focus enhancements (2026-11-10).
-   Keep the five navigation destinations available without hiding them on mobile. */
+/* NewView integrated reference theme — responsive shell and accessible focus enhancements (2026-11-10).
+   Preserve production accessibility rules and all five navigation destinations on mobile. */
 html{min-width:0}
 body{min-width:0}
 .workspace-switcher{scrollbar-width:thin;scroll-padding-inline:12px;overscroll-behavior-inline:contain}
