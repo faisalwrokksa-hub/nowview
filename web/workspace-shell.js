@@ -61,6 +61,9 @@
   const chartToggle=document.getElementById('board-toggle');
   if(chartToggle)chartToggle.hidden=view!=='markets';
   if(view!=='media'&&window.NewViewMedia?.stopPlayback)window.NewViewMedia.stopPlayback();
+  const previouslyFocused=document.activeElement;
+  const hiddenFocusPanel=previouslyFocused instanceof Element?previouslyFocused.closest('[data-workspace]'):null;
+  const focusWasInHiddenPanel=Boolean(hiddenFocusPanel&&hiddenFocusPanel.dataset.workspace!==view);
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
   for(const el of document.querySelectorAll('[data-view-button]')){
    const active=el.dataset.viewButton===view;el.setAttribute('aria-pressed',String(active));el.classList.toggle('selected',active);
@@ -72,6 +75,7 @@
   document.dispatchEvent(new CustomEvent('newview:workspace-change',{detail:{view}}));
   const activeTab=document.querySelector('[data-view-button="'+view+'"]');
   if(activeTab)activeTab.setAttribute('aria-current','page');
+  if(focusWasInHiddenPanel&&activeTab){try{activeTab.focus({preventScroll:true});}catch{activeTab.focus();}}
   document.querySelectorAll('[data-view-button]').forEach(tab=>{if(tab!==activeTab)tab.removeAttribute('aria-current');});
   if(view==='markets'){
     market.hidden=false;
@@ -105,8 +109,8 @@
   });
   document.getElementById('display-fullscreen')?.addEventListener('click',()=>{
    active=sanitizeDisplay({...active,fullscreen:!active.fullscreen});document.body.classList.toggle('display-mode',active.fullscreen);
-   if(active.fullscreen&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>report('Fullscreen not supported; display mode is active'));
-   if(!active.fullscreen&&document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+   if(active.fullscreen&&document.documentElement.requestFullscreen){try{Promise.resolve(document.documentElement.requestFullscreen()).catch(()=>report('Fullscreen not supported; display mode is active'));}catch{report('Fullscreen not supported; display mode is active');}}
+   if(!active.fullscreen&&document.fullscreenElement&&document.exitFullscreen){try{Promise.resolve(document.exitFullscreen()).catch(()=>{});}catch{}}
    report('Display mode '+(active.fullscreen?'on':'off')+'; save profile to retain it');
   });
   document.getElementById('display-next')?.addEventListener('click',()=>{
@@ -118,7 +122,7 @@
  function install(){
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
-  nav.addEventListener('click',event=>{const b=event.target.closest('[data-view-button]');if(b)select(b.dataset.viewButton);});
+  nav.addEventListener('click',event=>{const b=(event.target instanceof Element?event.target.closest('[data-view-button]'):null);if(b)select(b.dataset.viewButton);});
   // Roving focus for keyboard and Android TV remotes; native Tab remains available.
   nav.addEventListener('keydown',event=>{
    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
