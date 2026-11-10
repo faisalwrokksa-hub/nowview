@@ -83,8 +83,14 @@
   try{
    const url=new URL(list.value);
    if(url.protocol!=='https:'||url.username||url.password||url.port){status.textContent='Only secure HTTPS streams can be launched inside NewView.';return;}
-   window.NewViewNative.playStream(url.href);
+   const result=window.NewViewNative.playStream(url.href);
+   if(result===false){status.textContent='Android TV player rejected the stream. Try the stream link or another channel.';return;}
    status.textContent='Opening selected stream in the Android TV player. Availability depends on the external source.';
+   if(result&&typeof result.then==='function'){
+    Promise.resolve(result).then(accepted=>{
+     if(accepted===false)status.textContent='Android TV player rejected the stream. Try the stream link or another channel.';
+    },()=>{status.textContent='Android TV player could not open the stream. Try the stream link or another channel.';});
+   }
   }catch{
    status.textContent='Could not launch the Android TV player. Try the selected stream link or choose another channel.';
   }
