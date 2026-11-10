@@ -81,3 +81,12 @@ test('Market Watch hides stale quote times without treating old timestamps as cu
  const recent=Math.floor(Date.now()/1000)-60;
  assert.match(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:recent}),/ · quote (?!time unavailable)/);
 });
+
+
+test('Business Pulse labels imported KPIs as local and unverified',()=>{
+ const {api}=setup();
+ const preview=api.preview.business({revenue:100,cost:40,orders:2,asOf:'2026-11-10'});
+ assert.match(preview,/local CSV \(not independently verified\)/);
+ assert.match(preview,/2026-11-10/);
+ assert.equal(api.preview.business(null),'Upload a CSV in Business to view session KPIs');
+});
