@@ -157,7 +157,9 @@
    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
    const current=event.target instanceof Element?event.target.closest('[data-view-button]'):null;
    if(!current||!nav.contains(current)||event.target!==current)return;
-   const tabs=[...nav.querySelectorAll('[data-view-button]')].filter(tab=>!tab.disabled&&!tab.hidden&&tab.getAttribute('aria-disabled')!=='true');
+   const tabs=[...nav.querySelectorAll('[data-view-button]')].filter(tab=>
+    !tab.disabled&&!tab.hidden&&!tab.closest('[hidden],[inert],[aria-hidden="true"]')&&
+    tab.getAttribute('aria-disabled')!=='true'&&tab.getClientRects().length>0);
    const index=tabs.indexOf(current);
    if(index<0||!tabs.length)return;
    // Respect RTL direction for left/right D-pad navigation without changing DOM order.
