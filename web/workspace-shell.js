@@ -136,6 +136,10 @@
  function installDisplay(){
   const picker=document.getElementById('display-profile'),refresh=document.getElementById('display-refresh'),status=document.getElementById('display-status');
   if(!picker||!refresh||!status)return;
+  // Display-profile feedback must be announced without interrupting TV navigation.
+  status.setAttribute('role','status');
+  status.setAttribute('aria-live','polite');
+  status.setAttribute('aria-atomic','true');
   let profiles=loadDisplays();let active=sanitizeDisplay(profiles[0]);let timer=null;
   function report(message){status.textContent=message;}
   function apply(profile){active=sanitizeDisplay(profile);refresh.value=String(active.refreshSeconds);document.body.classList.toggle('display-mode',active.fullscreen);schedule();report('Profile: '+active.name+' · stored on this device only');}
