@@ -121,7 +121,10 @@
   nav.addEventListener('click',event=>{const b=event.target.closest('[data-view-button]');if(b)select(b.dataset.viewButton);});
   // Roving focus for keyboard and Android TV remotes; native Tab remains available.
   nav.addEventListener('keydown',event=>{
+   if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
+   // Keep native editing controls and disabled/hidden workspace buttons untouched.
+   if(event.target.closest?.('input, textarea, select, [contenteditable="true"]'))return;
    const target=event.target.closest?.('[data-view-button]');
    if(!target||!nav.contains(target))return;
    const buttons=[...nav.querySelectorAll('[data-view-button]')].filter(button=>!button.disabled&&!button.hidden);
