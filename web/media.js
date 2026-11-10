@@ -30,7 +30,7 @@
  }
 
  if(typeof document.createElement==='function'){
- const directory=document.createElement('section');directory.id='newview-channel-directory';directory.setAttribute('aria-label','IPTV-org channel directory');
+ const directory=document.createElement('section');directory.id='newview-channel-directory';directory.className='newview-channel-directory';directory.setAttribute('aria-label','IPTV-org channel directory');
  const heading=document.createElement('h3');heading.textContent='Free live TV directory';
  const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Channel directory not loaded yet.';
  const list=document.createElement('select');list.setAttribute('aria-label','Available IPTV channels');
@@ -65,12 +65,14 @@
   }
   list.replaceChildren(...displayed.map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
   if(selectedBefore&&displayed.some(c=>c.url===selectedBefore))list.value=selectedBefore;
-  open.hidden=!visible.length;
-  playChannel.disabled=!visible.length;
-  favorite.disabled=!visible.length;
-  favorite.textContent=visible.length&&favorites.has(list.value)?'Remove favorite':'Save favorite';
-  open.setAttribute('aria-disabled',String(!visible.length));
-  if(visible.length){open.href=list.value;status.textContent=allChannels.length+' loaded · '+visible.length+' matching (first 1500 displayed). Streams may be unavailable.';}
+  const hasSelection=Boolean(list.value)&&displayed.some(c=>c.url===list.value);
+  open.hidden=!hasSelection;
+  playChannel.disabled=!hasSelection;
+  favorite.disabled=!hasSelection;
+  favorite.textContent=hasSelection&&favorites.has(list.value)?'Remove favorite':'Save favorite';
+  open.setAttribute('aria-disabled',String(!hasSelection));
+  if(hasSelection)open.href=list.value;else open.removeAttribute('href');
+  if(visible.length){status.textContent=allChannels.length+' loaded · '+visible.length+' matching (first 1500 displayed). Streams may be unavailable.';}
   else{open.removeAttribute('href');status.textContent=allChannels.length?allChannels.length+' loaded · 0 matching. Choose All channels, disable HTTPS-only, or clear search.':'No channels loaded. Try refresh.';}
  }
  list.addEventListener('change',()=>{if(list.value){open.href=list.value;open.hidden=false;}else{open.hidden=true;open.removeAttribute('href');}playChannel.disabled=!list.value;favorite.disabled=!list.value;favorite.textContent=favorites.has(list.value)?'Remove favorite':'Save favorite';});
