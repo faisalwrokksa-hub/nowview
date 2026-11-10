@@ -42,8 +42,15 @@
    const hadFocus=container.contains(document.activeElement);
    container.remove();
    if(hadFocus){
+    const visible=el=>!!(el&&!el.hidden&&!el.closest('[hidden],[inert],[aria-hidden="true"]')&&el.getClientRects().length);
     const selected=document.querySelector('[data-view-button][aria-pressed="true"]');
-    selected?.focus?.({preventScroll:true});
+    const current=document.body.dataset.currentWorkspace||'myview';
+    const page=document.querySelector('[data-workspace="'+current+'"]');
+    const destination=visible(selected)?selected:visible(page)?page:null;
+    if(destination){
+     if(destination===page&&!page.hasAttribute('tabindex'))page.tabIndex=-1;
+     destination.focus({preventScroll:true});
+    }
    }
   }
   skip.addEventListener('click',()=>finish(false));save.addEventListener('click',()=>finish(true));
