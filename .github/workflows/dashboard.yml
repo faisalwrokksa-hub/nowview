@@ -1,9 +1,9 @@
 name: NewView dashboard TV and web
 on:
   push:
-    paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', '.github/workflows/dashboard.yml']
+    paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', 'scripts/verify-preview-apk.sh', '.github/workflows/dashboard.yml']
   pull_request:
-    paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', '.github/workflows/dashboard.yml']
+    paths: ['web/**', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', 'scripts/verify-preview-apk.sh', '.github/workflows/dashboard.yml']
   workflow_dispatch:
 permissions:
   contents: read
