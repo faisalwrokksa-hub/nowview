@@ -112,6 +112,8 @@
  picker.addEventListener('change',async()=>{
   const version=++selectionVersion;
   const file=picker.files?.[0];if(!file)return;
+  // Invalidate prior data immediately, including when the new file fails validation.
+  loadedRows=null;period.value='all';periodLabel.hidden=true;
   cards.replaceChildren();bars.replaceChildren();
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));
   if(file.size>limitBytes){status.textContent='File too large: maximum 1 MB';picker.value='';return;}

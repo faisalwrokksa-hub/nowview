@@ -42,3 +42,9 @@ test('stale asynchronous CSV reads cannot restore cleared or replaced data',()=>
  assert.match(src,/if\(version!==selectionVersion\)return/);
  assert.match(src,/if\(version===selectionVersion\)(?:\{|status\.textContent)/);
 });
+
+test('invalid replacement CSV cannot leave prior dataset selectable',()=>{
+ assert.match(src,/loadedRows=null;period\.value='all';periodLabel\.hidden=true;/);
+ assert.match(src,/if\(file\.size>limitBytes\)/);
+ assert.match(src,/catch\(error\)\{if\(version===selectionVersion\)\{loadedRows=null/);
+});
