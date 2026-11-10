@@ -34,3 +34,17 @@ jobs:
         run: npm run build
       - name: Build Pages
         run: npm run build:pages
+      - name: Verify build outputs
+        run: |
+          test -s dist/server/index.js
+          test -s dist/pages/_worker.js
+          grep -q 'tv-home.js' dist/server/index.js
+      - name: Upload review-only web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: newview-web-review-${{ github.sha }}
+          path: |
+            dist/server/index.js
+            dist/pages/_worker.js
+          if-no-files-found: error
+          retention-days: 7
