@@ -83,6 +83,8 @@
   if(loading)return loading;
   if(!force&&allChannels.length&&Date.now()-lastFetch<3600000){renderChannels();return;}
   status.textContent='Loading public IPTV directory…';
+  refresh.disabled=true;
+  refresh.setAttribute('aria-busy','true');
   loading=(async()=>{try{
    let content;
    if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicPlaylist==='function'){
@@ -120,7 +122,7 @@
    if(allChannels.length){renderChannels();status.textContent='Refresh failed ('+reason+'). Showing '+allChannels.length+' previously loaded channels; stream availability is not guaranteed.';}
    else{lastFetch=0;list.replaceChildren();playChannel.disabled=true;favorite.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+reason+'). Use the official playlist link or retry.';}
   }
-  finally{loading=null;}})();return loading;
+  finally{loading=null;refresh.disabled=false;refresh.removeAttribute('aria-busy');}})();return loading;
  }
  refresh.addEventListener('click',()=>loadDirectory(true));
  category?.addEventListener('change',renderChannels);
