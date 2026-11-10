@@ -43,3 +43,13 @@ test('TV app launcher is capability-gated and resilient to invalid app lists', (
   assert.match(tv, /typeof window\.NewViewApps\.launchApp==='function'/);
   assert.match(tv, /e\.key==='Backspace'/);
 });
+
+
+test('media and MyView tolerate missing or failing Android bridges', () => {
+  const media = read('web/media.js');
+  const myview = read('web/myview.js');
+  assert.match(media, /typeof window\.NewViewNative\.isPipeTvInstalled!=='function'/);
+  assert.match(media, /Unable to open PipeTv on this device/);
+  assert.match(myview, /typeof response==='string'\?JSON\.parse\(response\):response/);
+  assert.match(myview, /Unable to launch PipeTv on this TV/);
+});
