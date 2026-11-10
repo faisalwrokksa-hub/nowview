@@ -119,6 +119,21 @@
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
   nav.addEventListener('click',event=>{const b=event.target.closest('[data-view-button]');if(b)select(b.dataset.viewButton);});
+  // Mobile and tablet show one selected insight panel without changing widget data.
+  const panelTabs=document.querySelector('.newview-panel-tabs');
+  const panelGrid=document.getElementById('myview-grid');
+  let activePanel='market';
+  function syncPanels(){
+    if(!panelGrid)return;
+    const widgets=[...panelGrid.querySelectorAll('.myview-widget')];
+    const requested=widgets.find(el=>el.dataset.widget===activePanel);
+    const selected=requested||widgets[0];
+    widgets.forEach(el=>{el.dataset.panelActive=String(el===selected);});
+    panelTabs?.querySelectorAll('[data-panel-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.panelChoice===(selected?.dataset.widget||activePanel))));
+  }
+  panelTabs?.addEventListener('click',e=>{const b=e.target.closest('[data-panel-choice]');if(!b)return;activePanel=b.dataset.panelChoice;syncPanels();});
+  if(panelGrid){new MutationObserver(syncPanels).observe(panelGrid,{childList:true});syncPanels();}
+
   document.querySelector('[data-workspace="myview"]')?.addEventListener('click',event=>{const b=event.target.closest('[data-home-view]');if(!b)return;const view=b.dataset.homeView;if(!views.includes(view))return;select(view);if(b.dataset.homeSection)window.NewViewWatch?.select(b.dataset.homeSection);});
   // Roving focus for keyboard and Android TV remotes; native Tab remains available.
   nav.addEventListener('keydown',event=>{
