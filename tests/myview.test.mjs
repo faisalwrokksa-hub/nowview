@@ -64,3 +64,11 @@ test('Market Watch general reference does not claim to verify a specific quote',
  assert.match(src,/Binance markets \(general reference, not quote verification\)/);
  assert.match(src,/does not verify displayed quote/);
 });
+
+test('Market Watch does not display future-dated quote timestamps as current',()=>{
+ const {api}=setup();
+ const future=Math.floor(Date.now()/1000)+3600;
+ assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:future}),'BTCUSDT · 120 USDT · quote time unavailable');
+ const recent=Math.floor(Date.now()/1000)-60;
+ assert.match(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:recent}),/ · quote (?!time unavailable)/);
+});
