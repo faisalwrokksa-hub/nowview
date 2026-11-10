@@ -111,7 +111,12 @@
       parts.push(chunk);
       if(last){const content=parts.join('');cleanup();resolve(content);}
      };
-     window.NewViewNative.fetchPublicPlaylist(id);
+     // Native bridges may throw synchronously or reject asynchronously; fail fast rather than waiting 45 seconds.
+     try{
+      Promise.resolve(window.NewViewNative.fetchPublicPlaylist(id)).catch(error=>{
+       cleanup();reject(Error(String(error?.message||'Native playlist request failed')));
+      });
+     }catch(error){cleanup();reject(Error(String(error?.message||'Native playlist request failed')));}
     });
    }else{
     const controller=new AbortController();
