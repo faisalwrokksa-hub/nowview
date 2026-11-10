@@ -117,3 +117,15 @@ test('TV launcher uses local clock and tolerates missing optional Watch API', ()
   assert.doesNotMatch(tv, /timeZone:'Asia\/Riyadh'/);
   assert.match(tv, /NewViewWatch\?\.select\?\./);
 });
+
+test('IPTV directory guards filtered selections and exposes TV-friendly controls', () => {
+ const media=read('web/media.js');
+ assert.match(media, /directory\.className='newview-channel-directory'/);
+ assert.match(media, /const hasSelection=Boolean\(list\.value\)/);
+ assert.match(media, /playChannel\.disabled=!hasSelection/);
+ assert.match(media, /favorite\.disabled=!hasSelection/);
+ assert.match(media, /if\(hasSelection\)open\.href=list\.value;else open\.removeAttribute\('href'\)/);
+ assert.match(css, /#newview-channel-directory/);
+ assert.match(css, /#newview-channel-directory :is\(button,a,input,select\):focus-visible/);
+ assert.match(css, /@media\(max-width:620px\)/);
+});
