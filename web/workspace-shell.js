@@ -130,7 +130,8 @@
    report('Display mode '+(active.fullscreen?'on':'off')+'; save profile to retain it');
   });
   document.getElementById('display-next')?.addEventListener('click',()=>{
-   const current=document.body.dataset.currentWorkspace;const i=active.views.indexOf(current);select(active.views[(i+1)%active.views.length]);
+   const available=active.views.filter(v=>views.includes(v));if(!available.length){report('No workspaces available in this profile');return;}
+   const current=document.body.dataset.currentWorkspace;const i=available.indexOf(current);select(available[(i+1)%available.length]);
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('display-mode')){document.body.classList.remove('display-mode');active=sanitizeDisplay({...active,fullscreen:false});}});
   renderProfiles();apply(active);
