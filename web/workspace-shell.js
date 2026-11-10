@@ -36,7 +36,16 @@
   const actions=document.createElement('div');actions.className='myview-toolbar';
   const skip=document.createElement('button');skip.type='button';skip.textContent='Use recommended defaults';
   const save=document.createElement('button');save.type='button';save.textContent='Save preferences';
-  function finish(custom){saveFirstLaunch(custom?{interests:[...field.querySelectorAll('input:checked')].map(x=>x.value),coverage:coverage.value,video:video.value,refresh:refresh.value}:FIRST_LAUNCH_DEFAULT);container.remove();}
+  function finish(custom){
+   saveFirstLaunch(custom?{interests:[...field.querySelectorAll('input:checked')].map(x=>x.value),coverage:coverage.value,video:video.value,refresh:refresh.value}:FIRST_LAUNCH_DEFAULT);
+   // Restore focus when the first-launch controls are removed, including on TV remotes.
+   const hadFocus=container.contains(document.activeElement);
+   container.remove();
+   if(hadFocus){
+    const selected=document.querySelector('[data-view-button][aria-pressed="true"]');
+    selected?.focus?.({preventScroll:true});
+   }
+  }
   skip.addEventListener('click',()=>finish(false));save.addEventListener('click',()=>finish(true));
   actions.append(skip,save);container.append(actions);
   const target=document.getElementById('workspace-intro');target?.parentNode?.insertBefore(container,target);
