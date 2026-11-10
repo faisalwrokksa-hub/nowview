@@ -99,6 +99,17 @@
  };
  if(!root||!editor){window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,preview};return;}
  function text(tag,cls,value){const el=document.createElement(tag);if(cls)el.className=cls;el.textContent=value;return el;}
+ function updateNewsSourceLink(){
+  const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
+  if(!link)return;
+  const snapshot=snapshots.news;
+  const verified=Number.isFinite(snapshot?.count)&&snapshot.count>0&&(snapshot.source==='fed'||snapshot.source==='sec');
+  link.hidden=!verified;
+  if(!verified){link.removeAttribute('href');link.textContent='Source unavailable';return;}
+  const fed=snapshot.source==='fed';
+  link.href=fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom';
+  link.textContent=fed?'Federal Reserve source':'SEC source';
+ }
  function render(){
   root.replaceChildren();editor.replaceChildren();
   summary.textContent=chosen.length+' of '+catalog.length+' widgets selected · saved on this device';
@@ -140,20 +151,18 @@
    }
    item.append(eyebrow,heading,description,insight,actions);root.append(item);
   }
+  updateNewsSourceLink();
  }
  function installPresets(){if(!presetBar)return;for(const [name,label] of [['balanced','Balanced'],['markets','Markets first'],['media','Watch & News first']]){const button=text('button','',''+label);button.type='button';button.dataset.preset=name;button.addEventListener('click',()=>{chosen=save(preset(name));render();button.focus();});presetBar.append(button);}}
  document.getElementById('myview-reset')?.addEventListener('click',()=>{chosen=save(defaults);render();});
  for(const id of ['market','business','news','social'])window.addEventListener('newview:'+id,event=>{
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
-  if(preview[id](next)===preview[id](snapshots[id]))return; // Do not reset TV focus on unchanged quotes.
+  if(id!=='news'&&preview[id](next)===preview[id](snapshots[id]))return; // News source validity may change without changing preview text.
   snapshots[id]=next;
   // Refresh only the affected text: rebuilding cards on every quote disrupts TV/keyboard focus.
   const live=root.querySelector('[data-widget="'+id+'"] [data-snapshot="'+id+'"]');
   if(live)live.textContent=preview[id](next);
-  if(id==='news'){
-   const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
-   if(link){const verified=next?.source==='fed'||next?.source==='sec';link.hidden=!verified;if(verified){const fed=next.source==='fed';link.href=fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom';link.textContent=fed?'Federal Reserve source':'SEC source';}else{link.removeAttribute('href');link.textContent='Source unavailable';}}
-  }
+  if(id==='news')updateNewsSourceLink();
  });
  window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
  installPresets();render();
