@@ -53,3 +53,25 @@ test('media and MyView tolerate missing or failing Android bridges', () => {
   assert.match(myview, /typeof response==='string'\?JSON\.parse\(response\):response/);
   assert.match(myview, /Unable to launch PipeTv on this TV/);
 });
+
+
+test('installed app package validator accepts normal Android package IDs', () => {
+  const source = read('web/myview.js');
+  assert.ok(source.includes(String.raw`/^([A-Za-z][A-Za-z0-9_]*\\.)+[A-Za-z][A-Za-z0-9_]*$/`));
+  const pattern = /^([A-Za-z][A-Za-z0-9_]*\.)+[A-Za-z][A-Za-z0-9_]*$/;
+  assert.equal(pattern.test('com.example.tv'), true);
+  assert.equal(pattern.test('com\\example\\tv'), false);
+});
+
+test('IPTV preserves selected channel and handles incomplete metadata', () => {
+  const media = read('web/media.js');
+  assert.match(media, /const previous=list\.value/);
+  assert.match(media, /open\.href=list\.value/);
+  assert.match(media, /String\(c\.category\|\|''\)/);
+});
+
+test('Watch and News restores keyboard focus when switching hidden panels', () => {
+  const watch = read('web/watch.js');
+  assert.match(watch, /focusInsideHiddenPanel/);
+  assert.match(watch, /focus\(\{preventScroll:true\}\)/);
+});
