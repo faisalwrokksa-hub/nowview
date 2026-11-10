@@ -103,7 +103,7 @@
   else{if(market)market.hidden=true;if(board)board.hidden=true;if(chart)chart.hidden=true;}
   try{localStorage.setItem('newview.workspace',view);}catch{}
   const page=document.querySelector('[data-workspace="'+view+'"]');
-  if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'instant'});
+  if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'auto'});
   return true;
  }
  function installDisplay(){
@@ -139,13 +139,13 @@
  function install(){
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
-  nav.addEventListener('click',event=>{const b=event.target.closest('[data-view-button]');if(b)select(b.dataset.viewButton);});
+  nav.addEventListener('click',event=>{const b=event.target instanceof Element?event.target.closest('[data-view-button]'):null;if(b&&nav.contains(b)&&!b.disabled&&b.getAttribute('aria-disabled')!=='true')select(b.dataset.viewButton);});
   // Roving tab focus: arrow keys navigate workspaces on keyboard and TV remotes.
   // Keep ordinary arrow-key behavior inside content widgets and forms.
   nav.addEventListener('keydown',event=>{
    if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
-   const current=event.target.closest('[data-view-button]');
+   const current=event.target instanceof Element?event.target.closest('[data-view-button]'):null;
    if(!current||!nav.contains(current)||event.target!==current)return;
    const tabs=[...nav.querySelectorAll('[data-view-button]')].filter(tab=>!tab.disabled&&!tab.hidden&&tab.getAttribute('aria-disabled')!=='true');
    const index=tabs.indexOf(current);
@@ -163,7 +163,8 @@
   });
   document.querySelectorAll('[data-open-markets]').forEach(b=>b.addEventListener('click',()=>select('markets')));
   const boardButton=document.getElementById('board-toggle');
-  if(boardButton)document.getElementById('shell-market-actions').appendChild(boardButton);
+  const marketActions=document.getElementById('shell-market-actions');
+  if(boardButton&&marketActions)marketActions.appendChild(boardButton);
   select(window.NewViewApps?'myview':getStored());
   installDisplay();
   installFirstLaunch();
