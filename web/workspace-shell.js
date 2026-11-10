@@ -80,7 +80,13 @@
    // Arrow/Home/End keys still provide direct access to all available workspaces.
    el.tabIndex=active?0:-1;
   }
-  document.getElementById('workspace-title').textContent=names[view];
+  const workspaceTitle=document.getElementById('workspace-title');
+  if(workspaceTitle){
+   workspaceTitle.setAttribute('role','status');
+   workspaceTitle.setAttribute('aria-live','polite');
+   workspaceTitle.setAttribute('aria-atomic','true');
+   workspaceTitle.textContent=names[view];
+  }
   const source=document.getElementById('footer-source');
   if(source)source.textContent=sourceNotes[view];
   document.body.dataset.currentWorkspace=view;
