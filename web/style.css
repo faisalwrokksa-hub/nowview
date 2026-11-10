@@ -392,3 +392,17 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
   scroll-behavior:auto!important;
  }
 }
+
+
+/* Task 1: keep workspace controls usable in landscape phones and TV zoom. */
+@media (max-height:480px) and (orientation:landscape){
+ .workspace-switcher{max-width:100%;overflow-x:auto;scrollbar-width:thin}
+ .workspace-switcher [data-view-button]{min-height:44px;white-space:nowrap}
+}
+/* Focus rings must remain discernible when the OS forces its own palette. */
+@media (forced-colors:active){
+ .workspace-switcher [data-view-button]:focus-visible{outline:3px solid Highlight;outline-offset:2px}
+ .workspace-switcher [data-view-button][aria-current="page"]{border:2px solid Highlight}
+}
+/* Long localized labels should wrap rather than overflow narrow cards. */
+.shell-page :is(h1,h2,h3,p),.shell-card :is(h1,h2,h3,p){overflow-wrap:break-word}
