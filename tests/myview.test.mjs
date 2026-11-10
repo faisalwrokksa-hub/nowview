@@ -6,7 +6,7 @@ function setup(value=null){
  vm.runInNewContext(src,{window,document,localStorage});
  return {api:window.NewViewPersonal,saved:()=>saved};
 }
-test('MyView presets include Markets, News and Media',()=>{const {api}=setup();assert.deepEqual([...api.load()],['market','news','media']);});
+test('MyView defaults include Markets, News and Business',()=>{const {api}=setup();assert.deepEqual([...api.load()],['market','news','business']);});
 test('MyView excludes unrecognized widget IDs and duplicate entries',()=>{
  const {api}=setup();assert.deepEqual([...api.sanitize(['market','bad','news','market','business'])],['market','news','business']);
 });
@@ -15,7 +15,7 @@ test('MyView preserves an intentionally empty layout and safe order',()=>{
  assert.deepEqual([...s.api.save(['social','market'])],['social','market']);
  assert.deepEqual(JSON.parse(s.saved()),['social','market']);
 });
-test('MyView falls back to defaults if storage is corrupt',()=>{const s=setup('{');assert.deepEqual([...s.api.load()],['market','news','media']);});
+test('MyView falls back to defaults if storage is corrupt',()=>{const s=setup('{');assert.deepEqual([...s.api.load()],['market','news','business']);});
 test('Five-workspace navigation and MyView editable controls are in bundled UI',()=>{
  const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
  const cloud=fs.readFileSync(new URL('../cloud/build.mjs',import.meta.url),'utf8');
@@ -26,12 +26,12 @@ test('Five-workspace navigation and MyView editable controls are in bundled UI',
 
 test('MyView preset layouts are allowlisted, immutable defaults and locally selectable',()=>{
  const {api}=setup();
- assert.deepEqual([...api.preset('balanced')],['market','news','media']);
+ assert.deepEqual([...api.preset('balanced')],['market','news','business']);
  assert.deepEqual([...api.preset('markets')],['market','news','business']);
  assert.deepEqual([...api.preset('media')],['media','news','social']);
  assert.equal(api.preset('unknown'),null);
  const first=api.preset('balanced');first.pop();
- assert.deepEqual([...api.preset('balanced')],['market','news','media']);
+ assert.deepEqual([...api.preset('balanced')],['market','news','business']);
 });
 test('News and video widgets open their sections inside five-workspace Watch & News',()=>{
  const {api}=setup();
