@@ -1,0 +1,45 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const root = process.cwd();
+const read = file => readFileSync(join(root, file), 'utf8');
+const html = read('web/index.html');
+const shell = read('web/workspace-shell.js');
+const tv = read('web/tv-home.js');
+const css = read('web/style.css');
+
+test('five workspace buttons retain their unique routing keys and accessible pressed state', () => {
+  const matches = [...html.matchAll(/<button\b[^>]*data-view-button="([^"]+)"[^>]*>/g)];
+  assert.deepEqual(matches.map(m => m[1]), ['myview', 'markets', 'business', 'media', 'social']);
+  for (const [markup] of matches) assert.match(markup, /aria-pressed="false"/);
+});
+
+test('reference-theme workspace icons are SVG and decorative to screen readers', () => {
+  assert.equal((html.match(/class="nv-nav-icon"/g) || []).length, 5);
+  assert.equal((html.match(/class="nv-nav-icon" aria-hidden="true"/g) || []).length, 5);
+  assert.match(css, /\.nv-nav-icon/);
+});
+
+test('display profiles are device-local, bounded and sanitized', () => {
+  assert.match(shell, /newview\.display\.profiles\.v1/);
+  assert.match(shell, /profiles\.slice\(0,5\)\.map\(sanitizeDisplay\)/);
+  assert.match(shell, /\[0,30,60,120,300\]\.includes\(seconds\)/);
+  assert.match(shell, /typeof chosen!=='string'/);
+});
+
+test('workspace navigation preserves focus and handles WebView limitations', () => {
+  assert.match(shell, /focusWasInHiddenPanel/);
+  assert.match(shell, /event\.target instanceof Element/);
+  assert.match(shell, /page\.scrollTop=0/);
+  assert.match(shell, /Promise\.resolve\(document\.documentElement\.requestFullscreen\(\)\)/);
+});
+
+test('TV app launcher is capability-gated and resilient to invalid app lists', () => {
+  assert.match(tv, /if\(!window\.NewViewApps/);
+  assert.match(tv, /typeof window\.NewViewApps\.listLaunchableApps!=='function'/);
+  assert.match(tv, /Array\.isArray\(installed\)/);
+  assert.match(tv, /typeof window\.NewViewApps\.launchApp==='function'/);
+  assert.match(tv, /e\.key==='Backspace'/);
+});
