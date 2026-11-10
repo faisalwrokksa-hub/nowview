@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const script=readFileSync(new URL('../web/offline-agents.js',import.meta.url),'utf8');
+function load(){const values=new Map();const listeners=new Map();const window={localStorage:{getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)},addEventListener:(k,cb)=>listeners.set(k,cb),dispatchEvent:e=>listeners.get(e.type)?.(e),CustomEvent:class{constructor(type,opts){this.type=type;this.detail=opts.detail}}};vm.runInNewContext(script,{window,Date,Math,JSON,Number,String,Array,Set});return window.NewViewOfflineAgents}
+test('skill registry exposes deterministic offline operations',()=>{const a=load();assert.equal(a.skills.length,10);assert.equal(a.execute('skill-audit').ok,true);assert.equal(a.execute('arbitrary-js').ok,false);assert.equal(a.execute('offline-status').value.localInference,false)});
+test('threshold alerts trigger on crossings only',()=>{const a=load();assert.equal(a.setAlert({symbol:'BTCUSDT',direction:'above',price:100}).ok,true);assert.equal(a.observe('market',{symbol:'BTCUSDT',price:101,quoteTime:1700000000}).length,1);assert.equal(a.observe('market',{symbol:'BTCUSDT',price:102,quoteTime:1700000001}).length,0);assert.equal(a.observe('market',{symbol:'BTCUSDT',price:99,quoteTime:1700000002}).length,0);assert.equal(a.observe('market',{symbol:'BTCUSDT',price:101,quoteTime:1700000003}).length,1)});
+test('reject invalid profile and accept allowlisted widgets',()=>{const a=load();assert.equal(a.importProfile({format:'newview-offline-profile',version:1,data:{'newview.myview.widgets.v1':['evil']}}).ok,false);assert.equal(a.importProfile({format:'newview-offline-profile',version:1,data:{'newview.myview.widgets.v1':['market','media']}}).ok,true);assert.equal(a.exportProfile().data['newview.myview.widgets.v1'].length,2)});
