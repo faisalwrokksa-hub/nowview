@@ -26,7 +26,7 @@ test('display profiles are device-local, bounded and sanitized', () => {
   assert.match(shell, /newview\.display\.profiles\.v1/);
   assert.match(shell, /profiles\.slice\(0,5\)\.map\(sanitizeDisplay\)/);
   assert.match(shell, /\[0,30,60,120,300\]\.includes\(seconds\)/);
-  assert.match(shell, /if\(chosen===null\)return/);
+  assert.match(shell, /typeof chosen!=='string'/);
 });
 
 test('workspace navigation preserves focus and handles WebView limitations', () => {
@@ -80,9 +80,9 @@ test('Watch and News restores keyboard focus when switching hidden panels', () =
 
 test('IPTV launch reports secure-stream and bridge errors', () => {
   const media = read('web/media.js');
-  assert.match(media, /url\.protocol==='https:'/);
-  assert.match(media, /catch\{\}/);
-  assert.match(media, /if\(!nativeStream\(\)\|\|!list\.value\)return/);
+  assert.match(media, /Only secure HTTPS streams can be launched/);
+  assert.match(media, /Could not launch this stream/);
+  assert.match(media, /Native IPTV playback is not available/);
 });
 
 
