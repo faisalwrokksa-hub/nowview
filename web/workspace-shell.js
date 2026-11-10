@@ -61,7 +61,16 @@
   const chartToggle=document.getElementById('board-toggle');
   if(chartToggle)chartToggle.hidden=view!=='markets';
   if(view!=='media'&&window.NewViewMedia?.stopPlayback)window.NewViewMedia.stopPlayback();
+  // When switching views from a shortcut or TV remote, never strand keyboard focus
+  // inside a panel that becomes hidden. Preserve focus for ordinary tab clicks.
+  const previouslyFocused=document.activeElement;
+  const focusWasInHiddenPanel=!!previouslyFocused?.closest?.('[data-workspace]:not([hidden])') &&
+   previouslyFocused.closest('[data-workspace]').dataset.workspace!==view;
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
+  if(focusWasInHiddenPanel){
+   const destination=document.querySelector('[data-view-button="'+view+'"]');
+   destination?.focus?.({preventScroll:true});
+  }
   for(const el of document.querySelectorAll('[data-view-button]')){
    const active=el.dataset.viewButton===view;el.setAttribute('aria-pressed',String(active));el.classList.toggle('selected',active);
   }
