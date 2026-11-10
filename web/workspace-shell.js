@@ -80,10 +80,8 @@
    !!(focusedMarketPanel&&marketPanelWillHide) ||
    !!(chartToggle&&previouslyFocused===chartToggle&&view!=='markets');
   document.querySelectorAll('[data-workspace]').forEach(el=>{el.hidden=el.dataset.workspace!==view;});
-  if(focusWasInHiddenPanel){
-   const destination=document.querySelector('[data-view-button="'+view+'"]');
-   destination?.focus?.({preventScroll:true});
-  }
+  // Restore focus only after the destination workspace has become visible.
+  // TV launcher mode can hide the tab strip entirely; use the visible page instead.
   for(const el of document.querySelectorAll('[data-view-button]')){
    const active=el.dataset.viewButton===view;el.setAttribute('aria-pressed',String(active));el.classList.toggle('selected',active);
    // A single tab stop keeps TV remotes and keyboard users from traversing every workspace tab.
@@ -111,6 +109,18 @@
     if(!isBoard)requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
   }else if(view==='myview'&&document.body.classList.contains('tv-launcher')){if(market)market.hidden=false;if(board)board.hidden=true;if(chart)chart.hidden=false;requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));}
   else{if(market)market.hidden=true;if(board)board.hidden=true;if(chart)chart.hidden=true;}
+  if(focusWasInHiddenPanel){
+   const destination=document.querySelector('[data-view-button="'+view+'"]');
+   const visible=el=>el&&!el.hidden&&!el.closest('[hidden],[inert],[aria-hidden="true"]')&&el.getClientRects().length>0;
+   if(visible(destination))destination.focus({preventScroll:true});
+   else{
+    const page=document.querySelector('[data-workspace="'+view+'"]');
+    if(visible(page)){
+     if(!page.hasAttribute('tabindex'))page.tabIndex=-1;
+     page.focus({preventScroll:true});
+    }
+   }
+  }
   try{localStorage.setItem('newview.workspace',view);}catch{}
   const page=document.querySelector('[data-workspace="'+view+'"]');
   if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'auto'});
