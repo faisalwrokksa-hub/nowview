@@ -9,7 +9,7 @@
  const clock=document.createElement('div');clock.className='tv-home-clock';clock.setAttribute('aria-label','Riyadh time');
  const actions=document.createElement('nav');actions.className='tv-home-actions';actions.setAttribute('aria-label','TV Home actions');
  function action(name,handler){const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',handler);actions.append(b);return b;}
- const apps=document.querySelector('.home-apps'),grid=document.getElementById('home-installed-grid');
+ const grid=document.getElementById('home-installed-grid');
  const status=document.getElementById('home-app-status');
  function report(message){if(status)status.textContent=message;}
  function restoreFocus(target){if(target?.isConnected&&!target.disabled)target.focus();}
@@ -26,15 +26,18 @@
   const button=document.createElement('button');button.type='button';button.textContent=item.name;
   button.addEventListener('click',()=>{
    try{
-    const installed=JSON.parse(window.NewViewApps.listLaunchableApps());
-    const app=installed.find(x=>item.match.test(x.label+' '+x.packageName));
-    if(app&&typeof window.NewViewApps.launchApp==='function')window.NewViewApps.launchApp(app.packageName);
+    if(typeof window.NewViewApps.listLaunchableApps!=='function'){report('Installed-app discovery is not supported on this device.');return;}
+    const response=window.NewViewApps.listLaunchableApps();
+    const installed=typeof response==='string'?JSON.parse(response):response;
+    if(!Array.isArray(installed)){report('Installed-app list is unavailable.');return;}
+    const app=installed.find(x=>x&&item.match.test(String(x.label||'')+' '+String(x.packageName||'')));
+    if(app&&typeof app.packageName==='string'&&app.packageName&&typeof window.NewViewApps.launchApp==='function')window.NewViewApps.launchApp(app.packageName);
     else report(item.name+' is not installed or not discoverable. Open All apps.');
    }catch{report('Unable to launch '+item.name);}
   });favorites.append(button);
  }
  home.append(favorites);
- function tick(){const now=new Date();clock.textContent=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}).format(now)+' · Riyadh';}
+ function tick(){const now=new Date();try{clock.textContent=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}).format(now)+' · Riyadh';}catch{clock.textContent=now.toLocaleString()+' · Device time';}}
  tick();const timer=setInterval(()=>{if(!document.hidden)tick();},30000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});
  document.addEventListener('keydown',e=>{
