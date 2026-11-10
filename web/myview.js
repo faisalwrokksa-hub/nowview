@@ -13,6 +13,7 @@
  const presets=Object.freeze({balanced:Object.freeze(['market','news','media']),markets:Object.freeze(['market','news','business']),media:Object.freeze(['media','news','social'])});
  function preset(name){return Object.hasOwn(presets,name)?[...presets[name]]:null;}
  const key='newview.myview.widgets.v1';
+ const floatingVideoKey='newview.myview.floating-video.v1';
  function sanitize(input){
   if(!Array.isArray(input))return [...defaults];
   const out=[];for(const id of input){
@@ -150,9 +151,20 @@
    if(id==='market')item.append(chartFor(snapshots.market?.symbol||'Market'));
    if(id==='media'){
     const player=document.createElement('div');player.className='myview-video-panel';
-    const label=text('p','','Video playback is available in Watch & News; native IPTV requires Android TV support.');
+    const label=text('p','','Floating video supports official YouTube embeds on web. Native IPTV requires Android TV support.');
     const open=text('button','shell-primary','Open video player');open.type='button';open.addEventListener('click',()=>{window.NewViewShell?.select('media');window.NewViewWatch?.select('videos');});
-    player.append(label,open);item.append(player);
+    const floating=text('button','','Floating YouTube video');floating.type='button';floating.addEventListener('click',()=>{
+      const raw=window.prompt('Enter an official YouTube video URL (HTTPS):',(()=>{try{return localStorage.getItem(floatingVideoKey)||''}catch{return ''}})());
+      if(raw===null)return;
+      const parsed=window.NewViewMedia?.parse(raw);
+      if(!parsed){label.textContent='Enter a valid official YouTube video URL.';return;}
+      try{localStorage.setItem(floatingVideoKey,raw)}catch{}
+      const old=player.querySelector('iframe');if(old)old.remove();
+      if(location.protocol==='file:'){label.textContent='Embedded playback is not supported in this Android TV APK. Use the native player or external link.';return;}
+      const frame=document.createElement('iframe');frame.title='Floating YouTube video';frame.src=parsed.embed;frame.allow='encrypted-media; picture-in-picture';frame.allowFullscreen=true;frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';frame.style.cssText='width:100%;aspect-ratio:16/9;border:0;border-radius:9px';player.append(frame);
+      label.textContent='Official YouTube embed; advertisements may appear.';
+    });
+    player.append(label,open,floating);item.append(player);
    }
    item.append(actions);root.append(item);
   }
