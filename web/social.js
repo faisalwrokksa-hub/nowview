@@ -115,7 +115,7 @@
    a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';
    const remove=text('button','','Remove');
    remove.type='button';remove.setAttribute('aria-label','Remove '+item.name);
-   remove.addEventListener('click',()=>{const next=save(items.filter(x=>x.url!==item.url));if(!next){status.textContent='Could not remove profile: device storage is unavailable.';return;}items=next;delete metadata[item.url];persistMetadata();render();status.textContent='Profile removed locally.';});
+   remove.addEventListener('click',()=>{const next=save(items.filter(x=>x.url!==item.url));if(!next){status.textContent='Could not remove profile: device storage is unavailable.';return;}items=next;const previousMetadata=metadata[item.url];delete metadata[item.url];if(!persistMetadata()){if(previousMetadata)metadata[item.url]=previousMetadata;render();status.textContent='Profile removed, but saved labels could not be cleared from device storage.';return;}render();status.textContent='Profile removed locally.';});
    const tag=document.createElement('input');tag.type='text';tag.maxLength=32;tag.placeholder='Tag (optional)';tag.setAttribute('aria-label','Tag for '+item.name);tag.value=metadata[item.url]?.tag||'';
    const collection=document.createElement('input');collection.type='text';collection.maxLength=32;collection.placeholder='Collection (optional)';collection.setAttribute('aria-label','Collection for '+item.name);collection.value=metadata[item.url]?.collection||'';
    const saveLabels=text('button','','Save labels');saveLabels.type='button';
