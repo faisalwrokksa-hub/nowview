@@ -427,3 +427,16 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
   outline-color:Highlight;
  }
 }
+
+/* Task 1: logical-direction navigation and predictable focus under RTL locales. */
+.workspace-switcher{direction:inherit;scroll-padding-inline:16px}
+.workspace-switcher [data-view-button]{text-align:center;unicode-bidi:plaintext}
+.shell-page :is([dir="rtl"],[dir="ltr"]),
+.shell-card :is([dir="rtl"],[dir="ltr"]){text-align:start}
+/* Prevent zoomed mobile screens from clipping actionable status messages. */
+.shell-page :is([role="alert"],[role="status"]) a,
+.shell-card :is([role="alert"],[role="status"]) a{overflow-wrap:anywhere;text-underline-offset:.18em}
+@media(max-width:400px){
+ .workspace-switcher{scroll-padding-inline:12px}
+ .workspace-switcher [data-view-button]{min-width:44px;max-width:none}
+}
