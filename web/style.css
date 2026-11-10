@@ -695,3 +695,13 @@ body>main>[data-workspace="myview"] .newview-personalize[open]{position:absolute
 @media(min-width:651px) and (max-width:900px){body>main>[data-workspace="myview"] .newview-panel-tabs{display:flex}body>main>[data-workspace="myview"] .newview-panel-tabs button{flex:1}body>main>[data-workspace="myview"] #myview-grid>.myview-widget:not([data-panel-active="true"]):not([data-widget="market"]){display:none!important}}
 @media(pointer:coarse) and (min-width:901px){body>main>.workspace-switcher .workspace-tab{min-height:54px}body>main>[data-workspace="myview"] .newview-home-quick button{min-height:58px}}
 @media(prefers-reduced-motion:reduce){body>main>[data-workspace="myview"] *{scroll-behavior:auto!important}}
+
+/* Release audit refinement: pinned widget selector, focus visibility and small screens. */
+body>main>[data-workspace="myview"] .newview-panel-tabs[hidden],
+body>main>[data-workspace="myview"] .newview-panel-tabs button[hidden]{display:none!important}
+body>main>[data-workspace="myview"] :is(.newview-panel-tabs button,.newview-home-quick button,.myview-widget button):focus-visible{outline:3px solid #ffd7a9;outline-offset:2px;position:relative;z-index:2}
+body>main>[data-workspace="myview"] .myview-widget{overflow-wrap:anywhere}
+body>main>[data-workspace="myview"] #myview-grid{overscroll-behavior:contain}
+@media(min-width:651px) and (max-width:900px){body>main>[data-workspace="myview"] .newview-panel-tabs{flex-wrap:wrap}body>main>[data-workspace="myview"] .newview-panel-tabs button{flex:1 1 18%;min-width:0;padding:8px 3px}body>main>[data-workspace="myview"] #myview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}body>main>[data-workspace="myview"] #myview-grid>.myview-widget[data-panel-active="true"]{display:block!important}body>main>[data-workspace="myview"] #myview-grid>.myview-widget[data-widget="market"]{grid-column:span 2}}
+@media(max-width:650px){body>main>.workspace-switcher{padding-bottom:max(3px,env(safe-area-inset-bottom))}body>main>[data-workspace="myview"] .newview-panel-tabs{flex-wrap:wrap}body>main>[data-workspace="myview"] .newview-panel-tabs button{flex:1 1 18%;min-width:0}body>main>[data-workspace="myview"] #myview-grid>.myview-widget[data-panel-active="true"]{display:block!important}body>main>[data-workspace="myview"] #myview-grid>.myview-widget[data-widget="market"]{grid-column:auto}}
+@media(max-height:600px){body>main{padding-block:4px}body>main>header .eyebrow,body>main>footer{display:none}body>main>[data-workspace="myview"] .newview-home-hero{max-height:18%}body>main>[data-workspace="myview"] .newview-personalize{display:none}}
