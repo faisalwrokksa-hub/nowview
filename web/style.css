@@ -493,3 +493,63 @@ body{
  .workspace-switcher .workspace-tab{font-size:clamp(13px,3.5vw,16px)}
  .nv-nav-icon{width:18px;height:18px}
 }
+
+
+/* NewView dashboard framing: reference-inspired copper borders, capsule icons,
+   and channel/media surfaces. Presentation only; no launcher or playback changes. */
+:root{
+ --nv-frame-edge:rgba(213,151,110,.38);
+ --nv-frame-highlight:rgba(255,239,225,.12);
+ --nv-channel-surface:rgba(23,17,19,.76);
+}
+body main{border:1px solid rgba(213,151,110,.16);border-radius:22px}
+.workspace-switcher{
+ border:1px solid var(--nv-frame-edge);
+ border-radius:20px;
+ background:linear-gradient(145deg,rgba(52,32,27,.94),rgba(16,17,21,.92));
+ box-shadow:inset 0 1px 0 var(--nv-frame-highlight),0 16px 34px rgba(0,0,0,.2);
+}
+.workspace-switcher .workspace-tab{
+ border-radius:999px;
+ border:1px solid rgba(213,151,110,.2);
+ background:rgba(255,255,255,.035);
+}
+.workspace-switcher .nv-nav-icon{
+ border-radius:9px;
+ filter:drop-shadow(0 1px 3px rgba(213,151,110,.18));
+}
+.workspace-switcher .workspace-tab:is(.selected,[aria-current="page"],[aria-pressed="true"]){
+ border-color:#d5976e;
+ box-shadow:inset 0 1px 0 rgba(255,245,233,.18),0 0 0 1px rgba(213,151,110,.18);
+}
+:where(.shell-card,.myview-card,.widget-card,.workspace-panel){
+ border:1px solid var(--nv-frame-edge);
+ border-radius:20px;
+ background:linear-gradient(145deg,rgba(38,29,29,.92),rgba(15,17,22,.92));
+ box-shadow:inset 0 1px 0 var(--nv-frame-highlight),0 12px 32px rgba(0,0,0,.17);
+}
+:where(.media-actions,.media-input,#media-frame,#media-status){
+ border-radius:16px;
+}
+#media-frame{
+ border:1px solid var(--nv-frame-edge);
+ background:var(--nv-channel-surface);
+ overflow:hidden;
+}
+:where(.media-actions,.home-app-actions,.home-installed-grid) :where(button,a[href]){
+ border-radius:999px;
+}
+:where(.media-actions,.home-app-actions,.home-installed-grid) :where(button,a[href]):focus-visible{
+ outline:3px solid #ffd0a0;
+ outline-offset:3px;
+}
+@media(max-width:700px){
+ body main{border-radius:14px}
+ .workspace-switcher{border-radius:14px}
+ :where(.shell-card,.myview-card,.widget-card,.workspace-panel){border-radius:16px}
+}
+@media(forced-colors:active){
+ body main,.workspace-switcher,:where(.shell-card,.myview-card,.widget-card,.workspace-panel),#media-frame{
+ border:1px solid CanvasText;background:Canvas;box-shadow:none
+ }
+}
