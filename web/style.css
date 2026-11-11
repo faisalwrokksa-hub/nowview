@@ -883,3 +883,19 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media(forced-colors:active){
  body>main>.workspace-switcher .workspace-tab.selected{outline:2px solid Highlight;outline-offset:-3px}
 }
+
+
+/* Task 1: predictable feedback and remote focus across compact workspaces. */
+:is(.workspace,.shell-page,[data-workspace]) :is([role="status"],[role="alert"],[aria-live]){
+  min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:normal;
+}
+:is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,summary,input,select,textarea,[tabindex]):focus{
+  scroll-margin:28px;
+}
+@media (max-width:600px){
+  body>main>.workspace-switcher{max-width:100%;scroll-padding-inline:16px;-webkit-overflow-scrolling:touch}
+  body>main>.workspace-switcher .workspace-tab{flex-shrink:0}
+}
+@media (prefers-reduced-motion:reduce){
+  :is(.workspace,.shell-page,[data-workspace]) :is([role="status"],[role="alert"],[aria-live]){animation:none!important}
+}
