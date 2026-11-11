@@ -19,8 +19,18 @@ export async function handleDeviceSync(request,env,url,fetcher=fetch){
  const roomKey=new TextEncoder().encode(access.subject+String.fromCharCode(0)+match[1]);
  const digest=await crypto.subtle.digest('SHA-256',roomKey);
  const partition=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
- const path='v2:'+partition,method=request.method;
- if(!['GET','PUT'].includes(method))return new Response('Method not allowed',{status:405,headers:{...base,Allow:'GET, PUT'}});
+ const path='v2:'+partition,revocation='revoked:'+partition,method=request.method;
+ if(!['GET','PUT','DELETE'].includes(method))return new Response('Method not allowed',{status:405,headers:{...base,Allow:'GET, PUT, DELETE'}});
+ // A revocation tombstone blocks anyone holding an old room link from recreating it.
+ if(await env.NEWVIEW_SYNC.get(revocation))return reply({error:'This pairing room has been revoked. Create a new room.'},410);
+ if(method==='DELETE'){
+  const origin=request.headers.get('Origin');
+  if(origin&&origin!==url.origin)return reply({error:'Cross-origin changes are not allowed'},403);
+  // A TTL matching the room lifetime ensures a previously shared capability stays invalid.
+  await env.NEWVIEW_SYNC.put(revocation,'1',{expirationTtl:604800});
+  if(typeof env.NEWVIEW_SYNC.delete==='function')await env.NEWVIEW_SYNC.delete(path);
+  return new Response(null,{status:204,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+ }
  if(method==='PUT'){
   const origin=request.headers.get('Origin');
   if(origin&&origin!==url.origin)return reply({error:'Cross-origin changes are not allowed'},403);
