@@ -126,7 +126,20 @@
   // button and the inactive legacy customization sub-navigation.
   if(settings){customize.append(settings);settings.open=true;}
   const photo=document.getElementById('wallpaper-controls');
-  if(photo)customize.insertBefore(photo,settings||now);
+  if(photo){
+   customize.insertBefore(photo,settings||now);
+   const existing=document.getElementById('nv-wallpaper-credit');
+   if(!existing){
+    const credit=el('p','nv-wallpaper-credit');
+    credit.id='nv-wallpaper-credit';
+    credit.append('Default black tiger photograph: ');
+    const attribution=el('a','','Government of Odisha / Wikimedia Commons (CC BY 4.0)');
+    attribution.href='https://commons.wikimedia.org/wiki/File:Black_tiger_in_Similipal_Forest.jpg';
+    attribution.target='_blank';attribution.rel='noopener noreferrer';
+    credit.append(attribution,'. Upload your own JPEG, PNG or WebP to change it. Remove photo restores the default.');
+    photo.after(credit);
+   }
+  }
   const legacyPersonal=home.querySelector('.newview-personalize');
   if(legacyPersonal){legacyPersonal.hidden=true;}
   const advanced=el('details','nv-custom-advanced');
