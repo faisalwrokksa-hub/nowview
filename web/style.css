@@ -825,3 +825,10 @@ body>main>.newview-settings-content :is(input,select,button){max-width:100%}
 @media(forced-colors:active){
   :is(.workspace-switcher,.workspace,.shell-page) :is(button,a,summary,[tabindex]):focus{outline:3px solid Highlight;outline-offset:3px}
 }
+
+/* Keep the settings drawer reachable in RTL and on narrow landscape TV/web views. */
+[dir="rtl"] body>main>.newview-settings[open]>.newview-settings-content,
+body[dir="rtl"]>main>.newview-settings[open]>.newview-settings-content{right:auto;left:clamp(12px,3vw,48px)}
+@media(max-width:520px){
+ body>main>.newview-settings[open]>.newview-settings-content{inset:8px;width:auto;max-width:none;padding:clamp(12px,3vw,20px);overscroll-behavior:contain}
+}
