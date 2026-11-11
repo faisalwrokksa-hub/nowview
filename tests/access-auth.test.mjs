@@ -6,7 +6,7 @@ import {ACCESS_ISSUER,ACCESS_AUD,signedAccessToken,accessCertFetch,accessRequest
 const url='https://newview.example/api/device-sync/'+'A'.repeat(43);
 test('Access JWT verifies an authentic RS256 signature and matching claims',async()=>{
  const result=await checkNewViewAccess(accessRequest(new Request(url)),withAccess(),accessCertFetch);
- assert.deepEqual(result,{configured:true,ok:true});
+ assert.deepEqual(result,{configured:true,ok:true,subject:'test-user-123'});
 });
 test('Access fails closed without issuer or audience configuration',async()=>{
  const result=await checkNewViewAccess(accessRequest(new Request(url)),{},accessCertFetch);
