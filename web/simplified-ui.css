@@ -568,3 +568,20 @@ body.nv-simple .nv-home-news-story:focus-visible{outline:3px solid #f7d78f;outli
  body.nv-simple .nv-home-news-story{min-height:96px}
  body.nv-simple .nv-home-article-toolbar{align-items:stretch}
 }
+
+
+/* Floating IPTV occupies the video side of the Home composition when open;
+   users can still drag, minimize, choose 1/3, 1/2 or full-screen. */
+@media(min-width:981px){
+ body.nv-simple[data-simple-section="home"] .newview-cast-dock:not([hidden]):not(.is-minimized){
+  width:min(34vw,465px)!important;right:clamp(22px,4vw,80px)!important;
+  left:auto;bottom:clamp(22px,5dvh,80px)!important;top:auto;
+ }
+ body.nv-simple[data-simple-section="home"][data-newview-video-size="half"] .newview-cast-dock:not([hidden]):not(.is-minimized){
+  width:min(47vw,650px)!important;
+ }
+ body.nv-simple[data-simple-section="home"][data-newview-video-size="full"] .newview-cast-dock:not([hidden]):not(.is-minimized){
+  width:calc(min(1440px,100vw - 20px) - 2 * var(--nv-frame-padding) - 4px)!important;
+  right:auto!important;left:50%!important;top:50%!important;bottom:auto!important;
+ }
+}
