@@ -300,3 +300,33 @@ body:not(.home-panel)>main .newview-powerbi-actions{display:flex;flex-wrap:wrap;
 body:not(.home-panel)>main .newview-powerbi-actions button{min-height:44px;padding:9px 12px}
 body:not(.home-panel)>main .newview-powerbi :is(a,button,input):focus-visible{outline:3px solid #ffe09a;outline-offset:3px}
 @media(max-width:850px){body:not(.home-panel)>main .newview-powerbi-grid{grid-template-columns:1fr}}
+
+/* Universal quick actions: persistent across the four workspaces without
+   interrupting the separate, draggable screen stream. */
+body:not(.home-panel)>main #newview-quick-actions{
+ display:flex;align-items:center;gap:8px;min-width:0;padding:7px 0 12px;
+ overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;
+ scroll-snap-type:x proximity
+}
+body:not(.home-panel)>main #newview-quick-actions button{
+ flex:0 0 auto;min-height:44px;min-width:100px;padding:9px 14px;
+ background:#172638;border:1px solid #345368;border-radius:999px;
+ color:#d1e4ee;font:inherit;font-size:13px;font-weight:700;
+ cursor:pointer;scroll-snap-align:start;touch-action:manipulation
+}
+body:not(.home-panel)>main #newview-quick-actions button:hover{
+ background:#214357;border-color:#79cabf;color:#fff
+}
+body:not(.home-panel)>main #newview-quick-actions button[aria-pressed="true"]{
+ background:#1a504e;border-color:#7ce2c8;color:#f1fffc
+}
+body:not(.home-panel)>main #newview-quick-actions button:focus-visible{
+ outline:3px solid #95f4df;outline-offset:3px
+}
+@media(max-width:650px){
+ body:not(.home-panel)>main #newview-quick-actions{padding-bottom:10px}
+ body:not(.home-panel)>main #newview-quick-actions button{min-height:48px}
+}
+@media(forced-colors:active){
+ body:not(.home-panel)>main #newview-quick-actions button[aria-pressed="true"]{border:2px solid Highlight}
+}
