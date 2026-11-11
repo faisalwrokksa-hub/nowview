@@ -3,7 +3,7 @@
    Pairing links are bearer credentials, not account login or screen streaming. */
 (function(){
  const PREFIX='newview-sync-', INTERVAL=15000, encoder=new TextEncoder(),decoder=new TextDecoder();
- const allowed=new Set(['myview','markets','business','media','social']);
+ const allowed=new Set(['myview','markets','business','media','social','devices']);
  let room=null, key=null, timer=null, busy=false, previousLocal=null, previousVersion=null;
  const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
  function unb64(s){if(!/^[A-Za-z0-9_-]+$/.test(s))throw Error('Invalid pairing key');const str=atob(s.replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(str,c=>c.charCodeAt(0));}
@@ -53,9 +53,10 @@
   // The native APK uses file: URLs; pairing requires the deployed HTTPS Worker host.
   if(location.protocol!=='https:'&&!(location.protocol==='http:'&&['localhost','127.0.0.1'].includes(location.hostname)))return;
   if(!globalThis.crypto?.subtle||!globalThis.crypto?.getRandomValues)return;
-  const settings=document.querySelector('#newview-settings .newview-settings-content');if(!settings||document.getElementById(PREFIX+'panel'))return;
+  const settings=document.getElementById('newview-device-controls');if(!settings||document.getElementById(PREFIX+'panel'))return;
+  settings.replaceChildren();
   const section=document.createElement('section');section.className='shell-card device-sync';section.id=PREFIX+'panel';
-  const title=document.createElement('h3');title.textContent='Mirror MyView across devices';
+  const title=document.createElement('h4');title.textContent='Encrypted pairing';
   const description=document.createElement('p');description.textContent='Pair your own devices to synchronize widget order and selected workspace. Only encrypted settings are stored in the cloud; no camera, screen, files, media or private CSV data is shared.';
   const actions=document.createElement('div');actions.className='device-sync-actions';
   const create=document.createElement('button');create.type='button';create.textContent='Create pairing link';
@@ -66,7 +67,7 @@
   const leave=document.createElement('button');leave.type='button';leave.textContent='Disconnect';leave.hidden=true;
   const status=document.createElement('p');status.id=PREFIX+'status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.textContent='Not connected. Pairing is not account sign-in.';
   actions.append(create,pairing,join,copy,push,leave);section.append(title,description,actions,status);settings.append(section);
-  function report(message){status.textContent=message;}
+  function report(message){status.textContent=message;const badge=document.getElementById('newview-device-status');if(badge)badge.textContent=message;}
   function connected(value){copy.hidden=push.hidden=leave.hidden=!value;create.hidden=join.hidden=value;pairing.hidden=value;}
   async function update(force=false){
    if(!room||busy||document.hidden)return;
