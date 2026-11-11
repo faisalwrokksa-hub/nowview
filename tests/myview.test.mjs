@@ -54,7 +54,7 @@ test('Daily Brief omits empty sanitized official headlines without inventing tex
 
 test('Market Watch rejects malformed symbols without claiming quote verification',()=>{
  const {api}=setup();
- assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT'}),'BTCUSDT · 120 USDT · quote time unavailable');
+ assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT'}),'BTCUSDT · 120 USDT · quote timestamp missing, stale or invalid; price freshness unconfirmed');
  for(const symbol of ['BTC'+String.fromCharCode(10)+'USDT','BTC'+String.fromCharCode(0x202e)+'USDT','<script>','A'.repeat(25)]){
   assert.equal(api.preview.market({symbol,price:120,currency:'USDT'}),'No valid quote received');
  }
@@ -68,16 +68,16 @@ test('Market Watch general reference does not claim to verify a specific quote',
 test('Market Watch does not display future-dated quote timestamps as current',()=>{
  const {api}=setup();
  const future=Math.floor(Date.now()/1000)+3600;
- assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:future}),'BTCUSDT · 120 USDT · quote time unavailable');
+ assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:future}),'BTCUSDT · 120 USDT · quote timestamp missing, stale or invalid; price freshness unconfirmed');
  const recent=Math.floor(Date.now()/1000)-60;
  assert.match(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:recent}),/ · quote (?!time unavailable)/);
 });
 
 
-test('Market Watch hides stale quote times without treating old timestamps as current',()=>{
+test('Market Watch explicitly marks stale quote freshness as unconfirmed',()=>{
  const {api}=setup();
  const stale=Math.floor(Date.now()/1000)-25*60*60;
- assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:stale}),'BTCUSDT · 120 USDT · quote time unavailable');
+ assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:stale}),'BTCUSDT · 120 USDT · quote timestamp missing, stale or invalid; price freshness unconfirmed');
  const recent=Math.floor(Date.now()/1000)-60;
  assert.match(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:recent}),/ · quote (?!time unavailable)/);
 });
