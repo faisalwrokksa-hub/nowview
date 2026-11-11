@@ -10,15 +10,15 @@ const shell = read('web/workspace-shell.js');
 const tv = read('web/tv-home.js');
 const css = read('web/style.css');
 
-test('six workspace buttons retain their unique routing keys and accessible pressed state', () => {
+test('four primary workspace buttons retain their unique routing keys and accessible pressed state', () => {
   const matches = [...html.matchAll(/<button\b[^>]*data-view-button="([^"]+)"[^>]*>/g)];
-  assert.deepEqual(matches.map(m => m[1]), ['myview', 'markets', 'business', 'media', 'social', 'devices']);
+  assert.deepEqual(matches.map(m => m[1]), ['myview', 'markets', 'media', 'devices']);
   for (const [markup] of matches) assert.match(markup, /aria-pressed="false"/);
 });
 
 test('reference-theme workspace icons are SVG and decorative to screen readers', () => {
-  assert.equal((html.match(/class="nv-nav-icon"/g) || []).length, 6);
-  assert.equal((html.match(/class="nv-nav-icon" aria-hidden="true"/g) || []).length, 6);
+  assert.equal((html.match(/class="nv-nav-icon"/g) || []).length, 4);
+  assert.equal((html.match(/class="nv-nav-icon" aria-hidden="true"/g) || []).length, 4);
   assert.match(css, /\.nv-nav-icon/);
 });
 
