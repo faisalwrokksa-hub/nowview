@@ -105,3 +105,28 @@ body.nv-simple #newview-channel-directory>a{display:none!important}
 body.nv-simple #newview-channel-directory>.newview-inline-tv{order:-1}
 @media(max-width:700px){body.nv-simple .nv-tv-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:55vh}body.nv-simple .nv-tv-channel{min-height:85px}body.nv-simple .nv-tv-now{bottom:0}body.nv-simple .nv-tv-now span{flex-basis:100%}body.nv-simple .nv-tv-now button{min-width:0;flex:1}}
 @media(max-width:390px){body.nv-simple .nv-tv-grid{grid-template-columns:1fr}}
+
+
+/* Clean shell: one main navigation and one set of Home shortcuts. */
+body.nv-simple #newview-quick-actions,
+body.nv-simple [data-home-view],
+body.nv-simple .newview-home-actions,
+body.nv-simple .myview-home-shortcuts,
+body.nv-simple .newview-home-launcher,
+body.nv-simple .newview-command-trigger,
+body.nv-simple #newview-network-indicator[data-network="online"]{
+ display:none!important;
+}
+/* Advanced settings are intentionally hidden until the Settings summary is opened. */
+body.nv-simple #newview-settings:not([open]) .newview-settings-content{display:none!important}
+body.nv-simple #newview-settings[open] .newview-settings-content{
+ max-height:min(75vh,780px);overflow-y:auto;overscroll-behavior:contain;
+}
+body.nv-simple .nv-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:4;background:#152234;padding:10px 4px;border-bottom:1px solid #385468}
+body.nv-simple .nv-close-panel{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 14px;margin:8px 0;border-radius:10px;border:1px solid #547588;background:#244355;color:#f5fbff;font:inherit;font-size:13px;cursor:pointer}
+body.nv-simple .nv-close-panel:hover{background:#31576b}
+body.nv-simple .nv-close-panel:focus-visible{outline:3px solid #80e7d7;outline-offset:3px}
+body.nv-simple #newview-settings:not([open]) .nv-panel-head{display:none}
+body.nv-simple #nv-simple-home~.homepage-launcher,
+body.nv-simple #nv-simple-home~.newview-home-hero{display:none!important}
+body.nv-simple #newview-quicklinks{display:none!important}
