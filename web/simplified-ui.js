@@ -89,17 +89,56 @@
    now.textContent=chosen.length+' Home box'+(chosen.length===1?'':'es')+' selected';
   }
   selectCount.addEventListener('change',()=>{state.count=Math.max(1,Math.min(4,Number(selectCount.value)||4));store(state);render();});
-  for(const item of choices){
-   const area=item.section==='watch'?watchActions:readActions;
-   area.append(actionTile(item));
+  // Watch uses the already initialized IPTV catalog; Read uses the
+  // already initialized publisher RSS reader. Do not duplicate fetchers.
+  const mediaContent=document.getElementById('nv-watch-channels');
+  if(mediaContent){mediaContent.hidden=false;watch.append(mediaContent);}
+  const newsContent=document.getElementById('nv-watch-headlines');
+  if(newsContent){newsContent.hidden=false;readPanel.append(newsContent);}
+  const oldSecondaryNav=document.getElementById('nv-watch-sections');
+  oldSecondaryNav?.remove();
+  const launch=(url)=>{if(typeof window.NewViewNative?.openNewsBrowser==='function')window.NewViewNative.openNewsBrowser(url);else window.open(url,'_blank','noopener,noreferrer');};
+  function addAction(area,label,description,onClick){
+   const btn=el('button','nv-simple-tile');btn.type='button';
+   const body=el('span','nv-simple-tile-text');
+   body.append(el('strong','',label),el('small','',description));btn.append(body);
+   btn.addEventListener('click',onClick);area.append(btn);
   }
+  addAction(watchActions,'YouTube','Open YouTube',()=>launch('https://www.youtube.com/'));
+  addAction(watchActions,'Mirror device','Phone and TV screen sharing',()=>{window.NewViewShell?.select?.('devices');window.NewViewCast?.open?.();});
+  // Read focuses on text. Market charts and business sites are optional links,
+  // never video controls or duplicate headline navigation.
+  addAction(readActions,'Markets','Binance charts',()=>window.NewViewShell?.select?.('markets'));
+  addAction(readActions,'Business','Power BI reports',()=>launch('https://app.powerbi.com/'));
+  const readToolbar=el('div','nv-read-toolbar');
+  const sourcePicker=document.getElementById('news-source'),headlineSearch=document.querySelector('#nv-watch-headlines input[aria-label="Filter news headlines"]');
+  const note=el('p','nv-read-subtitle','Choose a publisher and read its latest headlines.');
+  readPanel.insertBefore(note,readActions);
+  if(sourcePicker){const wrap=el('label','nv-read-source-label','Publisher');wrap.append(sourcePicker);readToolbar.append(wrap);}
+  if(headlineSearch)readToolbar.append(headlineSearch);
+  if(readToolbar.childNodes.length)readPanel.insertBefore(readToolbar,newsContent||readActions);
+  // Bring all configuration behind one entry, instead of a second Settings
+  // button and the inactive legacy customization sub-navigation.
+  if(settings){customize.append(settings);settings.open=true;}
+  const photo=document.getElementById('wallpaper-controls');
+  if(photo)customize.insertBefore(photo,settings||now);
+  const legacyPersonal=home.querySelector('.newview-personalize');
+  if(legacyPersonal){legacyPersonal.hidden=true;}
+  const advanced=el('details','nv-custom-advanced');
+  const advancedSummary=el('summary','','Advanced settings');
+  const advancedContent=settings?.querySelector('.newview-settings-content');
+  if(advancedContent)advanced.append(advancedContent);
+  advanced.append(advancedSummary);
+  if(settings)settings.hidden=true;
+  customize.append(advanced);
   function show(id){
    if(!sections.some(x=>x[0]===id))return;
    active=id;
    const view='myview';
    if(window.NewViewShell?.select?.(view)===false)return;
    content.hidden=id!=='home';watch.hidden=id!=='watch';readPanel.hidden=id!=='read';customize.hidden=id!=='customize';
-   if(settings){settings.open=id==='customize';settings.hidden=id!=='customize';}
+   if(settings)settings.hidden=true;
+   if(id==='read'&&!document.getElementById('news-items')?.children.length)document.getElementById('news-refresh')?.click();
    syncNav();
   }
   for(const [id,label] of sections){
