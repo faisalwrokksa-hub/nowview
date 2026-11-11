@@ -61,3 +61,22 @@ test('diagnostics check the server only on user action, without claiming upstrea
 test('command dialog traps Tab focus between search and close controls',()=>{
  assert.match(shell,/if\(e\.key==='Tab'\)\{[\s\S]*?e\.preventDefault\(\);[\s\S]*?document\.activeElement===input\?close:input/);
 });
+
+test('four-workspace shell exposes a persistent accessible quick-action rail',()=>{
+ assert.match(shell,/function installQuickActions\(\)/);
+ assert.match(shell,/installQuickActions\(\);/);
+ assert.match(shell,/intro\.after\(bar\)/);
+ for(const label of ['Open charts','Power BI','Headlines','Social','Screen cast'])assert.ok(shell.includes("label:'"+label+"'"));
+ assert.match(shell,/window\.NewViewCast\?\.open\?\.\(\)/);
+ assert.match(shell,/window\.NewViewWatch\?\.select\?\.\(item\.section\)/);
+ assert.match(shell,/newview:workspace-change/);
+ assert.match(shell,/aria-pressed/);
+ assert.match(css,/#newview-quick-actions button:focus-visible/);
+ assert.match(css,/scroll-snap-type:x proximity/);
+});
+test('default TV profile uses the four primary workspaces and retains legacy migration',()=>{
+ assert.match(shell,/views:\['myview','markets','media','devices'\]/);
+ assert.match(shell,/list\.map\(legacyView\)/);
+ assert.doesNotMatch(shell,/Local CSV analytics/);
+ assert.match(shell,/Microsoft Power BI reports and workspaces/);
+});
