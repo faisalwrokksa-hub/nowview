@@ -515,3 +515,24 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
     outline-offset:-3px;
   }
 }
+
+/* Task 1: preserve TV D-pad focus when the horizontal tab rail clips content. */
+.workspace-switcher [data-view-button]:focus-visible{
+  outline-offset:-3px;
+  scroll-margin-inline:12px;
+}
+/* Distinguish unavailable workspaces without disabling normal focus styles elsewhere. */
+.workspace-switcher [data-view-button]:is(:disabled,[aria-disabled="true"]){
+  cursor:not-allowed;
+  opacity:.6;
+}
+/* Let keyboard users discover horizontally overflowing navigation on compact displays. */
+@media(max-width:700px){
+  .workspace-switcher{scrollbar-width:thin;scrollbar-gutter:stable;}
+  .workspace-switcher:focus-within{overscroll-behavior-x:contain;}
+}
+@media(forced-colors:active){
+  .workspace-switcher [data-view-button]:is(:disabled,[aria-disabled="true"]){
+    opacity:1;color:GrayText;border-color:GrayText;
+  }
+}
