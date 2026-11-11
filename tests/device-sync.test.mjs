@@ -55,3 +55,10 @@ test('client uses authenticated encryption and syncs only allowlisted layout set
  assert.match(index,/src="device-sync\.js"/);
  assert.match(build,/handleDeviceSync\(request,env,url\)/);
 });
+
+test('joining an expired or unknown pairing room never initializes storage with local layout',()=>{
+ const client=readFileSync(new URL('../web/device-sync.js',import.meta.url),'utf8');
+ assert.match(client,/if\(!createdRoom\)\{report\('Pairing room not found or expired/);
+ assert.match(client,/createdRoom=isNew/);
+ assert.match(client,/createdRoom=false/);
+});
