@@ -883,3 +883,16 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media(forced-colors:active){
  body>main>.workspace-switcher .workspace-tab.selected{outline:2px solid Highlight;outline-offset:-3px}
 }
+
+/* Task 1: avoid clipped settings controls when the on-screen keyboard opens. */
+@media (max-width:700px){
+ body>main>.newview-settings[open]>.newview-settings-content{
+  box-sizing:border-box;
+  max-height:calc(100vh - 16px);
+  max-height:calc(100dvh - 16px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+ }
+ body>main>.newview-settings[open]>.newview-settings-content :is(input,select,textarea,button){min-width:0}
+}
