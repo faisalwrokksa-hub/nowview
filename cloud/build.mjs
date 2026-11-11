@@ -5,7 +5,7 @@ for(const name of fs.readdirSync(path.join(root,'web')).filter(name=>/\.(?:html|
 // Fail the build if a core workspace or Android TV/offline module is absent.
 const requiredAssets=['index.html','style.css','app.js','live.js','indicators.js',
  'stock-board.js','source-monitor.js','screen-layout.js','workspace-shell.js','news.js','news-browser.js','channel-filters.js','public-sources.js',
- 'media.js','watch.js','offline-agents.js','offline-controls.js','business.js',
+ 'media.js','watch.js','tv-guide.js','offline-agents.js','offline-controls.js','business.js',
  'social.js','powerbi.js','external-links.js','myview.js','connectivity.js','device-sync.js','cast-overlay.js','dashboard-tools.js','simplified-ui.js','simplified-ui.css','tv-home.js','market-data.mjs'];
 for(const name of requiredAssets)if(!Object.hasOwn(assets,'/'+name))throw new Error('Missing required frontend asset: '+name);
 const source=fs.readFileSync(path.join(root,'web','market-data.mjs'),'utf8');
