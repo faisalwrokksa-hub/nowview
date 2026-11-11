@@ -358,6 +358,10 @@ body.nv-simple .newview-cast-dock button,body.nv-simple .nv-custom-advanced butt
 
 /* Home photo fills the entire gold dashboard frame; other pages stay legible.
    A local upload overrides the default Wikimedia black tiger image. */
+/* Never let custom wallpaper bleed outside the gold frame. */
+body.nv-simple.has-home-wallpaper[data-current-workspace="myview"]{
+ background-image:none!important;
+}
 body.nv-simple[data-simple-section="home"]>main{
  background-image:linear-gradient(115deg,rgba(4,9,16,.79),rgba(4,13,22,.56) 42%,rgba(3,11,20,.75)),var(--newview-wallpaper)!important;
  background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important;
