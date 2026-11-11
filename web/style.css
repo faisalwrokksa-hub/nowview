@@ -573,3 +573,32 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
 @media (forced-colors:active){
   .workspace-switcher [data-view-button]:focus{outline-color:Highlight;}
 }
+
+/* Task 1: predictable async feedback in compact dashboard cards.
+   Keep status and error content visible at TV zoom without layout jumps. */
+:where(.shell-card,.shell-page) :is([aria-busy="true"],[role="status"],[role="alert"]){
+  min-inline-size:0;
+  max-inline-size:100%;
+}
+:where(.shell-card,.shell-page) [aria-busy="true"]{
+  cursor:progress;
+}
+:where(.shell-card,.shell-page) :is([role="status"],[role="alert"]){
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.45;
+}
+:where(.shell-card,.shell-page) [role="alert"]{
+  border-inline-start:3px solid var(--warning,#e7a74d);
+  padding-inline-start:.65rem;
+}
+@media (prefers-reduced-motion:reduce){
+  .workspace-switcher,.workspace-switcher *{
+    scroll-behavior:auto!important;
+    transition-duration:0.01ms!important;
+    animation-duration:0.01ms!important;
+  }
+}
+@media (forced-colors:active){
+  :where(.shell-card,.shell-page) [role="alert"]{border-inline-start-color:Mark}
+}
