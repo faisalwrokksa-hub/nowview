@@ -2,7 +2,7 @@
 /* MyView: local-only dashboard pinning. Widget IDs are strictly allowlisted. */
 (function(){
  const catalog=Object.freeze([
-  Object.freeze({id:'market',title:'Markets',description:'Open verified Binance market charts and watchlists.',view:'markets',label:'Market charts'}),
+  Object.freeze({id:'market',title:'Markets',description:'Open Binance market charts and watchlists; quotes are not independently verified.',view:'markets',label:'Market charts'}),
   Object.freeze({id:'news',title:'Headlines',description:'Read source-linked financial announcements in Watch & News.',view:'media',section:'headlines',label:'Financial announcements'}),
   Object.freeze({id:'media',title:'Video & TV',description:'Open the video and TV section of Watch & News.',view:'media',section:'videos',label:'Video and TV'}),
   Object.freeze({id:'business',title:'Business',description:'Import your authorized business CSV locally to review KPIs.',view:'business',label:'Business KPIs'}),
@@ -118,7 +118,7 @@
   if(!verified){link.removeAttribute('href');link.textContent='Source unavailable';return;}
   const fed=snapshot.source==='fed';
   link.href=fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom';
-  link.textContent=fed?'Federal Reserve source':'SEC source';
+  link.textContent=fed?'Federal Reserve announcements (publisher index)':'SEC newsroom (publisher index)';
  }
  function render(){
   root.replaceChildren();editor.replaceChildren();
@@ -170,7 +170,7 @@
    if(id==='news'){
     const source=text('a','myview-source-link','SEC source');
     source.hidden=true;source.removeAttribute('href');source.target='_blank';source.rel='noopener noreferrer';
-    source.dataset.sourceLink='news';source.setAttribute('aria-label','Open official news publisher');
+    source.dataset.sourceLink='news';source.setAttribute('aria-label','Open official news publisher index; not a direct link to the displayed headline');
     actions.append(source);
    }
    item.append(eyebrow,heading,description,insight,actions);root.append(item);
