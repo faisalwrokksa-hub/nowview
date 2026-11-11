@@ -127,3 +127,12 @@ test('MyView Alt+Arrow reorders cards without intercepting ordinary TV D-pad key
  assert.match(src,/event\.key!=='ArrowUp'&&event\.key!=='ArrowDown'/);
  assert.match(src,/event\.preventDefault\(\);move\(delta\)/);
 });
+
+
+test('MyView preserves focused card action after keyboard or button reordering',()=>{
+ assert.match(src,/const focused=document\.activeElement/);
+ assert.match(src,/focused===up\?'up':focused===down\?'down'/);
+ assert.match(src,/focused===button\?'open'/);
+ assert.match(src,/\[data-source-link=/);
+ assert.match(src,/target&&!target\.disabled&&!target\.hidden/);
+});
