@@ -152,6 +152,14 @@
    function move(delta){const next=[...chosen],at=next.indexOf(id);if(at+delta<0||at+delta>=next.length)return;[next[at],next[at+delta]]=[next[at+delta],next[at]];chosen=save(next);render();const moved=root.querySelector('[data-widget="'+id+'"]');const target=moved?.querySelector(delta<0?'[data-reorder="up"]':'[data-reorder="down"]');if(target&&!target.disabled)target.focus();else moved?.querySelector('button:not([disabled])')?.focus();}
    up.dataset.reorder='up';down.dataset.reorder='down';
    up.addEventListener('click',()=>move(-1));down.addEventListener('click',()=>move(1));
+   // Alt+ArrowUp/Down reorders the focused card without trapping normal TV D-pad navigation.
+   item.addEventListener('keydown',event=>{
+    if(!event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
+    if(event.key!=='ArrowUp'&&event.key!=='ArrowDown')return;
+    const delta=event.key==='ArrowUp'?-1:1;
+    if(index+delta<0||index+delta>=chosen.length)return;
+    event.preventDefault();move(delta);
+   });
    actions.append(button,up,down);
    if(id==='market'){
     const source=text('a','myview-source-link','Source unavailable');
