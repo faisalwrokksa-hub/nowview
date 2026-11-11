@@ -1,14 +1,15 @@
 'use strict';
-/* Shared NewView shell: five workspaces, with no fake financial/social data. */
+/* Shared NewView shell: six workspaces, with no fake financial/social data. */
 (function(){
- const views=['myview','markets','business','media','social'];
- const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',media:'Watch & News',social:'NewViewSocial'};
+ const views=['myview','markets','business','media','social','devices'];
+ const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',media:'Watch & News',social:'NewViewSocial',devices:'NewViewDevice'};
  const sourceNotes={
   myview:'MyView · preferences stored on this device',
   markets:'Binance public token prices in USDT · U.S. stock quotes unavailable without authorized feed',
   business:'Business · CSV processed locally and never uploaded',
   media:'Watch & News · publisher-linked headlines and official video embeds; source rights vary',
-  social:'Social · saved public profile links only, no live feeds'
+  social:'Social · saved public profile links only, no live feeds',
+  devices:'NewViewDevice · opt-in encrypted layout sharing · no video streaming'
  };
  const FIRST_LAUNCH_KEY='newview.first-launch.v1';
  const FIRST_LAUNCH_DEFAULT=Object.freeze({interests:['markets','business','news'],coverage:'global',video:'manual',refresh:'balanced'});
@@ -195,7 +196,8 @@
    {name:'Headlines',detail:'Publisher-linked news',view:'media',section:'headlines'},
    {name:'Live TV',detail:'Public channel directory',view:'media',section:'channels'},
    {name:'Videos',detail:'Official video embeds',view:'media',section:'videos'},
-   {name:'Social',detail:'Public profile bookmarks',view:'social'}
+   {name:'Social',detail:'Public profile bookmarks',view:'social'},
+   {name:'NewViewDevice',detail:'Pair phone, browser and TV layouts',view:'devices'}
   ];
   let visible=actions,selected=0,restoreFocus=trigger;
   function closePalette(){
