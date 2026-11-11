@@ -330,3 +330,14 @@ body:not(.home-panel)>main #newview-quick-actions button:focus-visible{
 @media(forced-colors:active){
  body:not(.home-panel)>main #newview-quick-actions button[aria-pressed="true"]{border:2px solid Highlight}
 }
+
+/* Market search is strictly local to the documented Binance-listed instrument list. */
+body:not(.home-panel)>main .newview-market-search{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:#101b2a;border:1px solid #2e4b60;border-radius:14px;padding:12px;margin-block:10px}
+body:not(.home-panel)>main .newview-market-search label{font-size:13px;font-weight:750;color:#d8ecf5}
+body:not(.home-panel)>main #newview-market-filter{min-width:180px;flex:1 1 200px;min-height:44px;padding:9px 12px;color:#eef9ff;background:#1b2a3d;border:1px solid #3e6373;border-radius:10px}
+body:not(.home-panel)>main .newview-market-search button{min-height:44px;border:1px solid #4a7384;border-radius:10px;background:#20344a;color:#e8f5fb;padding:9px 13px;cursor:pointer}
+body:not(.home-panel)>main .newview-market-search button:disabled{opacity:.55;cursor:default}
+body:not(.home-panel)>main #newview-market-filter-count{flex-basis:100%;color:#bad0e2;font-size:12px}
+body:not(.home-panel)>main .newview-market-search :focus-visible{outline:3px solid #8ef4dc;outline-offset:2px}
+body:not(.home-panel)>main #symbols button[hidden]{display:none!important}
+@media(max-width:650px){body:not(.home-panel)>main .newview-market-search label{flex-basis:100%}}
