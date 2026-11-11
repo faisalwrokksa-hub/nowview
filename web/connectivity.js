@@ -17,9 +17,8 @@
     const render = () => {
       const offline = navigator.onLine === false;
       indicator.dataset.network = offline ? 'offline' : 'online';
-      indicator.textContent = offline
-        ? 'Browser offline — saved content may still work'
-        : 'Browser online · live sources may vary';
+      indicator.textContent = offline ? 'Offline' : '';
+      indicator.hidden = !offline;
     };
     header.append(indicator);
     window.addEventListener('online', render);
