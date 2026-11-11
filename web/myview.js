@@ -96,7 +96,7 @@
  function chartFor(symbol){
   const points=quoteHistory.get(symbol)||[];
   const container=document.createElement('div');container.className='myview-live-chart';
-  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two verified quotes';
+  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two valid observed quotes';
   container.append(title);
   if(points.length<2)return container;
   const min=Math.min(...points),max=Math.max(...points),range=max-min||1;
@@ -223,7 +223,7 @@ item.append(eyebrow,heading,description,insight);
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
-  if(id==='market'&&next&&typeof next.symbol==='string'&&Number.isFinite(next.price)&&Number.isFinite(next.quoteTime)){
+  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol.trim())&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
    const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
    if(!points.length||points[points.length-1]!==next.price){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);}
    refreshChart();
