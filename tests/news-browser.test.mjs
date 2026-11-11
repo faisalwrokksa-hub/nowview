@@ -54,3 +54,17 @@ test('Cloudflare DNS control is documented as external and not falsely claimed a
  assert.match(js,/cloudflare-one\/traffic-controls\/dns-policies/);
  assert.doesNotMatch(js,/setDns|setPrivateDns|setSystemDns/);
 });
+
+test('Discover Browser is a separate remote-switchable subtab',()=>{
+ const watch=read('web/watch.js');
+ assert.match(watch,/id:'browser',label:'Browser'/);
+ assert.match(watch,/media\.appendChild\(browserPanel\)/);
+ assert.match(watch,/section\.id==='browser'\?'newview-news-browser'/);
+ assert.match(js,/NewViewWatch\?\.select\?\.\('headlines'\)/);
+});
+test('Android exposes only user-triggered network settings, not an ad-block claim',()=>{
+ assert.match(bridge,/openDnsSettings\(\)/);
+ assert.match(bridge,/android\.provider\.Settings\.ACTION_WIRELESS_SETTINGS/);
+ assert.match(js,/Open Android network \/ DNS settings/);
+ assert.match(js,/window\.NewViewNative\?\.openDnsSettings/);
+});
