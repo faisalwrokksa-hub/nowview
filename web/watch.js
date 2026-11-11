@@ -5,6 +5,7 @@
     const media = document.querySelector('[data-workspace="media"]');
     const news = document.querySelector('[data-workspace="news"]');
     const social = document.querySelector('[data-workspace="social"]');
+    const browserPanel=document.getElementById('newview-news-browser');
     if (!media || !news || document.getElementById('nv-watch-sections')) return;
     const channelPanel = media.querySelector('.shell-card');
     const videoPanel = media.querySelector('.shell-grid');
@@ -21,12 +22,14 @@
       { id: 'channels', label: 'Live TV', panel: channelPanel },
       { id: 'videos', label: 'Videos', panel: videoPanel }
     ];
+    if(browserPanel)sections.push({id:'browser',label:'Browser',panel:browserPanel});
     if(social)sections.push({id:'social',label:'Social',panel:social});
     if(social){social.removeAttribute('data-workspace');social.classList.remove('shell-page');social.id='nv-watch-social';media.appendChild(social);}
     news.removeAttribute('data-workspace');
     news.classList.remove('shell-page');
     news.id = 'nv-watch-headlines';
     media.appendChild(news);
+    if(browserPanel)media.appendChild(browserPanel);
     media.insertBefore(tabs, media.firstChild);
 
     let active = 'headlines';
@@ -52,7 +55,7 @@
       button.dataset.watchSection = section.id;
       button.textContent = section.label;
       button.setAttribute('aria-controls', section.id === 'headlines'
-        ? 'nv-watch-headlines' : (section.id === 'channels' ? 'nv-watch-channels' : section.id==='social'?'nv-watch-social':'nv-watch-videos'));
+        ? 'nv-watch-headlines' : (section.id === 'channels' ? 'nv-watch-channels' : section.id==='social'?'nv-watch-social':section.id==='browser'?'newview-news-browser':'nv-watch-videos'));
       button.setAttribute('aria-pressed','false');
       button.addEventListener('click', () => select(section.id));
       button.addEventListener('keydown', event => {
