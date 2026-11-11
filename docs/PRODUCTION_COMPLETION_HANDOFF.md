@@ -35,3 +35,14 @@ These are release gates, not evidence that the capabilities have already been ac
 - Added screen-sharing 30-minute expiry and connection-loss cleanup.
 - Added negative and positive signed JWT unit coverage with test-generated RSA keys; no committed real secret keys.
 - The above are code/CI improvements only. Deployment, customer account identity and physical casting remain open gates.
+
+## November 11 — floating IPTV runtime verification enhancement
+The floating IPTV dock now listens to actual HTMLMediaElement playback events. It marks a source healthy only on a `playing` event, identifies a confirmed browser playback error, and treats an unconfirmed 20-second start or autoplay policy failure as **unknown**, not as a proven dead channel. It cancels old timers when changing sources. An automated regression test checks each of these behaviors. This verification is limited to browser media events: HLS format support, DRM, region, provider rights, physical Android playback and signed device installation still need hardware acceptance tests.
+
+### Go / no-go release criteria
+- **Code checks:** Latest same-revision GitHub dashboard/Android build, frontend validation, safety checks and Worker preflight must pass.
+- **Casting:** Explicit permission, functioning sender/viewer connection on a real pair of devices, controlled termination, and validation of reconnection behavior.
+- **Publisher media:** Confirm legal availability and actual playback for representative IPTV/YouTube sources; do not equate playlist membership with success.
+- **Production:** Verify deployment under the actual Cloudflare account using live `/version` SHA and `/healthz`, secure Access/KV bindings, and test rollback.
+- **Android:** Signed APK installed, remote navigation and native player tested on physical TV hardware.
+No automated preflight or source-code score is a substitute for any of these live tests.
