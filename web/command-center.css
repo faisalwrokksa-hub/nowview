@@ -134,8 +134,18 @@ body:not(.home-panel)>main .homepage-tile-arrow{margin-inline-start:auto;align-s
 body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile:hover{border-color:#5ba69f;background:#20384a}
 @media(max-width:1400px){body:not(.home-panel)>main .homepage-launcher-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){body:not(.home-panel)>main .homepage-launcher-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){body:not(.home-panel)>main .homepage-launcher{display:none}}
-@media(max-height:740px) and (min-width:651px){body:not(.home-panel)>main .homepage-launcher{display:none}}
+@media(max-width:650px){
+ body:not(.home-panel)>main .homepage-launcher{display:flex;gap:9px}
+ body:not(.home-panel)>main .homepage-launcher-heading{align-items:start}
+ body:not(.home-panel)>main .homepage-launcher-hint{display:none}
+ body:not(.home-panel)>main .homepage-launcher-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile{min-height:72px;padding:10px 8px;gap:8px}
+ body:not(.home-panel)>main .homepage-launcher-tile strong{font-size:12px}
+ body:not(.home-panel)>main .homepage-launcher-tile small{font-size:10px}
+ body:not(.home-panel)>main .homepage-tile-icon{height:31px;width:31px;font-size:18px}
+ body:not(.home-panel)>main .homepage-tile-arrow{display:none}
+}
+@media(max-height:740px) and (min-width:651px){body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile{min-height:58px}}
 
 /* Accessible command palette; local workspace navigation only. */
 body:not(.home-panel) .newview-command-trigger{
@@ -171,3 +181,9 @@ body:not(.home-panel) .newview-command-hint,body:not(.home-panel) .newview-comma
 body:not(.home-panel) .newview-command-overlay :focus-visible{outline:3px solid #9af5de;outline-offset:2px}
 @media(max-width:650px){body:not(.home-panel) .newview-command-trigger{font-size:12px;padding:8px;min-height:42px}}
 @media(forced-colors:active){body:not(.home-panel) .newview-command-result[aria-selected="true"]{border:2px solid Highlight}}
+
+/* Keep quick destinations discoverable and usable by keyboard, touch, and TV remotes. */
+body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile:focus-visible{
+ outline:3px solid #91f3de;outline-offset:3px;border-color:#91f3de
+}
+@media(hover:none){body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile{touch-action:manipulation}}
