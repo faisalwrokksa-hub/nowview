@@ -73,6 +73,21 @@
   const endpoint=preferred?.catalogUrl?.(kind);if(!endpoint)return [];
   const cached=catalogCache.get(kind);
   if(cached&&Date.now()-cached.time<10800000)return cached.items;
+  if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicCatalog==='function'){
+   const raw=await new Promise((resolve,reject)=>{
+    const id=Date.now()+Math.floor(Math.random()*1000),timer=setTimeout(()=>{delete window.__newviewCatalogResult;reject(Error('Catalog timeout'));},20000);
+    window.__newviewCatalogResult=(received,data,error)=>{
+     if(received!==id)return;
+     clearTimeout(timer);delete window.__newviewCatalogResult;
+     if(error||typeof data!=='string'||data.length>220000){reject(Error(error||'Invalid catalog'));return;}
+     resolve(data);
+    };
+    try{window.NewViewNative.fetchPublicCatalog(kind,id);}catch(error){clearTimeout(timer);delete window.__newviewCatalogResult;reject(error);}
+   });
+   const entries=preferred.parseCatalog(kind,JSON.parse(raw));
+   if(!entries.length)throw Error('No catalog options returned');
+   catalogCache.set(kind,{items:entries,time:Date.now()});return entries;
+  }
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
   try{
    const response=await fetch(endpoint,{cache:'no-store',signal:controller.signal});
