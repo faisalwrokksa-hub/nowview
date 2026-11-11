@@ -53,3 +53,31 @@ The ZIP contains an MIT-licensed Android Rescue AI project, including experiment
 - `cloud/device-sync.mjs`: Cloudflare KV encrypted relay and strict request checks.
 - `cloud/build.mjs`: bundles sync handler and UI into Worker.
 - `tests/device-sync.test.mjs`: relay, validation, expiry, and feature-boundary tests.
+
+
+## Security update — Cloudflare Access verification (development branch)
+
+The relay now **fails closed** until BOTH a Workers KV namespace and a Cloudflare Access application are configured for the same protected NewView host.
+
+Required Worker environment variables:
+
+- `NEWVIEW_SYNC_ACCESS_ISSUER`: exact Access team issuer, e.g. `https://YOUR-TEAM.cloudflareaccess.com`; it must be an HTTPS `*.cloudflareaccess.com` origin.
+- `NEWVIEW_SYNC_ACCESS_AUD`: the actual Access application's Audience Tag (AUD), not a placeholder.
+- `NEWVIEW_SYNC`: Workers KV namespace binding.
+
+Steps for the Cloudflare account owner:
+
+1. Protect the NewView hostname and its `/api/device-sync/*` requests with a Cloudflare Access self-hosted application and appropriate identity policies. Include preview/workers.dev hostnames in protection or disable any public bypass host.
+2. Configure the real Access issuer and AUD as Worker environment variables. Do not commit live credentials, signing keys, or identity data into source control.
+3. Create and bind a KV namespace with name `NEWVIEW_SYNC`. Test only on protected staging first.
+4. Request a sync endpoint without an Access session: it must return HTTP 401 (or an Access login challenge before reaching the Worker). With missing configuration, it must return 503. Forged and expired tokens must fail.
+5. After signing in through Access, open NewViewDevice, create a link and pair a second signed-in device. Test deliberate edits, conflicts, offline resume and stale room rejection.
+6. Set Access policies for the intended authorized users. Browser pairing links remain secret bearer capabilities, NOT substitutes for account sign-in.
+
+The Worker cryptographically validates the Cloudflare Access JWT RS256 signature using the issuer's JWK endpoint, and checks issuer, audience, expiry, not-before and subject. It does not trust the mere presence of `Cf-Access-Jwt-Assertion`. Cert keys are cached briefly per isolate; validation failures are handled without exposing tokens.
+
+**Important deployment constraints:** Cloudflare Access secures a protected beta, but it does NOT implement customer-owned devices, device revocation, billing, tenant isolation, TURN signaling, or a signed native Android app. Cloudflare Workers KV remains eventually consistent and does not offer atomic multi-device conflict resolution. The UI detects competing edits and requests the user to choose, but true concurrency-safe writes require a Durable Object or transactional backend.
+
+Privacy improvements: an incoming pairing URL fragment is removed from the address bar immediately after parsing; secret links cannot be copied before room initialization. The relay uses a 10-second request timeout and stops stale disconnected-tab sync operations. Screen sharing is separate and automatically terminates after a 30-minute session or prolonged connection loss.
+
+For Cloudflare Access JWT documentation, see https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/ .
