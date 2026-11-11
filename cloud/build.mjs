@@ -9,7 +9,7 @@ const requiredAssets=['index.html','style.css','app.js','live.js','indicators.js
  'social.js','powerbi.js','external-links.js','myview.js','connectivity.js','device-sync.js','cast-overlay.js','tv-home.js','market-data.mjs'];
 for(const name of requiredAssets)if(!Object.hasOwn(assets,'/'+name))throw new Error('Missing required frontend asset: '+name);
 const source=fs.readFileSync(path.join(root,'web','market-data.mjs'),'utf8');
-const deviceSync=fs.readFileSync(path.join(root,'cloud','device-sync.mjs'),'utf8').replace(/^export /gm,'');
+const deviceSync=fs.readFileSync(path.join(root,'cloud','device-sync.mjs'),'utf8').replace(/^import .*?;$/gm,'').replace(/^export /gm,'');
 const accessAuth=fs.readFileSync(path.join(root,'cloud','access-auth.mjs'),'utf8').replace(/^export /gm,'');
 const news=fs.readFileSync(path.join(root,'cloud','news.mjs'),'utf8').replace(/^export /gm,'');
 const candidate=process.env.WORKERS_CI_COMMIT_SHA||process.env.GITHUB_SHA||'';
