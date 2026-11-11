@@ -487,3 +487,31 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
 @media (pointer:coarse){
   .workspace-switcher .workspace-tab{min-inline-size:44px;touch-action:manipulation;}
 }
+
+/* TV remote focus and narrow landscape viewport: preserve visible selection. */
+@media (hover:none) and (pointer:coarse){
+  .workspace-switcher .workspace-tab:focus-visible{
+    outline:3px solid var(--cyan,#56e0d0);
+    outline-offset:-3px;
+    position:relative;
+    z-index:1;
+  }
+}
+@media (max-height:480px) and (orientation:landscape){
+  .workspace-switcher{
+    max-inline-size:100%;
+    overflow-x:auto;
+    overscroll-behavior-inline:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .workspace-switcher .workspace-tab{
+    min-block-size:44px;
+    flex-shrink:0;
+  }
+}
+@media (forced-colors:active){
+  .workspace-switcher .workspace-tab:focus-visible{
+    outline:3px solid Highlight;
+    outline-offset:-3px;
+  }
+}
