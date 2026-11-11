@@ -40,7 +40,8 @@
   tools.append(fold,dockSide,expand,close);top.append(heading,tools);dock.append(top,video,youtube,mediaControls,state);document.body.append(dock);
   const trigger=el('button','newview-cast-trigger','▣ Screen cast');trigger.type='button';trigger.id='newview-cast-trigger';
   trigger.setAttribute('aria-label','Open floating screen viewer and device connection controls');
-  const header=document.querySelector('main > header');header?.append(trigger);
+  // Keep casting accessible from Watch; avoid duplicate header action.
+  const header=document.querySelector('main > header');if(!document.body.classList.contains('nv-simple'))header?.append(trigger);
   const deviceControls=document.querySelector('.newview-device-cards');
   const card=el('article','shell-card newview-cast-setup');card.id='newview-cast-setup';
   const eyebrow=el('span','shell-eyebrow','LIVE VIEW · BROWSER EXPERIMENTAL');
