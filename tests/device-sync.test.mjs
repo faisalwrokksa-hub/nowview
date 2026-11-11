@@ -62,3 +62,12 @@ test('joining an expired or unknown pairing room never initializes storage with 
  assert.match(client,/createdRoom=isNew/);
  assert.match(client,/createdRoom=false/);
 });
+
+test('encrypted layout sync pauses offline and resumes after reconnect or returning to tab',()=>{
+ const client=readFileSync(new URL('../web/device-sync.js',import.meta.url),'utf8');
+ assert.match(client,/navigator\.onLine===false/);
+ assert.match(client,/window\.addEventListener\('online'/);
+ assert.match(client,/window\.addEventListener\('offline'/);
+ assert.match(client,/document\.addEventListener\('visibilitychange'/);
+ assert.match(client,/if\(!document\.hidden&&room\)update\(\)/);
+});
