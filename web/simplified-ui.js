@@ -28,24 +28,18 @@
   const sections=[['home','Home'],['watch','Watch'],['read','Read'],['customize','Customize']];
   const buttons=new Map();let active='home',state=read();
   const content=el('section','nv-simple-home');content.id='nv-simple-home';content.setAttribute('aria-label','Personalized Home');
-  const banner=el('div','nv-simple-welcome');
-  banner.append(el('h2','','My dashboard'),el('p','','Your selected sources and shortcuts'));
   const grid=el('div','nv-simple-grid');
   grid.id='nv-simple-grid';
-  content.append(banner,grid);home.prepend(content);
+  content.append(grid);home.prepend(content);
   const watch=el('section','nv-hub-panel');watch.id='nv-watch-hub';watch.hidden=true;
-  watch.append(el('h2','','Watch'),el('p','','Choose what to watch or mirror'));
   const watchActions=el('div','nv-hub-grid');watch.append(watchActions);home.append(watch);
   const readPanel=el('section','nv-hub-panel');readPanel.id='nv-read-hub';readPanel.hidden=true;
-  readPanel.append(el('h2','','Read'),el('p','','News, business websites and market charts'));
   const readActions=el('div','nv-hub-grid');readPanel.append(readActions);home.append(readPanel);
   const customize=el('section','nv-hub-panel');customize.id='nv-customize-hub';customize.hidden=true;
-  const customHeading=el('h2','','Customize Home');
-  const desc=el('p','','Choose 1–4 boxes. Your choices stay on this device.');
   const selectCount=el('select','nv-custom-count');selectCount.id='nv-custom-count';selectCount.setAttribute('aria-label','Number of Home boxes');
   for(let n=1;n<=4;n++){const option=el('option','',n+' box'+(n===1?'':'es'));option.value=String(n);selectCount.append(option);}
   const optionGrid=el('div','nv-custom-options');
-  customize.append(customHeading,desc,selectCount,optionGrid);home.append(customize);
+  customize.append(selectCount,optionGrid);home.append(customize);
   const now=el('p','nv-custom-state');now.setAttribute('role','status');customize.append(now);
   const settingsIntro=el('p','nv-custom-settings-help','Photo, advanced source options and screen layout settings are below.');
   customize.append(settingsIntro);
@@ -117,8 +111,6 @@
   addAction(readActions,'Business','Power BI reports',()=>launch('https://app.powerbi.com/'));
   const readToolbar=el('div','nv-read-toolbar');
   const sourcePicker=document.getElementById('news-source'),headlineSearch=document.querySelector('#nv-watch-headlines input[aria-label="Filter news headlines"]');
-  const note=el('p','nv-read-subtitle','Choose a publisher and read its latest headlines.');
-  readPanel.insertBefore(note,readActions);
   if(sourcePicker){const wrap=el('label','nv-read-source-label','Publisher');wrap.append(sourcePicker);readToolbar.append(wrap);}
   if(headlineSearch)readToolbar.append(headlineSearch);
   if(readToolbar.childNodes.length)readPanel.insertBefore(readToolbar,newsContent||readActions);
