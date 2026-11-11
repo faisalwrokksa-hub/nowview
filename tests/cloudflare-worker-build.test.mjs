@@ -14,7 +14,7 @@ test('Cloudflare Worker build has explicit Wrangler entrypoint and valid bundle'
  execFileSync(process.execPath,[path.join(root,'cloud/build.mjs')],{cwd:root,stdio:'pipe'});
  const generated=fs.readFileSync(path.join(root,config.main),'utf8');
  assert.match(generated,/export default \{async fetch\(request\)/);
- for(const asset of ['/index.html','/style.css','/watch.js','/myview.js','/connectivity.js'])assert.ok(generated.includes(asset),asset);
+ for(const asset of ['/index.html','/style.css','/watch.js','/myview.js','/connectivity.js','/tv-home.js','/offline-agents.js','/offline-controls.js'])assert.ok(generated.includes(asset),asset);
 });
 
 test('built Worker health endpoint reports only application readiness, not upstream success',async()=>{
