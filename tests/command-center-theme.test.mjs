@@ -17,3 +17,17 @@ test('theme excludes embedded Android home panel and accommodates TV, mobile and
  assert.match(css, /prefers-reduced-motion:reduce/);
  assert.match(css, /forced-colors:active/);
 });
+
+const shell=readFileSync(new URL('../web/workspace-shell.js',import.meta.url),'utf8');
+test('command palette stays local, supports keyboard navigation, and preserves back dismissal',()=>{
+ assert.match(shell,/function installCommandPalette\(\)/);
+ assert.match(shell,/aria-keyshortcuts/);
+ assert.match(shell,/aria-modal/);
+ assert.match(shell,/e\.key==='ArrowDown'/);
+ assert.match(shell,/e\.key==='Enter'/);
+ assert.match(shell,/e\.key==='Escape'/);
+ assert.match(shell,/NewViewCloseCommandPalette\?\.\(\)/);
+ assert.match(shell,/window\.NewViewWatch\?\.select/);
+ assert.match(css,/newview-command-overlay:not\(\[hidden\]\)/);
+ assert.match(css,/newview-command-result\[aria-selected="true"\]/);
+});
