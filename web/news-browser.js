@@ -59,6 +59,15 @@
   const guide=document.createElement('a');guide.href='https://developers.cloudflare.com/cloudflare-one/traffic-controls/dns-policies/';
   guide.target='_blank';guide.rel='noopener noreferrer';guide.textContent='Cloudflare Gateway DNS policy setup';
   section.append(eyebrow,heading,intro,form,sites,result,dns,guide);
+  if(typeof window.NewViewNative?.openDnsSettings==='function'){
+   const network=document.createElement('button');network.type='button';
+   network.className='news-browser-network';network.textContent='Open Android network / DNS settings';
+   network.addEventListener('click',()=>{
+    window.NewViewNative.openDnsSettings();
+    result.textContent='Opening Android network settings. Configure your Cloudflare Gateway DNS endpoint there.';
+   });
+   section.append(network);
+  }
   panel.insertBefore(section,panel.firstChild);
   form.addEventListener('submit',event=>{
    event.preventDefault();
