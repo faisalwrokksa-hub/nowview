@@ -81,6 +81,19 @@
   home.prepend(homeContent);
   const settings=document.getElementById('newview-settings');
   settings?.querySelector('summary')?.setAttribute('aria-label','Open advanced settings');
+  // Every expandable panel has a visible dismiss action, including on TV remote.
+  document.querySelectorAll('[data-close-panel],[data-close-closest-details]').forEach(button=>{
+   button.addEventListener('click',()=>{
+    const panel=button.dataset.closePanel?document.getElementById(button.dataset.closePanel):button.closest('details');
+    if(!panel||!('open' in panel))return;
+    panel.open=false;panel.querySelector(':scope > summary')?.focus();
+   });
+  });
+  // Keep the advanced drawer collapsed when arriving from any workspace; do
+  // not re-open settings as a side effect of selecting a different screen.
+  document.getElementById('nv-simple-nav')?.addEventListener('click',()=>{
+   if(settings?.open)settings.open=false;
+  });
   // Deprecated promotional/business/social bookmark widgets are deliberately
   // excluded from the visible simplified experience but retained in the DOM
   // for older local profiles and existing controllers.
