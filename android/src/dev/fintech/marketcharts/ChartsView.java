@@ -86,7 +86,10 @@ public final class ChartsView extends WebView {
             ||host.equals("news.google.com")||host.equals("trends.google.com")
             ||host.equals("www.reddit.com")
             ||host.equals("bsky.app")||host.equals("mastodon.social")
-            ||host.equals("iptv-org.github.io");
+            ||host.equals("iptv-org.github.io")
+            ||host.equals("www.bbc.com")||host.equals("www.bbc.co.uk")||host.equals("bbc.com")
+            ||host.equals("www.npr.org")||host.equals("text.npr.org")
+            ||host.equals("www.theguardian.com");
     }
     private boolean routeNavigation(Uri uri){
         if(isInternal(uri))return false;
@@ -132,7 +135,10 @@ public final class ChartsView extends WebView {
             worker.execute(()->{
                 JSONObject result=new JSONObject();JSONArray items=new JSONArray();
                 String feed="fed".equals(source)?"https://www.federalreserve.gov/feeds/press_all.xml":
-                            "sec".equals(source)?"https://www.sec.gov/news/pressreleases.rss":null;
+                            "sec".equals(source)?"https://www.sec.gov/news/pressreleases.rss":
+                            "bbc".equals(source)?"https://feeds.bbci.co.uk/news/world/rss.xml":
+                            "npr".equals(source)?"https://feeds.npr.org/1001/rss.xml":
+                            "guardian".equals(source)?"https://www.theguardian.com/world/rss":null;
                 try{
                     if(feed==null)throw new Exception("No approved native feed");
                     HttpURLConnection connection=(HttpURLConnection)new URL(feed).openConnection();
@@ -160,7 +166,7 @@ public final class ChartsView extends WebView {
                             if(!approvedUrl(uri)||title.isEmpty())continue;
                             JSONObject row=new JSONObject();
                             row.put("title",title);row.put("url",link);
-                            row.put("source","fed".equals(source)?"Federal Reserve":"SEC");
+                            row.put("source","fed".equals(source)?"Federal Reserve":"sec".equals(source)?"SEC":"bbc".equals(source)?"BBC World":"npr".equals(source)?"NPR News":"The Guardian");
                             row.put("publishedAt",tagText(item,"pubDate"));items.put(row);
                         }
                     }finally{connection.disconnect();}
