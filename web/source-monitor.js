@@ -138,6 +138,6 @@
   root.addEventListener?.('online',()=>{if(settings.autoCheck)checkNews();});
   root.addEventListener?.('pagehide',()=>{active=false;for(const timer of [newsTimer,marketTimer,iptvTimer])if(timer)clearInterval(timer);});
  }
- root.NewViewSourceMonitor=Object.freeze({defaults:PROFILE,feeds:FEEDS,getSettings:()=>({...settings}),status,hide,mark,getEntries,checkNews});
+ root.NewViewSourceMonitor=Object.freeze({defaults:PROFILE,feeds:FEEDS,getSettings:()=>({...settings}),status,hide,mark,getEntries,checkNews,notify});
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();}
 })(typeof window!=='undefined'?window:globalThis);
