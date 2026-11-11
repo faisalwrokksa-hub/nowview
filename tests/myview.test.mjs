@@ -112,3 +112,10 @@ test('Market source reference requires a valid timestamp and cannot accompany st
  assert.match(src,/quote\.quoteTime\*1000>=Date\.now\(\)-86400000/);
  assert.match(src,/quote\.quoteTime\*1000<=Date\.now\(\)\+300000/);
 });
+
+
+test('Market source link requires an explicitly valid quote currency',()=>{
+ assert.match(src,/typeof quote\.currency==='string'&&\/\^\[A-Z0-9\]\{2,12\}\$\/\.test\(quote\.currency\)/);
+ const {api}=setup();
+ assert.match(api.preview.market({symbol:'BTCUSDT',price:120,currency:'$',quoteTime:Math.floor(Date.now()/1000)}),/currency unavailable/);
+});
