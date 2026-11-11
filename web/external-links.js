@@ -8,11 +8,19 @@
  }
  if(typeof document.addEventListener==='function')document.addEventListener('click',event=>{
   const a=event.target?.closest?.('a[href]');
-  if(!a||!window.NewViewNative||typeof window.NewViewNative.openNewsBrowser!=='function')return;
+  if(!a||event.defaultPrevented||event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
   const href=a.href;
   if(!approved(href))return;
+  if(typeof window.NewViewNative?.openNewsBrowser==='function'){
+   event.preventDefault();window.NewViewNative.openNewsBrowser(href);return;
+  }
+  // Keep supported external publisher/social shortcuts inside the dashboard
+  // when a web preview is possible; never capture non-HTTPS or download links.
+  if(a.hasAttribute('download')||a.target!=='_blank'||!window.NewViewInternalBrowser)return;
   event.preventDefault();
-  window.NewViewNative.openNewsBrowser(href);
+  const section=document.body.dataset.simpleSection==='watch'?'watch':'read';
+  if(section==='read')window.NewViewSections?.show?.('read');
+  window.NewViewInternalBrowser.open(href,{area:section});
  });
  window.NewViewExternal={approved};
 })();
