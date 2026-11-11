@@ -41,11 +41,31 @@ function request(symbol,range){
  if(window.NewViewNative&&window.NewViewNative.requestChart)return new Promise((resolve,reject)=>{const id=++nativeId;const timer=setTimeout(()=>{pending.delete(id);reject(new Error('Market source timed out. Try Refresh.'));},45000);pending.set(id,{resolve,reject,timer});window.NewViewNative.requestChart(symbol,range,id);});
  return import('./market-data.mjs').then(m=>m.getChart(symbol,range));
 }
+function installMarketFilter(symbolNav){
+ if(document.getElementById('newview-market-filter'))return;
+ const wrapper=document.createElement('div');wrapper.className='newview-market-search';
+ const label=document.createElement('label');label.htmlFor='newview-market-filter';label.textContent='Find an instrument';
+ const input=document.createElement('input');input.id='newview-market-filter';input.type='search';
+ input.placeholder='Filter Binance-listed symbols';input.autocomplete='off';input.maxLength=32;
+ const count=document.createElement('span');count.id='newview-market-filter-count';count.setAttribute('role','status');count.setAttribute('aria-live','polite');
+ const reset=document.createElement('button');reset.type='button';reset.textContent='Clear filter';reset.setAttribute('aria-label','Clear instrument filter');
+ function apply(){
+  const term=input.value.trim().toUpperCase(),buttons=[...symbolNav.querySelectorAll('button')];
+  let visible=0;
+  buttons.forEach((button,index)=>{button.hidden=Boolean(term)&&!symbols[index].includes(term);if(!button.hidden)visible++;});
+  count.textContent=visible+' of '+symbols.length+' instruments shown · Binance Spot tokens, not direct stock quotes';
+  reset.disabled=!term;
+ }
+ input.addEventListener('input',apply);
+ reset.addEventListener('click',()=>{input.value='';apply();input.focus();});
+ wrapper.append(label,input,reset,count);symbolNav.before(wrapper);apply();
+}
 function nav(){
  const symbolNav=$('symbols'),rangeNav=$('ranges');
  // Build each TV remote target once: rebuilding buttons every refresh loses D-pad focus.
  if(!symbolNav.children.length)symbolNav.replaceChildren(...symbols.map(s=>button(s,false,()=>{selected=s;localStorage.setItem('symbol',s);load();})));
  if(!rangeNav.children.length)rangeNav.replaceChildren(...ranges.map(r=>button(r,false,()=>{period=r;load();})));
+ installMarketFilter(symbolNav);
  [...symbolNav.children].forEach((b,i)=>{const active=symbols[i]===selected;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
  [...rangeNav.children].forEach((b,i)=>{const active=ranges[i]===period;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
 }
