@@ -20,7 +20,8 @@
   if(!catalogUrl(kind)||!Array.isArray(items)||items.length>1000)return [];
   const result=[],seen=new Set();
   for(const item of items){
-   const code=kind==='category'?item?.id:item?.code;
+   const rawCode=kind==='category'?item?.id:item?.code;
+   const code=kind==='country'&&typeof rawCode==='string'?rawCode.toLowerCase():rawCode;
    if(typeof code!=='string'||seen.has(code)||!scopedPlaylist(kind,code))continue;
    const name=typeof item.name==='string'?item.name.slice(0,75):code.toUpperCase();
    if(!name)continue;
