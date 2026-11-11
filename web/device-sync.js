@@ -77,7 +77,7 @@
   const status=document.createElement('p');status.id=PREFIX+'status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.textContent='Not connected. Pairing is not account sign-in.';
   actions.append(create,pairing,join,copy,push,useCloud,useLocal,leave);section.append(title,description,actions,status);settings.append(section);
   function report(message){status.textContent=message;const badge=document.getElementById('newview-device-status');if(badge)badge.textContent=message;}
-  function connected(value){copy.hidden=push.hidden=leave.hidden=!value;create.hidden=join.hidden=value;pairing.hidden=value;if(!value){useCloud.hidden=useLocal.hidden=true;conflict=null;}}
+  function connected(value){copy.hidden=push.hidden=leave.hidden=!value;copy.disabled=value;create.hidden=join.hidden=value;pairing.hidden=value;if(!value){useCloud.hidden=useLocal.hidden=true;conflict=null;pairing.value='';}}
   function resolveConflict(){useCloud.hidden=useLocal.hidden=!conflict;}
   function applyCloud(incoming){
    window.NewViewPersonal?.save?.(incoming.widgets);
@@ -97,7 +97,7 @@
      if(!createdRoom){report('Pairing room not found or expired. Create a fresh link on the first device.');return;}
      const sealed=await encrypt(current);if(activeSession!==session)return;
      await request('PUT',sealed);if(activeSession!==session)return;
-     previousLocal=local;previousVersion=sealed;createdRoom=false;
+     previousLocal=local;previousVersion=sealed;createdRoom=false;copy.disabled=false;
      report('Encrypted room created · sharing layouts only, no screen video');
     }else if(remote.blob!==previousVersion){
      const incoming=await decrypt(remote.blob);if(activeSession!==session)return;
@@ -109,7 +109,7 @@
       return;
      }
      if(serialized!==local)applyCloud(incoming);
-     previousLocal=serialized;previousVersion=remote.blob;
+     previousLocal=serialized;previousVersion=remote.blob;copy.disabled=false;
      report('Cloud layout checked · no screen video');
     }else if(local!==previousLocal){
      const sealed=await encrypt(current);if(activeSession!==session)return;
@@ -142,8 +142,9 @@
   async function pair(value,isNew){
    session++;if(timer)clearInterval(timer);timer=null;conflict=null;
    room=value.room;key=value.key;previousLocal=previousVersion=null;createdRoom=isNew;connected(true);
-   pairing.value=link();report('Pairing…');
+   const pairingSession=session;pairing.value='';report('Pairing…');
    await update();
+   if(pairingSession!==session)return;
    timer=setInterval(()=>update(),INTERVAL);timer.unref?.();
   }
   create.addEventListener('click',()=>{
@@ -151,7 +152,7 @@
    pair({room:b64(random),key:secret},true);
   });
   join.addEventListener('click',()=>{try{pair(readPair(pairing.value),false);}catch(e){report(e.message);}});
-  copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(link());report('Private pairing link copied. Anyone with this link can view and change your synced layout.');}catch{pairing.hidden=false;pairing.value=link();pairing.select();report('Copy the link shown in the field.');}});
+  copy.addEventListener('click',async()=>{if(copy.disabled||!room)return;try{await navigator.clipboard.writeText(link());report('Private pairing link copied. Anyone with this link can view and change your synced layout.');}catch{pairing.hidden=false;pairing.value=link();pairing.select();report('Copy the link shown in the field.');}});
   push.addEventListener('click',()=>update());
   leave.addEventListener('click',disconnect);
   if(location.hash.startsWith('#sync=')){
@@ -164,7 +165,7 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&room)update();});
   window.addEventListener('online',()=>{if(room)update();});
   window.addEventListener('offline',()=>{if(room)report('Browser offline · cloud sync paused; local dashboard available');});
-  window.addEventListener('pagehide',()=>{if(timer)clearInterval(timer);},{once:true});
+  window.addEventListener('pagehide',()=>{session++;if(timer)clearInterval(timer);timer=null;},{once:true});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
