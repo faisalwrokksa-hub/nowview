@@ -62,3 +62,12 @@ test('phone pairing can paste a bounded offer and keeps projection alive when ro
  assert.match(activity,/value\.length\(\)>120000/);
  assert.match(manifest,/android:configChanges="orientation\|screenSize\|keyboardHidden"/);
 });
+
+test('native capture adapts portrait and landscape resolution safely',()=>{
+ assert.match(activity,/private int\[\] captureDimensions\(\)/);
+ assert.match(activity,/1280\.0\/Math\.max\(width,height\)/);
+ assert.match(activity,/capturer\.startCapture\(dimensions\[0\],dimensions\[1\],15\)/);
+ assert.match(activity,/onConfigurationChanged\(Configuration config\)/);
+ assert.match(activity,/capturer\.changeCaptureFormat\(dimensions\[0\],dimensions\[1\],15\)/);
+ assert.doesNotMatch(activity,/startCapture\(960,540,15\)/);
+});
