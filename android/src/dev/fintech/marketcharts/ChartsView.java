@@ -197,8 +197,40 @@ public final class ChartsView extends WebView {
                 post(()->{if(!closed)evaluateJavascript("window.__newviewNewsResult&&window.__newviewNewsResult("+id+","+result.toString()+")",null);});
             });
         }
-        @JavascriptInterface public void fetchPublicPlaylist(int id){
-            fetchPublicPlaylist(id,"all","");
+        @JavascriptInterface public void fetchPublicCatalog(String kind,int id){
+            final String path;
+            if("country".equals(kind))path="countries.json";
+            else if("language".equals(kind))path="languages.json";
+            else if("category".equals(kind))path="categories.json";
+            else{
+                post(()->{if(!closed)evaluateJavascript("window.__newviewCatalogResult&&window.__newviewCatalogResult("+id+",null,'Unsupported catalog')",null);});
+                return;
+            }
+            worker.execute(()->{
+                String result=null,error=null;
+                HttpURLConnection connection=null;
+                try{
+                    connection=(HttpURLConnection)new URL("https://iptv-org.github.io/api/"+path).openConnection();
+                    connection.setConnectTimeout(9000);connection.setReadTimeout(10000);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestProperty("Accept","application/json");
+                    if(connection.getResponseCode()!=200)throw new Exception("Catalog unavailable");
+                    ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+                    try(InputStream stream=connection.getInputStream()){
+                        byte[] bytes=new byte[4096];int count;
+                        while((count=stream.read(bytes))!=-1){
+                            if(buffer.size()+count>220000)throw new Exception("Catalog too large");
+                            buffer.write(bytes,0,count);
+                        }
+                    }
+                    result=new String(buffer.toByteArray(),StandardCharsets.UTF_8);
+                    if(!result.trim().startsWith("["))throw new Exception("Invalid catalog");
+                }catch(Exception ignored){error="Public IPTV catalog unavailable";}
+                finally{if(connection!=null)connection.disconnect();}
+                final String data=result==null?"null":JSONObject.quote(result);
+                final String failure=error==null?"null":JSONObject.quote(error);
+                post(()->{if(!closed)evaluateJavascript("window.__newviewCatalogResult&&window.__newviewCatalogResult("+id+","+data+","+failure+")",null);});
+            });
         }
         @JavascriptInterface public void fetchPublicPlaylist(int id,String scope,String code){
             final String path;
