@@ -202,6 +202,10 @@
  const freshnessTimer=setInterval(refreshMarketAge,60000);
  freshnessTimer.unref?.();
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshMarketAge();});
+ // Android TV WebViews may resume from the background without a visibilitychange event.
+ // Refresh source eligibility on page restoration and window focus as well.
+ window.addEventListener('pageshow',refreshMarketAge);
+ window.addEventListener('focus',refreshMarketAge);
  window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
  installPresets();render();
 })();
