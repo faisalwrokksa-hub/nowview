@@ -114,6 +114,7 @@
   const tags=[...new Set(items.map(item=>metadata[item.url]?.tag).filter(Boolean))].sort();
   tagFilter.replaceChildren(...[['','All tags'],...tags.map(x=>[x,x])].map(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;return option;}));
   tagFilter.value=tags.includes(selectedTag)?selectedTag:'';
+  clearFilters.disabled=!filter.value&&!collectionFilter.value&&!tagFilter.value;
   if(!items.length){matchStatus.textContent='0 saved profiles';links.append(text('p','social-empty','No public profiles saved. Add a public profile URL to open it from your dashboard.'));return;}
   const term=filter.value.trim().toLowerCase().slice(0,100);
   const matching=items.filter(item=>(!collectionFilter.value||metadata[item.url]?.collection===collectionFilter.value)&&(!tagFilter.value||metadata[item.url]?.tag===tagFilter.value)&&(!term||(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||'')).toLowerCase().includes(term)));
