@@ -54,3 +54,26 @@ test('RSS article links reject credentials and nonstandard ports',()=>{
  const items=parseNewsXml(xml,'stocktwits');
  assert.equal(items.length,1);assert.equal(items[0].title,'Good');
 });
+
+test('new global publishers have source-specific RSS article host allowlists',()=>{
+ const examples=[
+  {id:'bbc',host:'www.bbc.com',url:'https://www.bbc.com/news/world-123'},
+  {id:'npr',host:'www.npr.org',url:'https://www.npr.org/2026/11/11/story'},
+  {id:'guardian',host:'www.theguardian.com',url:'https://www.theguardian.com/world/2026/nov/11/news'}
+ ];
+ for(const source of examples){
+  assert.ok(NEWS_SOURCES[source.id],source.id+' missing');
+  const good='<rss><channel><item><title>World update</title><link>'+source.url+'</link></item></channel></rss>';
+  const bad='<rss><channel><item><title>Untrusted link</title><link>https://tracking.example/ads</link></item></channel></rss>';
+  assert.equal(parseNewsXml(good,source.id).length,1,source.id+' expected valid story');
+  assert.equal(parseNewsXml(bad,source.id).length,0,source.id+' should reject third-party URL');
+ }
+});
+test('news selector and Android native reader expose new publisher choices',()=>{
+ const html=readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
+ const java=readFileSync(new URL('../android/src/dev/fintech/marketcharts/ChartsView.java',import.meta.url),'utf8');
+ for(const source of ['bbc','npr','guardian']){
+  assert.match(html,new RegExp('option value="'+source+'"'));
+  assert.ok(java.includes('"'+source+'".equals(source)'),source+' missing in native RSS reader');
+ }
+});
