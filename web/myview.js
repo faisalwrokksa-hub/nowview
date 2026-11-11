@@ -91,6 +91,7 @@
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
  const presetBar=document.getElementById('myview-presets');
  let chosen=load();
+ let draggedWidget=null;
  const quoteHistory=new Map();
  const maxQuotePoints=36;
  function chartFor(symbol){
@@ -153,9 +154,10 @@
    item.dataset.widget=id;
    item.draggable=true;
    item.setAttribute('aria-label',widget.title+' widget. Use move earlier or later buttons for keyboard and TV.');
-   item.addEventListener('dragstart',e=>{e.dataTransfer?.setData('text/plain',id);if(e.dataTransfer)e.dataTransfer.effectAllowed='move';});
-   item.addEventListener('dragover',e=>{if(e.dataTransfer?.types.includes('text/plain'))e.preventDefault();});
-   item.addEventListener('drop',e=>{e.preventDefault();const from=e.dataTransfer?.getData('text/plain');if(!ids.has(from)||!chosen.includes(from)||from===id)return;const next=chosen.filter(x=>x!==from);next.splice(next.indexOf(id),0,from);chosen=save(next);render();root.querySelector('[data-widget="'+from+'"] button')?.focus();});
+   item.addEventListener('dragstart',e=>{draggedWidget=id;e.dataTransfer?.setData('text/plain',id);if(e.dataTransfer)e.dataTransfer.effectAllowed='move';});
+   item.addEventListener('dragend',()=>{draggedWidget=null;});
+   item.addEventListener('dragover',e=>{if(draggedWidget&&e.dataTransfer?.types.includes('text/plain'))e.preventDefault();});
+   item.addEventListener('drop',e=>{if(!draggedWidget)return;e.preventDefault();const from=draggedWidget;draggedWidget=null;if(!ids.has(from)||!chosen.includes(from)||from===id)return;const next=chosen.filter(x=>x!==from);next.splice(next.indexOf(id),0,from);chosen=save(next);render();root.querySelector('[data-widget="'+from+'"] button')?.focus();});
    const heading=text('h3','',widget.title);
    const eyebrow=text('div','shell-eyebrow',widget.label);
    const description=text('p','',widget.description);
