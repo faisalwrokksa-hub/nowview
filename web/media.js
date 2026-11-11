@@ -32,8 +32,8 @@
 
  if(typeof document.createElement==='function'){
  const directory=document.createElement('section');directory.id='newview-channel-directory';directory.className='newview-channel-directory';directory.setAttribute('aria-label','IPTV-org channel directory');
- const heading=document.createElement('h3');heading.textContent='Free live TV directory';
- const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Channel directory not loaded yet.';
+ const heading=document.createElement('h3');heading.textContent='IPTV-org public channel directory';
+ const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Public third-party directory; stream availability and viewing rights vary by provider.';
  const list=document.createElement('select');list.setAttribute('aria-label','Available IPTV channels');
  const search=document.createElement('input');search.type='search';search.placeholder='Filter channels by name or ID';search.setAttribute('aria-label','Search channels');
  const secureOnly=document.createElement('input');secureOnly.type='checkbox';secureOnly.checked=true;secureOnly.id='newview-https-only';
@@ -74,7 +74,7 @@
   favorite.textContent=hasSelection&&favorites.has(list.value)?'Remove favorite':'Save favorite';
   open.setAttribute('aria-disabled',String(!hasSelection));
   if(hasSelection)open.href=list.value;else open.removeAttribute('href');
-  if(visible.length){status.textContent=allChannels.length+' loaded · '+visible.length+' matching (first 1500 displayed). Streams may be unavailable.';}
+  if(visible.length){status.textContent=allChannels.length+' IPTV-org entries · '+visible.length+' matching (first 1500 displayed). Third-party streams may fail or require viewing rights.';}
   else{open.removeAttribute('href');status.textContent=allChannels.length?allChannels.length+' loaded · 0 matching. Choose All channels, disable HTTPS-only, or clear search.':'No channels loaded. Try refresh.';}
  }
  list.addEventListener('change',()=>{if(list.value){open.href=list.value;open.hidden=false;}else{open.hidden=true;open.removeAttribute('href');}playChannel.disabled=!list.value;favorite.disabled=!list.value;favorite.textContent=favorites.has(list.value)?'Remove favorite':'Save favorite';});
