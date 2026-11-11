@@ -40,6 +40,7 @@
   try{
    const response=await fetch('/api/device-sync/'+requestRoom,{method,cache:'no-store',credentials:'same-origin',signal:controller.signal,headers,body:blob===undefined?undefined:JSON.stringify({blob})});
    if(response.status===404)return null;
+   if(response.status===410)throw Error('This pairing room has been revoked. Create a new pairing link.');
    if(response.status===401||response.status===403)throw Error('Cloud sync requires an authorized Cloudflare Access sign-in');
    if(response.status===503)throw Error('Cloud sync storage or Access policy is not configured on this server');
    if(!response.ok)throw Error('Sync request failed (HTTP '+response.status+')');
@@ -74,11 +75,12 @@
   const push=document.createElement('button');push.type='button';push.textContent='Check for updates';push.hidden=true;
   const useCloud=document.createElement('button');useCloud.type='button';useCloud.textContent='Use cloud layout';useCloud.hidden=true;
   const useLocal=document.createElement('button');useLocal.type='button';useLocal.textContent='Keep this layout';useLocal.hidden=true;
-  const leave=document.createElement('button');leave.type='button';leave.textContent='Disconnect';leave.hidden=true;
+  const leave=document.createElement('button');leave.type='button';leave.textContent='Disconnect this device';leave.hidden=true;
+  const revoke=document.createElement('button');revoke.type='button';revoke.textContent='Revoke pairing for all devices';revoke.hidden=true;
   const status=document.createElement('p');status.id=PREFIX+'status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.textContent='Not connected. Pairing is not account sign-in.';
-  actions.append(create,pairing,join,copy,push,useCloud,useLocal,leave);section.append(title,description,actions,status);settings.append(section);
+  actions.append(create,pairing,join,copy,push,useCloud,useLocal,leave,revoke);section.append(title,description,actions,status);settings.append(section);
   function report(message){status.textContent=message;const badge=document.getElementById('newview-device-status');if(badge)badge.textContent=message;}
-  function connected(value){copy.hidden=push.hidden=leave.hidden=!value;copy.disabled=value;create.hidden=join.hidden=value;pairing.hidden=value;if(!value){useCloud.hidden=useLocal.hidden=true;conflict=null;pairing.value='';}}
+  function connected(value){copy.hidden=push.hidden=leave.hidden=revoke.hidden=!value;copy.disabled=value;create.hidden=join.hidden=value;pairing.hidden=value;if(!value){useCloud.hidden=useLocal.hidden=true;conflict=null;pairing.value='';}}
   function resolveConflict(){useCloud.hidden=useLocal.hidden=!conflict;}
   function applyCloud(incoming){
    window.NewViewPersonal?.save?.(incoming.widgets);
@@ -156,6 +158,14 @@
   copy.addEventListener('click',async()=>{if(copy.disabled||!room)return;try{await navigator.clipboard.writeText(link());report('Private pairing link copied. Anyone with this link can view and change your synced layout.');}catch{pairing.hidden=false;pairing.value=link();pairing.select();report('Copy the link shown in the field.');}});
   push.addEventListener('click',()=>update());
   leave.addEventListener('click',disconnect);
+  revoke.addEventListener('click',async()=>{
+   if(!room||busy)return;
+   if(!window.confirm('Revoke this encrypted pairing room for every device? This cannot be undone.'))return;
+   revoke.disabled=true;
+   try{await request('DELETE');disconnect();report('Pairing room revoked. Old links will no longer work.');}
+   catch(error){report(error?.message||'Could not revoke pairing. Retry.');}
+   finally{revoke.disabled=false;}
+  });
   if(location.hash.startsWith('#sync=')){
    try{
     const credentials=readPair(location.hash.slice(1));
