@@ -44,4 +44,7 @@ fix/watch-inline-selection-20261111-1928 24aadb4550d823c20ade5a9109d5c3272ca53dd
 fix/watch-selection-and-source-20261111-1825 e9c94491c9f0b84c90b37effc9d3007698448188
 fix/watch-source-attribution-20261111-1631 04249de140909fadd40e65d8b0a7910771cda0f5
 task3/market-data-integrity-20261111 88f863b3a5b2bedd97c9c14959b8dcb5e848d170
+fix/myview-chart-drag-validation-20261111-2221 c16a639670614c34763a7ab3e989ecb86a4cd8a2
+fix/newview-short-landscape-nav-20261111 *
+fix/watch-inline-play-guard-20261111-2222 785af10c463493cd6cdb9881806d850d01272d7a
 BRANCHES
