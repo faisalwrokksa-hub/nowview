@@ -29,7 +29,7 @@ test('manual SDP exchange validates video and bounds code size before capture',(
  assert.match(viewer,/if\(!data\|\|data\.type!==type/);
  assert.match(viewer,/waitIce\(pc\)/);
 });
-test('six workspaces and device pairing remain intact',()=>{
+test('four primary workspaces and device pairing remain intact',()=>{
  assert.match(html,/data-view-button="devices"/);
  assert.match(html,/id="newview-device-controls"/);
  assert.match(shell,/const views=\['myview','markets','business','media','social','devices'\]/);
