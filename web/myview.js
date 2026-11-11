@@ -231,7 +231,7 @@ item.append(eyebrow,heading,description,insight);
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
-  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
+  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&Number.isFinite(next.price)&&next.price>=0&&typeof next.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(next.currency)&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
    const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
    if(!points.length||points[points.length-1]!==next.price){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);}
    refreshChart();
