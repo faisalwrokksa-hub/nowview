@@ -41,6 +41,7 @@
   const category=document.getElementById('live-tv-category');
   const inlineButton=[...directory.querySelectorAll('button')].find(b=>b.textContent==='Play in dashboard');
   const nativeButton=[...directory.querySelectorAll('button')].find(b=>b.textContent==='Play selected channel in NewView');
+  const floatingButton=[...directory.querySelectorAll('button')].find(b=>b.textContent==='Float selected IPTV');
   const favoriteButton=[...directory.querySelectorAll('button')].find(b=>b.textContent==='Save favorite');
   const hideFailed=document.getElementById('newview-iptv-hide-failed');
   const refresh=[...directory.querySelectorAll('button')].find(b=>b.textContent==='Refresh channels');
@@ -135,7 +136,9 @@
   prev.addEventListener('click',()=>shift(-1));next.addEventListener('click',()=>shift(1));
   play.addEventListener('click',()=>{
    if(!selected||!selectChannel(selected))return;
-   if(nativeButton&&!nativeButton.hidden&&!nativeButton.disabled)nativeButton.click();
+   // Floating IPTV dock is the primary video surface; retain native/inline fallback.
+   if(floatingButton&&!floatingButton.disabled)floatingButton.click();
+   else if(nativeButton&&!nativeButton.hidden&&!nativeButton.disabled)nativeButton.click();
    else if(!inlineButton.disabled)inlineButton.click();
   });
   channelPicker.addEventListener('change',()=>{if(channelPicker.value)selectChannel(channelPicker.value);});
