@@ -32,7 +32,7 @@ test('manual SDP exchange validates video and bounds code size before capture',(
 test('four primary workspaces and device pairing remain intact',()=>{
  assert.match(html,/data-view-button="devices"/);
  assert.match(html,/id="newview-device-controls"/);
- assert.match(shell,/const views=\['myview','markets','business','media','social','devices'\]/);
+ assert.match(shell,/const views=\['myview','markets','media','devices'\]/);
  assert.match(css,/body:not\(\.home-panel\) \.newview-cast-trigger/);
 });
 test('cast UI source parses without syntax errors',()=>{assert.doesNotThrow(()=>new Function(viewer));});
