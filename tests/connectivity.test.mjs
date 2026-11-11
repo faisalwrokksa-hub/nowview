@@ -29,17 +29,19 @@ function makeContext(initialOnline = true) {
   return { context, byId, handlers, children, navigator };
 }
 
-test('network hint distinguishes browser online state without claiming feeds are live', () => {
+test('network hint stays hidden online and displays a concise offline warning', () => {
   const env = makeContext();
   vm.runInContext(script, env.context);
   const indicator = env.byId.get('newview-network-indicator');
   assert.equal(indicator.attributes.role, 'status');
   assert.equal(indicator.attributes['aria-live'], 'polite');
-  assert.match(indicator.textContent, /live sources may vary/i);
+  assert.equal(indicator.textContent, '');
+  assert.equal(indicator.hidden,true);
   env.navigator.onLine = false;
   env.handlers.get('offline')();
   assert.equal(indicator.dataset.network, 'offline');
-  assert.match(indicator.textContent, /saved content may still work/i);
+  assert.equal(indicator.textContent,'Offline');
+  assert.equal(indicator.hidden,false);
 });
 
 test('reloading module does not duplicate network hint', () => {
