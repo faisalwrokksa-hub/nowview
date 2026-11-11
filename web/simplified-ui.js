@@ -6,7 +6,7 @@
  const choices=[
   {id:'markets',label:'Markets',sub:'Binance charts and watchlists',section:'read'},
   {id:'iptv',label:'IPTV',sub:'Live public TV directory',section:'watch'},
-  {id:'youtube',label:'YouTube',sub:'Open official YouTube',section:'watch'},
+  {id:'youtube',label:'YouTube',sub:'Browse YouTube in NewView',section:'watch'},
   {id:'news',label:'News',sub:'Worldwide publisher headlines',section:'read'},
   {id:'devices',label:'Mirroring',sub:'Phone and TV casting',section:'watch'},
   {id:'business',label:'Business',sub:'Open authorized reports',section:'read'}
