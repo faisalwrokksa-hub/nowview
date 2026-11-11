@@ -18,7 +18,7 @@ test('six workspace buttons retain their unique routing keys and accessible pres
 
 test('reference-theme workspace icons are SVG and decorative to screen readers', () => {
   assert.equal((html.match(/class="nv-nav-icon"/g) || []).length, 6);
-  assert.equal((html.match(/class="nv-nav-icon" aria-hidden="true"/g) || []).length, 5);
+  assert.equal((html.match(/class="nv-nav-icon" aria-hidden="true"/g) || []).length, 6);
   assert.match(css, /\.nv-nav-icon/);
 });
 
