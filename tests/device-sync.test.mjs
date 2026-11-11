@@ -40,7 +40,7 @@ test('reject cross-origin updates, bad content, and unsupported methods',async()
  assert.equal(foreign.status,403);
  const plain=await secured(new Request(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({blob:'plain layout'})}),env,new URL(url));
  assert.equal(plain.status,400);
- const unsupported=await secured(new Request(url,{method:'DELETE'}),env,new URL(url));
+ const unsupported=await secured(new Request(url,{method:'PATCH'}),env,new URL(url));
  assert.equal(unsupported.status,405);
  assert.equal(env.NEWVIEW_SYNC.writes.length,0);
 });
