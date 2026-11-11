@@ -153,3 +153,11 @@ test('Market Watch identifies explicit provider without implying independent ver
  assert.match(api.preview.market({...base,source:'other'}),/source not independently verified/);
  assert.doesNotMatch(api.preview.market(base),/Binance source/);
 });
+
+
+test('Market chart avoids verification claims and excludes invalid or unattributed quotes',()=>{
+ assert.match(src,/Waiting for at least two valid observed quotes/);
+ assert.match(src,/if\(id==='market'&&next&&next\.source==='binance'/);
+ assert.match(src,/Number\.isSafeInteger\(next\.quoteTime\)/);
+ assert.match(src,/next\.quoteTime\*1000>=Date\.now\(\)-86400000/);
+});
