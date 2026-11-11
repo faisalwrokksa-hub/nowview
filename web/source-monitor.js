@@ -5,7 +5,7 @@
 (function(root){
  const KEY='newview.source-monitor.v1';
  const PROFILE=Object.freeze({profile:'realtime',newsMs:120000,marketMs:15000,iptvMs:10800000,hideFailed:true,autoCheck:true});
- const FEEDS=Object.freeze(['fed','sec','stocktwits','bbc','npr','guardian']);
+ const FEEDS=Object.freeze(['fed','sec','stocktwits','bbc','npr','guardian','aljazeera','dw','pbs']);
  const native=typeof location!=='undefined'&&location.protocol==='file:';
  const states=new Map(),journal=[];const MAX_LOG=60,FAIL_TTL=30*60000;
  let newsTimer=null,marketTimer=null,iptvTimer=null,active=false,checking=false,cloudHealth=null;
