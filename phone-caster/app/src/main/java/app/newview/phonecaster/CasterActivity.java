@@ -47,7 +47,7 @@ import java.util.List;
  * No automation, persistent access, remote commands, or device pairing credentials.
  */
 public final class CasterActivity extends Activity {
-    private static final int CAPTURE_REQUEST=4102;
+    private static final int CAPTURE_REQUEST=4102, NOTICE_REQUEST=4103;
     private static final long MAX_SESSION_MS=30*60*1000L, ICE_TIMEOUT_MS=15000L;
     private static WeakReference<CasterActivity> active=new WeakReference<>(null);
     private final Handler handler=new Handler(Looper.getMainLooper());
@@ -107,12 +107,25 @@ public final class CasterActivity extends Activity {
     }
     private void requestCapture(){
         if(sharing)return;
+        if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
+            requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS},NOTICE_REQUEST);
+            return;
+        }
         try{
             remoteOffer=parseOffer(offer.getText().toString());
             MediaProjectionManager manager=(MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             if(manager==null)throw new Exception("Screen capture is unsupported");
             startActivityForResult(manager.createScreenCaptureIntent(),CAPTURE_REQUEST);
         }catch(Exception error){show(error.getMessage());}
+    }
+    @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(requestCode!=NOTICE_REQUEST)return;
+        if(grantResults.length==0||grantResults[0]!=PackageManager.PERMISSION_GRANTED){
+            show("Notification permission is required to display an always-visible Stop sharing action. Nothing was captured.");
+            return;
+        }
+        requestCapture();
     }
     @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
         super.onActivityResult(requestCode,resultCode,data);
