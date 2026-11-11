@@ -345,3 +345,33 @@ body:not(.home-panel)>main #symbols button[hidden]{display:none!important}
 /* Explicit dock-side control for Android TV remotes and keyboard use. */
 body:not(.home-panel) .newview-cast-dock.is-left:not([hidden]){left:clamp(12px,2vw,28px);right:auto}
 @media(max-width:750px){body:not(.home-panel) .newview-cast-dock.is-left:not([hidden]){left:12px;right:auto}}
+
+/* News browsing hub: keyboard and D-pad first, open publishers externally on web. */
+body:not(.home-panel)>main #newview-news-browser{
+ display:flex;flex-direction:column;gap:12px;min-width:0;margin-bottom:16px;
+ border:1px solid #375e70;border-radius:18px;padding:clamp(14px,2vw,24px);
+ background:linear-gradient(115deg,#122c3b,#101a2b)
+}
+body:not(.home-panel)>main #newview-news-browser h3{font-size:clamp(19px,2.3vw,28px);margin:0}
+body:not(.home-panel)>main #newview-news-browser p{margin:0;line-height:1.5;color:#c5d6e3}
+body:not(.home-panel)>main .news-browser-form{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+body:not(.home-panel)>main .news-browser-form label{flex-basis:100%;font-size:12px;color:#b8d0da;font-weight:700}
+body:not(.home-panel)>main #newview-news-address{
+ min-width:160px;flex:1 1 240px;min-height:48px;border:1px solid #56818c;
+ border-radius:10px;padding:10px 12px;color:#ecffff;background:#122032;
+ box-sizing:border-box
+}
+body:not(.home-panel)>main .news-browser-form button,
+body:not(.home-panel)>main .news-browser-sites button{
+ min-height:48px;padding:9px 14px;background:#214254;color:#f0fbff;
+ border:1px solid #507989;border-radius:11px;cursor:pointer;font-size:13px;font-weight:700
+}
+body:not(.home-panel)>main .news-browser-form button:hover,
+body:not(.home-panel)>main .news-browser-sites button:hover{border-color:#8df0d8;background:#29615a}
+body:not(.home-panel)>main .news-browser-sites{display:flex;flex-wrap:wrap;gap:9px}
+body:not(.home-panel)>main .news-browser-dns{font-size:12px;color:#bfd1df!important}
+body:not(.home-panel)>main #newview-news-browser a{color:#91e9dc;font-size:13px}
+body:not(.home-panel)>main #newview-news-browser :focus-visible,
+body:not(.home-panel)>main .news-items .news-link:focus-visible{outline:3px solid #a1ffe9;outline-offset:3px}
+body:not(.home-panel)>main .news-items .news-link{display:block;min-height:42px;padding:8px 4px}
+@media(max-width:650px){body:not(.home-panel)>main .news-browser-sites{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
