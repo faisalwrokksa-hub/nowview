@@ -116,6 +116,23 @@
   async function copy(value){try{await navigator.clipboard.writeText(value);report('Code copied. Share privately with the other device.');}catch{report('Clipboard unavailable. Select and copy the code manually.');}}
   copyOffer.addEventListener('click',()=>copy(offer.value));copyAnswer.addEventListener('click',()=>copy(answer.value));
   viewMarket.addEventListener('click',()=>{showDock();window.NewViewShell?.select('markets');});
+  // Move the persistent viewer out of the way of market charts on desktop/touch.
+  let dragging=null;
+  top.addEventListener('pointerdown',e=>{
+   if(e.button!==0||e.target.closest('button')||document.fullscreenElement===dock)return;
+   const rect=dock.getBoundingClientRect();
+   dragging={x:e.clientX,y:e.clientY,left:rect.left,top:rect.top};
+   try{top.setPointerCapture(e.pointerId);}catch{}
+  });
+  top.addEventListener('pointermove',e=>{
+   if(!dragging)return;
+   const left=Math.max(0,Math.min(window.innerWidth-dock.offsetWidth,dragging.left+e.clientX-dragging.x));
+   const y=Math.max(0,Math.min(window.innerHeight-dock.offsetHeight,dragging.top+e.clientY-dragging.y));
+   dock.style.left=left+'px';dock.style.top=y+'px';dock.style.right='auto';dock.style.bottom='auto';
+  });
+  const releaseDrag=()=>{dragging=null;};
+  top.addEventListener('pointerup',releaseDrag);top.addEventListener('pointercancel',releaseDrag);
+  window.addEventListener('resize',()=>{if(dock.hidden)return;const rect=dock.getBoundingClientRect();if(rect.left>window.innerWidth-50||rect.top>window.innerHeight-50){dock.style.removeProperty('left');dock.style.removeProperty('top');dock.style.removeProperty('right');dock.style.removeProperty('bottom');}});
   trigger.addEventListener('click',()=>{showDock();window.NewViewShell?.select('devices');});
   fold.addEventListener('click',()=>{minimized=!minimized;dock.classList.toggle('is-minimized',minimized);fold.textContent=minimized?'+':'−';fold.setAttribute('aria-label',minimized?'Restore floating screen':'Minimize floating screen');});
   expand.addEventListener('click',()=>{if(dock.requestFullscreen)Promise.resolve(dock.requestFullscreen()).catch(()=>report('Fullscreen unavailable'));});
