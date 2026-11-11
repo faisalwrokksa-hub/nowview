@@ -23,8 +23,8 @@ test('TV guide search, favorites and categories are bounded and normalized',()=>
  assert.equal(guide.pick([{name:'Unsafe',url:'http://insecure.example/',category:'news'}]).length,0);
 });
 test('TV guide avoids fake uptime claims, arbitrary stream probing, and duplicate playlist fetches',()=>{
- assert.match(code,/Not playback-tested/);
- assert.match(code,/Verified playing/);
+ assert.match(code,/channelPicker/);
+ assert.match(code,/health\(channel.url\)/);
  assert.match(code,/newview:source-status/);
  assert.match(code,/MutationObserver/);
  assert.doesNotMatch(code,/fetch\(/);
