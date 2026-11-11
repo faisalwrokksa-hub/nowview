@@ -162,7 +162,7 @@
    const heading=text('h3','',widget.title);
    const eyebrow=text('div','shell-eyebrow',widget.label);
    const description=text('p','',widget.description);
-   const insight=text('p','myview-insight',id==='business'?'Launch Power BI reports securely in Microsoft Power BI.':preview[id](snapshots[id]));
+   const insight=text('p','myview-insight',preview[id](snapshots[id]));
    insight.setAttribute('aria-label',widget.title+' source snapshot');
    insight.dataset.snapshot=id;
    insight.setAttribute('aria-live','off');
