@@ -198,10 +198,22 @@ public final class ChartsView extends WebView {
             });
         }
         @JavascriptInterface public void fetchPublicPlaylist(int id){
+            fetchPublicPlaylist(id,"all","");
+        }
+        @JavascriptInterface public void fetchPublicPlaylist(int id,String scope,String code){
+            final String path;
+            if("all".equals(scope))path="index.m3u";
+            else if("country".equals(scope)&&code!=null&&code.matches("[a-z]{2}"))path="countries/"+code+".m3u";
+            else if("language".equals(scope)&&code!=null&&code.matches("[a-z]{3}"))path="languages/"+code+".m3u";
+            else if("category".equals(scope)&&code!=null&&code.matches("[a-z][a-z0-9-]{1,31}"))path="categories/"+code+".m3u";
+            else{
+                post(()->{if(!closed)evaluateJavascript("window.__newviewPlaylistChunk&&window.__newviewPlaylistChunk("+id+",null,true,'Invalid playlist scope')",null);});
+                return;
+            }
             worker.execute(()->{
                 JSONObject result=new JSONObject();
                 try{
-                    URL url=new URL("https://iptv-org.github.io/iptv/index.m3u");
+                    URL url=new URL("https://iptv-org.github.io/iptv/"+path);
                     HttpURLConnection connection=(HttpURLConnection)url.openConnection();
                     connection.setConnectTimeout(9000);connection.setReadTimeout(12000);
                     connection.setInstanceFollowRedirects(false);
