@@ -156,3 +156,53 @@ body.nv-simple .nv-simple-tile{background:rgba(21,42,60,.64);backdrop-filter:blu
 body.nv-simple .nv-simple-tile-icon{background:rgba(33,74,80,.55)}
 @media(max-width:800px){body.nv-simple .nv-hub-grid,body.nv-simple .nv-custom-options,body.nv-simple #nv-simple-grid[data-box-count="3"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){body.nv-simple .nv-hub-grid,body.nv-simple .nv-custom-options,body.nv-simple #nv-simple-grid[data-box-count]{grid-template-columns:1fr}}
+
+
+/* Clean Netflix-inspired Watch, newsletter-style Read, single Customize panel. */
+body.nv-simple[data-simple-section="home"] #nv-simple-home{
+ width:min(1260px,100%);max-width:1260px;min-height:clamp(430px,70vh,850px);
+ display:flex;flex-direction:column;justify-content:center;
+}
+body.nv-simple .nv-simple-welcome{
+ min-height:220px;display:flex;flex-direction:column;justify-content:center;gap:14px;
+ background:linear-gradient(115deg,rgba(7,15,25,.92),rgba(10,25,37,.32)),var(--newview-wallpaper,linear-gradient(135deg,#132a3c,#0a192a));
+ background-size:cover;background-position:center;border:1px solid #31495a;
+}
+body.nv-simple .nv-simple-welcome h2{font-size:clamp(32px,5vw,62px)}
+body.nv-simple .nv-simple-tile{background:rgba(15,33,48,.56);backdrop-filter:blur(16px);border-color:rgba(162,215,226,.24)}
+body.nv-simple #nv-watch-hub{max-width:1320px;gap:20px}
+body.nv-simple #nv-watch-hub>h2{font-size:clamp(32px,5vw,54px)}
+body.nv-simple #nv-watch-hub .nv-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+body.nv-simple #nv-watch-hub .nv-hub-grid .nv-simple-tile{min-height:112px}
+body.nv-simple #nv-watch-hub #nv-watch-channels{width:100%;max-width:none;min-width:0}
+body.nv-simple #nv-watch-hub #nv-watch-channels>.shell-eyebrow{display:none!important}
+body.nv-simple #nv-read-hub{max-width:1100px;gap:18px}
+body.nv-simple #nv-read-hub>h2{font-family:Georgia,serif;font-size:clamp(36px,5.5vw,58px);font-weight:700;border-bottom:2px solid #5a7786;padding-bottom:12px;letter-spacing:-.025em}
+body.nv-simple #nv-read-hub>p{font-family:Georgia,serif;font-size:16px;line-height:1.6}
+body.nv-simple #nv-read-hub .nv-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+body.nv-simple #nv-read-hub .nv-hub-grid .nv-simple-tile{min-height:70px;border-radius:10px;padding:15px}
+body.nv-simple #nv-read-hub .nv-hub-grid .nv-simple-tile strong{font-size:16px}
+body.nv-simple #nv-read-hub .nv-hub-grid .nv-simple-tile small{font-size:12px}
+body.nv-simple #nv-read-hub .nv-read-toolbar{display:flex;align-items:end;gap:14px;flex-wrap:wrap;padding:16px;background:rgba(16,33,49,.65);border:1px solid #354e62;border-radius:12px}
+body.nv-simple #nv-read-hub .nv-read-source-label{display:grid;gap:8px;min-width:210px;color:#e1eff7;font-size:13px;font-weight:600}
+body.nv-simple #nv-read-hub .nv-read-toolbar select,body.nv-simple #nv-read-hub .nv-read-toolbar input{min-height:45px;border-radius:9px;background:#142a3b;border:1px solid #4c6879;color:#edf9ff;padding:9px 12px;font:inherit}
+body.nv-simple #nv-read-hub #nv-watch-headlines{display:block!important;width:100%;max-width:100%;min-width:0;background:rgba(14,30,44,.72);border:1px solid #354b5b;border-radius:14px;padding:clamp(14px,3vw,32px)}
+body.nv-simple #nv-read-hub #nv-watch-headlines .shell-eyebrow,
+body.nv-simple #nv-read-hub #nv-watch-headlines>h3{display:none!important}
+body.nv-simple #nv-read-hub #news-items{display:grid;gap:14px}
+body.nv-simple #nv-read-hub #news-items :is(article,li){line-height:1.65;border-bottom:1px solid #335061;padding-bottom:13px}
+body.nv-simple #nv-read-hub #news-items a{overflow-wrap:anywhere}
+body.nv-simple #nv-customize-hub{max-width:1000px;gap:16px}
+body.nv-simple #nv-customize-hub .nv-custom-advanced{border:1px solid #38586a;border-radius:13px;padding:15px;background:#132638}
+body.nv-simple #nv-customize-hub .nv-custom-advanced>summary{font-weight:700;cursor:pointer;min-height:46px;padding:10px}
+body.nv-simple #nv-customize-hub .newview-settings-content{position:static!important;inset:auto!important;width:100%!important;max-width:100%!important;max-height:65vh;overflow-y:auto;background:transparent!important;box-shadow:none!important}
+body.nv-simple #nv-customize-hub .nv-custom-advanced:not([open])>.newview-settings-content{display:none!important}
+body.nv-simple #nv-customize-hub .nv-custom-advanced[open]>.newview-settings-content{display:block}
+body.nv-simple #nv-customize-hub #wallpaper-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;border:1px solid #38586a;border-radius:12px}
+body.nv-simple #nv-customize-hub #newview-settings[hidden]{display:none!important}
+body.nv-simple #nv-watch-hub .newview-inline-tv{max-width:100%}
+@media(max-width:700px){
+ body.nv-simple #nv-watch-hub .nv-hub-grid,body.nv-simple #nv-read-hub .nv-hub-grid{grid-template-columns:1fr}
+ body.nv-simple #nv-read-hub .nv-read-toolbar{display:grid}
+ body.nv-simple #nv-simple-home{min-height:0}
+}
