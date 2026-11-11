@@ -43,7 +43,7 @@ test('shared Android browser starts with YouTube and opens the requested news UR
  assert.match(browser,/setNavigationBarColor/);
  assert.match(browser,/setAlgorithmicDarkeningAllowed\(true\)/);
  assert.match(browser,/setForceDark\(WebSettings\.FORCE_DARK_ON\)/);
- assert.match(news,/NewViewNewsReader\?\.openByUrl\?\.\(url\)/);
+ assert.match(news,/if\(!browse\(url\)\)window\.NewViewNewsReader/);
  assert.doesNotMatch(news,/if\(!link\|\|typeof window\.NewViewNative/);
  const links=read('web/external-links.js');
  assert.match(links,/NewViewNative\.openNewsBrowser\(href\)/);
@@ -64,4 +64,25 @@ test('news reader remains in Read, uses feed excerpts and provides publisher lin
  assert.match(news,/Read full article at publisher/);
  assert.match(css,/#nv-article-reader/);
  assert.match(css,/\.nv-article-content/);
+});
+
+test('unified browser supports safe URLs, bookmarks, history and Home/Read/Watch slots',()=>{
+ const browser=read('web/internal-browser.js'),html=read('web/index.html'),css=read('web/simplified-ui.css'),home=read('web/simplified-ui.js');
+ assert.match(html,/src="internal-browser\.js" defer/);
+ assert.match(browser,/nv-browser-address-form/);
+ assert.match(browser,/nv-browser-frame/);
+ assert.match(browser,/nv-browser-excerpt/);
+ assert.match(browser,/newview\.browser\.bookmarks\.web\.v1/);
+ assert.match(browser,/history\.slice\(0,cursor\+1\)/);
+ assert.match(browser,/destination==='home'/);
+ assert.match(browser,/destination==='watch'/);
+ assert.match(browser,/NewViewNative\?\.openNewsBrowser/);
+ assert.match(home,/NewViewInternalBrowser/);
+ assert.match(css,/\.nv-browser-toolbar/);
+ assert.doesNotMatch(browser,/innerHTML\s*=/);
+ const context={window:{},URL};
+ vm.runInNewContext(browser,context,{timeout:2000});
+ const valid=context.window.NewViewBrowserSafeUrl;
+ assert.equal(valid('https://www.youtube.com/'),'https://www.youtube.com/');
+ for(const url of ['javascript:alert(1)','http://example.com','https://127.0.0.1/','https://localhost/','https://user:pass@example.com/','https://example.com:8443/'])assert.equal(valid(url),null,url);
 });
