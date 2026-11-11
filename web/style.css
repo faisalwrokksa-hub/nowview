@@ -883,3 +883,9 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media(forced-colors:active){
  body>main>.workspace-switcher .workspace-tab.selected{outline:2px solid Highlight;outline-offset:-3px}
 }
+
+/* Task 1: keyboard/TV focus and compact status resilience. */
+@media (hover:none){button:focus-visible,[role="tab"]:focus-visible,[tabindex]:focus-visible{outline:3px solid #fff;outline-offset:3px;scroll-margin:20px}}
+@media (prefers-contrast:more){button:focus-visible,[role="tab"]:focus-visible,[tabindex]:focus-visible{outline:3px solid CanvasText;outline-offset:3px}}
+#message,[role="status"],[role="alert"]{overflow-wrap:anywhere;min-width:0;max-width:100%}
+@media (prefers-reduced-motion:reduce){[role="status"],[role="alert"]{animation:none!important;transition:none!important}}
