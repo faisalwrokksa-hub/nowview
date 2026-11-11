@@ -68,6 +68,10 @@
   function playYouTube(raw){
    const item=window.NewViewMedia?.parse?.(raw);
    if(!item){report('Use a valid YouTube video URL');return false;}
+   if(location.protocol==='file:'){
+    report('Embedded YouTube playback is not supported in this Android APK. Open the official YouTube browser or PipeTv.');
+    return false;
+   }
    reset();clearMedia();youtube.src=item.embed;youtube.hidden=false;video.hidden=true;mediaMode='youtube';heading.textContent='YouTube';showDock();report('Official YouTube embed. Ads or playback restrictions may apply.');return true;
   }
   function playIPTV(raw){
