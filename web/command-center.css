@@ -227,3 +227,50 @@ body:not(.home-panel)>main .newview-device-controls .device-sync{padding:0;backg
 body:not(.home-panel)>main .newview-device-controls .device-sync h4{margin:0;color:#dff8f5}
 @media(max-width:900px){body:not(.home-panel)>main .newview-device-cards{grid-template-columns:1fr}}
 @media(forced-colors:active){body:not(.home-panel)>main .newview-device-hero{border:1px solid CanvasText}}
+
+/* Global persistent cast panel: survives workspace changes, including Markets. */
+body:not(.home-panel) .newview-cast-trigger{
+ min-height:44px;padding:9px 14px;border-radius:12px;border:1px solid #4b797b;
+ background:linear-gradient(120deg,#17464b,#18334c);color:#d8fff5;
+ font-weight:750;cursor:pointer;box-shadow:0 5px 18px rgba(3,14,24,.18)
+}
+body:not(.home-panel) .newview-cast-trigger:hover{border-color:#84f0d8;background:#20575b}
+body:not(.home-panel) .newview-cast-dock:not([hidden]){
+ position:fixed;bottom:clamp(12px,2vw,28px);right:clamp(12px,2vw,28px);
+ z-index:950;width:clamp(260px,29vw,510px);min-width:240px;
+ max-width:calc(100vw - 24px);max-height:min(75vh,670px);
+ overflow:auto;resize:both;border:1px solid #508d93;border-radius:18px;
+ background:#0c1827;color:#eefaff;box-shadow:0 24px 75px rgba(0,0,0,.65);
+ display:flex;flex-direction:column;gap:0
+}
+body:not(.home-panel) .newview-cast-bar{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:10px;background:linear-gradient(115deg,#183e47,#16283b);
+ min-height:46px;padding:7px 10px 7px 16px
+}
+body:not(.home-panel) .newview-cast-bar strong{font-size:13px}
+body:not(.home-panel) .newview-cast-tools{display:flex;gap:4px}
+body:not(.home-panel) .newview-cast-tools button{border:1px solid #557587;border-radius:8px;background:#1b3041;color:#edf9fc;min-width:37px;min-height:34px;cursor:pointer}
+body:not(.home-panel) #newview-cast-video{display:block;width:100%;aspect-ratio:16/9;min-height:0;object-fit:contain;background:#010610}
+body:not(.home-panel) .newview-cast-dock.is-minimized{width:210px;resize:none}
+body:not(.home-panel) .newview-cast-dock.is-minimized #newview-cast-video,
+body:not(.home-panel) .newview-cast-dock.is-minimized .newview-cast-state{display:none}
+body:not(.home-panel) .newview-cast-state{color:#b3ceda;padding:9px 12px;font-size:12px;margin:0;line-height:1.4}
+body:not(.home-panel) .newview-cast-dock:fullscreen{width:100%;max-width:none;max-height:none;height:100%;border:0;border-radius:0}
+body:not(.home-panel) .newview-cast-dock:fullscreen #newview-cast-video{flex:1}
+body:not(.home-panel) .newview-cast-setup{display:flex;flex-direction:column;gap:11px;grid-column:1/-1}
+body:not(.home-panel) .newview-cast-setup :is(textarea){width:100%;box-sizing:border-box;min-height:80px;padding:10px;font:12px/1.4 ui-monospace,monospace;overflow-wrap:anywhere}
+body:not(.home-panel) .newview-cast-setup label{font-size:12px;font-weight:700;color:#c6dfdf}
+body:not(.home-panel) .newview-cast-actions{display:flex;gap:8px;flex-wrap:wrap}
+body:not(.home-panel) .newview-cast-actions button{min-height:44px;padding:9px 12px;border:1px solid #577f88;border-radius:10px;background:#1b3444;color:#f2ffff;cursor:pointer}
+body:not(.home-panel) .newview-cast-actions button:hover:not(:disabled){background:#23525b;border-color:#8bffdf}
+body:not(.home-panel) .newview-cast-actions button:disabled{opacity:.5;cursor:not-allowed}
+body:not(.home-panel) .newview-cast-info{padding:9px 12px;background:#132d3c;border-radius:10px;color:#a5eadc!important}
+body:not(.home-panel) .newview-cast-note{font-size:12px;color:#b4c4ce!important}
+body:not(.home-panel) :is(.newview-cast-setup,.newview-cast-dock) button:focus-visible{outline:3px solid #9dffe0;outline-offset:3px}
+@media(max-width:750px){
+ body:not(.home-panel) .newview-cast-dock:not([hidden]){width:min(340px,calc(100vw - 24px));bottom:12px;right:12px}
+ body:not(.home-panel) .newview-cast-trigger{padding:8px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){body:not(.home-panel) .newview-cast-dock{scroll-behavior:auto}}
+@media(forced-colors:active){body:not(.home-panel) .newview-cast-dock{border:2px solid CanvasText}}
