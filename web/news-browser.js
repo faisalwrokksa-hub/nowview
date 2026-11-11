@@ -31,6 +31,7 @@
   if(typeof window.NewViewNative?.openNewsBrowser==='function'){
    window.NewViewNative.openNewsBrowser(url);return true;
   }
+  if(window.NewViewInternalBrowser?.open?.(url,{area:'read'}))return true;
   window.open(url,'_blank','noopener,noreferrer');
   return true;
  }
@@ -41,7 +42,7 @@
   const section=document.createElement('section');section.className='news-browser-tools shell-card';section.id='newview-news-browser';
   const eyebrow=document.createElement('span');eyebrow.className='shell-eyebrow';eyebrow.textContent='NEWS BROWSER · REMOTE READY';
   const heading=document.createElement('h3');heading.textContent='Browse the news';
-  const intro=document.createElement('p');intro.textContent='Open articles using the remote. On Android this opens the shared dark browser at the selected article. On the web publisher restrictions require a separate tab. Publisher paywalls and content rights still apply.';
+  const intro=document.createElement('p');intro.textContent='Browse publisher links in NewView’s dark browser. Some websites refuse embedded previews; use Open publisher for their full page. Publisher rights and paywalls still apply.';
   const form=document.createElement('form');form.className='news-browser-form';
   const label=document.createElement('label');label.htmlFor='newview-news-address';label.textContent='Website address';
   const input=document.createElement('input');input.id='newview-news-address';input.type='url';input.placeholder='https://www.bbc.com/news';input.autocomplete='url';input.inputMode='url';input.maxLength=MAX_URL;
@@ -85,7 +86,7 @@
    const url=safeUrl(link.href);
    if(!url)return;
    event.preventDefault();
-   if(!window.NewViewNewsReader?.openByUrl?.(url))browse(url);
+   if(!browse(url))window.NewViewNewsReader?.openByUrl?.(url);
   });
   items.addEventListener('keydown',event=>{
    if(!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
