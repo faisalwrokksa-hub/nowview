@@ -211,7 +211,7 @@ public final class CasterActivity extends Activity {
         stopping=true;sharing=false;
         handler.removeCallbacks(expire);handler.removeCallbacks(iceTimeout);
         if(peer!=null){PeerConnection previous=peer;peer=null;previous.close();previous.dispose();}
-        if(capturer!=null){ScreenCapturerAndroid previous=capturer;capturer=null;try{previous.stopCapture();}catch(InterruptedException interrupted){Thread.currentThread().interrupt();}previous.dispose();}
+        if(capturer!=null){ScreenCapturerAndroid previous=capturer;capturer=null;try{previous.stopCapture();}catch(RuntimeException ignored){}previous.dispose();}
         if(videoTrack!=null){videoTrack.dispose();videoTrack=null;}
         if(source!=null){source.dispose();source=null;}
         if(textureHelper!=null){textureHelper.dispose();textureHelper=null;}
