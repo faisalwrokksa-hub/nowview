@@ -8,7 +8,7 @@
  const FEEDS=Object.freeze(['fed','sec','stocktwits','bbc','npr','guardian']);
  const native=typeof location!=='undefined'&&location.protocol==='file:';
  const states=new Map(),journal=[];const MAX_LOG=60,FAIL_TTL=30*60000;
- let newsTimer=null,marketTimer=null,iptvTimer=null,active=false,checking=false;
+ let newsTimer=null,marketTimer=null,iptvTimer=null,active=false,checking=false,cloudHealth=null;
  function read(){
   try{const x=JSON.parse(localStorage.getItem(KEY)||'null');return x&&typeof x==='object'?{
    ...PROFILE,hideFailed:x.hideFailed!==false,autoCheck:x.autoCheck!==false
@@ -82,6 +82,21 @@
   }finally{checking=false;}
  }
  const seenNews=new Map();
+ async function checkCloud(){
+  if(native||!active||!settings.autoCheck||typeof fetch!=='function'||typeof document==='undefined'||document.hidden)return;
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
+  try{
+   const response=await fetch('/api/source-health',{cache:'no-store',signal:controller.signal});
+   if(!response.ok){cloudHealth=null;render();return;}
+   const snapshot=await response.json();
+   const checked=Date.parse(snapshot?.updatedAt||'');
+   if(!Number.isFinite(checked)||Date.now()-checked>3600000||Date.now()<checked-60000||!snapshot?.feeds||typeof snapshot.feeds!=='object')return;
+   cloudHealth={checkedAt:checked,feeds:Object.keys(snapshot.feeds).length,iptv:snapshot.iptv?.status||'unknown'};
+   render();
+  }catch{cloudHealth=null;render();}
+  finally{clearTimeout(timeout);}
+ }
+
  function notify(source,message){
   journal.unshift({kind:'update',id:source,status:'ok',time:Date.now(),detail:message});
   if(journal.length>MAX_LOG)journal.length=MAX_LOG;
@@ -90,7 +105,7 @@
  function render(){
   if(typeof document==='undefined')return;
   const host=document.getElementById('newview-monitor-feed'),summary=document.getElementById('newview-monitor-summary');
-  if(summary)summary.textContent=(active&&settings.autoCheck?'Monitoring while NewView is open':'Monitoring paused')+' · News 2m · Market freshness 15s · IPTV directory 3h';
+  if(summary)summary.textContent=(active&&settings.autoCheck?'Monitoring while NewView is open':'Monitoring paused')+' · News 2m · Market freshness 15s · IPTV directory 3h'+(cloudHealth?' · Cloud checks '+cloudHealth.feeds+' feeds (checked '+new Date(cloudHealth.checkedAt).toLocaleTimeString()+')':' · Cloud monitoring not connected');
   if(!host)return;
   host.replaceChildren();
   const entries=journal.filter(e=>e.kind==='update'||!settings.hideFailed||e.status!=='failed').slice(0,12);
@@ -112,7 +127,7 @@
   const hideLabel=document.createElement('label'),hideBox=document.createElement('input');hideBox.type='checkbox';hideBox.id='newview-monitor-hide-failed';hideBox.checked=settings.hideFailed;hideLabel.append(hideBox,' Hide confirmed unavailable sources');
   const autoLabel=document.createElement('label'),autoBox=document.createElement('input');autoBox.type='checkbox';autoBox.id='newview-monitor-auto-check';autoBox.checked=settings.autoCheck;autoLabel.append(autoBox,' Automatic checks');
   const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Check sources now';
-  refresh.addEventListener('click',()=>{checkNews();checkMarket();event('newview:iptv-refresh',{});});
+  refresh.addEventListener('click',()=>{checkNews();checkCloud();checkMarket();event('newview:iptv-refresh',{});});
   hideBox.addEventListener('change',()=>{settings.hideFailed=hideBox.checked;save();render();event('newview:source-filter',{});});
   autoBox.addEventListener('change',()=>{settings.autoCheck=autoBox.checked;save();restart();});
   controls.append(hideLabel,autoLabel,refresh);
@@ -125,16 +140,16 @@
   active=true;
   if(settings.autoCheck){
    marketTimer=setInterval(checkMarket,settings.marketMs);
-   newsTimer=setInterval(checkNews,settings.newsMs);
+   newsTimer=setInterval(()=>{checkNews();checkCloud();},settings.newsMs);
    iptvTimer=setInterval(()=>{if(!document.hidden&&navigator.onLine!==false)event('newview:iptv-refresh',{});},settings.iptvMs);
-   checkMarket();checkNews();
+   checkMarket();checkNews();checkCloud();
   }
   render();
  }
  function init(){
   if(typeof document==='undefined')return;
   setup();restart();
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&settings.autoCheck){checkMarket();checkNews();}});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&settings.autoCheck){checkMarket();checkNews();checkCloud();}});
   root.addEventListener?.('online',()=>{if(settings.autoCheck)checkNews();});
   root.addEventListener?.('pagehide',()=>{active=false;for(const timer of [newsTimer,marketTimer,iptvTimer])if(timer)clearInterval(timer);});
  }
