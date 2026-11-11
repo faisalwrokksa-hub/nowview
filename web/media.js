@@ -69,10 +69,10 @@
  let allChannels=[];let lastFetch=0;let loading=null,loadingUrl=null,loadedUrl=null;
  const catalogCache=new Map();
  const selectedPlaylist=()=>preferred?.scopedPlaylist?.(scope.value,scope.value==='all'?'':scopeValue.value)||null;
- async function readCatalog(kind){
+ async function readCatalog(kind,force=false){
   const endpoint=preferred?.catalogUrl?.(kind);if(!endpoint)return [];
   const cached=catalogCache.get(kind);
-  if(cached&&Date.now()-cached.time<10800000)return cached.items;
+  if(!force&&cached&&Date.now()-cached.time<10800000)return cached.items;
   if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicCatalog==='function'){
    const raw=await new Promise((resolve,reject)=>{
     const id=Date.now()+Math.floor(Math.random()*1000),timer=setTimeout(()=>{delete window.__newviewCatalogResult;reject(Error('Catalog timeout'));},20000);
@@ -99,21 +99,21 @@
    catalogCache.set(kind,{items:entries,time:Date.now()});return entries;
   }finally{clearTimeout(timeout);}
  }
- async function updateScope(){
+ async function updateScope(force=false){
   const kind=scope.value;
   if(kind==='all'){scopeValue.hidden=true;scopeValue.replaceChildren();loadDirectory(true);return;}
   scopeValue.hidden=false;catalogStatus.textContent='Checking current '+kind+' list…';
   try{
-   const entries=await readCatalog(kind);if(kind!==scope.value)return;
+   const entries=await readCatalog(kind,force);if(kind!==scope.value)return;
    const previous=scopeValue.value;
    scopeValue.replaceChildren(...entries.map(x=>{const o=document.createElement('option');o.value=x.code;o.textContent=x.name;return o;}));
    const desired=kind==='country'?'sa':kind==='language'?'ara':kind==='category'?'news':'';
    scopeValue.value=entries.some(x=>x.code===previous)?previous:entries.some(x=>x.code===desired)?desired:entries[0].code;
    catalogStatus.textContent=entries.length+' current '+kind+' choices from IPTV-org.';
    loadDirectory(true);
-  }catch(error){catalogStatus.textContent='Cannot refresh '+kind+' catalog ('+String(error?.message||error)+'). Choose All public channels or retry.';scopeValue.replaceChildren();}
+  }catch(error){catalogStatus.textContent='Cannot refresh '+kind+' catalog ('+String(error?.message||error)+'). Using previous choices if available.';if(!scopeValue.options.length)scopeValue.replaceChildren();else loadDirectory(true);}
  }
- scope.addEventListener('change',updateScope);
+ scope.addEventListener('change',()=>updateScope(true));
  scopeValue.addEventListener('change',()=>loadDirectory(true));
 
  function renderChannels(){
@@ -224,12 +224,12 @@
   }
   finally{loading=null;loadingUrl=null;refresh.disabled=false;refresh.removeAttribute('aria-busy');}})();return loading;
  }
- refresh.addEventListener('click',()=>loadDirectory(true));
+ refresh.addEventListener('click',()=>scope.value==='all'?loadDirectory(true):updateScope(true));
  category?.addEventListener('change',renderChannels);
  if(typeof document.addEventListener==='function')document.addEventListener('newview:workspace-change',renderChannels);
  if(typeof window.addEventListener==='function')window.addEventListener('newview:preferences-change',renderChannels);
  if(preferred?.MAIN_PLAYLIST)loadDirectory();
- window.addEventListener?.('newview:iptv-refresh',()=>loadDirectory(true));
+ window.addEventListener?.('newview:iptv-refresh',()=>scope.value==='all'?loadDirectory(true):updateScope(true));
  const playlist=document.getElementById('live-tv-playlist');
  if(category&&playlist){category.addEventListener('change',()=>{
   const permitted=new Set(['news','business','sports','documentary','education','kids','music','movies','entertainment','weather','general']);
