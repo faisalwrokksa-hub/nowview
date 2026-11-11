@@ -136,3 +136,38 @@ body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile:hover
 @media(max-width:900px){body:not(.home-panel)>main .homepage-launcher-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){body:not(.home-panel)>main .homepage-launcher{display:none}}
 @media(max-height:740px) and (min-width:651px){body:not(.home-panel)>main .homepage-launcher{display:none}}
+
+/* Accessible command palette; local workspace navigation only. */
+body:not(.home-panel) .newview-command-trigger{
+ margin-inline-start:auto;padding:9px 15px;border:1px solid #456579;border-radius:12px;
+ background:#16283a;color:#d9f1f1;font-weight:650;font-size:13px;min-height:44px;cursor:pointer
+}
+body:not(.home-panel) .newview-command-trigger:hover{background:#234052;border-color:#6cd8c7}
+body:not(.home-panel) .newview-command-overlay:not([hidden]){
+ position:fixed;inset:0;z-index:9999;background:rgba(3,9,18,.8);display:flex;
+ justify-content:center;align-items:flex-start;padding:clamp(18px,10vh,100px) 16px 16px
+}
+body:not(.home-panel) .newview-command-dialog{
+ box-sizing:border-box;width:min(100%,580px);max-height:80vh;overflow-y:auto;
+ background:#111d2d;border:1px solid #4a6077;border-radius:20px;
+ box-shadow:0 28px 100px rgba(0,0,0,.55);padding:20px;display:grid;gap:12px
+}
+body:not(.home-panel) .newview-command-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+body:not(.home-panel) .newview-command-top label{font-size:18px;font-weight:800;color:#effbf9}
+body:not(.home-panel) .newview-command-close{background:transparent;border:1px solid #53677b;border-radius:9px;color:#cddfe9;padding:8px 12px;cursor:pointer}
+body:not(.home-panel) #newview-command-input{
+ font:inherit;font-size:16px;background:#081523;color:#fff;border:2px solid #53778a;
+ border-radius:12px;min-height:52px;padding:12px 14px;width:100%
+}
+body:not(.home-panel) #newview-command-results{display:grid;gap:6px;max-height:45vh;overflow-y:auto}
+body:not(.home-panel) .newview-command-result{
+ display:flex;flex-direction:column;text-align:start;gap:4px;padding:13px 15px;
+ background:#17283a;border:1px solid transparent;border-radius:12px;color:#eef6fd;cursor:pointer
+}
+body:not(.home-panel) .newview-command-result small{color:#a9bfd0;font-size:12px}
+body:not(.home-panel) .newview-command-result[aria-selected="true"],
+body:not(.home-panel) .newview-command-result:hover{background:#22463f;border-color:#68d5bf}
+body:not(.home-panel) .newview-command-hint,body:not(.home-panel) .newview-command-empty{color:#a9bfd0;font-size:12px;margin:0}
+body:not(.home-panel) .newview-command-overlay :focus-visible{outline:3px solid #9af5de;outline-offset:2px}
+@media(max-width:650px){body:not(.home-panel) .newview-command-trigger{font-size:12px;padding:8px;min-height:42px}}
+@media(forced-colors:active){body:not(.home-panel) .newview-command-result[aria-selected="true"]{border:2px solid Highlight}}
