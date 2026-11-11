@@ -103,7 +103,7 @@
   const link=root.querySelector('[data-widget="market"] [data-source-link="market"]');
   if(!link)return;
   const quote=snapshots.market;
-  const valid=quote&&Number.isFinite(quote.price)&&quote.price>=0&&typeof quote.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(quote.symbol.trim())&&typeof quote.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(quote.currency)&&Number.isSafeInteger(quote.quoteTime)&&quote.quoteTime>0&&quote.quoteTime*1000<=Date.now()+300000&&quote.quoteTime*1000>=Date.now()-86400000;
+  const valid=quote&&(quote.source===undefined||quote.source==='binance')&&Number.isFinite(quote.price)&&quote.price>=0&&typeof quote.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(quote.symbol.trim())&&typeof quote.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(quote.currency)&&Number.isSafeInteger(quote.quoteTime)&&quote.quoteTime>0&&quote.quoteTime*1000<=Date.now()+300000&&quote.quoteTime*1000>=Date.now()-86400000;
   link.hidden=!valid;
   if(!valid){link.removeAttribute('href');link.textContent='Source unavailable';return;}
   link.href='https://www.binance.com/en/markets';
