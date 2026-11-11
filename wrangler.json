@@ -14,5 +14,21 @@
     "crons": [
       "*/2 * * * *"
     ]
-  }
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "NEWVIEW_SYNC_ROOMS",
+        "class_name": "NewViewSyncRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "newview-sync-rooms-v1",
+      "new_sqlite_classes": [
+        "NewViewSyncRoom"
+      ]
+    }
+  ]
 }
