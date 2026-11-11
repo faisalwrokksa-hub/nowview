@@ -57,3 +57,7 @@ test('diagnostics check the server only on user action, without claiming upstrea
  assert.match(worker,/upstreamsChecked:false/);
  assert.match(css,/newview-health-result\[data-health="error"\]/);
 });
+
+test('command dialog traps Tab focus between search and close controls',()=>{
+ assert.match(shell,/if\(e\.key==='Tab'\)\{[\s\S]*?e\.preventDefault\(\);[\s\S]*?document\.activeElement===input\?close:input/);
+});
