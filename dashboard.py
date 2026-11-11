@@ -127,6 +127,9 @@ CACHE = ChartCache()
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urllib.parse.urlsplit(self.path)
+        if parsed.path == '/healthz':
+            self.respond(200, json.dumps({'status': 'ok', 'app': 'newview', 'scope': 'worker-only', 'upstreamsChecked': False}).encode(), 'application/json')
+            return
         if parsed.path == '/api/chart':
             query = urllib.parse.parse_qs(parsed.query)
             try:
