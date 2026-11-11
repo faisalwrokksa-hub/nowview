@@ -136,3 +136,9 @@ test('MyView preserves focused card action after keyboard or button reordering',
  assert.match(src,/\[data-source-link=/);
  assert.match(src,/target&&!target\.disabled&&!target\.hidden/);
 });
+
+
+test('Market Watch does not attribute explicitly non-Binance quotes to Binance',()=>{
+ assert.match(src,/quote\.source===undefined\|\|quote\.source==='binance'/);
+ assert.match(src,/link\.hidden=!valid/);
+});
