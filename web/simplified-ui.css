@@ -466,3 +466,24 @@ body.nv-simple .nv-news-mode{min-height:44px;padding:9px 13px;color:#f4f7fa;back
  body.nv-simple #nv-tv-guide .nv-tv-now{gap:8px}
  body.nv-simple #nv-tv-guide .nv-tv-now span{flex-basis:100%}
 }
+
+
+/* Main video is the existing floating IPTV/casting dock, not a second inline player. */
+body.nv-simple #nv-watch-channels .newview-inline-tv :is(.inline-tv-video,button){display:none!important}
+body.nv-simple #nv-watch-channels .newview-inline-tv{padding:0!important;margin:0!important;border:0!important;min-height:0!important}
+body.nv-simple #nv-watch-channels .newview-inline-tv p{display:none!important}
+
+/* In-section article reading: publisher-supplied feed excerpt, readable dark chrome. */
+body.nv-simple #nv-article-reader{
+ width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+ background:#0c1a2a;color:#f2f5fa;border:1px solid #c4a164;border-radius:18px;
+ padding:clamp(22px,4vw,54px);margin:16px 0 24px;scroll-margin-top:90px;
+ overflow-wrap:anywhere;
+}
+body.nv-simple #nv-article-reader[hidden],body.nv-simple #news-items[hidden]{display:none!important}
+body.nv-simple #nv-article-reader h2{font-size:clamp(24px,3.1vw,38px);line-height:1.3;letter-spacing:-.02em;max-width:42ch;margin:18px 0}
+body.nv-simple #nv-article-reader .nv-article-meta{color:#b9c9da;font-size:14px}
+body.nv-simple #nv-article-reader .nv-article-content{font-size:clamp(17px,1.8vw,21px);line-height:1.85;max-width:72ch;white-space:pre-wrap;color:#ecf2f6;margin:22px 0}
+body.nv-simple #nv-article-reader .nv-article-back{min-height:48px;padding:10px 17px;border:1px solid #c4a164;border-radius:11px;background:#26394a;color:white;cursor:pointer}
+body.nv-simple #nv-article-reader .nv-article-original{display:inline-block;margin-top:8px;padding:12px 16px;color:#f5d48b;border:1px solid #a4834c;border-radius:10px;min-height:44px;text-decoration:underline}
+body.nv-simple #nv-article-reader :is(a,button):focus-visible{outline:3px solid #ffda90;outline-offset:3px}
