@@ -212,7 +212,10 @@
    if(content.length>16000000)throw Error('Playlist too large');
    if(typeof preferred?.parseM3U!=='function')throw Error('Playlist parser unavailable');
    const parsed=preferred.parseM3U(content);if(!Array.isArray(parsed)||!parsed.length)throw Error('No valid channels');
-   allChannels=parsed;loadedUrl=url;lastFetch=Date.now();catalogStatus.textContent=parsed.length+' unique streams in '+scope.value+' · checked '+new Date(lastFetch).toLocaleTimeString();window.NewViewSourceMonitor?.mark?.('api','iptv-directory','ok','IPTV directory loaded');renderChannels();
+   const existing=loadedUrl===url&&allChannels.length?new Set(allChannels.map(channel=>channel.url)):null;
+   const added=existing?parsed.filter(channel=>!existing.has(channel.url)).length:0;
+   allChannels=parsed;loadedUrl=url;lastFetch=Date.now();
+   if(added>0)window.NewViewSourceMonitor?.notify?.('IPTV',added+' newly listed streams in '+scope.value+' catalog; playback not yet verified');catalogStatus.textContent=parsed.length+' unique streams in '+scope.value+' · checked '+new Date(lastFetch).toLocaleTimeString();window.NewViewSourceMonitor?.mark?.('api','iptv-directory','ok','IPTV directory loaded');renderChannels();
   }catch(error){
    const reason=error?.name==='AbortError'?'request timed out':String(error?.message||error);
    window.NewViewSourceMonitor?.mark?.('api','iptv-directory','failed',reason);
