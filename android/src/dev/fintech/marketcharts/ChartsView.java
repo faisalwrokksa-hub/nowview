@@ -108,6 +108,16 @@ public final class ChartsView extends WebView {
             }catch(Exception ignored){}
         });
     }
+    private static boolean approvedNewsLink(String source,Uri url){
+        if(!approvedUrl(url))return false;
+        String host=url.getHost().toLowerCase(java.util.Locale.ROOT);
+        if("fed".equals(source))return host.equals("www.federalreserve.gov");
+        if("sec".equals(source))return host.equals("www.sec.gov");
+        if("bbc".equals(source))return host.equals("www.bbc.com")||host.equals("bbc.com")||host.equals("www.bbc.co.uk");
+        if("npr".equals(source))return host.equals("www.npr.org")||host.equals("text.npr.org");
+        if("guardian".equals(source))return host.equals("www.theguardian.com");
+        return false;
+    }
     public void handleActivityResult(int request,int result,Intent data){
         if(request!=CSV_PICKER_REQUEST)return;
         ValueCallback<Uri[]> callback=pendingFiles;pendingFiles=null;
@@ -175,7 +185,7 @@ public final class ChartsView extends WebView {
                             Element item=(Element)nodes.item(i);
                             String title=tagText(item,"title"),link=tagText(item,"link");
                             Uri uri=Uri.parse(link);
-                            if(!approvedUrl(uri)||title.isEmpty())continue;
+                            if(!approvedNewsLink(source,uri)||title.isEmpty())continue;
                             JSONObject row=new JSONObject();
                             row.put("title",title);row.put("url",link);
                             row.put("source","fed".equals(source)?"Federal Reserve":"sec".equals(source)?"SEC":"bbc".equals(source)?"BBC World":"npr".equals(source)?"NPR News":"The Guardian");
