@@ -1,119 +1,134 @@
 'use strict';
-/* NewView simplified presentation. Preserves the existing feature controllers,
-   while limiting what is visible at once to Home, Markets, Watch, and News. */
+/* One accessible four-destination shell. Controllers remain in their original
+ * modules; Home remembers 1–4 user-selected destinations on this device. */
 (function(){
+ const KEY='newview.home.boxes.v2',COUNT_KEY='newview.home.box-count.v2';
+ const choices=[
+  {id:'markets',label:'Markets',sub:'Binance charts and watchlists',section:'read'},
+  {id:'iptv',label:'IPTV',sub:'Live public TV directory',section:'watch'},
+  {id:'youtube',label:'YouTube',sub:'Open official YouTube',section:'watch'},
+  {id:'news',label:'News',sub:'Worldwide publisher headlines',section:'read'},
+  {id:'devices',label:'Mirroring',sub:'Phone and TV casting',section:'watch'},
+  {id:'business',label:'Business',sub:'Open authorized reports',section:'read'}
+ ];
+ function safeItems(value){return Array.isArray(value)?[...new Set(value.filter(x=>choices.some(c=>c.id===x)))].slice(0,4):[];}
+ function read(){
+  try{return {items:safeItems(JSON.parse(localStorage.getItem(KEY)||'["markets","iptv","news","devices"]')),count:Math.max(1,Math.min(4,Number(localStorage.getItem(COUNT_KEY))||4))};}
+  catch{return {items:['markets','iptv','news','devices'],count:4};}
+ }
+ function store(state){try{localStorage.setItem(KEY,JSON.stringify(state.items));localStorage.setItem(COUNT_KEY,String(state.count));}catch{}}
  function install(){
   const main=document.querySelector('body > main'),oldNav=document.getElementById('workspace-switcher'),
-   home=document.querySelector('[data-workspace="myview"]'),header=main?.querySelector(':scope > header');
+   home=document.querySelector('[data-workspace="myview"]'),header=main?.querySelector(':scope > header'),
+   settings=document.getElementById('newview-settings');
   if(!main||!oldNav||!home||!header||document.getElementById('nv-simple-nav'))return;
   document.body.classList.add('nv-simple');
-  const el=(tag,cls,content)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(content!==undefined)node.textContent=content;return node;};
-  const nav=el('nav','nv-simple-nav');nav.id='nv-simple-nav';nav.setAttribute('aria-label','Main dashboard navigation');
-  const sections=[
-   ['home','Home','myview',null],
-   ['markets','Markets','markets',null],
-   ['watch','Watch','media','channels'],
-   ['news','News','media','headlines']
-  ];
-  let active='home';
-  const buttons=new Map();
-  function show(id){
-   const item=sections.find(([key])=>key===id);
-   if(!item)return;
-   const [,label,view,sub]=item;
-   if(!window.NewViewShell?.select?.(view))return;
-   if(sub)window.NewViewWatch?.select?.(sub);
-   active=id;
-   document.body.dataset.simpleSection=id;
-   for(const [key,button] of buttons){
-    const selected=key===id;
-    button.classList.toggle('active',selected);button.setAttribute('aria-current',selected?'page':'false');button.setAttribute('aria-pressed',String(selected));
-    button.tabIndex=selected?0:-1;
+  const el=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;if(text!==undefined)n.textContent=text;return n;};
+  const nav=el('nav','nv-simple-nav');nav.id='nv-simple-nav';nav.setAttribute('aria-label','NewView main navigation');
+  const sections=[['home','Home'],['watch','Watch'],['read','Read'],['customize','Customize']];
+  const buttons=new Map();let active='home',state=read();
+  const content=el('section','nv-simple-home');content.id='nv-simple-home';content.setAttribute('aria-label','Personalized Home');
+  const banner=el('div','nv-simple-welcome');
+  banner.append(el('h2','','My dashboard'),el('p','','Your selected sources and shortcuts'));
+  const grid=el('div','nv-simple-grid');
+  grid.id='nv-simple-grid';
+  content.append(banner,grid);home.prepend(content);
+  const watch=el('section','nv-hub-panel');watch.id='nv-watch-hub';watch.hidden=true;
+  watch.append(el('h2','','Watch'),el('p','','Choose what to watch or mirror'));
+  const watchActions=el('div','nv-hub-grid');watch.append(watchActions);home.append(watch);
+  const readPanel=el('section','nv-hub-panel');readPanel.id='nv-read-hub';readPanel.hidden=true;
+  readPanel.append(el('h2','','Read'),el('p','','News, business websites and market charts'));
+  const readActions=el('div','nv-hub-grid');readPanel.append(readActions);home.append(readPanel);
+  const customize=el('section','nv-hub-panel');customize.id='nv-customize-hub';customize.hidden=true;
+  const customHeading=el('h2','','Customize Home');
+  const desc=el('p','','Choose 1–4 boxes. Your choices stay on this device.');
+  const selectCount=el('select','nv-custom-count');selectCount.id='nv-custom-count';selectCount.setAttribute('aria-label','Number of Home boxes');
+  for(let n=1;n<=4;n++){const option=el('option','',n+' box'+(n===1?'':'es'));option.value=String(n);selectCount.append(option);}
+  const optionGrid=el('div','nv-custom-options');
+  customize.append(customHeading,desc,selectCount,optionGrid);home.append(customize);
+  const now=el('p','nv-custom-state');now.setAttribute('role','status');customize.append(now);
+  const settingsIntro=el('p','nv-custom-settings-help','Photo, advanced source options and screen layout settings are below.');
+  customize.append(settingsIntro);
+  function syncNav(){
+   for(const [id,button] of buttons){const on=id===active;button.classList.toggle('active',on);button.setAttribute('aria-pressed',String(on));if(on)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');button.tabIndex=on?0:-1;}
+   document.body.dataset.simpleSection=active;
+  }
+  function navigate(target){
+   if(target==='markets'){window.NewViewShell?.select?.('markets');return;}
+   if(target==='iptv'){window.NewViewShell?.select?.('media');window.NewViewWatch?.select?.('channels');return;}
+   if(target==='news'){window.NewViewShell?.select?.('media');window.NewViewWatch?.select?.('headlines');return;}
+   if(target==='devices'){window.NewViewShell?.select?.('devices');window.NewViewCast?.open?.();return;}
+   if(target==='business'){window.open('https://app.powerbi.com/','_blank','noopener,noreferrer');return;}
+   if(target==='youtube'){
+    if(typeof window.NewViewNative?.openNewsBrowser==='function')window.NewViewNative.openNewsBrowser('https://www.youtube.com/');
+    else window.open('https://www.youtube.com/','_blank','noopener,noreferrer');
    }
-   const title=document.getElementById('workspace-title');if(title)title.textContent=label;
+  }
+  function actionTile(item){
+   const b=el('button','nv-simple-tile');b.type='button';b.dataset.simpleTarget=item.id;
+   const icon=el('span','nv-simple-tile-icon',({markets:'▤',iptv:'▣',youtube:'▶',news:'▥',devices:'▧',business:'▦'})[item.id]);icon.setAttribute('aria-hidden','true');
+   const label=el('span','nv-simple-tile-text');label.append(el('strong','',item.label),el('small','',item.sub));
+   b.append(icon,label);b.addEventListener('click',()=>navigate(item.id));return b;
+  }
+  function render(){
+   grid.replaceChildren();const chosen=state.items.slice(0,state.count);
+   for(const id of chosen){const item=choices.find(x=>x.id===id);if(item)grid.append(actionTile(item));}
+   if(!chosen.length)grid.append(el('p','','Choose a box in Customize.'));
+   grid.dataset.boxCount=String(chosen.length);
+   optionGrid.replaceChildren();
+   for(const item of choices){
+    const label=el('label','nv-custom-choice'),check=el('input');check.type='checkbox';check.value=item.id;check.checked=state.items.includes(item.id);
+    check.addEventListener('change',()=>{
+     if(check.checked){if(state.items.length>=4){check.checked=false;now.textContent='Maximum of four selected boxes';return;}state.items.push(item.id);}
+     else state.items=state.items.filter(x=>x!==item.id);
+     store(state);render();
+    });
+    label.append(check,el('span','',item.label));optionGrid.append(label);
+   }
+   selectCount.value=String(state.count);
+   now.textContent=chosen.length+' Home box'+(chosen.length===1?'':'es')+' selected';
+  }
+  selectCount.addEventListener('change',()=>{state.count=Math.max(1,Math.min(4,Number(selectCount.value)||4));store(state);render();});
+  for(const item of choices){
+   const area=item.section==='watch'?watchActions:readActions;
+   area.append(actionTile(item));
+  }
+  function show(id){
+   if(!sections.some(x=>x[0]===id))return;
+   active=id;
+   const view='myview';
+   if(window.NewViewShell?.select?.(view)===false)return;
+   content.hidden=id!=='home';watch.hidden=id!=='watch';readPanel.hidden=id!=='read';customize.hidden=id!=='customize';
+   if(settings){settings.open=id==='customize';settings.hidden=id!=='customize';}
+   syncNav();
   }
   for(const [id,label] of sections){
    const button=el('button','nv-simple-tab',label);button.type='button';button.dataset.simpleView=id;
-   button.setAttribute('aria-pressed','false');button.addEventListener('click',()=>show(id));buttons.set(id,button);nav.append(button);
+   button.addEventListener('click',()=>show(id));buttons.set(id,button);nav.append(button);
   }
-  nav.addEventListener('keydown',event=>{
-   if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
-   const items=[...buttons.values()],index=items.indexOf(document.activeElement);
-   if(index<0)return;
-   const next=event.key==='Home'?0:event.key==='End'?items.length-1:(index+(event.key==='ArrowLeft'?-1:1)+items.length)%items.length;
-   event.preventDefault();items[next].focus();show(sections[next][0]);
+  nav.addEventListener('keydown',e=>{
+   if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+   const index=[...buttons.values()].indexOf(document.activeElement);if(index<0)return;
+   const next=e.key==='Home'?0:e.key==='End'?3:(index+(e.key==='ArrowLeft'?-1:1)+4)%4;
+   e.preventDefault();const b=[...buttons.values()][next];b.focus();b.click();
   });
   oldNav.after(nav);
-  const devices=el('button','nv-simple-device','Devices');devices.type='button';devices.id='nv-simple-device';devices.title='Device pairing and casting';
-  devices.addEventListener('click',()=>{window.NewViewShell?.select?.('devices');document.body.dataset.simpleSection='devices';for(const button of buttons.values()){button.classList.remove('active');button.setAttribute('aria-pressed','false');button.removeAttribute('aria-current');button.tabIndex=0;}});
-  header.append(devices);
-  const homeContent=el('section','nv-simple-home');homeContent.id='nv-simple-home';homeContent.setAttribute('aria-label','NewView Home');
-  const banner=el('div','nv-simple-welcome');
-  const eyebrow=el('span','nv-simple-eyebrow','HOME DASHBOARD');
-  const title=el('h2','', 'Your world, one view');
-  const intro=el('p','', 'Open what matters. Advanced tools stay in their own sections.');
-  banner.append(eyebrow,title,intro);
-  const grid=el('div','nv-simple-grid');
-  const tiles=[
-   ['Markets','Live market charts and watchlists','markets','chart'],
-   ['Live TV','Browse IPTV channels','watch','tv'],
-   ['Headlines','News and public feeds','news','news'],
-   ['Casting','Connect your phone and TV','devices','cast']
-  ];
-  for(const [name,description,target,iconName] of tiles){
-   const button=el('button','nv-simple-tile');button.type='button';button.dataset.simpleTarget=target;
-   const icon=el('span','nv-simple-tile-icon');icon.setAttribute('aria-hidden','true');
-   icon.textContent=iconName==='chart'?'▤':iconName==='tv'?'▣':iconName==='news'?'▥':'▧';
-   const content=el('span','nv-simple-tile-text');
-   const heading=el('strong','',name),sub=el('small','',description);
-   content.append(heading,sub);button.append(icon,content);
-   button.addEventListener('click',()=>target==='devices'?devices.click():show(target));
-   grid.append(button);
-  }
-  const tools=el('div','nv-simple-home-bottom');
-  const summary=el('p','', 'Choose a section above to view live data. A source is only considered working after a successful check.');
-  const layout=el('button','nv-simple-layout','Customize layout');layout.type='button';
-  layout.addEventListener('click',()=>{
-   const customize=home.querySelector('.newview-personalize');
-   if(customize){customize.open=true;customize.scrollIntoView({block:'start',behavior:'smooth'});}
-  });
-  tools.append(summary,layout);homeContent.append(banner,grid,tools);
-  home.prepend(homeContent);
-  const settings=document.getElementById('newview-settings');
-  settings?.querySelector('summary')?.setAttribute('aria-label','Open advanced settings');
-  // Every expandable panel has a visible dismiss action, including on TV remote.
+  // Existing close buttons retain their keyboard and remote support.
   document.querySelectorAll('[data-close-panel],[data-close-closest-details]').forEach(button=>{
    button.addEventListener('click',()=>{
     const panel=button.dataset.closePanel?document.getElementById(button.dataset.closePanel):button.closest('details');
-    if(!panel||!('open' in panel))return;
-    panel.open=false;panel.querySelector(':scope > summary')?.focus();
+    if(!panel||!('open' in panel))return;panel.open=false;panel.querySelector(':scope > summary')?.focus();
    });
   });
-  // Keep the advanced drawer collapsed when arriving from any workspace; do
-  // not re-open settings as a side effect of selecting a different screen.
-  document.getElementById('nv-simple-nav')?.addEventListener('click',()=>{
-   if(settings?.open)settings.open=false;
-  });
-  // Deprecated promotional/business/social bookmark widgets are deliberately
-  // excluded from the visible simplified experience but retained in the DOM
-  // for older local profiles and existing controllers.
-  document.querySelectorAll('.newview-powerbi-hero,.newview-powerbi-grid,.social-intro,.social-links,.newview-quicklinks').forEach(node=>node.hidden=true);
-  // Selecting a workspace through the existing keyboard shortcuts or Android
-  // native back button keeps the new navigation in sync.
+  // No extra Devices / Screen cast header launchers: Watch → Mirroring is the entry.
+  document.getElementById('newview-cast-trigger')?.remove();
+  document.getElementById('nv-simple-device')?.remove();
+  document.querySelectorAll('.newview-powerbi-hero,.newview-powerbi-grid,.social-intro,.social-links,.newview-quicklinks').forEach(n=>n.hidden=true);
   document.addEventListener('newview:workspace-change',event=>{
    const view=event.detail?.view;
-   if(view==='devices'){document.body.dataset.simpleSection='devices';return;}
-   if(view==='myview'&&active!=='home')active='home';
-   if(view==='markets')active='markets';
-   if(view==='media'&&!['watch','news'].includes(active))active='watch';
-   const selected=view==='myview'?'home':view==='markets'?'markets':view==='media'?active:null;
-   if(selected){
-    document.body.dataset.simpleSection=selected;
-    for(const [key,button] of buttons){const on=key===selected;button.classList.toggle('active',on);button.setAttribute('aria-pressed',String(on));if(on)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');button.tabIndex=on?0:-1;}
-   }
+   if(view==='markets'||view==='media'||view==='devices'){active=view==='media'?'watch':view==='markets'?'read':'watch';syncNav();}
   });
-  // The simple shell always lands on Home on first load.
-  show('home');
+  render();show('home');
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
