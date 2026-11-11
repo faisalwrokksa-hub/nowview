@@ -24,8 +24,8 @@ test('IPTV catalog uses a single vetted public GitHub directory and bounded code
 });
 test('live IPTV catalogs validate entries, deduplicate codes and prevent injection',()=>{
  const entries=api.parseCatalog('country',[
-  {code:'sa',name:'Saudi Arabia'},{code:'sa',name:'Duplicate'},
-  {code:'gb',name:'United Kingdom'},{code:'../',name:'Danger'},{code:'US',name:'Invalid uppercase'}
+  {code:'SA',name:'Saudi Arabia'},{code:'sa',name:'Duplicate'},
+  {code:'GB',name:'United Kingdom'},{code:'../',name:'Danger'},{code:'9x',name:'Invalid code'}
  ]);
  assert.equal(entries.length,2);
  assert.equal(entries.find(x=>x.code==='sa').name,'Saudi Arabia');
