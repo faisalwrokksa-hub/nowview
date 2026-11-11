@@ -5,11 +5,11 @@
   Object.freeze({id:'market',title:'Markets',description:'Open Binance market charts and watchlists; quotes are not independently verified.',view:'markets',label:'Market charts'}),
   Object.freeze({id:'news',title:'Headlines',description:'Read source-linked financial announcements in Watch & News.',view:'media',section:'headlines',label:'Financial announcements'}),
   Object.freeze({id:'media',title:'Video & TV',description:'Open the video and TV section of Watch & News.',view:'media',section:'videos',label:'Video and TV'}),
-  Object.freeze({id:'business',title:'Business',description:'Import your authorized business CSV locally to review KPIs.',view:'business',label:'Business KPIs'}),
+  Object.freeze({id:'business',title:'Business',description:'Open your organization's Microsoft Power BI reports and dashboards.',view:'business',label:'Power BI reporting'}),
   Object.freeze({id:'social',title:'Social',description:'Save and open public social profile bookmarks.',view:'social',label:'Social discovery'})
  ]);
  const ids=new Set(catalog.map(x=>x.id));
- // Daily Brief starts with markets, official headlines and local business KPIs.
+ // Daily Brief starts with markets, official headlines and Power BI shortcuts.
  // Previously saved selections remain untouched by load().
  const defaults=['market','news','business'];
  const presets=Object.freeze({balanced:Object.freeze(['market','news','business']),markets:Object.freeze(['market','business','news']),media:Object.freeze(['media','news','social'])});
