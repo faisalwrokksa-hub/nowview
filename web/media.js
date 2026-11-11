@@ -35,6 +35,12 @@
  const heading=document.createElement('h3');heading.textContent='Free live TV directory';
  const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Channel directory not loaded yet.';
  const list=document.createElement('select');list.setAttribute('aria-label','Available IPTV channels');
+ const scope=document.createElement('select');scope.id='newview-iptv-scope';scope.setAttribute('aria-label','IPTV catalog grouping');
+ for(const [key,label] of [['all','All public channels'],['country','Country'],['language','Language'],['category','Category']]){const option=document.createElement('option');option.value=key;option.textContent=label;scope.append(option);}
+ const scopeValue=document.createElement('select');scopeValue.id='newview-iptv-scope-value';scopeValue.setAttribute('aria-label','Select IPTV country, language or category');scopeValue.hidden=true;
+ const catalogStatus=document.createElement('p');catalogStatus.setAttribute('role','status');catalogStatus.className='newview-iptv-catalog-status';
+ catalogStatus.textContent='Latest IPTV-org public catalog is checked online at startup and refreshed every 3 hours while NewView is active.';
+ const sourceLink=document.createElement('a');sourceLink.href='https://github.com/iptv-org/iptv';sourceLink.target='_blank';sourceLink.rel='noopener noreferrer';sourceLink.textContent='Public IPTV directory and source information';
  const search=document.createElement('input');search.type='search';search.placeholder='Filter channels by name or ID';search.setAttribute('aria-label','Search channels');
  const secureOnly=document.createElement('input');secureOnly.type='checkbox';secureOnly.checked=true;secureOnly.id='newview-https-only';
  const secureLabel=document.createElement('label');secureLabel.htmlFor=secureOnly.id;secureLabel.textContent='HTTPS streams only';
@@ -58,9 +64,43 @@
  const failedLabel=document.createElement('label');failedLabel.htmlFor=hideFailed.id;failedLabel.textContent='Hide confirmed failed streams';
  const retryFailed=document.createElement('button');retryFailed.type='button';retryFailed.textContent='Retry selected stream';retryFailed.setAttribute('aria-label','Retry selected IPTV stream');
  const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Refresh channels';
- directory.append(heading,status,search,secureLabel,secureOnly,favoritesLabel,favoritesOnly,failedLabel,hideFailed,list,favorite,playChannel,open,refresh,retryFailed,inlineWrap);
+ directory.append(heading,catalogStatus,scope,scopeValue,sourceLink,status,search,secureLabel,secureOnly,favoritesLabel,favoritesOnly,failedLabel,hideFailed,list,favorite,playChannel,open,refresh,retryFailed,inlineWrap);
  category?.parentElement?.append(directory);
- let allChannels=[];let lastFetch=0;let loading=null;
+ let allChannels=[];let lastFetch=0;let loading=null,loadingUrl=null,loadedUrl=null;
+ const catalogCache=new Map();
+ const selectedPlaylist=()=>preferred?.scopedPlaylist?.(scope.value,scope.value==='all'?'':scopeValue.value)||null;
+ async function readCatalog(kind){
+  const endpoint=preferred?.catalogUrl?.(kind);if(!endpoint)return [];
+  const cached=catalogCache.get(kind);
+  if(cached&&Date.now()-cached.time<10800000)return cached.items;
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
+  try{
+   const response=await fetch(endpoint,{cache:'no-store',signal:controller.signal});
+   if(!response.ok)throw Error('Catalog HTTP '+response.status);
+   if(Number(response.headers.get('content-length'))>220000)throw Error('Catalog too large');
+   const raw=await response.text();if(raw.length>220000)throw Error('Catalog too large');
+   const entries=preferred.parseCatalog(kind,JSON.parse(raw));
+   if(!entries.length)throw Error('No catalog options returned');
+   catalogCache.set(kind,{items:entries,time:Date.now()});return entries;
+  }finally{clearTimeout(timeout);}
+ }
+ async function updateScope(){
+  const kind=scope.value;
+  if(kind==='all'){scopeValue.hidden=true;scopeValue.replaceChildren();loadDirectory(true);return;}
+  scopeValue.hidden=false;catalogStatus.textContent='Checking current '+kind+' list…';
+  try{
+   const entries=await readCatalog(kind);if(kind!==scope.value)return;
+   const previous=scopeValue.value;
+   scopeValue.replaceChildren(...entries.map(x=>{const o=document.createElement('option');o.value=x.code;o.textContent=x.name;return o;}));
+   const desired=kind==='country'?'sa':kind==='language'?'ara':kind==='category'?'news':'';
+   scopeValue.value=entries.some(x=>x.code===previous)?previous:entries.some(x=>x.code===desired)?desired:entries[0].code;
+   catalogStatus.textContent=entries.length+' current '+kind+' choices from IPTV-org.';
+   loadDirectory(true);
+  }catch(error){catalogStatus.textContent='Cannot refresh '+kind+' catalog ('+String(error?.message||error)+'). Choose All public channels or retry.';scopeValue.replaceChildren();}
+ }
+ scope.addEventListener('change',updateScope);
+ scopeValue.addEventListener('change',()=>loadDirectory(true));
+
  function renderChannels(){
   if(!preferred?.filterChannels)return;
   const narrowed=category?.value==='favorites'||favoritesOnly.checked?allChannels.filter(c=>favorites.has(c.url)):category?.value&&category.value!=='all'?allChannels.filter(c=>String(c.category||'').toLowerCase().split(/[;,|]/).some(group=>group.trim()===category.value)):allChannels;
@@ -112,8 +152,11 @@
   }
  });
  async function loadDirectory(force=false){
-  if(loading)return loading;
-  if(!force&&allChannels.length&&Date.now()-lastFetch<10800000){renderChannels();return;}
+  const url=selectedPlaylist();
+  if(!url){catalogStatus.textContent='Choose a supported country, language or category.';return;}
+  if(loading){if(url!==loadingUrl)loading.then(()=>loadDirectory(true));return loading;}
+  if(!force&&url===loadedUrl&&allChannels.length&&Date.now()-lastFetch<10800000){renderChannels();return;}
+  loadingUrl=url;
   status.textContent='Loading public IPTV directory…';
   refresh.disabled=true;refresh.setAttribute('aria-busy','true');
   loading=(async()=>{try{
@@ -133,7 +176,7 @@
       if(last){const content=parts.join('');cleanup();resolve(content);}
      };
      try {
-      Promise.resolve(window.NewViewNative.fetchPublicPlaylist(id)).then(accepted=>{if(accepted===false){cleanup();reject(Error('Native playlist request rejected'));}},error=>{
+      Promise.resolve(window.NewViewNative.fetchPublicPlaylist(id,scope.value,scope.value==='all'?'':scopeValue.value)).then(accepted=>{if(accepted===false){cleanup();reject(Error('Native playlist request rejected'));}},error=>{
        cleanup();reject(Error('Native playlist request failed: '+String(error?.message||error)));
       });
      } catch(error) {
@@ -144,7 +187,7 @@
     const controller=new AbortController();
     const timeout=setTimeout(()=>controller.abort(),15000);
     try{
-     const response=await fetch(preferred.MAIN_PLAYLIST,{cache:'no-store',signal:controller.signal});
+     const response=await fetch(url,{cache:'no-store',signal:controller.signal});
      if(!response.ok)throw Error('HTTP '+response.status);
      const declaredSize=Number(response.headers.get('content-length'));
      if(Number.isFinite(declaredSize)&&declaredSize>16000000)throw Error('Playlist too large');
@@ -154,14 +197,14 @@
    if(content.length>16000000)throw Error('Playlist too large');
    if(typeof preferred?.parseM3U!=='function')throw Error('Playlist parser unavailable');
    const parsed=preferred.parseM3U(content);if(!Array.isArray(parsed)||!parsed.length)throw Error('No valid channels');
-   allChannels=parsed;lastFetch=Date.now();window.NewViewSourceMonitor?.mark?.('api','iptv-directory','ok','IPTV directory loaded');renderChannels();
+   allChannels=parsed;loadedUrl=url;lastFetch=Date.now();catalogStatus.textContent=parsed.length+' unique streams in '+scope.value+' · checked '+new Date(lastFetch).toLocaleTimeString();window.NewViewSourceMonitor?.mark?.('api','iptv-directory','ok','IPTV directory loaded');renderChannels();
   }catch(error){
    const reason=error?.name==='AbortError'?'request timed out':String(error?.message||error);
    window.NewViewSourceMonitor?.mark?.('api','iptv-directory','failed',reason);
    if(allChannels.length){renderChannels();status.textContent='Refresh failed ('+reason+'). Showing '+allChannels.length+' previously loaded channels; stream availability is not guaranteed.';}
    else{lastFetch=0;list.replaceChildren();playChannel.disabled=true;favorite.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+reason+'). Use the official playlist link or retry.';}
   }
-  finally{loading=null;refresh.disabled=false;refresh.removeAttribute('aria-busy');}})();return loading;
+  finally{loading=null;loadingUrl=null;refresh.disabled=false;refresh.removeAttribute('aria-busy');}})();return loading;
  }
  refresh.addEventListener('click',()=>loadDirectory(true));
  category?.addEventListener('change',renderChannels);
