@@ -34,6 +34,29 @@ for(const [path,type,bodyPattern] of required){
   console.log('PASS',path,'HTTP',res.status);
  }catch(e){failures.push(path+': '+e.message);console.error('FAIL',path,e.message);}
 }
+// Only mark a release verified if the live SHA matches the version being released.
+const expected=process.env.NEWVIEW_EXPECTED_SHA||'';
+if(expected&&!/^[a-f0-9]{40}$/.test(expected)){failures.push('NEWVIEW_EXPECTED_SHA must be a 40-character commit SHA');}
+try{
+ const response=await fetch(new URL('/version',base),{redirect:'manual',signal:AbortSignal.timeout(10000)});
+ assert.equal(response.status,200);
+ const version=await response.json();
+ assert.equal(version.app,'newview');
+ if(expected)assert.equal(version.revision,expected,'Live revision differs from the release commit');
+ console.log('PASS /version',version.revision||'(unconfigured build revision)');
+}catch(error){failures.push('/version: '+error.message);console.error('FAIL /version',error.message);}
+if(process.env.NEWVIEW_REQUIRE_SOURCE_HEALTH==='1'){
+ try{
+  const response=await fetch(new URL('/api/source-health',base),{redirect:'manual',signal:AbortSignal.timeout(10000)});
+  assert.equal(response.status,200,'Scheduled source-health backend must be active');
+  const health=await response.json();
+  const age=Date.now()-Date.parse(health.updatedAt);
+  assert.ok(Number.isFinite(age)&&age>=0&&age<=10*60*1000,'Scheduled health snapshot must be recent');
+  assert.ok(health.feeds&&typeof health.feeds==='object'&&Object.keys(health.feeds).length===6,'Six allowlisted feeds must be checked');
+  assert.ok(health.iptv&&['ok','failed'].includes(health.iptv.status),'IPTV directory must have been checked');
+  console.log('PASS /api/source-health fresh Cron snapshot');
+ }catch(error){failures.push('/api/source-health: '+error.message);console.error('FAIL /api/source-health',error.message);}
+}
 for(const path of ['/api/chart?symbol=%2Fetc%2Fpasswd&range=1D','/api/chart?symbol=SOXLB&range=invalid']){
  try{
   const res=await fetch(new URL(path,base),{signal:AbortSignal.timeout(10000),redirect:'manual'});
