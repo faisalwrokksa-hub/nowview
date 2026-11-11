@@ -40,7 +40,8 @@
   try{
    const response=await fetch('/api/device-sync/'+requestRoom,{method,cache:'no-store',credentials:'same-origin',signal:controller.signal,headers,body:blob===undefined?undefined:JSON.stringify({blob})});
    if(response.status===404)return null;
-   if(response.status===503)throw Error('Cloud sync not configured on this server');
+   if(response.status===401||response.status===403)throw Error('Cloud sync requires an authorized Cloudflare Access sign-in');
+   if(response.status===503)throw Error('Cloud sync storage or Access policy is not configured on this server');
    if(!response.ok)throw Error('Sync request failed (HTTP '+response.status+')');
    return response.status===204?null:response.json();
   }finally{clearTimeout(timeout);}
@@ -64,7 +65,7 @@
   settings.replaceChildren();
   const section=document.createElement('section');section.className='shell-card device-sync';section.id=PREFIX+'panel';
   const title=document.createElement('h4');title.textContent='Encrypted pairing';
-  const description=document.createElement('p');description.textContent='Pair your own devices to synchronize widget order and selected workspace. Only encrypted settings are stored in the cloud; no camera, screen, files, media or private CSV data is shared.';
+  const description=document.createElement('p');description.textContent='Pair your authorized devices after signing in through the protected NewView site. Only encrypted widget settings and the active workspace are relayed; no camera, screen, files, media or passwords are shared. Pairing is not a substitute for account sign-in.';
   const actions=document.createElement('div');actions.className='device-sync-actions';
   const create=document.createElement('button');create.type='button';create.textContent='Create pairing link';
   const pairing=document.createElement('input');pairing.type='text';pairing.id=PREFIX+'link';pairing.placeholder='Paste pairing link from another device';pairing.setAttribute('aria-label','Device pairing link');pairing.autocomplete='off';pairing.spellcheck=false;
