@@ -1,0 +1,117 @@
+/* NewView Command Center — original CSS, informed by Homarr/Glance layout patterns.
+   Scope to the standard web shell; embedded Android home-panel styles stay intact. */
+:root {
+  color-scheme:dark;
+  --bg:#090f1a;--panel:#131d2c;--line:#2c3c50;--muted:#a5b6cb;
+  --text:#f5f8fd;--cyan:#65dbc8;--green:#75e0aa;--red:#ff929f;
+  --nv-accent:#65dbc8;--nv-surface:#111b2a;--nv-surface-raised:#192639;
+  --nv-outline:#34465d;--nv-radius:18px;--nv-shadow:0 14px 40px rgba(2,8,18,.24);
+}
+body:not(.home-panel) {
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(ellipse 60% 42% at 94% 0%,rgba(52,104,144,.22),transparent 80%),#090f1a;
+  color:var(--text);letter-spacing:-.01em;
+}
+body:not(.home-panel)>main{max-width:1920px;gap:clamp(10px,1.3vw,19px);padding:clamp(14px,1.8vw,28px)}
+body:not(.home-panel)>main>header{min-width:0;gap:16px}
+body:not(.home-panel)>main>header h1{font-weight:800;letter-spacing:-.06em;margin-top:2px;line-height:1}
+body:not(.home-panel)>main>header .eyebrow{font-size:11px;letter-spacing:.2em;color:#8ca8bd;font-weight:700}
+body:not(.home-panel) .brand-dot{background:var(--nv-accent);box-shadow:0 0 0 5px rgba(101,219,200,.1)}
+body:not(.home-panel)>main .clocks{color:#e9f3fa;font-variant-numeric:tabular-nums}
+body:not(.home-panel)>main .clocks span{color:var(--muted)}
+body:not(.home-panel)>main>.workspace-switcher{background:var(--nv-surface);border:1px solid var(--nv-outline);border-radius:var(--nv-radius);padding:10px;gap:5px}
+body:not(.home-panel)>main>.workspace-switcher .workspace-tab{
+  background:transparent;border:1px solid transparent;border-radius:12px;
+  color:#a9bad0;display:flex;align-items:center;justify-content:flex-start;gap:13px;
+  padding:13px 15px;min-height:48px;font-size:clamp(13px,.95vw,16px);
+  font-weight:650;transition:background .15s ease,border-color .15s ease,color .15s ease
+}
+body:not(.home-panel)>main>.workspace-switcher .workspace-tab:hover{background:#223247;color:#fff}
+body:not(.home-panel)>main>.workspace-switcher .workspace-tab[aria-pressed="true"]{
+  background:linear-gradient(105deg,#194a4b,#1d3947);border-color:#32726f;color:#cbfff5;
+  box-shadow:inset 3px 0 0 var(--nv-accent)
+}
+body:not(.home-panel)>main .nv-nav-icon{width:21px;height:21px;opacity:.9}
+body:not(.home-panel)>main #workspace-intro{min-height:48px}
+body:not(.home-panel)>main #workspace-title{font-weight:750;letter-spacing:-.035em;font-size:clamp(20px,1.7vw,30px)}
+body:not(.home-panel)>main .newview-settings>summary{
+  background:var(--nv-surface-raised);border:1px solid var(--nv-outline);
+  border-radius:12px;color:#e4f2f6;min-height:44px
+}
+body:not(.home-panel)>main .newview-settings[open]>.newview-settings-content{
+  background:#152234;border-color:#426075;box-shadow:0 0 0 100vmax rgba(1,7,15,.72),0 24px 70px #0009
+}
+body:not(.home-panel)>main :is(.shell-card,.myview-widget,.workspace,.board-card){
+  background:linear-gradient(155deg,#172538,#111b2a);border:1px solid var(--nv-outline);
+  border-radius:var(--nv-radius);box-shadow:var(--nv-shadow);color:var(--text)
+}
+body:not(.home-panel)>main :is(.shell-card,.myview-widget,.workspace,.board-card):focus-within{border-color:#547d90}
+body:not(.home-panel)>main :is(.myview-widget,.shell-card) :is(h2,h3){color:#f5f8fd;letter-spacing:-.025em}
+body:not(.home-panel)>main :is(.shell-eyebrow,.board-subtitle,.chart-caption,.quote-meta){color:var(--muted)}
+body:not(.home-panel)>main button{
+  border-radius:10px;border-color:#3b4e63;background:#213249;color:#e5eff9;
+  min-height:40px;transition:background .15s ease,border-color .15s ease
+}
+body:not(.home-panel)>main button:hover:not(:disabled){background:#2a425b;border-color:#65849e}
+body:not(.home-panel)>main button[aria-pressed="true"],body:not(.home-panel)>main button.active{
+  background:#1a4c4d;border-color:#398980;color:#d0fff5
+}
+body:not(.home-panel)>main :is(button,a,input,select,summary,[tabindex]):focus-visible{
+  outline:3px solid #a7f7e9!important;outline-offset:3px!important
+}
+body:not(.home-panel)>main :is(input,select,textarea){background:#0d1927;color:#eef7ff;border:1px solid #476076;border-radius:10px}
+body:not(.home-panel)>main :is(.myview-widget,.shell-card,.board-card){overflow-wrap:anywhere}
+body:not(.home-panel)>main .board-heading h3{color:#dceff3}
+body:not(.home-panel)>main .board-row{border-color:#34445b}
+body:not(.home-panel)>main .board-name strong,body:not(.home-panel)>main .board-price{color:#f2f7ff}
+body:not(.home-panel)>main .board-note{color:#afbdd0}
+body:not(.home-panel)>main .positive,body:not(.home-panel)>main .board-up .board-change{color:var(--green)!important}
+body:not(.home-panel)>main .negative,body:not(.home-panel)>main .board-down .board-change{color:var(--red)!important}
+body:not(.home-panel)>main>footer{color:#94a9bc;border-top:1px solid #253449;padding-top:9px}
+body:not(.home-panel)>main>[data-workspace="myview"] .myview-grid{
+  gap:clamp(10px,1.4vw,20px);grid-template-columns:minmax(0,1.65fr) minmax(0,1fr)
+}
+body:not(.home-panel)>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{
+  grid-column:1;grid-row:span 2;min-height:310px
+}
+body:not(.home-panel)>main>[data-workspace="myview"] .newview-personalize>summary{color:#bfd1df}
+@media(min-width:1200px) and (min-height:650px){
+ body:not(.home-panel)>main{grid-template-columns:minmax(200px,246px) minmax(0,1fr)}
+ body:not(.home-panel)>main>.workspace-switcher{padding:15px 10px}
+ body:not(.home-panel)>main>.workspace-switcher::before{
+   content:"WORKSPACES";display:block;padding:5px 15px 13px;color:#7f9caf;
+   font-size:11px;letter-spacing:.18em;font-weight:800
+ }
+}
+@media(max-width:1199px){
+ body:not(.home-panel)>main>.workspace-switcher{padding:6px;overflow-x:auto}
+ body:not(.home-panel)>main>.workspace-switcher .workspace-tab{
+  justify-content:center;white-space:nowrap;min-height:48px;padding:10px 15px
+ }
+ body:not(.home-panel)>main>.workspace-switcher .workspace-tab[aria-pressed="true"]{
+  box-shadow:inset 0 -3px 0 var(--nv-accent)
+ }
+}
+@media(max-width:900px){
+ body:not(.home-panel)>main>[data-workspace="myview"] .myview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body:not(.home-panel)>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:1/-1;grid-row:auto;min-height:240px}
+}
+@media(max-width:650px){
+ body:not(.home-panel)>main{padding:10px;gap:8px}
+ body:not(.home-panel)>main>.workspace-switcher{order:10;gap:3px}
+ body:not(.home-panel)>main>.workspace-switcher .workspace-tab{
+  flex:1 0 auto;flex-direction:column;gap:4px;font-size:11px;min-height:54px;
+  padding:7px 4px;min-width:65px;white-space:normal
+ }
+ body:not(.home-panel)>main .nv-nav-icon{height:19px;width:19px}
+ body:not(.home-panel)>main>[data-workspace="myview"] .myview-grid{display:block}
+ body:not(.home-panel)>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:auto;min-height:0}
+ body:not(.home-panel)>main #workspace-title{font-size:21px}
+}
+@media(prefers-reduced-motion:reduce){
+ body:not(.home-panel)>main *,body:not(.home-panel)>main *::before,body:not(.home-panel)>main *::after{transition:none!important}
+}
+@media(forced-colors:active){
+ body:not(.home-panel)>main>.workspace-switcher .workspace-tab[aria-pressed="true"]{border:2px solid Highlight}
+ body:not(.home-panel)>main :is(.shell-card,.myview-widget,.workspace){border:1px solid CanvasText}
+}
