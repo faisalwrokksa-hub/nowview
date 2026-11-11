@@ -46,3 +46,9 @@ test('shared Android browser starts with YouTube and opens the requested news UR
  assert.match(news,/event\.preventDefault\(\);browse\(url\)/);
  assert.doesNotMatch(news,/if\(!link\|\|typeof window\.NewViewNative/);
 });
+
+test('Cloudflare Worker permits default Wikimedia wallpaper image hosts',()=>{
+ const build=read('cloud/build.mjs'),home=read('web/myview.js');
+ assert.match(home,/commons\.wikimedia\.org\/wiki\/Special:FilePath\/Black_tiger_in_Similipal_Forest\.jpg/);
+ assert.match(build,/img-src 'self' data: https:\/\/commons\.wikimedia\.org https:\/\/upload\.wikimedia\.org/);
+});
