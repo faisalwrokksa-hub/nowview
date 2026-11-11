@@ -97,7 +97,11 @@
    renderMarks();
    return true;
   }
-  function closeBrowser(){panel.hidden=true;frame.removeAttribute('src');}
+  function closeBrowser(){
+   const previous=area;
+   panel.hidden=true;frame.removeAttribute('src');
+   if(typeof CustomEvent==='function')document.dispatchEvent(new CustomEvent('newview:browser-close',{detail:{area:previous}}));
+  }
   form.addEventListener('submit',e=>{e.preventDefault();if(!show(address.value,{area}))status.textContent='Enter a valid public HTTPS website.';});
   back.addEventListener('click',()=>{if(cursor>0){cursor--;show(history[cursor],{area,replace:true});}});
   next.addEventListener('click',()=>{if(cursor<history.length-1){cursor++;show(history[cursor],{area,replace:true});}});
