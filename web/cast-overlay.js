@@ -5,7 +5,7 @@
 (function(){
  const MAX_SIGNAL=120000, MAX_SESSION_MS=30*60*1000, DISCONNECT_GRACE_MS=20000;
  let peer=null, localCapture=null, currentStream=null, mode=null, minimized=false, expiryTimer=null, disconnectTimer=null;
- let mediaMode='none';
+ let mediaMode='none',iptvSource=null,iptvTimeout=null,iptvAttempt=0;
  const el=(tag,cls,value)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(value)e.textContent=value;return e;};
  function parseSignal(raw,type){
   if(typeof raw!=='string'||raw.length>MAX_SIGNAL)throw Error('Invalid or oversized connection code');
@@ -64,7 +64,22 @@
   buttons.append(watch,send,stop);actions.append(apply,copyOffer,copyAnswer,viewMarket);
   card.append(eyebrow,title,note,status,buttons,offerLabel,offer,answerLabel,answer,actions,noAuto);deviceControls?.prepend(card);
   const report=text=>{status.textContent=text;state.textContent=text;};
-  function clearMedia(){youtube.removeAttribute('src');youtube.hidden=true;video.pause();video.removeAttribute('src');video.load();video.hidden=false;mediaMode='none';}
+  function clearMedia(){
+   iptvAttempt++;
+   if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;iptvSource=null;
+   youtube.removeAttribute('src');youtube.hidden=true;
+   video.pause();video.removeAttribute('src');video.load();video.hidden=false;mediaMode='none';
+  }
+  function flagIPTV(status,detail){
+   if(mediaMode!=='iptv'||!iptvSource)return;
+   window.NewViewSourceMonitor?.mark?.('iptv',iptvSource,status,detail);
+  }
+  video.addEventListener('playing',()=>{
+   if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;flagIPTV('ok','Video playback confirmed');report('IPTV stream playing · broadcaster availability can change');}
+  });
+  video.addEventListener('error',()=>{
+   if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;flagIPTV('failed','Browser video playback failed');report('This IPTV channel cannot play here. Try another channel or native TV playback.');}
+  });
   function playYouTube(raw){
    const item=window.NewViewMedia?.parse?.(raw);
    if(!item){report('Use a valid YouTube video URL');return false;}
@@ -78,9 +93,20 @@
    try{
     const url=new URL(raw);
     if(url.protocol!=='https:'||url.username||url.password||url.port||!/^https:\/\//.test(url.href)||! /\.(m3u8|mp4)$/i.test(url.pathname))throw Error('Choose a standard HTTPS HLS or MP4 channel');
-    reset();clearMedia();video.src=url.href;mediaMode='iptv';heading.textContent='IPTV';showDock();
-    video.play().catch(()=>report('Player ready: press Play. This stream may not support browser playback.'));
-    report('IPTV playback attempt. Stream availability and rights depend on publisher.');return true;
+    reset();clearMedia();video.src=url.href;mediaMode='iptv';iptvSource=url.href;heading.textContent='IPTV';showDock();
+    const attempt=iptvAttempt;
+    iptvTimeout=setTimeout(()=>{
+     if(mediaMode!=='iptv'||attempt!==iptvAttempt||video.readyState>=3)return;
+     // Timeout does not prove stream invalid: incompatible player, network, or DRM may be the cause.
+     flagIPTV('unknown','No playback confirmed within 20 seconds');
+     report('IPTV playback not confirmed. Try the Android TV player or another channel.');
+    },20000);
+    Promise.resolve(video.play()).catch(error=>{
+     if(mediaMode!=='iptv'||attempt!==iptvAttempt)return;
+     if(error?.name==='NotAllowedError')report('Press Play to allow playback. Channel health is unconfirmed.');
+     else{flagIPTV('unknown','Browser cannot play this stream');report('Browser playback unavailable. Use the Android TV player if supported.');}
+    });
+    report('Connecting to IPTV. Playback is not yet verified.');return true;
    }catch(e){report(e?.message||'Invalid channel');return false;}
   }
   const updateViewport=()=>{document.body.classList.toggle('newview-video-active',!dock.hidden&&!minimized);document.body.classList.toggle('newview-video-left',dock.classList.contains('is-left'));};
