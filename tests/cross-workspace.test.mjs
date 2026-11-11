@@ -18,5 +18,5 @@ test('workspace tab current state and scrolling support mobile and television',(
  assert.match(shell,/aria-current/);
  assert.match(css,/100dvh/);
  assert.match(css,/overscroll-behavior:contain/);
- for(const v of ['myview','markets','business','media','social'])assert.match(html,new RegExp('data-view-button="'+v+'"'));
+ for(const v of ['myview','markets','business','media','social','devices'])assert.match(html,new RegExp('data-view-button="'+v+'"'));
 });
