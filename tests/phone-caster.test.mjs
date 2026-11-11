@@ -41,3 +41,9 @@ test('separate source-based Android phone caster uses maintained WebRTC dependen
  assert.match(gradle,/io\.github\.webrtc-sdk:android:150\.7871\.01/);
  assert.match(manifest,/app\.newview\.phonecaster\.START|\.CasterActivity/);
 });
+
+test('Android 13+ requires the visible stop-sharing notification before projection',()=>{
+ assert.match(activity,/POST_NOTIFICATIONS/);
+ assert.match(activity,/requestPermissions\(new String\[\]\{android\.Manifest\.permission\.POST_NOTIFICATIONS\},NOTICE_REQUEST\)/);
+ assert.match(activity,/onRequestPermissionsResult\(int requestCode/);
+});
