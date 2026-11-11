@@ -52,3 +52,11 @@ test('news request pins its feed ID while failed-source filter changes selection
  assert.match(news,/mark\?\.\('news',sourceId,'failed'/);
  assert.match(news,/mark\?\.\('news',sourceId,'ok'/);
 });
+
+test('cloud health is surfaced without claiming unconfigured monitoring works',()=>{
+ assert.match(monitor,/fetch\('\/api\/source-health'/);
+ assert.match(monitor,/Cloud monitoring not connected/);
+ assert.match(monitor,/Date\.parse\(snapshot\?\.updatedAt/);
+ assert.match(monitor,/checkCloud\(\)/);
+ assert.match(monitor,/cloudHealth=\{checkedAt:checked/);
+});
