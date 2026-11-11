@@ -138,7 +138,7 @@ class Handler(BaseHTTPRequestHandler):
             except (OSError, urllib.error.URLError, json.JSONDecodeError):
                 self.respond(502, b'{"error":"Binance market data unavailable or rate-limited. Try again shortly."}', 'application/json')
             return
-        files = {'/': 'index.html', '/index.html': 'index.html', '/app.js': 'app.js', '/style.css': 'style.css', '/market-data.mjs': 'market-data.mjs', '/live.js': 'live.js', '/indicators.js': 'indicators.js'}
+        files = {'/': 'index.html', '/index.html': 'index.html', '/app.js': 'app.js', '/style.css': 'style.css', '/command-center.css': 'command-center.css', '/market-data.mjs': 'market-data.mjs', '/live.js': 'live.js', '/indicators.js': 'indicators.js'}
         name = files.get(parsed.path)
         if not name:
             self.respond(404, b'Not found', 'text/plain')
