@@ -341,3 +341,7 @@ body:not(.home-panel)>main #newview-market-filter-count{flex-basis:100%;color:#b
 body:not(.home-panel)>main .newview-market-search :focus-visible{outline:3px solid #8ef4dc;outline-offset:2px}
 body:not(.home-panel)>main #symbols button[hidden]{display:none!important}
 @media(max-width:650px){body:not(.home-panel)>main .newview-market-search label{flex-basis:100%}}
+
+/* Explicit dock-side control for Android TV remotes and keyboard use. */
+body:not(.home-panel) .newview-cast-dock.is-left:not([hidden]){left:clamp(12px,2vw,28px);right:auto}
+@media(max-width:750px){body:not(.home-panel) .newview-cast-dock.is-left:not([hidden]){left:12px;right:auto}}
