@@ -44,6 +44,6 @@ export async function checkNewViewAccess(request,env,fetcher=fetch){
   const signature=decodeAccessPart(parts[2]);
   const message=new TextEncoder().encode(parts[0]+'.'+parts[1]);
   const ok=await crypto.subtle.verify('RSASSA-PKCS1-v1_5',publicKey,signature,message);
-  return {configured:true,ok};
+  return ok?{configured:true,ok:true,subject:payload.sub}:{configured:true,ok:false};
  }catch{return {configured:true,ok:false};}
 }
