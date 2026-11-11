@@ -84,7 +84,8 @@
    if(!link)return;
    const url=safeUrl(link.href);
    if(!url)return;
-   event.preventDefault();browse(url);
+   event.preventDefault();
+   if(!window.NewViewNewsReader?.openByUrl?.(url))browse(url);
   });
   items.addEventListener('keydown',event=>{
    if(!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
