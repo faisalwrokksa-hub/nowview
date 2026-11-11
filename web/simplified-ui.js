@@ -97,6 +97,12 @@
   if(newsContent){newsContent.hidden=false;readPanel.append(newsContent);}
   const oldSecondaryNav=document.getElementById('nv-watch-sections');
   oldSecondaryNav?.remove();
+  document.getElementById('newview-quick-actions')?.remove();
+  // Prevent the former media heading and redundant row of media tabs from
+  // appearing in either Read or Watch.
+  const mediaHub=document.querySelector('[data-workspace="media"]');
+  mediaHub?.querySelector('.shell-eyebrow')?.setAttribute('hidden','');
+
   const launch=(url)=>{if(typeof window.NewViewNative?.openNewsBrowser==='function')window.NewViewNative.openNewsBrowser(url);else window.open(url,'_blank','noopener,noreferrer');};
   function addAction(area,label,description,onClick){
    const btn=el('button','nv-simple-tile');btn.type='button';
@@ -127,10 +133,13 @@
   const advanced=el('details','nv-custom-advanced');
   const advancedSummary=el('summary','','Advanced settings');
   const advancedContent=settings?.querySelector('.newview-settings-content');
-  if(advancedContent)advanced.append(advancedContent);
   advanced.append(advancedSummary);
+  if(advancedContent)advanced.append(advancedContent);
   if(settings)settings.hidden=true;
   customize.append(advanced);
+  // The formerly visible settings and old widgets never become top-level
+  // pages in this four-section experience.
+  document.getElementById('newview-quick-actions')?.remove();
   function show(id){
    if(!sections.some(x=>x[0]===id))return;
    active=id;
