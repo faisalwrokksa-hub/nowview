@@ -812,3 +812,16 @@ body>main>.newview-settings-content :is(input,select,button){max-width:100%}
 .nv-nav-icon{display:inline-block;width:1.15em;height:1.15em;flex:none;vertical-align:-.12em;pointer-events:none}
 @media(max-width:400px){[role="status"],[role="alert"]{overflow-wrap:anywhere}.workspace-switcher .workspace-tab{min-width:64px}}
 @media(forced-colors:active){button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid Highlight;box-shadow:none}}
+
+/* TV remote and keyboard navigation: keep the active control visible in scrollable panels. */
+@supports selector(:focus-visible){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,input,select,textarea,summary,[tabindex]):focus-visible{scroll-margin-block:24px;scroll-margin-inline:24px}
+}
+@supports not selector(:focus-visible){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,input,select,textarea,summary,[tabindex]):focus{outline:3px solid #ffd6a3;outline-offset:3px}
+}
+/* State feedback stays legible without moving the surrounding dashboard. */
+:is(.workspace,.shell-page) :is([role="status"],[role="alert"],[aria-live]){max-width:100%;min-width:0;overflow-wrap:anywhere}
+@media(forced-colors:active){
+  :is(.workspace-switcher,.workspace,.shell-page) :is(button,a,summary,[tabindex]):focus{outline:3px solid Highlight;outline-offset:3px}
+}
