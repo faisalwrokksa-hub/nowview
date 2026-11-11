@@ -274,3 +274,8 @@ body:not(.home-panel) :is(.newview-cast-setup,.newview-cast-dock) button:focus-v
 }
 @media(prefers-reduced-motion:reduce){body:not(.home-panel) .newview-cast-dock{scroll-behavior:auto}}
 @media(forced-colors:active){body:not(.home-panel) .newview-cast-dock{border:2px solid CanvasText}}
+
+/* Drag handle is separate from interactive video and accessible viewer buttons. */
+body:not(.home-panel) .newview-cast-bar{cursor:grab;touch-action:none;user-select:none}
+body:not(.home-panel) .newview-cast-bar:active{cursor:grabbing}
+body:not(.home-panel) .newview-cast-tools button{cursor:pointer;touch-action:manipulation}
