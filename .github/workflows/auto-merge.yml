@@ -29,6 +29,11 @@ jobs:
           set -euo pipefail
           # workflow_run.pull_requests may be empty for fork PRs; only same-repo PRs qualify.
           prs=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '.pull_requests[]?.number')
+          # Some Actions events omit their pull_requests array. Resolve only
+          # PRs pointing to this exact tested commit, then recheck each head.
+          if [[ -z "$prs" ]]; then
+            prs=$(gh api "repos/$REPO/commits/$TESTED_SHA/pulls" --jq '.[] | select(.state == "open") | .number')
+          fi
           if [[ -z "$prs" ]]; then
             echo "No linked pull request; nothing to merge."
             exit 0
@@ -46,8 +51,14 @@ jobs:
             fi
             # GitHub enforces branch protection, required reviews, and mergeability.
             # Never pass --admin or bypass required checks.
-            gh pr merge "$pr" --repo "$REPO" --squash --delete-branch
-            # GITHUB_TOKEN merges do not emit normal push workflows.
-            # workflow_dispatch is an explicitly supported follow-on event.
-            gh workflow run deploy-production.yml --repo "$REPO" --ref main
+            # Queue native auto-merge if an approval or protection requirement
+            # is still pending. Never bypass repository branch protection.
+            gh pr merge "$pr" --repo "$REPO" --auto --squash --delete-branch
+            # A merge made with GITHUB_TOKEN does not emit normal push events.
+            # Dispatch only if the PR actually merged now. Queued merges
+            # will create a main push when GitHub completes them later.
+            merged=$(gh api "repos/$REPO/pulls/$pr" --jq '.merged')
+            if [[ "$merged" == "true" ]]; then
+              gh workflow run deploy-production.yml --repo "$REPO" --ref main
+            fi
           done <<< "$prs"
