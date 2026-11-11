@@ -58,3 +58,15 @@ test('live multi-screen panes use source-linked events and never fabricate quote
  assert.match(layout,/Waiting for a current market quote/);
  assert.doesNotMatch(layout,/Math\.random\(\)/);
 });
+
+test('floating IPTV health is marked from playback, not playlist presence or blocked autoplay',()=>{
+ assert.match(viewer,/video\.addEventListener\('playing'/);
+ assert.match(viewer,/flagIPTV\('ok','Video playback confirmed'\)/);
+ assert.match(viewer,/video\.addEventListener\('error'/);
+ assert.match(viewer,/flagIPTV\('failed','Browser video playback failed'\)/);
+ assert.match(viewer,/iptvTimeout=setTimeout/);
+ assert.match(viewer,/flagIPTV\('unknown','No playback confirmed within 20 seconds'\)/);
+ assert.match(viewer,/error\?\.name==='NotAllowedError'/);
+ assert.match(viewer,/iptvAttempt\+\+/);
+ assert.match(viewer,/if\(iptvTimeout\)clearTimeout\(iptvTimeout\)/);
+});
