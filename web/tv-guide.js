@@ -3,7 +3,7 @@
  * directory controller; no second fetch, no third-party IPTV proxy or false online claims.
  */
 (function(root){
- const MAX_TILES=96,RECENT_KEY='newview.tv.recent.v1',MAX_RECENTS=20;
+ const RECENT_KEY='newview.tv.recent.v1',MAX_RECENTS=20;
  const CATEGORIES=['all','news','business','sports','documentary','education','entertainment','music','kids','movies','weather','general','favorites'];
  function categoryMatches(value,category){
   if(category==='all'||category==='favorites')return true;
@@ -52,12 +52,13 @@
   const guide=make('section','nv-tv-guide');guide.id='nv-tv-guide';guide.setAttribute('aria-label','Live TV channel guide');
   const heading=make('div','nv-tv-heading');
   const info=make('div','nv-tv-heading-copy');
-  info.append(make('h3','','Live TV'),make('p','','Public IPTV directory · verified playback is marked; other channels are untested'));
+  info.append(make('h3','','Channels'));
   const refreshButton=make('button','nv-tv-refresh','↻ Refresh channels');refreshButton.type='button';
   refreshButton.addEventListener('click',()=>refresh?.click());
   heading.append(info,refreshButton);
-  const filters=make('nav','nv-tv-filters');filters.setAttribute('aria-label','Channel categories');
-  const cards=make('div','nv-tv-grid');cards.id='nv-tv-grid';cards.setAttribute('aria-label','Channel choices');
+  const filters=make('div','nv-tv-filters');filters.setAttribute('aria-label','Channel categories');
+  const categoryPicker=make('select','nv-tv-category');categoryPicker.setAttribute('aria-label','Channel category');filters.append(categoryPicker);
+  const channelPicker=make('select','nv-tv-channel-picker');channelPicker.setAttribute('aria-label','Select a channel');
   const controls=make('div','nv-tv-controls');
   const input=make('input','nv-tv-search');input.type='search';input.placeholder='Find a channel';input.setAttribute('aria-label','Find channels');input.maxLength=100;
   const verifiedLabel=make('label','nv-tv-check');
@@ -71,7 +72,7 @@
   for(const b of [prev,next,play])b.type='button';
   const note=make('p','nv-tv-count');note.setAttribute('role','status');
   now.append(nowText,prev,play,next);
-  guide.append(heading,filters,controls,cards,note,now);
+  guide.append(heading,filters,controls,channelPicker,now,note);
   directory.prepend(guide);
   let selected='',activeCategory='all',displayed=[],rendering=false;
   const health=url=>root.NewViewSourceMonitor?.status?.('iptv',url)||'unknown';
@@ -96,9 +97,10 @@
    draw();
   }
   for(const id of CATEGORIES){
-   const button=make('button','nv-tv-filter',id==='all'?'All':id==='favorites'?'★ Favorites':id[0].toUpperCase()+id.slice(1));button.type='button';button.dataset.tvFilter=id;
-   button.addEventListener('click',()=>setCategory(id));filters.append(button);
+   const option=make('option','',id==='all'?'All channels':id==='favorites'?'★ Favorites':id[0].toUpperCase()+id.slice(1));
+   option.value=id;categoryPicker.append(option);
   }
+  categoryPicker.addEventListener('change',()=>setCategory(categoryPicker.value));
   function selectChannel(url){
    const option=[...original.options].find(o=>o.value===url);
    if(!option)return false;
@@ -111,29 +113,24 @@
    try{
     const all=available(),results=pick(all,{category:'all',query:input.value,hideFailed:failed.checked,
      onlyVerified:verified.checked,favorites:favorites(),status:health});
-    displayed=results.slice(0,MAX_TILES);
-    cards.replaceChildren();
+    displayed=results;
+    channelPicker.replaceChildren();
+    const prompt=make('option','',results.length?'Select a channel ('+results.length+')':'No channels found');prompt.value='';channelPicker.append(prompt);
     for(const channel of displayed){
      const state=health(channel.url);
-     const button=make('button','nv-tv-channel');button.type='button';button.dataset.channelUrl=channel.url;
-     button.setAttribute('aria-pressed',String(channel.url===selected));button.classList.toggle('selected',channel.url===selected);
-     const title=make('strong','',channel.name.slice(0,120));
-     const status=make('small','',state==='ok'?'● Verified playing':state==='failed'?'Unavailable':'◯ Not playback-tested');
-     status.className='nv-tv-state '+state;button.append(title,status);
-     button.addEventListener('click',()=>selectChannel(channel.url));
-     button.addEventListener('dblclick',()=>{selectChannel(channel.url);play.click();});
-     cards.append(button);
+     const label=channel.name.slice(0,120)+(state==='ok'?' • Playing':state==='failed'?' • Unavailable':'');
+     const option=make('option','',label);option.value=channel.url;channelPicker.append(option);
     }
-    for(const button of filters.querySelectorAll('button')){const active=button.dataset.tvFilter===activeCategory;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}
-    note.textContent=results.length+' listed candidates'+(results.length>MAX_TILES?' · showing first '+MAX_TILES:'')+' · '+results.filter(x=>health(x.url)==='ok').length+' playback-confirmed · directory refreshes every 3 hours while open';
-    if(!results.length){cards.append(make('p','nv-tv-empty',verified.checked?'No playback-confirmed channels yet. Disable “Only confirmed playing” to try listed channels.':'No matching channels. Try another category or refresh.'));}
+    if(displayed.some(x=>x.url===selected))channelPicker.value=selected;
+    categoryPicker.value=activeCategory;
+    note.textContent=results.length+' channels'+(results.filter(x=>health(x.url)==='ok').length?' · '+results.filter(x=>health(x.url)==='ok').length+' confirmed':'');
     const enabled=displayed.length>0;play.disabled=!selected||!displayed.some(x=>x.url===selected);prev.disabled=!enabled;next.disabled=!enabled;
    }finally{rendering=false;}
   }
   function shift(delta){
    if(!displayed.length)return;
    const i=displayed.findIndex(x=>x.url===selected);
-   selectChannel(displayed[(i+delta+displayed.length)%displayed.length].url);
+   selectChannel(displayed[i<0?(delta>0?0:displayed.length-1):(i+delta+displayed.length)%displayed.length].url);
   }
   prev.addEventListener('click',()=>shift(-1));next.addEventListener('click',()=>shift(1));
   play.addEventListener('click',()=>{
@@ -141,6 +138,7 @@
    if(nativeButton&&!nativeButton.hidden&&!nativeButton.disabled)nativeButton.click();
    else if(!inlineButton.disabled)inlineButton.click();
   });
+  channelPicker.addEventListener('change',()=>{if(channelPicker.value)selectChannel(channelPicker.value);});
   input.addEventListener('input',draw);verified.addEventListener('change',draw);
   failed.addEventListener('change',()=>{if(hideFailed){hideFailed.checked=failed.checked;hideFailed.dispatchEvent(new Event('change'));}draw();});
   original.addEventListener('change',()=>{selected=original.value;nowText.textContent=original.selectedOptions[0]?.textContent||'Select a channel';draw();});
