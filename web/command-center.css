@@ -439,3 +439,18 @@ body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock.is-mini
  inset:auto 16px 16px auto!important;left:auto!important;top:auto!important;right:16px!important;bottom:16px!important;
  width:210px!important;height:auto!important;max-height:none!important;border-radius:14px!important
 }
+
+/* Online IPTV catalog controls: accessible from TV remotes and keyboard. */
+body:not(.home-panel) #newview-channel-directory #newview-iptv-scope,
+body:not(.home-panel) #newview-channel-directory #newview-iptv-scope-value{
+ min-width:min(260px,100%);max-width:100%;min-height:50px;padding:8px 12px;
+ border:1px solid #537d8d;border-radius:12px;background:#172c3f;color:#f3fdff;
+ font-size:15px;cursor:pointer
+}
+body:not(.home-panel) #newview-channel-directory #newview-iptv-scope:focus-visible,
+body:not(.home-panel) #newview-channel-directory #newview-iptv-scope-value:focus-visible{
+ outline:3px solid #9bffe3;outline-offset:3px
+}
+body:not(.home-panel) #newview-channel-directory .newview-iptv-catalog-status{
+ color:#b6d5e0;font-size:13px;line-height:1.5
+}
