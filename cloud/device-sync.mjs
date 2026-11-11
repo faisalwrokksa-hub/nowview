@@ -2,12 +2,15 @@
    This is a capability-link prototype, not a sign-in provider.
    Configure NEWVIEW_SYNC KV binding before enabling on a public deployment.
 */
-export async function handleDeviceSync(request,env,url){
+export async function handleDeviceSync(request,env,url,fetcher=fetch){
  const base={'Cache-Control':'no-store','Content-Type':'application/json; charset=utf-8',
   'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','X-Frame-Options':'DENY'};
  const reply=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:base});
  const fail=()=>reply({error:'Cloud sync unavailable; NEWVIEW_SYNC KV binding is not configured'},503);
  if(!env?.NEWVIEW_SYNC||typeof env.NEWVIEW_SYNC.get!=='function'||typeof env.NEWVIEW_SYNC.put!=='function')return fail();
+ const access=await checkNewViewAccess(request,env,fetcher);
+ if(!access.configured)return reply({error:'Cloudflare Access authentication must be configured for device sync'},503);
+ if(!access.ok)return reply({error:'Sign in through the protected NewView domain before using device sync'},401);
  const match=/^\/api\/device-sync\/([A-Za-z0-9_-]{43})$/.exec(url.pathname);
  if(!match)return reply({error:'Invalid sync room'},404);
  const path='v1:'+match[1],method=request.method;
