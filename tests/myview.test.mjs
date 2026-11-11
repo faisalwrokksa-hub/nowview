@@ -90,3 +90,18 @@ test('Business Pulse labels imported KPIs as local and unverified',()=>{
  assert.match(preview,/2026-11-10/);
  assert.equal(api.preview.business(null),'Upload a CSV in Business to view session KPIs');
 });
+
+
+test('Business Pulse strips bidirectional formatting controls from imported reporting periods',()=>{
+ const {api}=setup();
+ const preview=api.preview.business({revenue:100,cost:40,orders:2,asOf:'2026-'+String.fromCharCode(0x202e)+'11-10'});
+ assert.equal(preview.includes(String.fromCharCode(0x202e)),false);
+ assert.match(preview,/2026-11-10/);
+});
+
+test('Official headline previews strip bidirectional control characters',()=>{
+ const {api}=setup();
+ const preview=api.preview.news({source:'sec',count:1,headline:'SEC '+String.fromCharCode(0x202e)+'update'});
+ assert.equal(preview.includes(String.fromCharCode(0x202e)),false);
+ assert.match(preview,/SEC update/);
+});
