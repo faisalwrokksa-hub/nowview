@@ -36,3 +36,11 @@ test('six workspaces and device pairing remain intact',()=>{
  assert.match(css,/body:not\(\.home-panel\) \.newview-cast-trigger/);
 });
 test('cast UI source parses without syntax errors',()=>{assert.doesNotThrow(()=>new Function(viewer));});
+
+test('floating viewer can be moved aside without navigating away from Markets',()=>{
+ assert.match(viewer,/top\.addEventListener\('pointerdown'/);
+ assert.match(viewer,/top\.addEventListener\('pointermove'/);
+ assert.match(viewer,/dock\.style\.left=left\+'px'/);
+ assert.match(viewer,/document\.body\.append\(dock\)/);
+ assert.match(css,/\.newview-cast-bar\{cursor:grab/);
+});
