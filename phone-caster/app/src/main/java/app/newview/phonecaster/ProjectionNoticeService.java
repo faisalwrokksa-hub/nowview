@@ -22,6 +22,7 @@ public final class ProjectionNoticeService extends Service {
     @Override public IBinder onBind(Intent intent){return null;}
     @Override public int onStartCommand(Intent intent,int flags,int startId){
         if(intent==null||ACTION_STOP.equals(intent.getAction())){
+            CasterActivity.stopActiveCapture();
             stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();return START_NOT_STICKY;
         }
         if(!ACTION_START.equals(intent.getAction())){stopSelf();return START_NOT_STICKY;}
