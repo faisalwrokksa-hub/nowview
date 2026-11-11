@@ -20,8 +20,8 @@ test('workspace and stock board remain separate from market engine',()=>{
  assert.match(build,/workspace-shell\.js/);
  assert.doesNotMatch(board,/Tadawul|id:'sa'|الأسهم السعودية/);
  assert.match(board,/U\.S\. Stocks/);
- assert.match(html,/id="business-file"/);
- assert.match(html,/id="business-kpis"/);
+ assert.match(html,/id="powerbi-report-url"/);
+ assert.match(html,/https:\/\/app\.powerbi\.com\//);
  assert.match(html,/id="social-add"/);
 });
 
