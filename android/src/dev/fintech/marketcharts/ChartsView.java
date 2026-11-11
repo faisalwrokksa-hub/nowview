@@ -119,6 +119,18 @@ public final class ChartsView extends WebView {
     }
     private static String tagText(Element e,String tag){NodeList n=e.getElementsByTagName(tag);return n.getLength()>0?n.item(0).getTextContent().trim():"";}
     public final class Bridge {
+        @JavascriptInterface public void openDnsSettings(){
+            post(()->{
+                if(closed)return;
+                try{
+                    Intent settings=new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
+                    getContext().startActivity(settings);
+                }catch(Exception ignored){
+                    try{getContext().startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));}
+                    catch(Exception ignoredAgain){}
+                }
+            });
+        }
         @JavascriptInterface public void openNewsBrowser(String url){
             try{
                 Uri target=Uri.parse(url);
