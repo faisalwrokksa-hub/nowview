@@ -33,8 +33,8 @@ test('IPTV player filters only confirmed failed streams, checks recovery and sch
 test('News exposes default hide failed toggle, two minute updates and recovery',()=>{
  assert.match(news,/newview-news-hide-failed/);
  assert.match(news,/status\?\.\('news',option\.value\)==='failed'/);
- assert.match(news,/mark\?\.\('news',choose\.value,'ok'/);
- assert.match(news,/mark\?\.\('news',choose\.value,'failed'/);
+ assert.match(news,/mark\?\.\('news',sourceId,'ok'/);
+ assert.match(news,/mark\?\.\('news',sourceId,'failed'/);
  assert.match(news,/120000\);/);
  assert.match(news,/newview:source-status/);
 });
