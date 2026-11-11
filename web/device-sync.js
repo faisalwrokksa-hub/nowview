@@ -121,7 +121,8 @@
      report('Local layout sent to paired devices');
     }else report('Up to date · encrypted layout only');
    }catch(error){
-    if(activeSession===session)report(error?.name==='AbortError'?'Cloud sync timed out; retry':(error?.message||'Unable to synchronize right now'));
+    if(activeSession===session&&/room has been revoked/.test(String(error?.message||''))){disconnect();report('This room was revoked. The pairing link is no longer valid.');}
+    else if(activeSession===session)report(error?.name==='AbortError'?'Cloud sync timed out; retry':(error?.message||'Unable to synchronize right now'));
    }finally{busy=false;}
   }
   useCloud.addEventListener('click',()=>{
@@ -155,7 +156,7 @@
    pair({room:b64(random),key:secret},true);
   });
   join.addEventListener('click',()=>{try{pair(readPair(pairing.value),false);}catch(e){report(e.message);}});
-  copy.addEventListener('click',async()=>{if(copy.disabled||!room)return;try{await navigator.clipboard.writeText(link());report('Private pairing link copied. Anyone with this link can view and change your synced layout.');}catch{pairing.hidden=false;pairing.value=link();pairing.select();report('Copy the link shown in the field.');}});
+  copy.addEventListener('click',async()=>{if(copy.disabled||!room)return;try{await navigator.clipboard.writeText(link());report('Private pairing link copied. Only a user authorized through Cloudflare Access can join this account-scoped room.');}catch{pairing.hidden=false;pairing.value=link();pairing.select();report('Copy the link shown in the field.');}});
   push.addEventListener('click',()=>update());
   leave.addEventListener('click',disconnect);
   revoke.addEventListener('click',async()=>{
