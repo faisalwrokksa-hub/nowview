@@ -105,3 +105,10 @@ test('Official headline previews strip bidirectional control characters',()=>{
  assert.equal(preview.includes(String.fromCharCode(0x202e)),false);
  assert.match(preview,/SEC update/);
 });
+
+
+test('Market source reference requires a valid timestamp and cannot accompany stale or future quotes',()=>{
+ assert.match(src,/const valid=quote&&[^;]*Number\.isSafeInteger\(quote\.quoteTime\)/);
+ assert.match(src,/quote\.quoteTime\*1000>=Date\.now\(\)-86400000/);
+ assert.match(src,/quote\.quoteTime\*1000<=Date\.now\(\)\+300000/);
+});
