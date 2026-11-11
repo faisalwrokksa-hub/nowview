@@ -2,7 +2,10 @@
 export const NEWS_SOURCES=Object.freeze({
  fed:Object.freeze({name:'Federal Reserve',url:'https://www.federalreserve.gov/feeds/press_all.xml',host:'www.federalreserve.gov',homepage:'https://www.federalreserve.gov/newsevents/pressreleases.htm'}),
  sec:Object.freeze({name:'U.S. SEC',url:'https://www.sec.gov/news/pressreleases.rss',host:'www.sec.gov',homepage:'https://www.sec.gov/newsroom/press-releases'}),
- stocktwits:Object.freeze({name:'Stocktwits News',url:'https://stocktwits.com/sitemap/rss_feed.xml',host:'stocktwits.com',homepage:'https://stocktwits.com/'})
+ stocktwits:Object.freeze({name:'Stocktwits News',url:'https://stocktwits.com/sitemap/rss_feed.xml',host:'stocktwits.com',homepage:'https://stocktwits.com/'}),
+ bbc:Object.freeze({name:'BBC World',url:'https://feeds.bbci.co.uk/news/world/rss.xml',host:'feeds.bbci.co.uk',articleHosts:['www.bbc.com','www.bbc.co.uk','bbc.com','www.bbc.co.uk'],homepage:'https://www.bbc.com/news'}),
+ npr:Object.freeze({name:'NPR News',url:'https://feeds.npr.org/1001/rss.xml',host:'feeds.npr.org',articleHosts:['www.npr.org','text.npr.org'],homepage:'https://www.npr.org/'}),
+ guardian:Object.freeze({name:'The Guardian',url:'https://www.theguardian.com/world/rss',host:'www.theguardian.com',articleHosts:['www.theguardian.com'],homepage:'https://www.theguardian.com/world'})
 });
 const xmlDecode=s=>String(s).replace(/&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos);/gi,(whole,key)=>{
  if(key[0]==='#'){const n=key[1]?.toLowerCase()==='x'?parseInt(key.slice(2),16):parseInt(key.slice(1),10);
@@ -12,7 +15,7 @@ const xmlDecode=s=>String(s).replace(/&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos)
 const cleanText=s=>xmlDecode(String(s||'').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1').replace(/<[^>]*>/g,' ').replace(/[\u0000-\u001f]/g,' ').replace(/\s+/g,' ').trim()).slice(0,210);
 const tag=(xml,name)=>{const m=xml.match(new RegExp('<(?:[a-z]+:)?'+name+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/(?:[a-z]+:)?'+name+'>','i'));return m?m[1]:'';};
 const validArticleLink=(value,source)=>{
- try{const u=new URL(xmlDecode(value).trim());return u.protocol==='https:'&&(u.hostname===source.host)&&u.username===''&&u.password===''&&u.port===''?u.href:null;}catch{return null;}
+ try{const u=new URL(xmlDecode(value).trim());return u.protocol==='https:'&&((source.articleHosts||[source.host]).includes(u.hostname))&&u.username===''&&u.password===''&&u.port===''?u.href:null;}catch{return null;}
 };
 export function parseNewsXml(xml,sourceId){
  const source=NEWS_SOURCES[sourceId];if(!source)throw new Error('Unknown news source');
