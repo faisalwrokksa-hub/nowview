@@ -774,3 +774,10 @@ body>main>.newview-settings-content :is(input,select,button){max-width:100%}
 }
 @media(hover:none){.workspace-switcher .workspace-tab{min-height:56px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+.inline-tv-video{width:100%;max-height:420px;background:#101827;border-radius:12px}
+
+/* Shared decorative icons and compact status text; Cinema TV remains the final theme. */
+.nv-nav-icon{display:inline-block;width:1.15em;height:1.15em;flex:none;vertical-align:-.12em;pointer-events:none}
+@media(max-width:400px){[role="status"],[role="alert"]{overflow-wrap:anywhere}.workspace-switcher .workspace-tab{min-width:64px}}
+@media(forced-colors:active){button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid Highlight;box-shadow:none}}

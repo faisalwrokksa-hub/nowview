@@ -9,7 +9,7 @@ test('NewView device security hardening and manual test matrix are tracked',()=>
  }
  for(const id of ['TV-01','TV-02','TV-03','TV-04','TV-05','TV-06','TV-07','MOB-01','MOB-02','MOB-03','WEB-01','SEC-01','SEC-02'])assert.match(doc,new RegExp(id));
  assert.match(doc,/NOT RUN/);
- assert.match(wf,/tests\/device-security\.test\.mjs/);
+ assert.match(wf,/node --test tests\/\*\.test\.mjs/);
 });
 
 test('Home overlay remains disabled until user explicitly opts in',()=>{

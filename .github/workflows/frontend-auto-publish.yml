@@ -1,23 +1,31 @@
 name: NewView frontend auto-publish (verified)
 on:
   push:
-    branches: [feat/expert2-apk-audit-20261109]
     paths:
       - 'web/**'
       - 'cloud/**'
       - 'tests/**'
+      - 'tools/**'
+      - 'scripts/**'
       - 'wrangler.json'
       - 'package.json'
       - '.github/workflows/frontend-auto-publish.yml'
+  pull_request:
+    paths: ['web/**', 'cloud/**', 'tests/**', 'tools/**', 'package.json', 'wrangler.json', '.github/workflows/**']
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy the tested main revision to production'
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: newview-frontend-publish
+  group: newview-frontend-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -27,18 +35,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Run dashboard and integration tests
-        run: |
-          python -m unittest discover -s tests -v
-          node --test tests/*.test.mjs
-          for file in web/*.js web/*.mjs; do node --check "$file"; done
+      - name: Run complete frontend validation
+        run: npm run verify
       - name: Build frontend
         run: npm run build
       - name: Validate Worker bundle
         run: node --test tests/cloudflare-worker-build.test.mjs
   publish:
     needs: validate
-    runs-on: ubuntu-latest
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      vars.FRONTEND_DEPLOY_VIA_GITHUB == 'true' &&
+      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy))
+    runs-on: ubuntu-24.04
     environment: newview-frontend
     timeout-minutes: 10
     steps:
@@ -59,4 +68,4 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           npm run build
-          npx --yes wrangler@4.158.0 deploy --config wrangler.json
+          npx --yes wrangler@4.158.0 deploy --config wrangler.json --var NEWVIEW_REVISION:${{ github.sha }}

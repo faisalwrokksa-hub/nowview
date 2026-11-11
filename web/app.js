@@ -102,10 +102,10 @@ function visibleFocusable(element){
  return style.visibility!=='hidden'&&style.display!=='none'&&element.getClientRects().length>0;
 }
 document.addEventListener('keydown',event=>{
- if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)||event.altKey||event.ctrlKey||event.metaKey)return;
+ if(event.defaultPrevented||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)||event.altKey||event.ctrlKey||event.metaKey)return;
  const current=document.activeElement;
  if(current&&current.matches('input, textarea, select, [contenteditable="true"]'))return;
- const controls=[...document.querySelectorAll('button:not(:disabled), a[href], [tabindex="0"]')].filter(visibleFocusable);
+ const controls=[...document.querySelectorAll('button:not(:disabled), a[href], summary, input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]')].filter(visibleFocusable);
  if(!controls.length)return;
  if(!controls.includes(current)){controls[0].focus();event.preventDefault();return;}
  const r=current.getBoundingClientRect(),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;

@@ -2,5 +2,12 @@
   "name": "nowview",
   "main": "dist/server/index.js",
   "compatibility_date": "2026-11-09",
-  "workers_dev": true
+  "workers_dev": true,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1,
+    "traces": {
+      "enabled": true
+    }
+  }
 }
