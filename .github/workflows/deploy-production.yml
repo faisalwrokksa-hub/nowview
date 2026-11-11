@@ -1,7 +1,7 @@
 name: Deploy production (after CI)
 on:
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["CI", "Auto merge verified pull requests"]
     types: [completed]
 permissions:
   contents: read
@@ -12,24 +12,27 @@ jobs:
   deploy:
     if: >-
       ${{ github.event.workflow_run.conclusion == 'success' &&
-          github.event.workflow_run.event == 'push' &&
           github.event.workflow_run.head_branch == 'main' &&
           github.event.workflow_run.head_repository.full_name == github.repository &&
-          vars.NOWVIEW_DEPLOY_ENABLED == 'true' }}
+          ((github.event.workflow_run.name == 'CI' &&
+            github.event.workflow_run.event == 'push') ||
+           (github.event.workflow_run.name == 'Auto merge verified pull requests')) }}
     runs-on: ubuntu-latest
     environment: production
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.name == 'CI' && github.event.workflow_run.head_sha || 'main' }}
           persist-credentials: false
       - name: Refuse superseded release
         env:
           GH_TOKEN: ${{ github.token }}
-          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          TESTED_SHA: ${{ github.event.workflow_run.name == 'CI' && github.event.workflow_run.head_sha || '' }}
         run: |
           set -euo pipefail
-          [[ "$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq .commit.sha)" == "$TESTED_SHA" ]]
+          CURRENT_SHA="$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq .commit.sha)"
+          [[ "$(git rev-parse HEAD)" == "$CURRENT_SHA" ]]
+          if [[ -n "$TESTED_SHA" ]]; then [[ "$CURRENT_SHA" == "$TESTED_SHA" ]]; fi
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
