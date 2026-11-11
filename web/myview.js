@@ -189,6 +189,19 @@
   if(id==='news')updateNewsSourceLink();
   if(id==='market')updateMarketSourceLink();
  });
+ // A quote can become stale while the dashboard stays open without receiving another event.
+ // Recheck time-based validity without rebuilding cards or disrupting remote focus.
+ function refreshMarketAge(){
+  const quote=snapshots.market;
+  if(!quote)return;
+  const live=root.querySelector('[data-widget="market"] [data-snapshot="market"]');
+  const updated=preview.market(quote);
+  if(live&&live.textContent!==updated)live.textContent=updated;
+  updateMarketSourceLink();
+ }
+ const freshnessTimer=setInterval(refreshMarketAge,60000);
+ freshnessTimer.unref?.();
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshMarketAge();});
  window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
  installPresets();render();
 })();
