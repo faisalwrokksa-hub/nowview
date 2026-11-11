@@ -1,7 +1,7 @@
 'use strict';
-/* Remote-first News Browser. Native Android users open a bridge-free WebView.
-   Website users open trusted HTTPS URLs in a new browser tab: most publishers
-   cannot legally/technically be embedded in iframes. DNS is OS/network policy. */
+/* Read headlines launch the same isolated browser used by Watch > YouTube.
+   Native opens the requested article directly instead of its default homepage.
+   The web fallback opens a tab: publishers often block iframe embedding. */
 (function(){
  const MAX_URL=2048;
  const defaultSites=Object.freeze([
@@ -41,7 +41,7 @@
   const section=document.createElement('section');section.className='news-browser-tools shell-card';section.id='newview-news-browser';
   const eyebrow=document.createElement('span');eyebrow.className='shell-eyebrow';eyebrow.textContent='NEWS BROWSER · REMOTE READY';
   const heading=document.createElement('h3');heading.textContent='Browse the news';
-  const intro=document.createElement('p');intro.textContent='Open articles using the remote. Android TV uses a separate in-app HTTPS browser; the web dashboard opens a new tab. Publisher paywalls and content rights still apply.';
+  const intro=document.createElement('p');intro.textContent='Open articles using the remote. On Android this opens the shared dark browser at the selected article. On the web publisher restrictions require a separate tab. Publisher paywalls and content rights still apply.';
   const form=document.createElement('form');form.className='news-browser-form';
   const label=document.createElement('label');label.htmlFor='newview-news-address';label.textContent='Website address';
   const input=document.createElement('input');input.id='newview-news-address';input.type='url';input.placeholder='https://www.bbc.com/news';input.autocomplete='url';input.inputMode='url';input.maxLength=MAX_URL;
@@ -81,7 +81,7 @@
   });
   items.addEventListener('click',event=>{
    const link=event.target.closest('a.news-link');
-   if(!link||typeof window.NewViewNative?.openNewsBrowser!=='function')return;
+   if(!link)return;
    const url=safeUrl(link.href);
    if(!url)return;
    event.preventDefault();browse(url);
