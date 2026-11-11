@@ -314,6 +314,7 @@
    const view=event.detail?.view;
    if(view==='markets'||view==='media'||view==='devices'){active=view==='media'?'watch':view==='markets'?'read':'watch';syncNav();}
   });
+  window.NewViewSections=Object.freeze({show});
   render();show('home');
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
