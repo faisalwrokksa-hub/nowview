@@ -4,7 +4,7 @@
 (function(){
  const PREFIX='newview-sync-', INTERVAL=15000, encoder=new TextEncoder(),decoder=new TextDecoder();
  const allowed=new Set(['myview','markets','business','media','social','devices']);
- let room=null, key=null, timer=null, busy=false, previousLocal=null, previousVersion=null;
+ let room=null, key=null, timer=null, busy=false, previousLocal=null, previousVersion=null, createdRoom=false;
  const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
  function unb64(s){if(!/^[A-Za-z0-9_-]+$/.test(s))throw Error('Invalid pairing key');const str=atob(s.replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(str,c=>c.charCodeAt(0));}
  function snapshot(){
@@ -76,7 +76,8 @@
     const current=snapshot(),local=JSON.stringify(current);
     const remote=await request('GET');
     if(!remote){
-     await request('PUT',await encrypt(current));previousLocal=local;previousVersion=null;
+     if(!createdRoom){report('Pairing room not found or expired. Create a fresh link on the first device.');return;}
+     await request('PUT',await encrypt(current));previousLocal=local;previousVersion=null;createdRoom=false;
      report('Encrypted dashboard initialized in cloud · sharing layouts only');
     }else if(remote.blob!==previousVersion){
      const incoming=await decrypt(remote.blob),serialized=JSON.stringify(incoming);
@@ -96,13 +97,13 @@
    finally{busy=false;}
   }
   function disconnect(){
-   if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=null;
+   if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=null;createdRoom=false;
    if(location.hash.startsWith('#sync='))history.replaceState(null,'',location.pathname+location.search);
    connected(false);report('Disconnected on this device; other devices keep their copies');
   }
   async function pair(value,isNew){
    if(timer)clearInterval(timer);timer=null;
-   room=value.room;key=value.key;previousLocal=previousVersion=null;connected(true);
+   room=value.room;key=value.key;previousLocal=previousVersion=null;createdRoom=isNew;connected(true);
    pairing.value=link();report('Pairing…');
    await update(!isNew);
    timer=setInterval(()=>update(),INTERVAL);timer.unref?.();
