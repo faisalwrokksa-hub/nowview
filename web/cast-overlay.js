@@ -19,12 +19,13 @@
   const dock=el('aside','newview-cast-dock');dock.id='newview-cast-dock';dock.hidden=true;dock.setAttribute('aria-label','Floating device screen viewer');
   const top=el('div','newview-cast-bar');const heading=el('strong','','Device screen');const tools=el('div','newview-cast-tools');
   const fold=el('button','','−');fold.type='button';fold.title='Minimize floating screen';fold.setAttribute('aria-label','Minimize floating screen');
+  const dockSide=el('button','','⇄');dockSide.type='button';dockSide.title='Move viewer to other side';dockSide.setAttribute('aria-label','Move floating screen to other side');
   const expand=el('button','','⛶');expand.type='button';expand.title='Fullscreen screen viewer';expand.setAttribute('aria-label','Fullscreen floating screen');
   const close=el('button','','×');close.type='button';close.title='Stop and close device screen';close.setAttribute('aria-label','Stop and close screen sharing');
   const video=document.createElement('video');video.id='newview-cast-video';video.autoplay=true;video.playsInline=true;video.controls=true;
   video.setAttribute('aria-label','Connected screen stream');
   const state=el('p','newview-cast-state','No live video source');state.setAttribute('role','status');
-  tools.append(fold,expand,close);top.append(heading,tools);dock.append(top,video,state);document.body.append(dock);
+  tools.append(fold,dockSide,expand,close);top.append(heading,tools);dock.append(top,video,state);document.body.append(dock);
   const trigger=el('button','newview-cast-trigger','▣ Screen cast');trigger.type='button';trigger.id='newview-cast-trigger';
   trigger.setAttribute('aria-label','Open floating screen viewer and device connection controls');
   const header=document.querySelector('main > header');header?.append(trigger);
@@ -135,6 +136,14 @@
   window.addEventListener('resize',()=>{if(dock.hidden)return;const rect=dock.getBoundingClientRect();if(rect.left>window.innerWidth-50||rect.top>window.innerHeight-50){dock.style.removeProperty('left');dock.style.removeProperty('top');dock.style.removeProperty('right');dock.style.removeProperty('bottom');}});
   trigger.addEventListener('click',()=>{showDock();window.NewViewShell?.select('devices');});
   fold.addEventListener('click',()=>{minimized=!minimized;dock.classList.toggle('is-minimized',minimized);fold.textContent=minimized?'+':'−';fold.setAttribute('aria-label',minimized?'Restore floating screen':'Minimize floating screen');});
+  let onLeft=false;
+  dockSide.addEventListener('click',()=>{
+   onLeft=!onLeft;
+   dock.style.removeProperty('top');dock.style.removeProperty('right');dock.style.removeProperty('bottom');dock.style.removeProperty('left');
+   dock.classList.toggle('is-left',onLeft);
+   dockSide.setAttribute('aria-label',onLeft?'Move floating screen to right':'Move floating screen to left');
+   report(onLeft?'Video docked on the left':'Video docked on the right');
+  });
   expand.addEventListener('click',()=>{if(dock.requestFullscreen)Promise.resolve(dock.requestFullscreen()).catch(()=>report('Fullscreen unavailable'));});
   close.addEventListener('click',()=>{reset();dock.hidden=true;window.NewViewShell?.select('devices');});
   stop.addEventListener('click',()=>{reset();dock.hidden=true;});
