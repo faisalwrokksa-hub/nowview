@@ -5,7 +5,7 @@
   Object.freeze({id:'market',title:'Markets',description:'Open Binance market charts and watchlists; quotes are not independently verified.',view:'markets',label:'Market charts'}),
   Object.freeze({id:'news',title:'Headlines',description:'Read source-linked financial announcements in Watch & News.',view:'media',section:'headlines',label:'Financial announcements'}),
   Object.freeze({id:'media',title:'Video & TV',description:'Open the video and TV section of Watch & News.',view:'media',section:'videos',label:'Video and TV'}),
-  Object.freeze({id:'business',title:'Business',description:'Open your organization's Microsoft Power BI reports and dashboards.',view:'business',label:'Power BI reporting'}),
+  Object.freeze({id:'business',title:'Business',description:'Open Microsoft Power BI reports and dashboards.',view:'business',label:'Power BI reporting'}),
   Object.freeze({id:'social',title:'Social',description:'Save and open public social profile bookmarks.',view:'social',label:'Social discovery'})
  ]);
  const ids=new Set(catalog.map(x=>x.id));
