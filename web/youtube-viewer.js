@@ -46,7 +46,7 @@
     root.NewViewNative.openNewsBrowser(url);
     return true;
    }
-   return false;
+   return !!root.NewViewInternalBrowser?.open?.(url,{area:'watch'});
   }
   function clear(){
    stage.replaceChildren(placeholder);panel.hidden=true;input.value='';
@@ -81,9 +81,9 @@
    return true;
   }
   browse.addEventListener('click',()=>{
-   if(!openBrowser())status.textContent='Full-site browsing is available inside the Android app. In a web browser, YouTube does not allow its homepage to be embedded; use a YouTube video link here.';
+   if(!openBrowser())status.textContent='YouTube full-site browsing is blocked by iframe policy. Use Open YouTube or enter a video link.';
   });
-  form.addEventListener('submit',e=>{e.preventDefault();if(nativeBrowser()&&parseVideo(input.value)){openBrowser(input.value);return;}load();});
+  form.addEventListener('submit',e=>{e.preventDefault();if(openBrowser(input.value))return;load();});
   close.addEventListener('click',clear);
   root.NewViewYouTube=Object.freeze({open,close:clear,parseVideo,openBrowser});
  }
