@@ -144,3 +144,11 @@ test('Market Watch does not attribute explicitly non-Binance quotes to Binance',
  // An absent provider is not evidence that Binance supplied the quote.
  assert.match(src,/link\.hidden=!valid/);
 });
+
+test('Market Watch identifies explicit provider without implying independent verification',()=>{
+ const {api}=setup();
+ const base={symbol:'BTCUSDT',price:120,currency:'USDT',quoteTime:Math.floor(Date.now()/1000)};
+ assert.match(api.preview.market({...base,source:'binance'}),/Binance source \(not independently verified\)/);
+ assert.match(api.preview.market({...base,source:'other'}),/source not independently verified/);
+ assert.doesNotMatch(api.preview.market(base),/Binance source/);
+});
