@@ -12,22 +12,13 @@ export class NewViewSyncRoom extends DurableObject {
   );
  }
  state(){
-  return this.ctx.storage.sql.exec('SELECT blob, expires_at, revoked FROM room WHERE id=1').one()||null;
+  return this.ctx.storage.sql.exec('SELECT blob, expires_at, revoked FROM room WHERE id=1').toArray()[0]||null;
  }
  async read(){
   const row=this.state();
   if(row?.revoked)return {status:410};
   if(!row||row.expires_at<=Date.now()||!row.blob)return {status:404};
   return {status:200,blob:row.blob};
- }
- async write(blob){
-  if(typeof blob!=='string'||blob.length>8000||!/^[A-Za-z0-9_-]{16,64}\.[A-Za-z0-9_-]{20,7950}$/.test(blob))
-   return {status:400};
-  const row=this.state(),now=Date.now();
-  if(row?.revoked)return {status:410};
-  // Expired or empty rooms may be initialized only by an explicitly created new room.
-  // Creation authorization is enforced by the API layer through the create flag.
-  return {status:428};
  }
  async create(blob){
   if(typeof blob!=='string'||blob.length>8000||!/^[A-Za-z0-9_-]{16,64}\.[A-Za-z0-9_-]{20,7950}$/.test(blob))
