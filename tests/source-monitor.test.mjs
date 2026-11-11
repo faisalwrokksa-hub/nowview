@@ -45,3 +45,10 @@ test('source monitor is packaged in dashboard and Worker',()=>{
  assert.doesNotThrow(()=>new Function(iptv));
  assert.doesNotThrow(()=>new Function(news));
 });
+
+test('news request pins its feed ID while failed-source filter changes selection',()=>{
+ assert.match(news,/async function refreshNews\(\)\{\s*const sourceId=choose\.value/);
+ assert.match(news,/source=\x27\+encodeURIComponent\(sourceId\)/);
+ assert.match(news,/mark\?\.\('news',sourceId,'failed'/);
+ assert.match(news,/mark\?\.\('news',sourceId,'ok'/);
+});
