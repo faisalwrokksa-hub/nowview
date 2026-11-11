@@ -234,8 +234,10 @@
   overlay.addEventListener('keydown',e=>{
    if(e.key==='Escape'||e.key==='BrowserBack'){e.preventDefault();e.stopPropagation();closePalette();return;}
    if(e.key==='Tab'){
-    const target=e.shiftKey?close:input;
-    if((e.shiftKey&&document.activeElement===input)||(!e.shiftKey&&document.activeElement===close)){e.preventDefault();target.focus();}
+    // Only the close button and search input are tabbable inside this dialog.
+    // Keep focus inside the modal for TV remotes, browsers and screen readers.
+    e.preventDefault();
+    (document.activeElement===input?close:input).focus();
    }
    if(e.key==='ArrowDown'||e.key==='ArrowUp'){
     e.preventDefault();if(visible.length){selected=(selected+(e.key==='ArrowDown'?1:-1)+visible.length)%visible.length;render();}
