@@ -9,5 +9,10 @@
     "traces": {
       "enabled": true
     }
+  },
+  "triggers": {
+    "crons": [
+      "*/2 * * * *"
+    ]
   }
 }
