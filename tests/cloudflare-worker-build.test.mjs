@@ -34,3 +34,19 @@ test('built Worker health endpoint reports only application readiness, not upstr
  const invalidMarket=await worker.fetch(new Request('https://example.test/api/chart?symbol=NOT-A-PAIR&range=1D'));
  assert.equal(invalidMarket.status,400);
 });
+
+test('every local HTML script and stylesheet is included in the published Worker',()=>{
+ const html=fs.readFileSync(path.join(root,'web/index.html'),'utf8');
+ execFileSync(process.execPath,[path.join(root,'cloud/build.mjs')],{cwd:root,stdio:'pipe'});
+ const generated=fs.readFileSync(path.join(root,'dist/server/index.js'),'utf8');
+ const refs=[
+  ...html.matchAll(/<script\\b[^>]*\\bsrc=["']([^"']+)["']/g),
+  ...html.matchAll(/<link\\b[^>]*\\bhref=["']([^"']+\\.css)["']/g)
+ ].map(match=>match[1]).filter(ref=>!/^https?:|^\\/\\//.test(ref));
+ for(const ref of refs){
+  const asset='/'+ref.replace(/^\\.\\//,'').split(/[?#]/)[0];
+  assert.ok(fs.existsSync(path.join(root,'web',asset.slice(1))),`Missing local asset: ${asset}`);
+  assert.ok(generated.includes(JSON.stringify(asset)),`Asset omitted from Worker: ${asset}`);
+ }
+ assert.ok(refs.length>=18,'Expected all core NewView script and stylesheet references');
+});
