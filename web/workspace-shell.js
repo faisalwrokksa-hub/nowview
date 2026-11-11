@@ -1,13 +1,14 @@
 'use strict';
-/* Shared NewView shell: six workspaces, with no fake financial/social data. */
+/* Shared NewView shell: four primary workspaces with legacy navigation aliases. */
 (function(){
- const views=['myview','markets','business','media','social','devices'];
- const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',media:'Watch & News',social:'NewViewSocial',devices:'NewViewDevice'};
+ const views=['myview','markets','media','devices'];
+ const legacyView=view=>view==='business'?'myview':view==='social'||view==='news'?'media':view;
+ const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',media:'Discover',social:'NewViewSocial',devices:'NewViewDevice'};
  const sourceNotes={
   myview:'MyView · preferences stored on this device',
   markets:'Binance public token prices in USDT · U.S. stock quotes unavailable without authorized feed',
-  business:'Business · CSV processed locally and never uploaded',
-  media:'Watch & News · publisher-linked headlines and official video embeds; source rights vary',
+  business:'Power BI · opens via Microsoft and saved shortcuts',
+  media:'Discover · headlines, video and public social links',
   social:'Social · saved public profile links only, no live feeds',
   devices:'NewViewDevice · opt-in encrypted layout sharing · no video streaming'
  };
@@ -63,14 +64,16 @@
  function sanitizeDisplay(value){
   if(!value||typeof value!=='object')return {...DISPLAY_DEFAULT,views:[...DISPLAY_DEFAULT.views]};
   const list=Array.isArray(value.views)?value.views:DISPLAY_DEFAULT.views;
-  const selected=[...new Set(list.map(v=>v==='news'?'media':v).filter(v=>views.includes(v)))];
+  const selected=[...new Set(list.map(legacyView).filter(v=>views.includes(v)))];
   const seconds=Number(value.refreshSeconds);
   return {name:typeof value.name==='string'?value.name.slice(0,40):DISPLAY_DEFAULT.name,views:selected.length?selected:[...DISPLAY_DEFAULT.views],refreshSeconds:[0,30,60,120,300].includes(seconds)?seconds:60,fullscreen:value.fullscreen===true};
  }
  function loadDisplays(){try{const x=JSON.parse(localStorage.getItem(DISPLAY_KEY)||'[]');return Array.isArray(x)?x.slice(0,5).map(sanitizeDisplay):[];}catch{return [];}}
  function saveDisplays(profiles){const safe=profiles.slice(0,5).map(sanitizeDisplay);try{localStorage.setItem(DISPLAY_KEY,JSON.stringify(safe));}catch{}return safe;}
- const getStored=()=>{try{const v=localStorage.getItem('newview.workspace');return v==='news'?'media':views.includes(v)?v:'myview';}catch{return 'myview';}};
+ const getStored=()=>{try{const v=localStorage.getItem('newview.workspace');const mapped=legacyView(v);return views.includes(mapped)?mapped:'myview';}catch{return 'myview';}};
  function select(view){
+  const requested=view;
+  view=legacyView(view);
   if(!views.includes(view)||document.body.classList.contains('home-panel'))return false;
   const market=document.getElementById('market-shell');
   const chart=document.querySelector('.workspace');
@@ -133,6 +136,8 @@
   try{localStorage.setItem('newview.workspace',view);}catch{}
   const page=document.querySelector('[data-workspace="'+view+'"]');
   if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'auto'});
+  if(requested==='social')window.NewViewWatch?.select?.('social');
+  if(requested==='business')document.getElementById('newview-powerbi-portal')?.scrollIntoView?.({block:'start',behavior:'smooth'});
   return true;
  }
  function installDisplay(){
@@ -191,12 +196,14 @@
   dialog.append(top,input,results,hint);overlay.append(dialog);document.body.append(overlay);
   const actions=[
    {name:'MyView',detail:'Personal dashboard and widgets',view:'myview'},
+   {name:'Power BI',detail:'Microsoft reporting portal',view:'business'},
    {name:'Markets',detail:'Charts and watchlists',view:'markets'},
    {name:'Business',detail:'Local CSV analytics',view:'business'},
+   {name:'Discover',detail:'News, social and video',view:'media'},
    {name:'Headlines',detail:'Publisher-linked news',view:'media',section:'headlines'},
    {name:'Live TV',detail:'Public channel directory',view:'media',section:'channels'},
    {name:'Videos',detail:'Official video embeds',view:'media',section:'videos'},
-   {name:'Social',detail:'Public profile bookmarks',view:'social'},
+   {name:'Social',detail:'Public profile bookmarks',view:'media',section:'social'},
    {name:'NewViewDevice',detail:'Pair phone, browser and TV layouts',view:'devices'}
   ];
   let visible=actions,selected=0,restoreFocus=trigger;
@@ -253,6 +260,10 @@
  }
  function install(){
   if(document.body.classList.contains('home-panel'))return;
+  // Migrate the former Business page into MyView without recreating its buttons.
+  const powerbi=document.querySelector('[data-workspace="business"]');
+  const home=document.querySelector('[data-workspace="myview"]');
+  if(powerbi&&home){powerbi.removeAttribute('data-workspace');powerbi.classList.remove('shell-page');powerbi.id='newview-powerbi-portal';home.appendChild(powerbi);}
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
   nav.addEventListener('click',event=>{const b=event.target instanceof Element?event.target.closest('[data-view-button]'):null;if(b)select(b.dataset.viewButton);});
   // Keep the mobile/tablet selector synchronized with the actual pinned widgets.
@@ -283,7 +294,7 @@
   });
   if(panelGrid){new MutationObserver(syncPanels).observe(panelGrid,{childList:true});syncPanels();}
 
-  document.querySelector('[data-workspace="myview"]')?.addEventListener('click',event=>{const b=event.target.closest('[data-home-view]');if(!b)return;const view=b.dataset.homeView;if(!views.includes(view))return;select(view);if(b.dataset.homeSection)window.NewViewWatch?.select(b.dataset.homeSection);});
+  document.querySelector('[data-workspace="myview"]')?.addEventListener('click',event=>{const b=event.target.closest('[data-home-view]');if(!b)return;const view=b.dataset.homeView;if(!views.includes(legacyView(view)))return;select(view);if(b.dataset.homeSection)window.NewViewWatch?.select(b.dataset.homeSection);});
   // Settings drawer: Escape/TV Back closes it, and focus returns to its opener.
   const settingsDrawer=document.getElementById('newview-settings');
   if(settingsDrawer){
