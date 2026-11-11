@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Build;
 import android.content.Intent;
+import android.app.AlertDialog;
+import android.content.SharedPreferences;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import android.graphics.Color;
 import android.net.Uri;
 import android.view.KeyEvent;
@@ -22,6 +26,8 @@ public final class NewsBrowserActivity extends Activity {
     private WebView browser;
     private EditText address;
     private static final String START="https://www.youtube.com/";
+    private static final String BOOKMARK_PREFS="newview.browser.bookmarks.v1";
+    private Button bookmarkButton;
 
     public static boolean safePage(Uri u){
         if(u==null||!"https".equalsIgnoreCase(u.getScheme())||u.getHost()==null||
@@ -42,6 +48,59 @@ public final class NewsBrowserActivity extends Activity {
             else address.setError("HTTPS public websites only");
         }catch(Exception ignored){address.setError("Invalid website address");}
     }
+    private JSONArray savedBookmarks(){
+        try{return new JSONArray(getSharedPreferences(BOOKMARK_PREFS,MODE_PRIVATE).getString("items","[]"));}
+        catch(Exception ignored){return new JSONArray();}
+    }
+    private void storeBookmarks(JSONArray items){
+        getSharedPreferences(BOOKMARK_PREFS,MODE_PRIVATE).edit().putString("items",items.toString()).apply();
+    }
+    private String currentPage(){
+        String value=browser==null?null:browser.getUrl();
+        try{return safePage(Uri.parse(value))?value:null;}catch(Exception ignored){return null;}
+    }
+    private void updateBookmarkButton(){
+        if(bookmarkButton==null)return;
+        String url=currentPage();boolean saved=false;
+        JSONArray items=savedBookmarks();
+        for(int i=0;i<items.length();i++){if(url!=null&&url.equals(items.optJSONObject(i)==null?null:items.optJSONObject(i).optString("url")))saved=true;}
+        bookmarkButton.setText(saved?"★":"☆");
+        bookmarkButton.setContentDescription(saved?"Remove current bookmark":"Bookmark current page");
+    }
+    private void toggleBookmark(){
+        String url=currentPage();if(url==null)return;
+        JSONArray items=savedBookmarks(),next=new JSONArray();boolean removed=false;
+        for(int i=0;i<items.length();i++){
+            JSONObject entry=items.optJSONObject(i);
+            if(entry==null)continue;
+            if(url.equals(entry.optString("url"))){removed=true;continue;}
+            next.put(entry);
+        }
+        if(!removed){
+            if(next.length()>=100){new AlertDialog.Builder(this).setMessage("Maximum 100 bookmarks").setPositiveButton("OK",null).show();return;}
+            JSONObject entry=new JSONObject();
+            try{
+                String title=browser.getTitle();
+                entry.put("url",url);
+                entry.put("title",title==null||title.trim().isEmpty()?Uri.parse(url).getHost():title.substring(0,Math.min(100,title.length())));
+                next.put(entry);
+            }catch(Exception ignored){return;}
+        }
+        storeBookmarks(next);updateBookmarkButton();
+    }
+    private void showBookmarks(){
+        JSONArray saved=savedBookmarks();
+        if(saved.length()==0){new AlertDialog.Builder(this).setTitle("Bookmarks").setMessage("No saved pages yet").setPositiveButton("Close",null).show();return;}
+        String[] labels=new String[saved.length()];
+        for(int i=0;i<saved.length();i++){
+            JSONObject entry=saved.optJSONObject(i);
+            labels[i]=entry==null?"Unknown":entry.optString("title",entry.optString("url"));
+        }
+        new AlertDialog.Builder(this).setTitle("Saved pages").setItems(labels,(dialog,index)->{
+            JSONObject entry=saved.optJSONObject(index);
+            if(entry!=null){String url=entry.optString("url");try{if(safePage(Uri.parse(url)))browser.loadUrl(url);}catch(Exception ignored){}}
+        }).setNegativeButton("Close",null).show();
+    }
     @Override public void onCreate(Bundle state){
         super.onCreate(state);
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);
@@ -50,7 +109,8 @@ public final class NewsBrowserActivity extends Activity {
         getWindow().setNavigationBarColor(Color.rgb(9,15,26));
         LinearLayout toolbar=new LinearLayout(this);toolbar.setOrientation(LinearLayout.HORIZONTAL);
         toolbar.setBackgroundColor(Color.rgb(17,28,43));
-        Button back=button("◀"),forward=button("▶"),refresh=button("↻"),close=button("Close");
+        Button back=button("◀"),forward=button("▶"),refresh=button("↻"),bookmarks=button("Bookmarks"),close=button("Close");
+        bookmarkButton=button("☆");
         address=new EditText(this);address.setSingleLine(true);address.setTextColor(Color.WHITE);
         address.setHint("Search or enter HTTPS website");address.setHintTextColor(Color.LTGRAY);
         address.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(205,165,92)));
@@ -58,7 +118,7 @@ public final class NewsBrowserActivity extends Activity {
         address.setImeOptions(EditorInfo.IME_ACTION_GO);
         toolbar.addView(back);toolbar.addView(forward);
         toolbar.addView(address,new LinearLayout.LayoutParams(0,-2,1));
-        toolbar.addView(refresh);toolbar.addView(close);
+        toolbar.addView(refresh);toolbar.addView(bookmarkButton);toolbar.addView(bookmarks);toolbar.addView(close);
         root.addView(toolbar);
         browser=new WebView(this);browser.setFocusable(true);browser.setFocusableInTouchMode(true);
         root.addView(browser,new LinearLayout.LayoutParams(-1,0,1));
@@ -85,11 +145,14 @@ public final class NewsBrowserActivity extends Activity {
             }
             @Override public void onPageFinished(WebView view,String url){
                 address.setText(url);
+                updateBookmarkButton();
             }
         });
         back.setOnClickListener(v->{if(browser.canGoBack())browser.goBack();});
         forward.setOnClickListener(v->{if(browser.canGoForward())browser.goForward();});
         refresh.setOnClickListener(v->browser.reload());
+        bookmarkButton.setOnClickListener(v->toggleBookmark());
+        bookmarks.setOnClickListener(v->showBookmarks());
         close.setOnClickListener(v->finish());
         address.setOnEditorActionListener((v,action,event)->{
             if(action==EditorInfo.IME_ACTION_GO||(event!=null&&event.getKeyCode()==KeyEvent.KEYCODE_ENTER)){
