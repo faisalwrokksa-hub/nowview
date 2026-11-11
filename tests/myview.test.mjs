@@ -168,3 +168,8 @@ test('MyView rejects external text-drag reorder attempts',()=>{
  assert.match(src,/item.addEventListener\('dragend'/);
  assert.doesNotMatch(src,/const from=e.dataTransfer\?\.getData\('text\/plain'\)/);
 });
+
+
+test('Market Watch chart observations reject missing or malformed quote currencies',()=>{
+ assert.match(src,/next\.price>=0&&typeof next\.currency==='string'&&\/\^\[A-Z0-9\]\{2,12\}\$\/\.test\(next\.currency\)/);
+});
