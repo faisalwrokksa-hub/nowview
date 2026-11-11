@@ -43,12 +43,25 @@ test('shared Android browser starts with YouTube and opens the requested news UR
  assert.match(browser,/setNavigationBarColor/);
  assert.match(browser,/setAlgorithmicDarkeningAllowed\(true\)/);
  assert.match(browser,/setForceDark\(WebSettings\.FORCE_DARK_ON\)/);
- assert.match(news,/event\.preventDefault\(\);browse\(url\)/);
+ assert.match(news,/NewViewNewsReader\?\.openByUrl\?\.\(url\)/);
  assert.doesNotMatch(news,/if\(!link\|\|typeof window\.NewViewNative/);
+ const links=read('web/external-links.js');
+ assert.match(links,/NewViewNative\.openNewsBrowser\(href\)/);
+ const tv=read('web/tv-guide.js');
+ assert.match(tv,/floatingButton\.click\(\)/);
 });
 
 test('Cloudflare Worker permits default Wikimedia wallpaper image hosts',()=>{
  const build=read('cloud/build.mjs'),home=read('web/myview.js');
  assert.match(home,/commons\.wikimedia\.org\/wiki\/Special:FilePath\/Black_tiger_in_Similipal_Forest\.jpg/);
  assert.match(build,/img-src 'self' data: https:\/\/commons\.wikimedia\.org https:\/\/upload\.wikimedia\.org/);
+});
+
+test('news reader remains in Read, uses feed excerpts and provides publisher link',()=>{
+ const news=read('web/news.js'),css=read('web/simplified-ui.css');
+ assert.match(news,/reader\.hidden=false;container\.hidden=true/);
+ assert.match(news,/NewViewNewsReader=Object\.freeze/);
+ assert.match(news,/Read full article at publisher/);
+ assert.match(css,/#nv-article-reader/);
+ assert.match(css,/\.nv-article-content/);
 });
