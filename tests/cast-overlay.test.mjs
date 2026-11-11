@@ -44,3 +44,9 @@ test('floating viewer can be moved aside without navigating away from Markets',(
  assert.match(viewer,/document\.body\.append\(dock\)/);
  assert.match(css,/\.newview-cast-bar\{cursor:grab/);
 });
+
+test('TV viewers can move the floating cast between left and right without mouse dragging',()=>{
+ assert.match(viewer,/dockSide\.setAttribute\('aria-label'/);
+ assert.match(viewer,/dock\.classList\.toggle\('is-left',onLeft\)/);
+ assert.match(css,/\.newview-cast-dock\.is-left:not\(\[hidden\]\)/);
+});
