@@ -91,12 +91,13 @@
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
  const presetBar=document.getElementById('myview-presets');
  let chosen=load();
+ let activeDragWidget=null;
  const quoteHistory=new Map();
  const maxQuotePoints=36;
  function chartFor(symbol){
   const points=quoteHistory.get(symbol)||[];
   const container=document.createElement('div');container.className='myview-live-chart';
-  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two verified quotes';
+  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two valid observed quotes';
   container.append(title);
   if(points.length<2)return container;
   const min=Math.min(...points),max=Math.max(...points),range=max-min||1;
@@ -153,9 +154,10 @@
    item.dataset.widget=id;
    item.draggable=true;
    item.setAttribute('aria-label',widget.title+' widget. Use move earlier or later buttons for keyboard and TV.');
-   item.addEventListener('dragstart',e=>{e.dataTransfer?.setData('text/plain',id);if(e.dataTransfer)e.dataTransfer.effectAllowed='move';});
-   item.addEventListener('dragover',e=>{if(e.dataTransfer?.types.includes('text/plain'))e.preventDefault();});
-   item.addEventListener('drop',e=>{e.preventDefault();const from=e.dataTransfer?.getData('text/plain');if(!ids.has(from)||!chosen.includes(from)||from===id)return;const next=chosen.filter(x=>x!==from);next.splice(next.indexOf(id),0,from);chosen=save(next);render();root.querySelector('[data-widget="'+from+'"] button')?.focus();});
+   item.addEventListener('dragstart',e=>{activeDragWidget=id;e.dataTransfer?.setData('text/plain',id);if(e.dataTransfer)e.dataTransfer.effectAllowed='move';});
+   item.addEventListener('dragend',()=>{activeDragWidget=null;});
+   item.addEventListener('dragover',e=>{if(activeDragWidget&&e.dataTransfer?.types.includes('text/plain'))e.preventDefault();});
+   item.addEventListener('drop',e=>{e.preventDefault();const from=activeDragWidget;activeDragWidget=null;if(!ids.has(from)||!chosen.includes(from)||from===id)return;const next=chosen.filter(x=>x!==from);next.splice(next.indexOf(id),0,from);chosen=save(next);render();root.querySelector('[data-widget="'+from+'"] button')?.focus();});
    const heading=text('h3','',widget.title);
    const eyebrow=text('div','shell-eyebrow',widget.label);
    const description=text('p','',widget.description);
@@ -223,7 +225,7 @@ item.append(eyebrow,heading,description,insight);
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
-  if(id==='market'&&next&&typeof next.symbol==='string'&&Number.isFinite(next.price)&&Number.isFinite(next.quoteTime)){
+  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&typeof next.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(next.currency)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
    const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
    if(!points.length||points[points.length-1]!==next.price){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);}
    refreshChart();
