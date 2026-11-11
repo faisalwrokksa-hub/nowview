@@ -119,3 +119,11 @@ test('Market source link requires an explicitly valid quote currency',()=>{
  const {api}=setup();
  assert.match(api.preview.market({symbol:'BTCUSDT',price:120,currency:'$',quoteTime:Math.floor(Date.now()/1000)}),/currency unavailable/);
 });
+
+
+test('MyView Alt+Arrow reorders cards without intercepting ordinary TV D-pad keys',()=>{
+ assert.match(src,/item\.addEventListener\('keydown',event=>/);
+ assert.match(src,/!event\.altKey\|\|event\.ctrlKey\|\|event\.metaKey\|\|event\.shiftKey/);
+ assert.match(src,/event\.key!=='ArrowUp'&&event\.key!=='ArrowDown'/);
+ assert.match(src,/event\.preventDefault\(\);move\(delta\)/);
+});
