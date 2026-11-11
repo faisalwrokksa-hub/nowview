@@ -43,7 +43,7 @@ test('M3U list refresh deduplicates streaming URLs',()=>{
 test('web IPTV browser automatically fetches selected live playlists and refreshes every three hours',()=>{
  assert.match(media,/newview-iptv-scope/);
  assert.match(media,/newview-iptv-scope-value/);
- assert.match(media,/readCatalog\(kind\)/);
+ assert.match(media,/readCatalog\(kind,force\)/);
  assert.match(media,/preferred\.parseCatalog\(kind,JSON\.parse\(raw\)\)/);
  assert.match(media,/const url=selectedPlaylist\(\)/);
  assert.match(media,/fetch\(url,\{cache:'no-store'/);
