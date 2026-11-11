@@ -153,3 +153,18 @@ test('Market Watch identifies explicit provider without implying independent ver
  assert.match(api.preview.market({...base,source:'other'}),/source not independently verified/);
  assert.doesNotMatch(api.preview.market(base),/Binance source/);
 });
+
+test('MyView chart accepts only valid Binance observations and uses accurate caption',()=>{
+ assert.match(src,/next\.source==='binance'/);
+ assert.match(src,/next\.price>=0/);
+ assert.match(src,/Number\.isSafeInteger\(next\.quoteTime\)/);
+ assert.match(src,/next\.quoteTime\*1000>=Date\.now\(\)-86400000/);
+ assert.match(src,/Waiting for at least two valid observed quotes/);
+ assert.doesNotMatch(src,/Waiting for at least two verified quotes/);
+});
+test('MyView rejects external drag text as reorder source',()=>{
+ assert.match(src,/let activeDragWidget=null/);
+ assert.match(src,/const from=activeDragWidget;activeDragWidget=null/);
+ assert.match(src,/item\.addEventListener\('dragend',\(\)=>\{activeDragWidget=null;\}\)/);
+ assert.doesNotMatch(src,/const from=e\.dataTransfer\?\.getData\('text\/plain'\)/);
+});
