@@ -46,4 +46,7 @@ jobs:
             # GitHub enforces branch protection, required reviews, and mergeability.
             # Never pass --admin or bypass required checks.
             gh pr merge "$pr" --repo "$REPO" --squash --delete-branch
+            # GITHUB_TOKEN merges do not emit normal push workflows.
+            # workflow_dispatch is an explicitly supported follow-on event.
+            gh workflow run deploy-production.yml --repo "$REPO" --ref main
           done <<< "$prs"
