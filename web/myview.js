@@ -62,14 +62,19 @@
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installHomeActions);else installHomeActions();
  const wallpaperKey='newview.home.wallpaper.v1',shadeKey='newview.home.wallpaper.shade.v1';
+ // Openly licensed CC BY 4.0 photo, Government of Odisha via Wikimedia Commons.
+ // The default remains visible without storing any large image in localStorage.
+ const defaultWallpaper='https://commons.wikimedia.org/wiki/Special:FilePath/Black_tiger_in_Similipal_Forest.jpg';
  function setWallpaper(data){
   if(data&&(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(data)||data.length>1400000))return false;
   try{if(data)localStorage.setItem(wallpaperKey,data);else localStorage.removeItem(wallpaperKey);}catch{return false;}
   applyWallpaper(data);return true;
  }
  function applyWallpaper(data){
-  document.body.classList.toggle('has-home-wallpaper',!!data);
-  if(data)document.body.style.setProperty('--newview-wallpaper','url("'+data+'")');else document.body.style.removeProperty('--newview-wallpaper');
+  const custom=!!data;
+  document.body.classList.toggle('has-home-wallpaper',custom);
+  document.body.dataset.wallpaperSource=custom?'custom':'default';
+  document.body.style.setProperty('--newview-wallpaper','url("'+(custom?data:defaultWallpaper)+'")');
  }
  function installWallpaper(){
   const input=document.getElementById('wallpaper-file'),remove=document.getElementById('wallpaper-remove'),shade=document.getElementById('wallpaper-shade'),status=document.getElementById('wallpaper-status');
@@ -85,7 +90,7 @@
    const reader=new FileReader();reader.onload=()=>{status.textContent=setWallpaper(reader.result)?'Home photo saved on this device':'Photo could not be saved; try a smaller file';input.value='';};
    reader.onerror=()=>{status.textContent='Photo could not be read';};reader.readAsDataURL(file);
   });
-  remove.addEventListener('click',()=>{status.textContent=setWallpaper(null)?'Home photo removed':'Could not clear stored photo';input.value='';});
+  remove.addEventListener('click',()=>{status.textContent=setWallpaper(null)?'Default black tiger photo restored':'Could not restore default photo';input.value='';});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installWallpaper);else installWallpaper();
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
