@@ -71,3 +71,24 @@ test('encrypted layout sync pauses offline and resumes after reconnect or return
  assert.match(client,/document\.addEventListener\('visibilitychange'/);
  assert.match(client,/if\(!document\.hidden&&room\)update\(\)/);
 });
+
+test('secret pairing fragment is cleared before joining and rooms remain unavailable until initialized',()=>{
+ const js=readFileSync(new URL('../web/device-sync.js',import.meta.url),'utf8');
+ assert.match(js,/const credentials=readPair\(location\.hash\.slice\(1\)\)/);
+ assert.match(js,/history\.replaceState\(null,'',location\.pathname\+location\.search\)/);
+ assert.match(js,/copy\.disabled=value/);
+ assert.match(js,/copy\.disabled=false/);
+ assert.match(js,/pairingSession!==session/);
+ assert.match(js,/session\+\+/);
+ assert.match(js,/new AbortController\(\)/);
+ assert.match(js,/10000/);
+});
+test('simultaneous cloud and local layout changes require visible human conflict resolution',()=>{
+ const js=readFileSync(new URL('../web/device-sync.js',import.meta.url),'utf8');
+ assert.match(js,/useCloud\.addEventListener\('click'/);
+ assert.match(js,/useLocal\.addEventListener\('click'/);
+ assert.match(js,/Both devices changed their layouts/);
+ assert.match(js,/if\(!room\|\|busy\|\|document\.hidden\|\|conflict\)return/);
+ assert.match(js,/const activeSession=session/);
+ assert.match(js,/if\(activeSession!==session\)return/);
+});
