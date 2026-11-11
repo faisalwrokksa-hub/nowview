@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {handleDeviceSync} from '../cloud/device-sync.mjs';
-import {secured,withAccess,accessCertFetch} from './access-fixture.mjs';
+import {secured,withAccess,accessCertFetch,signedAccessToken,accessRequest} from './access-fixture.mjs';
 const room='A'.repeat(43);
 const url='https://newview.example/api/device-sync/'+room;
 const blob='B'.repeat(16)+'.'+'C'.repeat(40);
@@ -27,7 +27,9 @@ test('encrypted layout round trips with bounded expiring KV record and no cachin
   headers:{'Origin':'https://newview.example','Content-Type':'application/json'},
   body:JSON.stringify({blob})}),env,new URL(url));
  assert.equal(update.status,204);
- assert.deepEqual(store.writes[0],{key:'v1:'+room,value:blob,options:{expirationTtl:604800}});
+ assert.match(store.writes[0].key,/^v2:[a-f0-9]{64}$/);
+ assert.equal(store.writes[0].value,blob);
+ assert.deepEqual(store.writes[0].options,{expirationTtl:604800});
  const loaded=await secured(new Request(url),env,new URL(url));
  assert.deepEqual(await loaded.json(),{blob});
  assert.equal(loaded.headers.get('cache-control'),'no-store');
@@ -102,4 +104,14 @@ test('cloud sync fails closed without Access configuration and denies unsigned c
  const unsigned=await handleDeviceSync(new Request(url),withAccess({NEWVIEW_SYNC:store}),new URL(url),accessCertFetch);
  assert.equal(unsigned.status,401);
  assert.equal(store.writes.length,0);
+});
+
+test('same room ID cannot read another Access user encrypted layout',async()=>{
+ const store=kv(),env=withAccess({NEWVIEW_SYNC:store}),endpoint=new URL(url);
+ const first=accessRequest(new Request(url,{method:'PUT',headers:{'Content-Type':'application/json','Origin':'https://newview.example'},body:JSON.stringify({blob})}),signedAccessToken({sub:'user-one'}));
+ assert.equal((await handleDeviceSync(first,env,endpoint,accessCertFetch)).status,204);
+ const second=accessRequest(new Request(url),signedAccessToken({sub:'user-two'}));
+ assert.equal((await handleDeviceSync(second,env,endpoint,accessCertFetch)).status,404);
+ const owner=accessRequest(new Request(url),signedAccessToken({sub:'user-one'}));
+ assert.equal((await handleDeviceSync(owner,env,endpoint,accessCertFetch)).status,200);
 });
