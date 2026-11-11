@@ -5,12 +5,12 @@
  const legacyView=view=>view==='business'?'myview':view==='social'||view==='news'?'media':view;
  const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',media:'Discover',social:'NewViewSocial',devices:'NewViewDevice'};
  const sourceNotes={
-  myview:'MyView · preferences stored on this device',
+  myview:'MyView · local widgets and Power BI shortcut · Microsoft sign-in stays with Microsoft',
   markets:'Binance public token prices in USDT · U.S. stock quotes unavailable without authorized feed',
   business:'Power BI · opens via Microsoft and saved shortcuts',
-  media:'Discover · headlines, video and public social links',
+  media:'Discover · publisher-linked headlines, official video embeds, public social bookmarks',
   social:'Social · saved public profile links only, no live feeds',
-  devices:'NewViewDevice · opt-in encrypted layout sharing · no video streaming'
+  devices:'NewViewDevice · encrypted layout pairing and experimental consent-based browser screen sharing'
  };
  const FIRST_LAUNCH_KEY='newview.first-launch.v1';
  const FIRST_LAUNCH_DEFAULT=Object.freeze({interests:['markets','business','news'],coverage:'global',video:'manual',refresh:'balanced'});
@@ -60,7 +60,7 @@
   const target=document.getElementById('workspace-intro');target?.parentNode?.insertBefore(container,target);
  }
  const DISPLAY_KEY='newview.display.profiles.v1';
- const DISPLAY_DEFAULT={name:'Default TV',views:['myview','markets','business','media','social'],refreshSeconds:60,fullscreen:false};
+ const DISPLAY_DEFAULT={name:'Default TV',views:['myview','markets','media','devices'],refreshSeconds:60,fullscreen:false};
  function sanitizeDisplay(value){
   if(!value||typeof value!=='object')return {...DISPLAY_DEFAULT,views:[...DISPLAY_DEFAULT.views]};
   const list=Array.isArray(value.views)?value.views:DISPLAY_DEFAULT.views;
@@ -188,7 +188,7 @@
   dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','newview-command-label');
   const label=document.createElement('label');label.id='newview-command-label';label.htmlFor='newview-command-input';label.textContent='Jump to a workspace';
   const input=document.createElement('input');input.id='newview-command-input';input.type='search';
-  input.placeholder='Search Markets, News, Watch, Business…';input.autocomplete='off';
+  input.placeholder='Search Markets, Power BI, Discover, Devices…';input.autocomplete='off';
   const hint=document.createElement('p');hint.className='newview-command-hint';hint.textContent='↑ ↓ select · Enter open · Esc close';
   const results=document.createElement('div');results.id='newview-command-results';results.setAttribute('role','listbox');results.setAttribute('aria-label','Workspace results');
   const close=document.createElement('button');close.type='button';close.className='newview-command-close';close.textContent='Close';close.setAttribute('aria-label','Close workspace search');
@@ -198,7 +198,7 @@
    {name:'MyView',detail:'Personal dashboard and widgets',view:'myview'},
    {name:'Power BI',detail:'Microsoft reporting portal',view:'business'},
    {name:'Markets',detail:'Charts and watchlists',view:'markets'},
-   {name:'Business',detail:'Local CSV analytics',view:'business'},
+   {name:'Business',detail:'Microsoft Power BI reports and workspaces',view:'business'},
    {name:'Discover',detail:'News, social and video',view:'media'},
    {name:'Headlines',detail:'Publisher-linked news',view:'media',section:'headlines'},
    {name:'Live TV',detail:'Public channel directory',view:'media',section:'channels'},
@@ -257,6 +257,56 @@
    if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='k'){e.preventDefault();overlay.hidden?openPalette():closePalette();}
   });
   window.NewViewCloseCommandPalette=closePalette;
+ }
+ function installQuickActions(){
+  const intro=document.getElementById('workspace-intro');
+  if(!intro||document.getElementById('newview-quick-actions'))return;
+  const bar=document.createElement('nav');bar.id='newview-quick-actions';bar.className='newview-quick-actions';
+  bar.setAttribute('aria-label','Workspace quick actions');
+  const items=[
+   {id:'markets',label:'Open charts',view:'markets'},
+   {id:'powerbi',label:'Power BI',view:'business'},
+   {id:'headlines',label:'Headlines',view:'media',section:'headlines'},
+   {id:'social',label:'Social',view:'media',section:'social'},
+   {id:'cast',label:'Screen cast',view:'devices'}
+  ];
+  for(const item of items){
+   const button=document.createElement('button');button.type='button';button.dataset.quickAction=item.id;
+   button.textContent=item.label;button.setAttribute('aria-label',item.label);
+   button.addEventListener('click',()=>{
+    if(item.id==='cast'){
+     window.NewViewCast?.open?.();
+     select('devices');
+    }else{
+     select(item.view);
+     if(item.section)window.NewViewWatch?.select?.(item.section);
+    }
+   });
+   bar.append(button);
+  }
+  intro.after(bar);
+  function sync(){
+   const current=document.body.dataset.currentWorkspace;
+   for(const button of bar.querySelectorAll('button')){
+    const selected=button.dataset.quickAction==='markets'?current==='markets':
+      button.dataset.quickAction==='powerbi'?current==='myview':
+      button.dataset.quickAction==='cast'?current==='devices':
+      current==='media'&&window.NewViewWatch?.currentSection?.()===button.dataset.quickAction;
+    button.setAttribute('aria-pressed',String(!!selected));
+   }
+  }
+  document.addEventListener('newview:workspace-change',sync);
+  bar.addEventListener('keydown',event=>{
+   if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+   const buttons=[...bar.querySelectorAll('button')];
+   const index=buttons.indexOf(document.activeElement);
+   if(index===-1)return;
+   event.preventDefault();
+   const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:
+     (index+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;
+   buttons[next].focus();
+  });
+  sync();
  }
  function install(){
   if(document.body.classList.contains('home-panel'))return;
@@ -332,6 +382,7 @@
   if(boardButton&&marketActions)marketActions.appendChild(boardButton);
   select(window.NewViewApps?'myview':getStored());
   installCommandPalette();
+  installQuickActions();
   installDisplay();
   installFirstLaunch();
  }
