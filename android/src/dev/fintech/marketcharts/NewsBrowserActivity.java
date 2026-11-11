@@ -21,7 +21,7 @@ import android.webkit.WebViewClient;
 public final class NewsBrowserActivity extends Activity {
     private WebView browser;
     private EditText address;
-    private static final String START="https://www.bbc.com/news";
+    private static final String START="https://www.youtube.com/";
 
     public static boolean safePage(Uri u){
         if(u==null||!"https".equalsIgnoreCase(u.getScheme())||u.getHost()==null||
@@ -46,10 +46,14 @@ public final class NewsBrowserActivity extends Activity {
         super.onCreate(state);
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.rgb(9,15,26));
+        getWindow().setStatusBarColor(Color.rgb(9,15,26));
+        getWindow().setNavigationBarColor(Color.rgb(9,15,26));
         LinearLayout toolbar=new LinearLayout(this);toolbar.setOrientation(LinearLayout.HORIZONTAL);
+        toolbar.setBackgroundColor(Color.rgb(17,28,43));
         Button back=button("◀"),forward=button("▶"),refresh=button("↻"),close=button("Close");
         address=new EditText(this);address.setSingleLine(true);address.setTextColor(Color.WHITE);
-        address.setHint("https://…");address.setHintTextColor(Color.LTGRAY);
+        address.setHint("Search or enter HTTPS website");address.setHintTextColor(Color.LTGRAY);
+        address.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(205,165,92)));
         address.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_VARIATION_URI);
         address.setImeOptions(EditorInfo.IME_ACTION_GO);
         toolbar.addView(back);toolbar.addView(forward);
@@ -61,6 +65,10 @@ public final class NewsBrowserActivity extends Activity {
         setContentView(root);
         WebSettings settings=browser.getSettings();
         settings.setJavaScriptEnabled(true);settings.setDomStorageEnabled(true);
+        // Prefer dark pages where WebView and publisher support the system preference.
+        // Algorithmic darkening is best effort; publisher-controlled rendering can remain light.
+        if(Build.VERSION.SDK_INT>=33)settings.setAlgorithmicDarkeningAllowed(true);
+        else if(Build.VERSION.SDK_INT>=29)settings.setForceDark(WebSettings.FORCE_DARK_ON);
         settings.setAllowFileAccess(false);settings.setAllowContentAccess(false);
         settings.setAllowFileAccessFromFileURLs(false);settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
@@ -94,7 +102,9 @@ public final class NewsBrowserActivity extends Activity {
         browser.requestFocus();
     }
     private Button button(String label){
-        Button b=new Button(this);b.setText(label);b.setMinimumWidth(54);b.setMinHeight(56);b.setFocusable(true);return b;
+        Button b=new Button(this);b.setText(label);b.setMinimumWidth(54);b.setMinHeight(56);
+        b.setTextColor(Color.WHITE);b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(36,58,75)));
+        b.setFocusable(true);return b;
     }
     @Override public void onBackPressed(){if(browser!=null&&browser.canGoBack())browser.goBack();else super.onBackPressed();}
     @Override protected void onPause(){if(browser!=null)browser.onPause();super.onPause();}
