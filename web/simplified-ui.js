@@ -52,7 +52,7 @@
   const articlePanel=el('section','nv-home-article');articlePanel.id='nv-home-article';articlePanel.hidden=true;
   articlePanel.setAttribute('aria-label','Readable article inside Home');
   const articleToolbar=el('div','nv-home-article-toolbar');
-  const backChart=el('button','','← Charts');backChart.type='button';backChart.addEventListener('click',()=>{articlePanel.hidden=true;mainChart.hidden=false;});
+  const backChart=el('button','','← Charts');backChart.type='button';backChart.addEventListener('click',()=>{window.NewViewInternalBrowser?.close?.();articlePanel.hidden=true;mainChart.hidden=false;});
   const articleSize=el('select');articleSize.setAttribute('aria-label','Article panel size');
   for(const [value,label] of [['normal','Normal reader'],['wide','Wide reader'],['large','Large reader']]){
    const opt=el('option','',label);opt.value=value;articleSize.append(opt);
@@ -63,8 +63,10 @@
   let articleUrl='';
   function openPublisher(){
    if(!articleUrl)return;
-   if(typeof window.NewViewNative?.openNewsBrowser==='function')window.NewViewNative.openNewsBrowser(articleUrl);
-   else window.open(articleUrl,'_blank','noopener,noreferrer');
+   if(!window.NewViewInternalBrowser?.open?.(articleUrl,{area:'home'})){
+    if(typeof window.NewViewNative?.openNewsBrowser==='function')window.NewViewNative.openNewsBrowser(articleUrl);
+    else window.open(articleUrl,'_blank','noopener,noreferrer');
+   }
   }
   fullArticle.addEventListener('click',openPublisher);
   articleToolbar.append(backChart,articleSize,fullArticle);
@@ -73,8 +75,13 @@
    if(!item||typeof item.url!=='string'||!item.url.startsWith('https://'))return;
    articleUrl=item.url;articleTitle.textContent=item.title;
    articleInfo.textContent=item.source+(item.publishedAt?' · '+new Date(item.publishedAt).toLocaleString():'');
-   articleBody.textContent=item.summary||'This publisher provides a headline without an excerpt. Choose Full publisher page to continue reading in NewView on Android or the publisher tab on the web.';
+   articleBody.textContent=item.summary||'Publisher feed excerpt unavailable. Open publisher for the complete article.';
    mainChart.hidden=true;articlePanel.hidden=false;homeLower.dataset.articleSize=articleSize.value;
+   const browser=window.NewViewInternalBrowser;
+   if(browser){
+    articleTitle.hidden=true;articleInfo.hidden=true;articleBody.hidden=true;
+    browser.open(item.url,{area:'home',title:item.title,summary:item.summary||''});
+   }else{articleTitle.hidden=false;articleInfo.hidden=false;articleBody.hidden=false;}
    articlePanel.scrollIntoView?.({block:'start',behavior:'smooth'});
   }
   const featured=el('section','nv-home-featured');featured.id='nv-home-featured';featured.setAttribute('aria-label','Featured channel and floating cast');
