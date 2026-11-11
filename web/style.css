@@ -817,3 +817,56 @@ body>main>.newview-settings-content :is(input,select,button){max-width:100%}
 body>main>.newview-settings[open]>.newview-settings-content{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto}
 @media(max-height:480px){body>main>.newview-settings[open]>.newview-settings-content{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}}
 @media(hover:none){.newview-settings-content :is(button,a,input,select,textarea,summary,[tabindex]):focus{scroll-margin-block:32px}}
+
+/* TV remote and keyboard navigation: keep the active control visible in scrollable panels. */
+@supports selector(:focus-visible){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,input,select,textarea,summary,[tabindex]):focus-visible{scroll-margin-block:24px;scroll-margin-inline:24px}
+}
+@supports not selector(:focus-visible){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,input,select,textarea,summary,[tabindex]):focus{outline:3px solid #ffd6a3;outline-offset:3px}
+}
+/* State feedback stays legible without moving the surrounding dashboard. */
+:is(.workspace,.shell-page) :is([role="status"],[role="alert"],[aria-live]){max-width:100%;min-width:0;overflow-wrap:anywhere}
+@media(forced-colors:active){
+  :is(.workspace-switcher,.workspace,.shell-page) :is(button,a,summary,[tabindex]):focus{outline:3px solid Highlight;outline-offset:3px}
+}
+
+/* Keep the settings drawer reachable in RTL and on narrow landscape TV/web views. */
+[dir="rtl"] body>main>.newview-settings[open]>.newview-settings-content,
+body[dir="rtl"]>main>.newview-settings[open]>.newview-settings-content{right:auto;left:clamp(12px,3vw,48px)}
+@media(max-width:520px){
+ body>main>.newview-settings[open]>.newview-settings-content{inset:8px;width:auto;max-width:none;padding:clamp(12px,3vw,20px);overscroll-behavior:contain}
+}
+
+/* TV and keyboard users: preserve a visible focus target when panels scroll. */
+.workspace-switcher,.workspace,.shell-page,.newview-settings-content{scroll-padding:24px}
+@media (hover:none) and (pointer:coarse){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,summary,input,select,textarea,[tabindex]):focus{outline:3px solid #ffd6a3;outline-offset:3px}
+}
+@media (prefers-contrast:more){
+  :is(.workspace-switcher,.workspace,.shell-page) :is(button,a,summary,[tabindex]):focus{outline-width:4px;outline-offset:3px}
+}
+
+
+/* Task 1: keep settings controls operable with TV remotes and short viewports. */
+body>main>.newview-settings[open]>.newview-settings-content{
+  max-height:calc(100dvh - 24px);
+  scrollbar-gutter:stable;
+  overscroll-behavior:contain;
+}
+body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,select,textarea,summary,[tabindex]):focus{
+  scroll-margin-block:32px;
+  scroll-margin-inline:24px;
+}
+@media(max-height:480px){
+  body>main>.newview-settings[open]>.newview-settings-content{
+    top:8px;
+    bottom:8px;
+    max-height:calc(100dvh - 16px);
+    padding:12px;
+  }
+}
+@media(forced-colors:active){
+  body>main>.newview-settings[open]>.newview-settings-content{border:2px solid CanvasText}
+}
+
