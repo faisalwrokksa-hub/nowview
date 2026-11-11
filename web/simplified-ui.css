@@ -354,3 +354,39 @@ body.nv-simple .newview-cast-dock button,body.nv-simple .nv-custom-advanced butt
  }
  body.nv-simple .newview-cast-dock:not([hidden]){max-width:calc(100vw - 28px)!important;max-height:calc(100dvh - 24px)!important}
 }
+
+
+/* Home photo fills the entire gold dashboard frame; other pages stay legible.
+   A local upload overrides the default Wikimedia black tiger image. */
+body.nv-simple[data-simple-section="home"]>main{
+ background-image:linear-gradient(115deg,rgba(4,9,16,.79),rgba(4,13,22,.56) 42%,rgba(3,11,20,.75)),var(--newview-wallpaper)!important;
+ background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important;
+ background-attachment:scroll!important;
+}
+body.nv-simple[data-simple-section="home"][data-wallpaper-shade="light"]>main{
+ background-image:linear-gradient(110deg,rgba(4,9,16,.47),rgba(4,13,22,.28) 48%,rgba(3,11,20,.52)),var(--newview-wallpaper)!important;
+}
+body.nv-simple[data-simple-section="home"][data-wallpaper-shade="dark"]>main{
+ background-image:linear-gradient(110deg,rgba(4,9,16,.88),rgba(4,13,22,.70) 48%,rgba(3,11,20,.9)),var(--newview-wallpaper)!important;
+}
+body.nv-simple[data-simple-section="home"] .nv-simple-welcome{
+ background:linear-gradient(105deg,rgba(8,19,30,.37),rgba(9,21,33,.15))!important;
+ backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+}
+body.nv-simple[data-simple-section="home"] .nv-simple-tile{
+ background:rgba(7,18,30,.4)!important;
+ border-color:rgba(240,206,132,.6)!important;
+ backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px);
+ box-shadow:0 6px 24px rgba(0,0,0,.18);
+}
+body.nv-simple[data-simple-section="home"] .nv-simple-tile-icon{
+ background:rgba(9,25,37,.38)!important;color:#f5d28c;
+}
+body.nv-simple #nv-wallpaper-credit{font-size:12px;color:#afc4d5;line-height:1.6}
+body.nv-simple #nv-wallpaper-credit a{color:#f4d58e;text-decoration:underline;text-underline-offset:3px}
+body.nv-simple #wallpaper-controls{max-width:100%;min-width:0}
+body.nv-simple #wallpaper-controls input[type="file"]{width:min(100%,320px);max-width:100%}
+@media(max-width:700px){
+ body.nv-simple[data-simple-section="home"]>main{background-position:63% center!important}
+ body.nv-simple[data-simple-section="home"] .nv-simple-tile{backdrop-filter:blur(8px)}
+}
