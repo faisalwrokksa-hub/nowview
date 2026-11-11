@@ -71,6 +71,7 @@
   function connected(value){copy.hidden=push.hidden=leave.hidden=!value;create.hidden=join.hidden=value;pairing.hidden=value;}
   async function update(force=false){
    if(!room||busy||document.hidden)return;
+   if(navigator.onLine===false){report('Browser offline · local dashboard available; cloud layout sync paused');return;}
    busy=true;
    try{
     const current=snapshot(),local=JSON.stringify(current);
@@ -119,6 +120,9 @@
   if(location.hash.startsWith('#sync=')){
    try{pair(readPair(location.hash.slice(1)),false);}catch{report('Invalid pairing link. Create a fresh one.');}
   }
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&room)update();});
+  window.addEventListener('online',()=>{if(room)update();});
+  window.addEventListener('offline',()=>{if(room)report('Browser offline · cloud sync paused; local dashboard available');});
   window.addEventListener('pagehide',()=>{if(timer)clearInterval(timer);},{once:true});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
