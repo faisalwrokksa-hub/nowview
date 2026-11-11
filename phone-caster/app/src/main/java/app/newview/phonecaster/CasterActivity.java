@@ -48,7 +48,7 @@ import java.util.List;
  */
 public final class CasterActivity extends Activity {
     private static final int CAPTURE_REQUEST=4102, NOTICE_REQUEST=4103;
-    private static final long MAX_SESSION_MS=30*60*1000L, ICE_TIMEOUT_MS=15000L;
+    private static final long MAX_SESSION_MS=30*60*1000L, ICE_TIMEOUT_MS=15000L, CONNECT_TIMEOUT_MS=120000L, DISCONNECT_GRACE_MS=20000L;
     private static WeakReference<CasterActivity> active=new WeakReference<>(null);
     private final Handler handler=new Handler(Looper.getMainLooper());
     private EditText offer,answer;
@@ -62,9 +62,12 @@ public final class CasterActivity extends Activity {
     private VideoTrack videoTrack;
     private EglBase egl;
     private SessionDescription remoteOffer;
-    private boolean sharing=false,stopping=false,initialized=false;
+    private boolean sharing=false,stopping=false,initialized=false,connected=false;
     private final Runnable expire=()->{stopCasting();show("Session expired after 30 minutes. Reconnect to share again.");};
     private final Runnable iceTimeout=()->{if(sharing&&answer.getText().length()==0){stopCasting();show("LAN connection setup timed out. Recreate the TV offer.");}};
+
+    private final Runnable connectTimeout=()->{if(sharing&&!connected){stopCasting();show("No TV connected within two minutes. Screen sharing stopped for privacy.");}};
+    private final Runnable disconnectTimeout=()->{if(sharing){stopCasting();show("TV connection was lost. Screen sharing stopped.");}};
 
     public static void stopActiveCapture(){
         CasterActivity activity=active.get();
@@ -79,11 +82,20 @@ public final class CasterActivity extends Activity {
         TextView info=new TextView(this);info.setText("1. On your TV open NewViewDevice → Watch another screen.\n2. Copy the TV connection offer below.\n3. Tap Start, approve Android screen sharing, then copy the generated answer back to your TV.\n\nLAN-only video; no audio or remote control. Stop sharing at any time.");
         offer=new EditText(this);offer.setHint("Paste TV WebRTC offer (JSON)");offer.setSingleLine(false);offer.setMinLines(4);offer.setMaxLines(8);
         answer=new EditText(this);answer.setHint("Connection answer appears here");answer.setSingleLine(false);answer.setMinLines(4);answer.setMaxLines(8);answer.setTextIsSelectable(true);answer.setFocusable(false);
+        Button paste=new Button(this);paste.setText("Paste TV offer from clipboard");
+        paste.setOnClickListener(v->{
+            android.content.ClipboardManager clip=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+            android.content.ClipData content=clip==null?null:clip.getPrimaryClip();
+            if(content==null||content.getItemCount()==0){show("No TV offer in clipboard.");return;}
+            CharSequence value=content.getItemAt(0).coerceToText(this);
+            if(value==null||value.length()>120000){show("Clipboard offer is too large or invalid.");return;}
+            offer.setText(value);show("TV offer pasted. Review it before approving screen capture.");
+        });
         start=new Button(this);start.setText("Start screen sharing · Android permission required");
         stop=new Button(this);stop.setText("Stop sharing");stop.setEnabled(false);
         Button copy=new Button(this);copy.setText("Copy answer");
         status=new TextView(this);status.setText("Not sharing");status.setTextSize(16f);
-        main.addView(title);main.addView(info);main.addView(offer);main.addView(start);main.addView(answer);main.addView(copy);main.addView(stop);main.addView(status);
+        main.addView(title);main.addView(info);main.addView(offer);main.addView(paste);main.addView(start);main.addView(answer);main.addView(copy);main.addView(stop);main.addView(status);
         ScrollView scroll=new ScrollView(this);scroll.addView(main,new ScrollView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));setContentView(scroll);
         start.setOnClickListener(v->requestCapture());
         stop.setOnClickListener(v->stopCasting());
@@ -147,8 +159,8 @@ public final class CasterActivity extends Activity {
     private void beginCapture(Intent permission){
         if(sharing||stopping||remoteOffer==null)return;
         try{
-            sharing=true;start.setEnabled(false);stop.setEnabled(true);offer.setEnabled(false);
-            answer.setText("");handler.postDelayed(expire,MAX_SESSION_MS);
+            sharing=true;connected=false;start.setEnabled(false);stop.setEnabled(true);offer.setEnabled(false);
+            answer.setText("");handler.postDelayed(expire,MAX_SESSION_MS);handler.postDelayed(connectTimeout,CONNECT_TIMEOUT_MS);
             PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(getApplicationContext()).createInitializationOptions());
             initialized=true;
             egl=EglBase.create();
@@ -160,9 +172,12 @@ public final class CasterActivity extends Activity {
             peer=factory.createPeerConnection(config,new PeerConnection.Observer(){
                 @Override public void onSignalingChange(PeerConnection.SignalingState state){}
                 @Override public void onIceConnectionChange(PeerConnection.IceConnectionState state){
-                    if(state==PeerConnection.IceConnectionState.CONNECTED||state==PeerConnection.IceConnectionState.COMPLETED)show("Connected to TV · live screen sharing");
+                    if(state==PeerConnection.IceConnectionState.CONNECTED||state==PeerConnection.IceConnectionState.COMPLETED)
+                        runOnUiThread(()->{if(!sharing)return;connected=true;handler.removeCallbacks(connectTimeout);handler.removeCallbacks(disconnectTimeout);show("Connected to TV · live screen sharing");});
+                    if(state==PeerConnection.IceConnectionState.DISCONNECTED)
+                        runOnUiThread(()->{if(!sharing)return;show("TV disconnected; attempting to reconnect for 20 seconds…");handler.removeCallbacks(disconnectTimeout);handler.postDelayed(disconnectTimeout,DISCONNECT_GRACE_MS);});
                     if(state==PeerConnection.IceConnectionState.FAILED||state==PeerConnection.IceConnectionState.CLOSED)
-                        runOnUiThread(()->{stopCasting();show("WebRTC connection ended. Screen capture stopped.");});
+                        runOnUiThread(()->{if(!sharing)return;stopCasting();show("WebRTC connection ended. Screen capture stopped.");});
                 }
                 @Override public void onIceConnectionReceivingChange(boolean change){}
                 @Override public void onIceGatheringChange(PeerConnection.IceGatheringState state){
@@ -222,7 +237,7 @@ public final class CasterActivity extends Activity {
     private void stopCasting(){
         if(stopping)return;
         stopping=true;sharing=false;
-        handler.removeCallbacks(expire);handler.removeCallbacks(iceTimeout);
+        handler.removeCallbacks(expire);handler.removeCallbacks(iceTimeout);handler.removeCallbacks(connectTimeout);handler.removeCallbacks(disconnectTimeout);connected=false;
         if(peer!=null){PeerConnection previous=peer;peer=null;previous.close();previous.dispose();}
         if(capturer!=null){ScreenCapturerAndroid previous=capturer;capturer=null;try{previous.stopCapture();}catch(RuntimeException ignored){}previous.dispose();}
         if(videoTrack!=null){videoTrack.dispose();videoTrack=null;}
