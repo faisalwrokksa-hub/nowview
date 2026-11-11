@@ -10,7 +10,7 @@
   business:'Power BI · opens via Microsoft and saved shortcuts',
   media:'Discover · publisher-linked headlines, official video embeds, public social bookmarks',
   social:'Social · saved public profile links only, no live feeds',
-  devices:'NewViewDevice · encrypted layout pairing and experimental consent-based browser screen sharing'
+  devices:'Devices'
  };
  const FIRST_LAUNCH_KEY='newview.first-launch.v1';
  const FIRST_LAUNCH_DEFAULT=Object.freeze({interests:['markets','business','news'],coverage:'global',video:'manual',refresh:'balanced'});
@@ -107,7 +107,7 @@
    workspaceTitle.textContent=names[view];
   }
   const source=document.getElementById('footer-source');
-  if(source)source.textContent=sourceNotes[view];
+  if(source)source.textContent='';
   document.body.dataset.currentWorkspace=view;
   document.dispatchEvent(new CustomEvent('newview:workspace-change',{detail:{view}}));
   const activeTab=document.querySelector('[data-view-button="'+view+'"]');
