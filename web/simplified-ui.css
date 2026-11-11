@@ -397,3 +397,72 @@ body.nv-simple #wallpaper-controls input[type="file"]{width:min(100%,320px);max-
  body.nv-simple[data-simple-section="home"]>main{background-position:63% center!important}
  body.nv-simple[data-simple-section="home"] .nv-simple-tile{backdrop-filter:blur(8px)}
 }
+
+
+/* Compact, remote-friendly IPTV channel switcher; no long wall of channel tiles. */
+body.nv-simple #nv-tv-guide{display:grid;gap:12px;width:100%;max-width:100%}
+body.nv-simple #nv-tv-guide .nv-tv-filters{display:block;overflow:visible;padding:0}
+body.nv-simple #nv-tv-guide :is(.nv-tv-category,.nv-tv-channel-picker,.nv-tv-search){
+ width:100%;max-width:100%;min-height:50px;box-sizing:border-box;
+ padding:11px 14px;background:#132638;color:#f3f8ff;border:1px solid #9b7e4a;
+ border-radius:12px;font:inherit;
+}
+body.nv-simple #nv-tv-guide .nv-tv-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+body.nv-simple #nv-tv-guide .nv-tv-controls .nv-tv-search{flex:1 1 240px}
+body.nv-simple #nv-tv-guide .nv-tv-now{position:static;bottom:auto;box-shadow:none}
+body.nv-simple #nv-tv-guide .nv-tv-count{font-size:12px}
+body.nv-simple #nv-tv-guide :is(select,button,input):focus-visible{outline:3px solid #e6c17b;outline-offset:2px}
+
+/* Enlarged customizable Home shortcuts, with removed intro text. */
+body.nv-simple[data-simple-section="home"] #nv-simple-home{
+ width:100%;max-width:1360px;min-height:min(74dvh,860px);display:flex;
+ flex-direction:column;justify-content:center;
+}
+body.nv-simple #nv-simple-grid{width:100%;display:grid;gap:clamp(14px,2vw,26px)}
+body.nv-simple #nv-simple-grid[data-box-count="1"]{grid-template-columns:1fr}
+body.nv-simple #nv-simple-grid[data-box-count="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+body.nv-simple #nv-simple-grid[data-box-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.nv-simple #nv-simple-grid[data-box-count="4"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+body.nv-simple #nv-simple-grid .nv-simple-tile{
+ min-height:clamp(190px,27dvh,325px);padding:clamp(22px,3vw,44px);
+ gap:clamp(15px,2vw,32px);border-radius:22px;
+}
+body.nv-simple #nv-simple-grid .nv-simple-tile-icon{
+ width:clamp(72px,7vw,108px);height:clamp(72px,7vw,108px);
+ font-size:clamp(32px,3vw,48px);
+}
+body.nv-simple #nv-simple-grid .nv-simple-tile-text strong{font-size:clamp(23px,2.5vw,36px)}
+body.nv-simple #nv-watch-hub .nv-hub-grid .nv-simple-tile{
+ min-height:clamp(150px,20dvh,235px);padding:clamp(24px,3vw,38px);
+}
+body.nv-simple #nv-read-hub .nv-hub-grid .nv-simple-tile{
+ min-height:clamp(105px,15dvh,165px);padding:clamp(18px,2vw,28px);
+}
+/* Source-linked top stories, at most four cards. */
+body.nv-simple #news-items.nv-news-cards{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;
+}
+body.nv-simple #news-items.nv-news-cards .news-item{
+ min-width:0;margin:0;padding:clamp(18px,2vw,28px);border:1px solid #947548;
+ border-radius:15px;background:#122539;display:flex;flex-direction:column;gap:12px;
+}
+body.nv-simple #news-items.nv-news-cards .news-link{
+ font-size:clamp(17px,2vw,23px);font-weight:700;line-height:1.35;overflow-wrap:anywhere;
+}
+body.nv-simple #news-items.nv-news-cards .nv-news-summary{
+ margin:0;color:#c5d4dd;font-size:14px;line-height:1.6;overflow-wrap:anywhere;
+}
+body.nv-simple #news-items.nv-news-cards .news-meta{margin-top:auto}
+body.nv-simple .nv-news-mode{min-height:44px;padding:9px 13px;color:#f4f7fa;background:#152d40;border:1px solid #997849;border-radius:10px}
+@media(max-width:800px){
+ body.nv-simple #nv-simple-grid[data-box-count="3"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:650px){
+ body.nv-simple[data-simple-section="home"] #nv-simple-home{min-height:0;justify-content:flex-start}
+ body.nv-simple #nv-simple-grid[data-box-count]{grid-template-columns:1fr}
+ body.nv-simple #nv-simple-grid .nv-simple-tile{min-height:165px;padding:22px}
+ body.nv-simple #nv-simple-grid .nv-simple-tile-text strong{font-size:24px}
+ body.nv-simple #news-items.nv-news-cards{grid-template-columns:1fr}
+ body.nv-simple #nv-tv-guide .nv-tv-now{gap:8px}
+ body.nv-simple #nv-tv-guide .nv-tv-now span{flex-basis:100%}
+}
