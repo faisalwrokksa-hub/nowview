@@ -41,7 +41,9 @@
   const trigger=el('button','newview-cast-trigger','▣ Screen cast');trigger.type='button';trigger.id='newview-cast-trigger';
   trigger.setAttribute('aria-label','Open floating screen viewer and device connection controls');
   // Keep casting accessible from Watch; avoid duplicate header action.
-  const header=document.querySelector('main > header');if(!document.body.classList.contains('nv-simple'))header?.append(trigger);
+  // No redundant header launcher: casting is available through Watch → Mirror.
+  // The persistent dock and public NewViewCast API remain available.
+
   const deviceControls=document.querySelector('.newview-device-cards');
   const card=el('article','shell-card newview-cast-setup');card.id='newview-cast-setup';
   const eyebrow=el('span','shell-eyebrow','LIVE VIEW · BROWSER EXPERIMENTAL');
