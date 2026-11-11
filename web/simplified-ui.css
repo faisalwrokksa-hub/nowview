@@ -224,3 +224,79 @@ body.nv-simple .nv-youtube-stage iframe{width:100%;height:100%;aspect-ratio:16/9
 body.nv-simple .nv-youtube-stage p{color:#aeb7c8;padding:18px;text-align:center}
 body.nv-simple .nv-youtube-status{font-size:12px;color:#afb9c9;margin:0;line-height:1.5}
 @media(max-width:640px){body.nv-simple .nv-youtube-form{display:grid;grid-template-columns:1fr}body.nv-simple .nv-youtube-form input{min-width:0}}
+
+
+/* Scroll repair: older fixed-viewport TV rules locked html, body and MyView.
+   Prefer one natural vertical page scroller for phones and desktop browsers. */
+html:has(body.nv-simple){height:auto!important;min-height:100%;overflow-x:clip!important;overflow-y:auto!important;scroll-behavior:smooth}
+body.nv-simple{
+ height:auto!important;min-height:100vh!important;min-height:100dvh!important;
+ max-height:none!important;overflow-x:clip!important;overflow-y:visible!important;
+ overscroll-behavior-y:auto!important;-webkit-overflow-scrolling:touch;
+}
+body.nv-simple>main{
+ display:flex!important;flex-direction:column!important;
+ width:min(1440px,100%)!important;max-width:100%!important;
+ height:auto!important;min-height:100vh!important;min-height:100dvh!important;
+ max-height:none!important;overflow:visible!important;overflow-x:clip!important;
+ padding-bottom:max(24px,env(safe-area-inset-bottom))!important;
+ gap:clamp(10px,1.6vw,22px);
+}
+body.nv-simple>main>header,
+body.nv-simple #nv-simple-nav{flex:0 0 auto!important;min-width:0}
+body.nv-simple>main>[data-workspace],
+body.nv-simple>main>[data-workspace="myview"],
+body.nv-simple>main>.shell-page,
+body.nv-simple>main>#market-shell{
+ display:flex;flex-direction:column;flex:0 0 auto!important;
+ width:100%;min-width:0!important;min-height:0!important;
+ height:auto!important;max-height:none!important;
+ overflow:visible!important;overscroll-behavior-y:auto!important;
+}
+body.nv-simple>main>[hidden],
+body.nv-simple>main>[data-workspace][hidden],
+body.nv-simple>main>#market-shell[hidden],
+body.nv-simple #nv-simple-home[hidden],
+body.nv-simple #nv-watch-hub[hidden],
+body.nv-simple #nv-read-hub[hidden],
+body.nv-simple #nv-customize-hub[hidden]{display:none!important}
+body.nv-simple #nv-simple-home,
+body.nv-simple #nv-watch-hub,
+body.nv-simple #nv-read-hub,
+body.nv-simple #nv-customize-hub{
+ width:min(100%,1320px);max-height:none!important;height:auto!important;
+ min-width:0!important;overflow:visible!important;overscroll-behavior:auto!important;
+}
+body.nv-simple #nv-watch-hub #nv-watch-channels,
+body.nv-simple #nv-read-hub #nv-watch-headlines,
+body.nv-simple #nv-read-hub #news-items,
+body.nv-simple #newview-channel-directory,
+body.nv-simple .nv-tv-guide,
+body.nv-simple .nv-tv-grid{
+ height:auto!important;min-height:0!important;max-height:none!important;
+ overflow:visible!important;overscroll-behavior:auto!important;
+}
+body.nv-simple .nv-tv-now{position:static!important;bottom:auto!important;max-width:100%}
+body.nv-simple .nv-tv-filters{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+body.nv-simple #nv-simple-nav{position:sticky!important;top:0;z-index:20;scroll-margin-top:8px}
+body.nv-simple :is(#nv-simple-home,#nv-watch-hub,#nv-read-hub,#nv-customize-hub,.nv-youtube,.nv-tv-guide){scroll-margin-top:90px}
+body.nv-simple :is(button,a,input,select,textarea,summary):focus-visible{scroll-margin-block:90px 30px}
+body.nv-simple :is(.nv-simple-tile,.nv-tv-channel,.nv-custom-choice){touch-action:manipulation}
+body.nv-simple #nv-customize-hub .newview-settings-content{
+ max-height:none!important;height:auto!important;overflow:visible!important;
+ overscroll-behavior:auto!important;
+}
+body.nv-simple #nv-customize-hub .nv-custom-advanced[open]>.newview-settings-content{display:block}
+@media(max-width:700px){
+ html:has(body.nv-simple){scroll-behavior:auto}
+ body.nv-simple>main{padding:12px 12px max(22px,env(safe-area-inset-bottom))!important;gap:12px!important}
+ body.nv-simple>main>header{gap:8px}
+ body.nv-simple #nv-simple-nav{top:0;gap:3px;grid-template-columns:repeat(4,minmax(0,1fr))}
+ body.nv-simple .nv-simple-tab{min-width:0;min-height:48px;white-space:normal;overflow-wrap:anywhere;padding:10px 3px}
+ body.nv-simple[data-simple-section="home"] #nv-simple-home{min-height:0!important;justify-content:flex-start}
+ body.nv-simple .nv-simple-welcome{min-height:150px}
+ body.nv-simple .nv-tv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.nv-simple #nv-customize-hub .nv-custom-options{grid-template-columns:1fr}
+}
+@media(max-width:390px){body.nv-simple .nv-tv-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html:has(body.nv-simple){scroll-behavior:auto}}
