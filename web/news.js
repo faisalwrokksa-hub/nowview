@@ -11,6 +11,10 @@
  const nativePending=new Map();
  window.__newviewNewsResult=(id,data)=>{const entry=nativePending.get(id);if(!entry)return;nativePending.delete(id);clearTimeout(entry.timer);if(data?.error)entry.reject(Error(data.error));else entry.resolve(data);};
  let lastItems=[];let lastFetchLabel='';
+ const mode=document.createElement('select');mode.className='nv-news-mode';mode.setAttribute('aria-label','News filter');
+ for(const [value,label] of [['hot','Top stories (4)'],['all','All headlines']]){const option=document.createElement('option');option.value=value;option.textContent=label;mode.append(option);}
+ mode.value='hot';
+ refresh.parentElement?.append(mode);
  const search=document.createElement('input');search.type='search';search.placeholder='Filter headlines';search.setAttribute('aria-label','Filter news headlines');
  const auto=document.createElement('input');auto.type='checkbox';auto.id='news-auto-refresh';
  const autoLabel=document.createElement('label');autoLabel.htmlFor=auto.id;autoLabel.textContent='Auto refresh every 2 minutes';
@@ -30,19 +34,29 @@
  window.addEventListener?.('newview:source-filter',()=>{hideFailed.checked=window.NewViewSourceMonitor?.getSettings?.().hideFailed!==false;filterSources();});
  refresh.parentElement?.append(search,autoLabel,auto,hiddenLabel,hideFailed);
  function renderItems(){
-  container.replaceChildren();const term=search.value.trim().toLowerCase().slice(0,120);
-  for(const item of lastItems){if(term&&!item.title.toLowerCase().includes(term))continue;
+  container.replaceChildren();
+  container.classList.toggle('nv-news-cards',mode.value==='hot');
+  const term=search.value.trim().toLowerCase().slice(0,120);
+  const matches=lastItems.filter(item=>!term||item.title.toLowerCase().includes(term));
+  const sorted=mode.value==='hot'?[...matches].sort((a,b)=>(Date.parse(b.publishedAt)||0)-(Date.parse(a.publishedAt)||0)).slice(0,4):matches;
+  for(const item of sorted){
    let url;try{url=new URL(item.url);}catch{continue;}
    if(url.protocol!=='https:'||url.username||url.password||url.port||!articleHosts.has(url.hostname))continue;
-   const article=line('article','news-item','');const link=line('a','news-link',item.title);
+   const article=line('article','news-item',''),link=line('a','news-link',item.title);
    link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';
    const date=item.publishedAt?new Date(item.publishedAt):null;
    const stamp=date&&Number.isFinite(date.getTime())?date.toLocaleString('en-US',{dateStyle:'medium'}):'Date unavailable';
-   article.append(link,line('small','news-meta',item.source+' · '+stamp));container.append(article);
+   article.append(link);
+   if(mode.value==='hot'){
+    const summary=String(item.summary||'').trim();
+    if(summary)article.append(line('p','nv-news-summary',summary.slice(0,210)));
+   }
+   article.append(line('small','news-meta',item.source+' · '+stamp));container.append(article);
   }
-  status.textContent=container.children.length+' matching headlines'+(lastFetchLabel?' · '+lastFetchLabel:'');
+  status.textContent=container.children.length+(mode.value==='hot'?' top stories':' matching headlines')+(lastFetchLabel?' · '+lastFetchLabel:'');
  }
  search.addEventListener('input',renderItems);
+ mode.addEventListener('change',renderItems);
  auto.addEventListener('change',()=>{if(auto.checked)refreshNews();});
  setInterval(()=>{if(auto.checked&&document.body.dataset.currentWorkspace==='media'&&window.NewViewWatch?.currentSection?.()==='headlines')refreshNews();},120000);
  const line=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;n.textContent=text;return n;};
