@@ -119,7 +119,9 @@
       if(last){const content=parts.join('');cleanup();resolve(content);}
      };
      try {
-      Promise.resolve(window.NewViewNative.fetchPublicPlaylist(id)).catch(error=>{
+      Promise.resolve(window.NewViewNative.fetchPublicPlaylist(id)).then(accepted=>{
+       if(accepted===false){cleanup();reject(Error('Native playlist request was rejected'));}
+      },error=>{
        cleanup();reject(Error('Native playlist request failed: '+String(error?.message||error)));
       });
      } catch(error) {
