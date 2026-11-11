@@ -714,3 +714,70 @@ body>main>[data-workspace="myview"] #myview-grid{overscroll-behavior:contain}
 .myview-video-panel p{margin:0;font-size:12px}
 @media(pointer:fine){.myview-widget[draggable="true"]{cursor:grab}.myview-widget[draggable="true"]:active{cursor:grabbing}}
 @media(pointer:coarse){.myview-widget[draggable="true"]{cursor:default}}
+
+
+
+/* Cinema TV — consolidated design layer. Inspired by open dashboard design patterns;
+   no third-party CSS or proprietary assets are included. */
+:root{--bg:#08090e;--panel:#151922;--line:#343b48;--muted:#aab3c4;--text:#f7f8fc;--cyan:#e4a66c;--green:#79dfb4;--red:#ff8f9c;--cinema-radius:18px;--cinema-gap:clamp(10px,1.4vw,22px)}
+body{background:radial-gradient(ellipse at 75% -10%,rgba(90,66,123,.23),transparent 55%),var(--bg);color:var(--text)}
+body>main{width:100%;max-width:2200px;margin:auto;padding:clamp(12px,2vw,32px);gap:var(--cinema-gap)}
+body>main>header h1{font-weight:750;letter-spacing:-.055em}
+.brand-dot{background:var(--cyan)}
+.workspace-switcher{gap:8px;scrollbar-width:thin;scrollbar-color:#646474 transparent}
+.workspace-switcher .workspace-tab{background:#1b202b;border:1px solid #384151;border-radius:14px;color:#e2e5ed;min-height:52px;padding:12px 18px;font-weight:650}
+.workspace-switcher .workspace-tab.active,.workspace-switcher .workspace-tab[aria-pressed="true"]{background:#413029;border-color:#e4a66c;color:#ffe4c7}
+.workspace,.shell-card,.myview-widget{border-radius:var(--cinema-radius);border-color:var(--line)}
+.workspace{background:linear-gradient(145deg,#1b202b,#10131b)}
+.myview-widget{min-width:0;background:#1b202b}
+.myview-widget :is(h2,h3){overflow-wrap:anywhere}
+button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #ffd6a3!important;outline-offset:3px!important}
+body>main>[data-workspace="myview"] .newview-home-hero{display:none}
+body>main>[data-workspace="myview"] .myview-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:var(--cinema-gap)}
+body>main>[data-workspace="myview"] .myview-widget{min-height:160px}
+body>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:1;grid-row:span 2;min-height:330px}
+body>main>[data-workspace="myview"] .newview-personalize{margin-top:12px}
+.newview-advanced-navigation{padding:12px;border-bottom:1px solid var(--line)}
+.newview-advanced-navigation .newview-home-quick,.newview-advanced-navigation .newview-panel-tabs{display:flex;flex-wrap:wrap;gap:8px;position:static}
+.newview-advanced-navigation h3{font-size:14px;margin:0 0 10px}
+body>main>.newview-settings{position:relative;z-index:40;flex-shrink:0;align-self:flex-end}
+body>main>.newview-settings>summary{cursor:pointer;min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:#202631;list-style:none}
+body>main>.newview-settings>summary::-webkit-details-marker{display:none}
+body>main>.newview-settings[open]>.newview-settings-content{position:fixed;z-index:41;top:clamp(12px,5vh,50px);right:clamp(12px,3vw,48px);bottom:clamp(12px,5vh,50px);width:min(480px,calc(100vw - 24px));overflow:auto;padding:20px;background:#171c27;border:1px solid #525b6b;border-radius:20px;box-shadow:0 0 0 100vmax rgba(0,0,0,.64),0 25px 60px rgba(0,0,0,.6)}
+body>main>.newview-settings[open]>summary{border-color:var(--cyan);color:var(--cyan)}
+body>main>.newview-settings-content :is(input,select,button){max-width:100%}
+@media(min-width:1200px) and (min-height:650px){
+ body>main{display:grid;grid-template-columns:minmax(185px,220px) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;align-items:stretch}
+ body>main>header{grid-column:1/-1;grid-row:1}
+ body>main>.workspace-switcher{grid-column:1;grid-row:2/4;display:flex;flex-direction:column;align-items:stretch;overflow-y:auto;overflow-x:hidden;padding:12px;background:#11151e;border:1px solid var(--line);border-radius:20px}
+ body>main>.workspace-switcher .workspace-tab{text-align:left;white-space:normal}
+ body>main>.newview-settings{grid-column:2;grid-row:2;justify-self:end}
+ body>main>#workspace-intro{grid-column:2;grid-row:2;justify-self:start;align-self:center;max-width:65%}
+ body>main>.shell-page,body>main>.workspace,body>main>[data-workspace]{grid-column:2;grid-row:3;min-width:0;min-height:0;overflow:auto}
+ body>main>footer{grid-column:1/-1;grid-row:4}
+}
+@media(max-width:1199px){
+ body>main{display:flex;flex-direction:column;min-height:100dvh;height:auto}
+ body>main>.workspace-switcher{display:flex;flex-direction:row;overflow-x:auto;flex-shrink:0}
+ body>main>.shell-page,body>main>.workspace,body>main>[data-workspace]{min-width:0;min-height:55vh}
+}
+@media(max-width:900px){
+ body>main>[data-workspace="myview"] .myview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:1/-1;grid-row:auto;min-height:260px}
+}
+@media(max-width:600px){
+ body>main{padding:10px;gap:10px}
+ body>main>header{flex-wrap:wrap;gap:8px}
+ body>main>[data-workspace="myview"] .myview-grid{grid-template-columns:minmax(0,1fr)}
+ body>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:1;min-height:220px}
+ body>main>.shell-page,body>main>.workspace,body>main>[data-workspace]{padding:12px;min-height:60vh}
+}
+@media(hover:none){.workspace-switcher .workspace-tab{min-height:56px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+.inline-tv-video{width:100%;max-height:420px;background:#101827;border-radius:12px}
+
+/* Shared decorative icons and compact status text; Cinema TV remains the final theme. */
+.nv-nav-icon{display:inline-block;width:1.15em;height:1.15em;flex:none;vertical-align:-.12em;pointer-events:none}
+@media(max-width:400px){[role="status"],[role="alert"]{overflow-wrap:anywhere}.workspace-switcher .workspace-tab{min-width:64px}}
+@media(forced-colors:active){button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid Highlight;box-shadow:none}}

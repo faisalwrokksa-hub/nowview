@@ -18,5 +18,12 @@ public final class MainActivity extends Activity {
         super.onActivityResult(requestCode,resultCode,data);
         if(web!=null)web.handleActivityResult(requestCode,resultCode,data);
     }
+    @Override public void onBackPressed(){
+        if(web==null){super.onBackPressed();return;}
+        web.evaluateJavascript("Boolean(typeof window.NewViewBack==='function' && window.NewViewBack())",result->{
+            if(!"true".equals(result))finishOnBack();
+        });
+    }
+    private void finishOnBack(){super.onBackPressed();}
     @Override protected void onDestroy(){if(web!=null)web.destroy();super.onDestroy();}
 }

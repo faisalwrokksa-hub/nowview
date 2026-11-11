@@ -1,0 +1,71 @@
+name: NewView frontend auto-publish (verified)
+on:
+  push:
+    paths:
+      - 'web/**'
+      - 'cloud/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'scripts/**'
+      - 'wrangler.json'
+      - 'package.json'
+      - '.github/workflows/frontend-auto-publish.yml'
+  pull_request:
+    paths: ['web/**', 'cloud/**', 'tests/**', 'tools/**', 'package.json', 'wrangler.json', '.github/workflows/**']
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy the tested main revision to production'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: newview-frontend-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run complete frontend validation
+        run: npm run verify
+      - name: Build frontend
+        run: npm run build
+      - name: Validate Worker bundle
+        run: node --test tests/cloudflare-worker-build.test.mjs
+  publish:
+    needs: validate
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      vars.FRONTEND_DEPLOY_VIA_GITHUB == 'true' &&
+      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy))
+    runs-on: ubuntu-24.04
+    environment: newview-frontend
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Cloudflare configuration
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Set CLOUDFLARE_API_TOKEN in GitHub Actions secrets"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Set CLOUDFLARE_ACCOUNT_ID in GitHub Actions secrets"; exit 1; }
+      - name: Build and publish verified frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm run build
+          npx --yes wrangler@4.158.0 deploy --config wrangler.json --var NEWVIEW_REVISION:${{ github.sha }}
