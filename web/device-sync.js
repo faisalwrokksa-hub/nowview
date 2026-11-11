@@ -42,7 +42,7 @@
    if(response.status===404)return null;
    if(response.status===410)throw Error('This pairing room has been revoked. Create a new pairing link.');
    if(response.status===401||response.status===403)throw Error('Cloud sync requires an authorized Cloudflare Access sign-in');
-   if(response.status===503)throw Error('Cloud sync storage or Access policy is not configured on this server');
+   if(response.status===503)throw Error('Cloud sync Durable Object or Access policy is not configured on this server');
    if(!response.ok)throw Error('Sync request failed (HTTP '+response.status+')');
    return response.status===204?null:response.json();
   }finally{clearTimeout(timeout);}
@@ -99,7 +99,7 @@
     if(!remote){
      if(!createdRoom){report('Pairing room not found or expired. Create a fresh link on the first device.');return;}
      const sealed=await encrypt(current);if(activeSession!==session)return;
-     await request('PUT',sealed);if(activeSession!==session)return;
+     await request('POST',sealed);if(activeSession!==session)return;
      previousLocal=local;previousVersion=sealed;createdRoom=false;copy.disabled=false;
      report('Encrypted room created · sharing layouts only, no screen video');
     }else if(remote.blob!==previousVersion){
