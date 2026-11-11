@@ -149,6 +149,9 @@
    if(settings)settings.hidden=true;
    if(id==='read'&&!document.getElementById('news-items')?.children.length)document.getElementById('news-refresh')?.click();
    syncNav();
+   // One document-level scroller: returning to the top of a new section avoids
+   // inheriting the previous section's vertical position on phones.
+   if(typeof window.scrollTo==='function')window.scrollTo({top:0,behavior:'instant'});
   }
   for(const [id,label] of sections){
    const button=el('button','nv-simple-tab',label);button.type='button';button.dataset.simpleView=id;
