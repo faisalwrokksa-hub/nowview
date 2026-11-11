@@ -50,6 +50,8 @@
   return {room:match[1],key:material};
  }
  function install(){
+  // The native APK uses file: URLs; pairing requires the deployed HTTPS Worker host.
+  if(location.protocol!=='https:'&&!(location.protocol==='http:'&&['localhost','127.0.0.1'].includes(location.hostname)))return;
   if(!globalThis.crypto?.subtle||!globalThis.crypto?.getRandomValues)return;
   const settings=document.querySelector('#newview-settings .newview-settings-content');if(!settings||document.getElementById(PREFIX+'panel'))return;
   const section=document.createElement('section');section.className='shell-card device-sync';section.id=PREFIX+'panel';
