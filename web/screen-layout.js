@@ -1,9 +1,9 @@
 'use strict';
-/* MyView 1/2/3 independent workspace panes; dock sizing persists locally.
+/* MyView 1/2/3 responsive summary panes; dock sizing persists locally.
    Layout only, never captures or transmits screens. */
 (function(){
  const LAYOUT_KEY='newview.layout.panels.v1',SIZE_KEY='newview.layout.video-size.v1';
- const panes=Object.freeze({1:['myview'],2:['myview','markets'],3:['myview','markets','media']});
+ const liveSummaries={myview:'Waiting for Source Monitor updates',markets:'Waiting for a current market quote',media:'Waiting for source-linked news'};
  const sizes=new Set(['third','half','full']);
  const get=(key,valid,defaultValue)=>{try{const value=localStorage.getItem(key);return valid(value)?value:defaultValue;}catch{return defaultValue;}};
  let count=Number(get(LAYOUT_KEY,v=>v==='1'||v==='2'||v==='3','1'));
@@ -26,10 +26,17 @@
    const card=document.createElement('section');card.className='newview-screen-pane';
    const title=document.createElement('h3');title.textContent=info.title;
    const description=document.createElement('p');description.textContent=info.text;
+   const detail=document.createElement('p');detail.className='newview-pane-live';detail.dataset.liveView=info.view;detail.textContent=liveSummaries[info.view];
    const button=document.createElement('button');button.type='button';
    button.textContent='Open '+info.title;button.addEventListener('click',()=>root.NewViewShell?.select(info.view));
-   card.append(title,description,button);grids.append(card);
+   card.append(title,description,detail,button);grids.append(card);
   }
+ }
+ function updateSummary(view,text){
+  if(!Object.hasOwn(liveSummaries,view)||typeof text!=='string')return;
+  liveSummaries[view]=text.slice(0,230);
+  const panel=document.querySelector('[data-live-view="'+view+'"]');
+  if(panel)panel.textContent=liveSummaries[view];
  }
  function setCount(value){
   if(!Number.isInteger(Number(value))||![1,2,3].includes(Number(value)))return false;
@@ -65,6 +72,20 @@
   }
   const grids=document.createElement('div');grids.id='newview-screen-panes';grids.className='newview-screen-panes';
   header.append(title,description,controls,grids);home.prepend(header);
+  root.addEventListener?.('newview:market',e=>{
+   const quote=e.detail;
+   if(!quote||quote.source!=='binance'||typeof quote.symbol!=='string'||!Number.isFinite(quote.price)||quote.price<0||!Number.isFinite(quote.quoteTime))return;
+   const stale=Date.now()-quote.quoteTime*1000>120000||quote.quoteTime*1000>Date.now()+300000;
+   updateSummary('markets',quote.symbol+' · '+new Intl.NumberFormat('en-US',{maximumFractionDigits:3}).format(quote.price)+' '+(quote.currency==='USDT'?'USDT':'units')+(stale?' · stale quote':' · recent quote')+' · Binance source');
+  });
+  root.addEventListener?.('newview:news',e=>{
+   const snapshot=e.detail;
+   if(!snapshot||typeof snapshot.headline!=='string'||!snapshot.headline.trim())return;
+   updateSummary('media',snapshot.headline.trim()+' · source '+String(snapshot.source||'unknown').slice(0,24));
+  });
+  root.addEventListener?.('newview:update',e=>{
+   if(typeof e.detail?.message==='string')updateSummary('myview',e.detail.message);
+  });
   setSize(size);applyPanels();updateButtons();
  }
  const root=typeof window!=='undefined'?window:globalThis;
