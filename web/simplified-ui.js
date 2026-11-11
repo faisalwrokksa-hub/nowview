@@ -136,6 +136,14 @@
   if(advancedContent)advanced.append(advancedContent);
   if(settings)settings.hidden=true;
   customize.append(advanced);
+  // Keep monitoring active but make its verbose journal opt-in and contained.
+  const monitor=document.getElementById('newview-monitor-panel');
+  if(monitor){
+   const monitorDisclosure=el('details','nv-monitor-disclosure');
+   const monitorSummary=el('summary','','Source health & activity');
+   monitorDisclosure.append(monitorSummary,monitor);
+   advanced.append(monitorDisclosure);
+  }
   // The formerly visible settings and old widgets never become top-level
   // pages in this four-section experience.
   document.getElementById('newview-quick-actions')?.remove();
