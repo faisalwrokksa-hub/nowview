@@ -864,3 +864,21 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media(forced-colors:active){
   body>main>.newview-settings[open]>.newview-settings-content{border:2px solid CanvasText}
 }
+
+/* Short-screen fallback for older Android TV WebViews without dynamic viewport units. */
+body>main>.newview-settings[open]>.newview-settings-content{
+  max-height:calc(100vh - 24px);
+  max-height:calc(100dvh - 24px);
+  overflow-y:auto;
+}
+@media(max-height:480px){
+  body>main>.newview-settings[open]>.newview-settings-content{
+    max-height:calc(100vh - 16px);
+    max-height:calc(100dvh - 16px);
+  }
+}
+@media(hover:none){
+  .newview-settings-content :is(button,a,input,select,textarea,summary,[tabindex]):focus{
+    scroll-margin-block:32px;
+  }
+}
