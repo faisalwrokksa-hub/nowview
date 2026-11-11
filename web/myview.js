@@ -96,7 +96,7 @@
  function chartFor(symbol){
   const points=quoteHistory.get(symbol)||[];
   const container=document.createElement('div');container.className='myview-live-chart';
-  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two verified quotes';
+  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two valid observed quotes';
   container.append(title);
   if(points.length<2)return container;
   const min=Math.min(...points),max=Math.max(...points),range=max-min||1;
