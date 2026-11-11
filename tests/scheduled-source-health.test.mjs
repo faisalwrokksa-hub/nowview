@@ -64,3 +64,12 @@ test('Worker declares a real scheduled handler and a read-only health endpoint',
  assert.match(build,/url\.pathname==='\/api\/source-health'/);
  assert.match(build,/sourceHealth\+entry/);
 });
+
+test('release smoke checks exact live revision and real cloud monitoring only when enabled',()=>{
+ const smoke=readFileSync(new URL('../tools/smoke-public-newview.mjs',import.meta.url),'utf8');
+ assert.match(smoke,/NEWVIEW_EXPECTED_SHA/);
+ assert.match(smoke,/version\.revision,expected/);
+ assert.match(smoke,/NEWVIEW_REQUIRE_SOURCE_HEALTH/);
+ assert.match(smoke,/\/api\/source-health/);
+ assert.match(smoke,/age<=10\*60\*1000/);
+});
