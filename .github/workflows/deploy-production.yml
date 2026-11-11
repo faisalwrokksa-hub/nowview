@@ -48,5 +48,7 @@ jobs:
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
+          # Refuse deployment to unrelated Cloudflare accounts.
+          test "$CLOUDFLARE_ACCOUNT_ID" = "d971aa01a0cdd29f016ff88565aded43"
           test -s dist/server/index.js
           npx --yes wrangler@4 deploy --config wrangler.json --name nowview
