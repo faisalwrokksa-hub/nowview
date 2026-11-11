@@ -10,6 +10,7 @@ permissions:
   contents: read
 jobs:
   sign-apks:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     environment: newview-android-release
     timeout-minutes: 35
