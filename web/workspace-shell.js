@@ -148,6 +148,21 @@
   if(panelGrid){new MutationObserver(syncPanels).observe(panelGrid,{childList:true});syncPanels();}
 
   document.querySelector('[data-workspace="myview"]')?.addEventListener('click',event=>{const b=event.target.closest('[data-home-view]');if(!b)return;const view=b.dataset.homeView;if(!views.includes(view))return;select(view);if(b.dataset.homeSection)window.NewViewWatch?.select(b.dataset.homeSection);});
+  // Settings drawer: Escape/TV Back closes it, and focus returns to its opener.
+  const settingsDrawer=document.getElementById('newview-settings');
+  if(settingsDrawer){
+    const trigger=settingsDrawer.querySelector('summary');
+    settingsDrawer.addEventListener('keydown',event=>{
+      if((event.key==='Escape'||event.key==='Backspace')&&settingsDrawer.open){
+        if(event.target.matches?.('input,textarea,[contenteditable="true"]')&&event.key==='Backspace')return;
+        event.preventDefault();event.stopPropagation();settingsDrawer.open=false;trigger?.focus();
+      }
+    });
+    document.addEventListener('keydown',event=>{
+      if(!settingsDrawer.open||!['Escape','BrowserBack'].includes(event.key))return;
+      event.preventDefault();event.stopPropagation();settingsDrawer.open=false;trigger?.focus();
+    });
+  }
   // Roving focus for keyboard and Android TV remotes; native Tab remains available.
   nav.addEventListener('keydown',event=>{
    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
