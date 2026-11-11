@@ -22,7 +22,8 @@
   if(!category||!preferred)return;
   const preferences=window.NewViewShell?.loadFirstLaunch?.();
   const types=typeof preferred.categoriesFor==='function'?preferred.categoriesFor(currentDashboard(),preferences?.interests):[];
-  const valid=['all',...(Array.isArray(types)?types:[]).filter(x=>typeof x==='string'&&typeof preferred.playlistUrl==='function'&&preferred.playlistUrl(x))];
+  const allTypes=['news','business','sports','documentary','education','entertainment','music','kids','movies','weather','general'];
+  const valid=['all',...[...new Set([...(Array.isArray(types)?types:[]),...allTypes])].filter(x=>typeof x==='string'&&typeof preferred.playlistUrl==='function'&&preferred.playlistUrl(x))];
   if(!valid.length)return;
   const previous=category.value;
   category.replaceChildren(...valid.map(x=>{const o=document.createElement('option');o.value=x;o.textContent=x.charAt(0).toUpperCase()+x.slice(1);return o;}));
