@@ -52,11 +52,11 @@ test('Daily Brief omits empty sanitized official headlines without inventing tex
  assert.equal(api.preview.news({source:'unknown',count:1,headline:'Unverified'}),'Load verified official announcements in Watch & News');
 });
 
-test('Market Watch rejects malformed symbols instead of displaying misleading quotes',()=>{
+test('Market Watch rejects malformed symbols without claiming quote verification',()=>{
  const {api}=setup();
  assert.equal(api.preview.market({symbol:'BTCUSDT',price:120,currency:'USDT'}),'BTCUSDT · 120 USDT · quote time unavailable');
  for(const symbol of ['BTC'+String.fromCharCode(10)+'USDT','BTC'+String.fromCharCode(0x202e)+'USDT','<script>','A'.repeat(25)]){
-  assert.equal(api.preview.market({symbol,price:120,currency:'USDT'}),'No verified quote received');
+  assert.equal(api.preview.market({symbol,price:120,currency:'USDT'}),'No valid quote received');
  }
 });
 
