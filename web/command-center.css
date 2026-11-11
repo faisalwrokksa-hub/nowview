@@ -433,3 +433,9 @@ body:not(.home-panel) .newview-cast-dock.is-minimized .newview-cast-media-contro
   margin-left:auto;margin-right:0
  }
 }
+
+/* Minimize always returns to a compact, movable control bar, including Full. */
+body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock.is-minimized:not([hidden]){
+ inset:auto 16px 16px auto!important;left:auto!important;top:auto!important;right:16px!important;bottom:16px!important;
+ width:210px!important;height:auto!important;max-height:none!important;border-radius:14px!important
+}
