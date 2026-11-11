@@ -6,7 +6,7 @@
 (function () {
   function install() {
     if (document.getElementById('newview-network-indicator')) return;
-    const header = document.querySelector('main > header');
+    const header = document.querySelector('header');
     if (!header) return;
     const indicator = document.createElement('span');
     indicator.id = 'newview-network-indicator';
