@@ -116,6 +116,18 @@ public final class ChartsView extends WebView {
     }
     private static String tagText(Element e,String tag){NodeList n=e.getElementsByTagName(tag);return n.getLength()>0?n.item(0).getTextContent().trim():"";}
     public final class Bridge {
+        @JavascriptInterface public void openNewsBrowser(String url){
+            try{
+                Uri target=Uri.parse(url);
+                if(!NewsBrowserActivity.safePage(target))return;
+                post(()->{
+                    if(closed)return;
+                    Intent intent=new Intent(getContext(),NewsBrowserActivity.class);
+                    intent.setData(target);
+                    try{getContext().startActivity(intent);}catch(Exception ignored){}
+                });
+            }catch(Exception ignored){}
+        }
         @JavascriptInterface public void fetchPublicNews(String source,int id){
             worker.execute(()->{
                 JSONObject result=new JSONObject();JSONArray items=new JSONArray();
