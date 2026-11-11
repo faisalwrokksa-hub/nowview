@@ -47,3 +47,18 @@ test('Android 13+ requires the visible stop-sharing notification before projecti
  assert.match(activity,/requestPermissions\(new String\[\]\{android\.Manifest\.permission\.POST_NOTIFICATIONS\},NOTICE_REQUEST\)/);
  assert.match(activity,/onRequestPermissionsResult\(int requestCode/);
 });
+
+test('safety: casting stops if TV never connects, and tolerates short Wi-Fi interruptions',()=>{
+ assert.match(activity,/CONNECT_TIMEOUT_MS=120000L/);
+ assert.match(activity,/DISCONNECT_GRACE_MS=20000L/);
+ assert.match(activity,/handler\.postDelayed\(connectTimeout,CONNECT_TIMEOUT_MS\)/);
+ assert.match(activity,/handler\.postDelayed\(disconnectTimeout,DISCONNECT_GRACE_MS\)/);
+ assert.match(activity,/handler\.removeCallbacks\(connectTimeout\)/);
+ assert.match(activity,/handler\.removeCallbacks\(disconnectTimeout\)/);
+ assert.match(activity,/connected=true/);
+});
+test('phone pairing can paste a bounded offer and keeps projection alive when rotated',()=>{
+ assert.match(activity,/Paste TV offer from clipboard/);
+ assert.match(activity,/value\.length\(\)>120000/);
+ assert.match(manifest,/android:configChanges="orientation\|screenSize\|keyboardHidden"/);
+});
