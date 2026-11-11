@@ -621,3 +621,12 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
     outline-offset:2px;
   }
 }
+
+/* Task 1: keep asynchronous card content usable on narrow and TV viewports. */
+:where(.shell-card,.shell-page) :is(img,video,canvas,svg){max-inline-size:100%;}
+:where(.shell-card,.shell-page) :is(pre,table){max-inline-size:100%;}
+:where(.shell-card,.shell-page) pre{overflow-x:auto;overscroll-behavior-inline:contain;}
+:where(.shell-card,.shell-page) :is(button,a,[role="button"]):focus{scroll-margin:16px;}
+@media (prefers-reduced-motion:reduce){
+  :where(.shell-card,.shell-page) [aria-busy="true"]{animation:none!important;}
+}
