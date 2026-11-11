@@ -33,3 +33,16 @@ test('web and Android packaging include dark YouTube viewer',()=>{
  assert.match(ui,/NewViewYouTube\?\.open/);
  assert.match(css,/\.nv-youtube-stage iframe/);
 });
+
+test('shared Android browser starts with YouTube and opens the requested news URL with dark chrome',()=>{
+ const browser=read('android/src/dev/fintech/marketcharts/NewsBrowserActivity.java');
+ const news=read('web/news-browser.js');
+ assert.match(browser,/START="https:\/\/www\.youtube\.com\/"/);
+ assert.match(browser,/navigate\(safePage\(requested\)\?requested\.toString\(\):START\)/);
+ assert.match(browser,/setStatusBarColor/);
+ assert.match(browser,/setNavigationBarColor/);
+ assert.match(browser,/setAlgorithmicDarkeningAllowed\(true\)/);
+ assert.match(browser,/setForceDark\(WebSettings\.FORCE_DARK_ON\)/);
+ assert.match(news,/event\.preventDefault\(\);browse\(url\)/);
+ assert.doesNotMatch(news,/if\(!link\|\|typeof window\.NewViewNative/);
+});
