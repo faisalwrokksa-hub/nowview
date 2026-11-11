@@ -2,6 +2,8 @@ package app.newview.phonecaster;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.util.DisplayMetrics;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.projection.MediaProjection;
@@ -108,6 +110,21 @@ public final class CasterActivity extends Activity {
         });
     }
     private void show(String value){runOnUiThread(()->{if(status!=null)status.setText(value);});}
+    private int[] captureDimensions(){
+        DisplayMetrics metrics=getResources().getDisplayMetrics();
+        int width=Math.max(1,metrics.widthPixels),height=Math.max(1,metrics.heightPixels);
+        double scale=Math.min(1.0,1280.0/Math.max(width,height));
+        int outWidth=Math.max(2,((int)(width*scale)/2)*2),outHeight=Math.max(2,((int)(height*scale)/2)*2);
+        return new int[]{outWidth,outHeight};
+    }
+    @Override public void onConfigurationChanged(Configuration config){
+        super.onConfigurationChanged(config);
+        if(capturer!=null&&sharing){
+            int[] dimensions=captureDimensions();
+            try{capturer.changeCaptureFormat(dimensions[0],dimensions[1],15);}
+            catch(RuntimeException ignored){show("Rotation detected; video orientation may require reconnecting.");}
+        }
+    }
     private SessionDescription parseOffer(String text)throws Exception{
         if(text==null||text.length()>120000)throw new Exception("Invalid or oversized TV offer");
         JSONObject json=new JSONObject(text);
@@ -199,7 +216,8 @@ public final class CasterActivity extends Activity {
             if(textureHelper==null)throw new IllegalStateException("Video capture unavailable");
             source=factory.createVideoSource(true);
             capturer.initialize(textureHelper,getApplicationContext(),source.getCapturerObserver());
-            capturer.startCapture(960,540,15);
+            int[] dimensions=captureDimensions();
+            capturer.startCapture(dimensions[0],dimensions[1],15);
             videoTrack=factory.createVideoTrack("NewViewPhoneScreen",source);
             peer.addTrack(videoTrack,Collections.singletonList("NewViewScreen"));
             show("Screen capture active; generating private TV answer…");
