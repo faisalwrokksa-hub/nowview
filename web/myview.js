@@ -99,6 +99,7 @@
  // Only a drag started from one of our own cards can reorder the dashboard.
  let activeDraggedWidget=null;
  const quoteHistory=new Map();
+ const lastQuoteTime=new Map();
  const maxQuotePoints=36;
  function chartFor(symbol){
   const points=quoteHistory.get(symbol)||[];
@@ -233,7 +234,10 @@ item.append(eyebrow,heading,description,insight);
   snapshots[id]=next;
   if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
    const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
-   if(!points.length||points[points.length-1]!==next.price){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);}
+   if(!lastQuoteTime.has(key)||next.quoteTime>lastQuoteTime.get(key)){
+    points.push(next.price);if(points.length>maxQuotePoints)points.shift();
+    quoteHistory.set(key,points);lastQuoteTime.set(key,next.quoteTime);
+   }
    refreshChart();
   }
   // Update only the live insight text: rebuilding the grid would steal TV remote/keyboard focus.
