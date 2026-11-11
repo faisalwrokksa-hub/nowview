@@ -1,9 +1,10 @@
 'use strict';
-/* Five-workspace Watch & News: retain existing News and Media controllers. */
+/* Discover: preserve existing News, Media and Social controllers. */
 (function () {
   function install() {
     const media = document.querySelector('[data-workspace="media"]');
     const news = document.querySelector('[data-workspace="news"]');
+    const social = document.querySelector('[data-workspace="social"]');
     if (!media || !news || document.getElementById('nv-watch-sections')) return;
     const channelPanel = media.querySelector('.shell-card');
     const videoPanel = media.querySelector('.shell-grid');
@@ -16,17 +17,19 @@
     tabs.className = 'nv-watch-sections';
     tabs.setAttribute('aria-label', 'Watch & News sections');
     const sections = [
+      { id: 'headlines', label: 'Headlines', panel: news },
       { id: 'channels', label: 'Live TV', panel: channelPanel },
-      { id: 'videos', label: 'Videos', panel: videoPanel },
-      { id: 'headlines', label: 'Headlines', panel: news }
+      { id: 'videos', label: 'Videos', panel: videoPanel }
     ];
+    if(social)sections.push({id:'social',label:'Social',panel:social});
+    if(social){social.removeAttribute('data-workspace');social.classList.remove('shell-page');social.id='nv-watch-social';media.appendChild(social);}
     news.removeAttribute('data-workspace');
     news.classList.remove('shell-page');
     news.id = 'nv-watch-headlines';
     media.appendChild(news);
     media.insertBefore(tabs, media.firstChild);
 
-    let active = 'channels';
+    let active = 'headlines';
     function select(id) {
       if (!sections.some(section => section.id === id)) return false;
       if (id !== active) window.NewViewMedia?.stopPlayback?.();
@@ -49,7 +52,8 @@
       button.dataset.watchSection = section.id;
       button.textContent = section.label;
       button.setAttribute('aria-controls', section.id === 'headlines'
-        ? 'nv-watch-headlines' : (section.id === 'channels' ? 'nv-watch-channels' : 'nv-watch-videos'));
+        ? 'nv-watch-headlines' : (section.id === 'channels' ? 'nv-watch-channels' : section.id==='social'?'nv-watch-social':'nv-watch-videos'));
+      button.setAttribute('aria-pressed','false');
       button.addEventListener('click', () => select(section.id));
       button.addEventListener('keydown', event => {
         const index = sections.findIndex(item => item.id === section.id);
@@ -69,7 +73,7 @@
     channelPanel.id = 'nv-watch-channels';
     videoPanel.id = 'nv-watch-videos';
     window.NewViewWatch = { select, currentSection: () => active };
-    select('channels');
+    select('headlines');
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', install, { once: true });
