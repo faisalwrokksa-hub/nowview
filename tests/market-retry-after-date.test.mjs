@@ -21,3 +21,24 @@ test('Binance HTTP-date Retry-After prevents repeated requests beyond minimum co
   Date.now=originalNow;
  }
 });
+
+
+test('Binance numeric Retry-After on HTTP 418 also blocks premature retries', async () => {
+ const originalFetch=globalThis.fetch,originalNow=Date.now;
+ const start=Date.UTC(2026,10,11,12,0,0);
+ let calls=0;
+ try {
+  Date.now=()=>start;
+  globalThis.fetch=async ()=>{
+   calls++;
+   return {ok:false,status:418,headers:{get:()=> '180'}};
+  };
+  await assert.rejects(getChart('BTC','5D'),/unavailable|rate-limit/i);
+  Date.now=()=>start+61000;
+  await assert.rejects(getChart('BTC','5D'),/cooldown/i);
+  assert.equal(calls,1,'Numeric cooldown must block retries after 61 seconds');
+ } finally {
+  globalThis.fetch=originalFetch;
+  Date.now=originalNow;
+ }
+});
