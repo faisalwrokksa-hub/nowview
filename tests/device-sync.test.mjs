@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {handleDeviceSync} from '../cloud/device-sync.mjs';
-import {secured} from './access-fixture.mjs';
+import {secured,withAccess,accessCertFetch} from './access-fixture.mjs';
 const room='A'.repeat(43);
 const url='https://newview.example/api/device-sync/'+room;
 const blob='B'.repeat(16)+'.'+'C'.repeat(40);
@@ -92,4 +92,14 @@ test('simultaneous cloud and local layout changes require visible human conflict
  assert.match(js,/if\(!room\|\|busy\|\|document\.hidden\|\|conflict\)return/);
  assert.match(js,/const activeSession=session/);
  assert.match(js,/if\(activeSession!==session\)return/);
+});
+
+test('cloud sync fails closed without Access configuration and denies unsigned clients before reading KV',async()=>{
+ const store=kv();
+ const unconfigured=await handleDeviceSync(new Request(url),{NEWVIEW_SYNC:store},new URL(url),accessCertFetch);
+ assert.equal(unconfigured.status,503);
+ assert.equal((await unconfigured.json()).error,'Cloudflare Access authentication must be configured for device sync');
+ const unsigned=await handleDeviceSync(new Request(url),withAccess({NEWVIEW_SYNC:store}),new URL(url),accessCertFetch);
+ assert.equal(unsigned.status,401);
+ assert.equal(store.writes.length,0);
 });
