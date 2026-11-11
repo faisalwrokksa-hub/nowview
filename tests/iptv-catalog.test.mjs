@@ -62,3 +62,13 @@ test('native Android IPTV browser fetches grouped playlists and catalogs only fr
  assert.match(media,/NewViewNative\.fetchPublicPlaylist\(id,scope\.value/);
  assert.match(build,/connect-src 'self' [^;]*https:\/\/iptv-org\.github\.io;/);
 });
+
+test('periodic IPTV refresh re-fetches online scope choices instead of using stale catalog metadata',()=>{
+ assert.match(media,/async function readCatalog\(kind,force=false\)/);
+ assert.match(media,/if\(!force&&cached&&Date\.now\(\)-cached\.time<10800000\)/);
+ assert.match(media,/async function updateScope\(force=false\)/);
+ assert.match(media,/readCatalog\(kind,force\)/);
+ assert.match(media,/newview:iptv-refresh',\(\)=>scope\.value==='all'\?loadDirectory\(true\):updateScope\(true\)/);
+ assert.match(media,/window\.NewViewSourceMonitor\?\.notify\?\.\('IPTV'/);
+ assert.match(media,/newly listed streams/);
+});
