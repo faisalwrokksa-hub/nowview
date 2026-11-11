@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root=path.resolve(import.meta.dirname,'..'),assets={};
+for(const name of fs.readdirSync(path.join(root,'web')).filter(name=>/\.(?:html|css|js|mjs)$/.test(name)).sort())assets['/'+name]=fs.readFileSync(path.join(root,'web',name),'utf8');
+// Fail the build if a core workspace or Android TV/offline module is absent.
+const requiredAssets=['index.html','style.css','app.js','live.js','indicators.js',
+ 'stock-board.js','workspace-shell.js','news.js','channel-filters.js','public-sources.js',
+ 'media.js','watch.js','offline-agents.js','offline-controls.js','business.js',
+ 'social.js','external-links.js','myview.js','connectivity.js','tv-home.js','market-data.mjs'];
+for(const name of requiredAssets)if(!Object.hasOwn(assets,'/'+name))throw new Error('Missing required frontend asset: '+name);
+const source=fs.readFileSync(path.join(root,'web','market-data.mjs'),'utf8');
+const news=fs.readFileSync(path.join(root,'cloud','news.mjs'),'utf8').replace(/^export /gm,'');
+const candidate=process.env.WORKERS_CI_COMMIT_SHA||process.env.GITHUB_SHA||'';
+const revision=/^[a-f0-9]{40}$/.test(candidate)?candidate:null;
+const entry=`\nconst assets=${JSON.stringify(assets)};const revision=${JSON.stringify(revision)};\nexport default {async fetch(request){const url=new URL(request.url);const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','X-Frame-Options':'DENY'};if(request.method!=='GET')return new Response('Method not allowed',{status:405,headers});if(url.pathname==='/version')return Response.json({app:'newview',revision},{headers});if(url.pathname==='/healthz'){headers['Cache-Control']='no-store';return Response.json({status:'ok',app:'newview',scope:'worker-only',upstreamsChecked:false},{headers});}if(url.pathname==='/api/news'){const sourceId=url.searchParams.get('source')||'fed';if(!Object.hasOwn(NEWS_SOURCES,sourceId))return Response.json({error:'Unsupported news source'},{status:400,headers});try{const result=await loadNews(sourceId);return Response.json(result,{headers});}catch(error){return Response.json({error:'Official news feed unavailable'},{status:502,headers});}}if(url.pathname==='/api/chart'){const symbol=url.searchParams.get('symbol')||'SOXLB',range=url.searchParams.get('range')||'1D';if(!symbols.includes(symbol)||!Object.hasOwn(ranges,range))return Response.json({error:'Unsupported token or range'},{status:400,headers});try{const result=await getChart(symbol,range);return Response.json(result,{headers});}catch{return Response.json({error:'Binance market data unavailable'},{status:502,headers});}}const file=url.pathname==='/'?'/index.html':url.pathname;if(!Object.hasOwn(assets,file))return new Response('Not found',{status:404,headers});headers['Content-Type']=(file.endsWith('.js')||file.endsWith('.mjs'))?'text/javascript; charset=utf-8':file.endsWith('.css')?'text/css; charset=utf-8':'text/html; charset=utf-8';headers['Content-Security-Policy']="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://data-api.binance.vision wss://stream.binance.com:443 https://iptv-org.github.io/iptv/index.m3u; img-src 'self' data:; media-src https:; frame-src https://www.youtube-nocookie.com";return new Response(assets[file],{headers});}};\n`;
+fs.mkdirSync(path.join(root,'dist','server'),{recursive:true});fs.writeFileSync(path.join(root,'dist','server','index.js'),news+source+entry);
+console.log('Built dist/server/index.js');
+

@@ -1,0 +1,59 @@
+name: Expert 2 F1 safety checks
+on:
+  pull_request:
+    paths:
+      - 'tools/import_f1_apk_assets.py'
+      - 'tools/import_f1_direct_apk.py'
+      - 'tools/test_import_f1_direct_apk.py'
+      - 'tools/f1_dependency_audit.py'
+      - 'tools/test_f1_dependency_audit.py'
+      - 'tools/check_apk_frontend_dependencies.py'
+      - 'tools/test_check_apk_frontend_dependencies.py'
+      - 'tools/test_import_f1_apk_assets.py'
+      - 'tools/verify_apk_web_assets.py'
+      - 'web/**'
+      - 'cloud/**'
+      - 'tests/connectivity.test.mjs'
+      - 'tests/watch-workspace.test.mjs'
+      - 'tests/cloudflare-worker-build.test.mjs'
+      - 'wrangler.json'
+      - 'package.json'
+      - '.github/workflows/expert2-f1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  import-safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python version
+        run: python3 --version
+      - name: Verify tampered assets are rejected and originals preserved
+        run: python3 -m unittest discover -s tools -p 'test_*.py' -v
+      - name: Validate tracked JavaScript syntax
+        run: |
+          for file in web/*.js web/*.mjs; do
+            test -f "$file" || continue
+            node --check "$file"
+          done
+      - name: Configure Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser connectivity module tests
+        run: node --test tests/connectivity.test.mjs tests/watch-workspace.test.mjs
+      - name: Validate Wrangler Worker bundle without deployment
+        run: node --test tests/cloudflare-worker-build.test.mjs
+      - name: Build Cloudflare Pages staging artifact (no deployment)
+        run: |
+          npm run build:pages
+          node --check dist/pages/_worker.js
+          test -s dist/pages/_worker.js
+      - name: Asset reference status
+        run: |
+          echo "Reference APK must be supplied by owner for the separate binary comparison."
+          echo "This CI does not certify Android signing, device behavior or APK equivalence."

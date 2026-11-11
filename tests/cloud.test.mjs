@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {normalise,getChart} from '../cloud/market.mjs';
+const fixture=()=>[[[100000,'10','12','9','11','100',159999]],{symbol:'SOXLBUSDT',priceChangePercent:'2.5',closeTime:1000000},[{price:'11',time:950000}],{symbol:'SOXLBUSDT',baseAsset:'SOXLB',quoteAsset:'USDT',status:'TRADING'}];
+test('last-trade time is not the ticker window end',()=>{const r=normalise(...fixture(),'SOXLB','1D',1000);assert.equal(r.quoteTime,950);assert.equal(r.currency,'USDT');assert.equal(r.changeBasis,'24h');});
+test('24-hour tokens are not closed by US exchange hours',()=>assert.match(normalise(...fixture(),'SOXLB','1D',1000).session,/24\/7/));
+test('underlying shares cannot replace token pairs',()=>{const a=fixture();a[3].baseAsset='SOXL';assert.throws(()=>normalise(...a,'SOXLB','1D',1000),/identity/);});
+test('halted pairs cannot be labelled trading',()=>{const a=fixture();a[3].status='BREAK';assert.throws(()=>normalise(...a,'SOXLB','1D',1000),/not trading/);});
+test('stale token trades remain marked stale',()=>assert.equal(normalise(...fixture(),'SOXLB','1D',2000).status,'Historical / stale'));
+test('unsupported URLs fail before a network request',async()=>assert.rejects(getChart('http://localhost/private','1D'),/Unsupported/));

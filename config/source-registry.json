@@ -1,0 +1,771 @@
+{
+  "schemaVersion": 1,
+  "description": "Future integration registry only. Listed sources are NOT automatically fetched, endorsed, licensed, or activated.",
+  "statuses": {
+    "implemented": "Existing code integration; not necessarily end-to-end verified",
+    "partial": "Partial implementation, not release-ready",
+    "planned": "Reference only, not integrated",
+    "restricted": "Requires license, account, approval or usage review"
+  },
+  "sources": [
+    {
+      "id": "binance-spot",
+      "type": "api",
+      "name": "Binance Spot",
+      "url": "https://data-api.binance.vision/api/v3/exchangeInfo",
+      "dashboards": [
+        "markets",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "implemented",
+      "notes": "Public market data; verify exchange data terms"
+    },
+    {
+      "id": "iptv-org-main",
+      "type": "iptv",
+      "name": "IPTV-org Main M3U",
+      "url": "https://iptv-org.github.io/iptv/index.m3u",
+      "dashboards": [
+        "media",
+        "news",
+        "markets",
+        "business",
+        "social",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "partial",
+      "notes": "Directory is not proof of channel redistribution rights"
+    },
+    {
+      "id": "iptv-org-epg",
+      "type": "epg",
+      "name": "IPTV-org EPG",
+      "url": "https://github.com/iptv-org/epg",
+      "dashboards": [
+        "media",
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Verify program metadata terms"
+    },
+    {
+      "id": "fed",
+      "type": "rss",
+      "name": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "dashboards": [
+        "markets",
+        "business",
+        "news"
+      ],
+      "auth": "none",
+      "status": "partial",
+      "notes": "Public notices; verify endpoint"
+    },
+    {
+      "id": "sec",
+      "type": "api",
+      "name": "SEC EDGAR",
+      "url": "https://data.sec.gov/",
+      "dashboards": [
+        "markets",
+        "business",
+        "news"
+      ],
+      "auth": "none",
+      "status": "partial",
+      "notes": "Observe SEC fair-access rules"
+    },
+    {
+      "id": "stocktwits",
+      "type": "rss",
+      "name": "Stocktwits News",
+      "url": "https://stocktwits.com/",
+      "dashboards": [
+        "markets",
+        "news",
+        "social"
+      ],
+      "auth": "review",
+      "status": "partial",
+      "notes": "Existing backend source; endpoint and reuse review"
+    },
+    {
+      "id": "bbc-world",
+      "type": "rss",
+      "name": "BBC World",
+      "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+      "dashboards": [
+        "news",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Headlines and attribution; verify commercial terms"
+    },
+    {
+      "id": "bbc-business",
+      "type": "rss",
+      "name": "BBC Business",
+      "url": "https://feeds.bbci.co.uk/news/business/rss.xml",
+      "dashboards": [
+        "markets",
+        "business",
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Commercial reuse review"
+    },
+    {
+      "id": "bbc-tech",
+      "type": "rss",
+      "name": "BBC Technology",
+      "url": "https://feeds.bbci.co.uk/news/technology/rss.xml",
+      "dashboards": [
+        "business",
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Commercial reuse review"
+    },
+    {
+      "id": "npr",
+      "type": "rss",
+      "name": "NPR News",
+      "url": "https://feeds.npr.org/1001/rss.xml",
+      "dashboards": [
+        "news",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "abc-au",
+      "type": "rss",
+      "name": "ABC News Australia",
+      "url": "https://www.abc.net.au/news/feed/51120/rss.xml",
+      "dashboards": [
+        "news",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "guardian",
+      "type": "rss",
+      "name": "The Guardian World",
+      "url": "https://www.theguardian.com/world/rss",
+      "dashboards": [
+        "news",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "cbs",
+      "type": "rss",
+      "name": "CBS News",
+      "url": "https://www.cbsnews.com/latest/rss/main",
+      "dashboards": [
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "sky",
+      "type": "rss",
+      "name": "Sky News",
+      "url": "https://feeds.skynews.com/feeds/rss/home.xml",
+      "dashboards": [
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "aljazeera",
+      "type": "rss",
+      "name": "Al Jazeera English",
+      "url": "https://www.aljazeera.com/xml/rss/all.xml",
+      "dashboards": [
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "france24",
+      "type": "rss",
+      "name": "France 24",
+      "url": "https://www.france24.com/en/rss",
+      "dashboards": [
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "dw",
+      "type": "rss",
+      "name": "Deutsche Welle",
+      "url": "https://rss.dw.com/xml/rss-en-all",
+      "dashboards": [
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "techcrunch",
+      "type": "rss",
+      "name": "TechCrunch",
+      "url": "https://techcrunch.com/feed/",
+      "dashboards": [
+        "business",
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "un-news",
+      "type": "rss",
+      "name": "UN News",
+      "url": "https://news.un.org/feed/subscribe/en/news/all/rss.xml",
+      "dashboards": [
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "nyt",
+      "type": "rss",
+      "name": "NYT Home",
+      "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+      "dashboards": [
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Publisher terms review"
+    },
+    {
+      "id": "worldbank",
+      "type": "api",
+      "name": "World Bank",
+      "url": "https://api.worldbank.org/v2/",
+      "dashboards": [
+        "business",
+        "markets"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Dataset-specific terms"
+    },
+    {
+      "id": "fred",
+      "type": "api",
+      "name": "FRED",
+      "url": "https://fred.stlouisfed.org/docs/api/fred/",
+      "dashboards": [
+        "markets",
+        "business"
+      ],
+      "auth": "key",
+      "status": "planned",
+      "notes": "Free key; individual series rights vary"
+    },
+    {
+      "id": "imf",
+      "type": "api",
+      "name": "IMF Data",
+      "url": "https://www.imf.org/en/Data",
+      "dashboards": [
+        "markets",
+        "business"
+      ],
+      "auth": "varies",
+      "status": "planned",
+      "notes": "Dataset terms"
+    },
+    {
+      "id": "oecd",
+      "type": "api",
+      "name": "OECD SDMX",
+      "url": "https://sdmx.oecd.org/",
+      "dashboards": [
+        "business"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Data reuse terms"
+    },
+    {
+      "id": "eurostat",
+      "type": "api",
+      "name": "Eurostat",
+      "url": "https://ec.europa.eu/eurostat/web/main/data/database",
+      "dashboards": [
+        "business"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Data attribution"
+    },
+    {
+      "id": "census",
+      "type": "api",
+      "name": "US Census",
+      "url": "https://api.census.gov/data.html",
+      "dashboards": [
+        "business"
+      ],
+      "auth": "varies",
+      "status": "planned",
+      "notes": "Rate limits"
+    },
+    {
+      "id": "bls",
+      "type": "api",
+      "name": "US BLS",
+      "url": "https://www.bls.gov/developers/",
+      "dashboards": [
+        "markets",
+        "business"
+      ],
+      "auth": "varies",
+      "status": "planned",
+      "notes": "Rate limits"
+    },
+    {
+      "id": "ecb",
+      "type": "api",
+      "name": "ECB FX",
+      "url": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
+      "dashboards": [
+        "markets",
+        "business"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Reference rates not trading quotes"
+    },
+    {
+      "id": "kraken",
+      "type": "api",
+      "name": "Kraken",
+      "url": "https://docs.kraken.com/api/",
+      "dashboards": [
+        "markets"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Public market-data endpoints"
+    },
+    {
+      "id": "coinbase",
+      "type": "api",
+      "name": "Coinbase Exchange",
+      "url": "https://docs.cdp.coinbase.com/exchange/reference",
+      "dashboards": [
+        "markets"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Rate limits and terms"
+    },
+    {
+      "id": "coingecko",
+      "type": "api",
+      "name": "CoinGecko",
+      "url": "https://docs.coingecko.com/",
+      "dashboards": [
+        "markets"
+      ],
+      "auth": "varies",
+      "status": "planned",
+      "notes": "Free/demo quota and commercial terms"
+    },
+    {
+      "id": "alphavantage",
+      "type": "api",
+      "name": "Alpha Vantage",
+      "url": "https://www.alphavantage.co/documentation/",
+      "dashboards": [
+        "markets"
+      ],
+      "auth": "key",
+      "status": "restricted",
+      "notes": "Free-tier quota and redistribution"
+    },
+    {
+      "id": "gdelt",
+      "type": "api",
+      "name": "GDELT",
+      "url": "https://www.gdeltproject.org/",
+      "dashboards": [
+        "news",
+        "business"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "News discovery not article redistribution"
+    },
+    {
+      "id": "nws",
+      "type": "api",
+      "name": "US NWS",
+      "url": "https://api.weather.gov/",
+      "dashboards": [
+        "myview",
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "US weather; identify client"
+    },
+    {
+      "id": "usgs",
+      "type": "api",
+      "name": "USGS Earthquakes",
+      "url": "https://earthquake.usgs.gov/fdsnws/event/1/",
+      "dashboards": [
+        "news",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Public alerts"
+    },
+    {
+      "id": "nasa",
+      "type": "api",
+      "name": "NASA",
+      "url": "https://api.nasa.gov/",
+      "dashboards": [
+        "news",
+        "myview"
+      ],
+      "auth": "varies",
+      "status": "planned",
+      "notes": "API key and imagery rights"
+    },
+    {
+      "id": "openmeteo",
+      "type": "api",
+      "name": "Open-Meteo",
+      "url": "https://open-meteo.com/en/docs",
+      "dashboards": [
+        "myview"
+      ],
+      "auth": "none",
+      "status": "restricted",
+      "notes": "Free noncommercial tier; commercial license review"
+    },
+    {
+      "id": "openweather",
+      "type": "api",
+      "name": "OpenWeather",
+      "url": "https://openweathermap.org/api",
+      "dashboards": [
+        "myview"
+      ],
+      "auth": "key",
+      "status": "restricted",
+      "notes": "Free tier and commercial terms"
+    },
+    {
+      "id": "weatherapi",
+      "type": "api",
+      "name": "WeatherAPI",
+      "url": "https://www.weatherapi.com/docs/",
+      "dashboards": [
+        "myview"
+      ],
+      "auth": "key",
+      "status": "restricted",
+      "notes": "Free tier and commercial terms"
+    },
+    {
+      "id": "bluesky",
+      "type": "api",
+      "name": "Bluesky Public API",
+      "url": "https://docs.bsky.app/",
+      "dashboards": [
+        "social"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Public endpoints and rate limits"
+    },
+    {
+      "id": "mastodon",
+      "type": "api",
+      "name": "Mastodon",
+      "url": "https://docs.joinmastodon.org/api/",
+      "dashboards": [
+        "social"
+      ],
+      "auth": "varies",
+      "status": "planned",
+      "notes": "Instance-specific rules"
+    },
+    {
+      "id": "reddit",
+      "type": "social",
+      "name": "Reddit",
+      "url": "https://www.reddit.com/dev/api/",
+      "dashboards": [
+        "social"
+      ],
+      "auth": "approval",
+      "status": "restricted",
+      "notes": "API approval and commercial terms"
+    },
+    {
+      "id": "youtube",
+      "type": "video",
+      "name": "YouTube official embeds",
+      "url": "https://developers.google.com/youtube/iframe_api_reference",
+      "dashboards": [
+        "media",
+        "social"
+      ],
+      "auth": "none",
+      "status": "partial",
+      "notes": "Official player; ads may appear"
+    },
+    {
+      "id": "x",
+      "type": "social",
+      "name": "X",
+      "url": "https://developer.x.com/",
+      "dashboards": [
+        "social"
+      ],
+      "auth": "approval",
+      "status": "restricted",
+      "notes": "Official API terms"
+    },
+    {
+      "id": "tiktok",
+      "type": "social",
+      "name": "TikTok",
+      "url": "https://developers.tiktok.com/",
+      "dashboards": [
+        "social",
+        "media"
+      ],
+      "auth": "approval",
+      "status": "restricted",
+      "notes": "Official embeds or app handoff"
+    },
+    {
+      "id": "facebook",
+      "type": "social",
+      "name": "Facebook",
+      "url": "https://developers.facebook.com/",
+      "dashboards": [
+        "social"
+      ],
+      "auth": "approval",
+      "status": "restricted",
+      "notes": "Official embeds or app handoff"
+    },
+    {
+      "id": "instagram",
+      "type": "social",
+      "name": "Instagram",
+      "url": "https://developers.facebook.com/docs/instagram-platform/",
+      "dashboards": [
+        "social"
+      ],
+      "auth": "approval",
+      "status": "restricted",
+      "notes": "Official embeds or app handoff"
+    },
+    {
+      "id": "linkedin",
+      "type": "social",
+      "name": "LinkedIn",
+      "url": "https://learn.microsoft.com/en-us/linkedin/",
+      "dashboards": [
+        "social",
+        "business"
+      ],
+      "auth": "approval",
+      "status": "restricted",
+      "notes": "Approved API or links"
+    },
+    {
+      "id": "wikidata",
+      "type": "api",
+      "name": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Wikidata:Data_access",
+      "dashboards": [
+        "news",
+        "business"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Attribution/license requirements"
+    },
+    {
+      "id": "mediawiki",
+      "type": "api",
+      "name": "MediaWiki",
+      "url": "https://www.mediawiki.org/wiki/API:Main_page",
+      "dashboards": [
+        "news",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Usage policy"
+    },
+    {
+      "id": "openlibrary",
+      "type": "api",
+      "name": "Open Library",
+      "url": "https://openlibrary.org/developers/api",
+      "dashboards": [
+        "media",
+        "myview"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Rate limits"
+    },
+    {
+      "id": "restcountries",
+      "type": "api",
+      "name": "REST Countries",
+      "url": "https://restcountries.com/",
+      "dashboards": [
+        "myview"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Uptime and terms review"
+    },
+    {
+      "id": "osm",
+      "type": "api",
+      "name": "OpenStreetMap",
+      "url": "https://www.openstreetmap.org/",
+      "dashboards": [
+        "myview",
+        "news"
+      ],
+      "auth": "none",
+      "status": "planned",
+      "notes": "Public tile servers not for bulk commercial use"
+    },
+    {
+      "id": "github",
+      "type": "api",
+      "name": "GitHub Public API",
+      "url": "https://docs.github.com/en/rest",
+      "dashboards": [
+        "business"
+      ],
+      "auth": "varies",
+      "status": "planned",
+      "notes": "Anonymous limits"
+    },
+    {
+      "id": "google-trends",
+      "type": "social",
+      "name": "Google Trends",
+      "url": "https://trends.google.com/",
+      "dashboards": [
+        "social",
+        "business"
+      ],
+      "auth": "varies",
+      "status": "restricted",
+      "notes": "No assumed unrestricted scraping"
+    },
+    {
+      "id": "pluto",
+      "type": "video",
+      "name": "Pluto TV",
+      "url": "https://pluto.tv/",
+      "dashboards": [
+        "media"
+      ],
+      "auth": "account-varies",
+      "status": "restricted",
+      "notes": "Official app or approved integration"
+    },
+    {
+      "id": "plex",
+      "type": "video",
+      "name": "Plex Live TV",
+      "url": "https://www.plex.tv/watch-free-tv/",
+      "dashboards": [
+        "media"
+      ],
+      "auth": "account-varies",
+      "status": "restricted",
+      "notes": "Official app or approved integration"
+    },
+    {
+      "id": "tubi",
+      "type": "video",
+      "name": "Tubi",
+      "url": "https://tubitv.com/",
+      "dashboards": [
+        "media"
+      ],
+      "auth": "account-varies",
+      "status": "restricted",
+      "notes": "Official app or approved integration"
+    },
+    {
+      "id": "samsung-tv",
+      "type": "video",
+      "name": "Samsung TV Plus",
+      "url": "https://www.samsungtvplus.com/",
+      "dashboards": [
+        "media"
+      ],
+      "auth": "device",
+      "status": "restricted",
+      "notes": "Device/platform eligibility"
+    },
+    {
+      "id": "user-m3u",
+      "type": "iptv",
+      "name": "User-provided authorized M3U",
+      "url": "local://user-playlist",
+      "dashboards": [
+        "media",
+        "myview"
+      ],
+      "auth": "user",
+      "status": "planned",
+      "notes": "User is responsible for authorized access"
+    }
+  ]
+}

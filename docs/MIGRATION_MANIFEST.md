@@ -1,0 +1,56 @@
+# Market Dashboard Migration Manifest
+
+- Source: `faisalwrokksa-hub/Fintech`, open draft PR #1, branch `codex/market-charts-tv-20261108`.
+- Pinned inspected source snapshot: `061badd5a7a307d0ad3225c60917c79e3dd0a5aa`.
+- Destination: `faisalwrokksa-hub/nowview`, branch `feat/market-dashboard-baseline`.
+- Method: dashboard-related files copied into independent history in NowView. Fintech was not changed.
+- Copied files (29):
+  - `.dockerignore`
+  - `.github/workflows/dashboard.yml`
+  - `.gitignore`
+  - `Dockerfile`
+  - `android/AndroidManifest.xml`
+  - `android/res/drawable/banner.xml`
+  - `android/res/drawable/icon.xml`
+  - `android/res/values/strings.xml`
+  - `android/res/xml/home_panel_service.xml`
+  - `android/src/dev/fintech/marketcharts/ChartsView.java`
+  - `android/src/dev/fintech/marketcharts/HomePanelService.java`
+  - `android/src/dev/fintech/marketcharts/MainActivity.java`
+  - `android/src/dev/fintech/marketcharts/MarketData.java`
+  - `build-apk.ps1`
+  - `build-apk.sh`
+  - `cloud/build.mjs`
+  - `cloud/market.mjs`
+  - `dashboard.py`
+  - `package.json`
+  - `tests/cloud.test.mjs`
+  - `tests/indicators.test.mjs`
+  - `tests/live.test.mjs`
+  - `tests/test_dashboard.py`
+  - `web/app.js`
+  - `web/index.html`
+  - `web/indicators.js`
+  - `web/live.js`
+  - `web/market-data.mjs`
+  - `web/style.css`
+
+## Deliberately excluded
+- Telegram bot source and its periodic workflows, secrets and any credentials.
+- `.openai/hosting.json`: source-specific deployment binding.
+- `dist/server/index.js`: generated output; build from source instead.
+- Fintech's original root README (NowView has its own).
+- Fintech's commercial plan (scope incorporated into NowView's master prompt).
+
+## Follow-up work
+- **Visual brand update (development only):** HTML title/header, Android visible app/service labels and package metadata now use NowView Markets. Historical quote caption corrected from USD to USDT; instrument display remains Binance-based.
+- **Still pending:** Android package ID `dev.fintech.marketcharts`, APK filename, Python user agent, test/signing identity and other legacy internals remain for build and upgrade-path compatibility. Change only with separate signing/upgrade strategy before public sale.
+- Existing original CI/test status **does not certify** this new repository; run dedicated NowView CI and physical-device QA.
+- Audit license provenance of every migrated file and market-data redistribution rights.
+- No production APK, website or git merge authorized.
+
+## NowView beta app identity (development branch)
+- Android application ID: `app.nowview.markets`; this is a **different application** from the original Fintech package. Existing Fintech installations will not upgrade in place. Do not uninstall the existing original app without backing up settings.
+- Java package statements have been updated while the source directory remains at `android/src/dev/fintech/marketcharts/` for this controlled migration batch; Java compilation uses declared package namespaces. Directory relocation and any JavaScript bridge rename require separate review.
+- Development APK output is `build/nowview-markets.apk`. CI keys remain ephemeral test keys. APK files from separate CI runs **cannot be assumed update-compatible**; commercial signing must be configured separately.
+- Actual Android device installation/upgrade verification and approved domain/trademark ownership are not yet complete.

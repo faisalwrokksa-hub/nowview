@@ -1,8 +1,8 @@
-# NowView
+# NewView
 
 **Everything you follow. Live.**
 
-NowView is a customizable, multi-screen dashboard product. Start with a **commercially resellable market dashboard** based on the existing Market Charts Android TV + web prototype. Expand deliberately into personalized website shortcuts, cross-device accounts, media feeds, and optional AI features only after the first release is validated.
+NewView is a customizable, multi-screen dashboard product. Start with a **commercially resellable market dashboard** based on the existing Market Charts Android TV + web prototype. Expand deliberately into personalized website shortcuts, cross-device accounts, media feeds, and optional AI features only after the first release is validated.
 
 ## Contributor starting point
 
@@ -11,15 +11,15 @@ NowView is a customizable, multi-screen dashboard product. Start with a **commer
 ### Source project
 - Original: [faisalwrokksa-hub/Fintech](https://github.com/faisalwrokksa-hub/Fintech) — **leave it unchanged**.
 - Market dashboard prototype: [Fintech draft PR #1](https://github.com/faisalwrokksa-hub/Fintech/pull/1), branch `codex/market-charts-tv-20261108`.
-- The original project also includes a Telegram reporting bot, which is explicitly **out of scope** for NowView.
+- The original project also includes a Telegram reporting bot, which is explicitly **out of scope** for NewView.
 - This repository starts as an independent product and must not merge Fintech's history or secrets by default.
 
 ## Product delivery order
 
-1. **NowView Markets 1.0:** reliable market charts, TV remote usability, watchlists, responsive web experience, verified data attribution, installable/tested APK, copyright and redistribution checks.
-2. **NowView Personal:** saved layouts, personalized website shortcuts, optional sign-in and synchronization.
-3. **NowView Media:** licensed/allowed media integrations, floating video where platform support permits.
-4. **NowView AI (future):** optional AI insights and agent feeds, not a prerequisite for release 1.0.
+1. **NewView Markets 1.0:** reliable market charts, TV remote usability, watchlists, responsive web experience, verified data attribution, installable/tested APK, copyright and redistribution checks.
+2. **NewView Personal:** saved layouts, personalized website shortcuts, optional sign-in and synchronization.
+3. **NewView Media:** licensed/allowed media integrations, floating video where platform support permits.
+4. **NewView AI (future):** optional AI insights and agent feeds, not a prerequisite for release 1.0.
 
 ## Working rules
 
@@ -28,4 +28,8 @@ NowView is a customizable, multi-screen dashboard product. Start with a **commer
 - No trade execution and no false equivalence between Binance tokenized instruments and actual US shares.
 - Release only after testing on real TV hardware and completing the checklist in the master prompt.
 
-**Current status:** initial planning scaffold; the Fintech dashboard code has **not yet been migrated**.
+**Current status:** market-dashboard code has been migrated on the review branch [`feat/market-dashboard-baseline`](https://github.com/faisalwrokksa-hub/nowview/pull/1). A test APK build has passed automated CI; commercial data rights, signing continuity and hardware QA remain unverified. No PR has been merged or deployed.
+
+## Release signing
+
+Production signing is a separate owner-controlled process. Read [Android release policy](docs/ANDROID_RELEASE_POLICY.md); CI APKs are test-only and must never be sold as stable upgradeable releases.
