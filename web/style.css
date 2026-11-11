@@ -478,3 +478,12 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
     border-inline-start-color:Mark;
   }
 }
+
+/* Task 1: keep TV/mobile workspace controls reachable at large text zoom. */
+@media (max-width:600px){
+  .workspace-switcher{max-inline-size:100%;min-inline-size:0;}
+  .workspace-switcher .workspace-tab{white-space:normal;overflow-wrap:anywhere;flex-shrink:0;}
+}
+@media (pointer:coarse){
+  .workspace-switcher .workspace-tab{min-inline-size:44px;touch-action:manipulation;}
+}
