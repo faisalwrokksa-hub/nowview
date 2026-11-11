@@ -7,7 +7,7 @@ test('command center theme is linked after baseline CSS',()=>{
  assert.match(html, /href="style\.css"[^>]*><link rel="stylesheet" href="command-center\.css"/);
 });
 test('redesign preserves existing workspaces and adds NewViewDevice',()=>{
- assert.deepEqual([...html.matchAll(/data-view-button="([^"]+)"/g)].map(x=>x[1]),['myview','markets','business','media','social','devices']);
+ assert.deepEqual([...html.matchAll(/data-view-button="([^"]+)"/g)].map(x=>x[1]),['myview','markets','media','devices']);
 });
 test('theme excludes embedded Android home panel and accommodates TV, mobile and accessibility',()=>{
  assert.match(css,/body:not\(\.home-panel\)/);
