@@ -50,3 +50,14 @@ test('TV viewers can move the floating cast between left and right without mouse
  assert.match(viewer,/dock\.classList\.toggle\('is-left',onLeft\)/);
  assert.match(css,/\.newview-cast-dock\.is-left:not\(\[hidden\]\)/);
 });
+
+test('WebRTC sessions expire and automatically stop after screen track loss or prolonged disconnect',()=>{
+ assert.match(viewer,/MAX_SESSION_MS=30\*60\*1000/);
+ assert.match(viewer,/DISCONNECT_GRACE_MS=20000/);
+ assert.match(viewer,/function startSessionLimit\(\)/);
+ assert.match(viewer,/track\.addEventListener\('ended'/);
+ assert.match(viewer,/if\(expiryTimer\)clearTimeout\(expiryTimer\)/);
+ assert.match(viewer,/if\(disconnectTimer\)clearTimeout\(disconnectTimer\)/);
+ assert.match(viewer,/startSessionLimit\(\)/);
+ assert.match(viewer,/reset\(\);dock\.hidden=true/);
+});
