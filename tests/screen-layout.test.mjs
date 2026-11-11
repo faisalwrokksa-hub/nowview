@@ -38,3 +38,11 @@ test('all controls are included by the development Worker and the main HTML page
  assert.match(build,/screen-layout\.js/);
  assert.equal((html.match(/src="screen-layout\.js"/g)||[]).length,1);
 });
+
+test('half and third video actually reserve chart space and release it on close',()=>{
+ assert.match(viewer,/document\.body\.classList\.toggle\('newview-video-active'/);
+ assert.match(viewer,/updateViewport\(\)/);
+ assert.match(css,/newview-video-active\[data-newview-video-size="half"\]>main/);
+ assert.match(css,/newview-video-active\[data-newview-video-size="third"\]>main/);
+ assert.match(css,/newview-video-active\.newview-video-left/);
+});
