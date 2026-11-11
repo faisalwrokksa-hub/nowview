@@ -69,3 +69,16 @@ jobs:
         run: |
           npm run build
           npx --yes wrangler@4.158.0 deploy --config wrangler.json --var NEWVIEW_REVISION:${{ github.sha }}
+      - name: Confirm expected release is serving on the official deployment URL
+        if: ${{ vars.NEWVIEW_PRODUCTION_URL != '' }}
+        env:
+          NEWVIEW_URL: ${{ vars.NEWVIEW_PRODUCTION_URL }}
+          NEWVIEW_EXPECTED_SHA: ${{ github.sha }}
+          NEWVIEW_REQUIRE_SOURCE_HEALTH: ${{ vars.NEWVIEW_REQUIRE_SOURCE_HEALTH }}
+        run: node tools/smoke-public-newview.mjs
+      - name: Require a configured verification URL for customer releases
+        if: ${{ vars.NEWVIEW_ENFORCE_RELEASE_GATE == 'true' && vars.NEWVIEW_PRODUCTION_URL == '' }}
+        run: |
+          echo "::error::Set repository variable NEWVIEW_PRODUCTION_URL before enabling the release gate"
+          exit 1
+
