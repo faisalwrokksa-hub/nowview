@@ -5,6 +5,7 @@
 (function(){
  const MAX_SIGNAL=120000, MAX_SESSION_MS=30*60*1000, DISCONNECT_GRACE_MS=20000;
  let peer=null, localCapture=null, currentStream=null, mode=null, minimized=false, expiryTimer=null, disconnectTimer=null;
+ let mediaMode='none';
  const el=(tag,cls,value)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(value)e.textContent=value;return e;};
  function parseSignal(raw,type){
   if(typeof raw!=='string'||raw.length>MAX_SIGNAL)throw Error('Invalid or oversized connection code');
@@ -24,8 +25,19 @@
   const close=el('button','','×');close.type='button';close.title='Stop and close device screen';close.setAttribute('aria-label','Stop and close screen sharing');
   const video=document.createElement('video');video.id='newview-cast-video';video.autoplay=true;video.playsInline=true;video.controls=true;
   video.setAttribute('aria-label','Connected screen stream');
+  const youtube=document.createElement('iframe');youtube.id='newview-cast-youtube';youtube.hidden=true;
+  youtube.title='Official YouTube floating player';youtube.referrerPolicy='strict-origin-when-cross-origin';
+  youtube.allow='autoplay; encrypted-media; picture-in-picture';youtube.allowFullscreen=true;
+  const mediaControls=el('div','newview-cast-media-controls');
+  const sizeButtons=[];
+  for(const item of [{key:'third',label:'⅓'},{key:'half',label:'½'},{key:'full',label:'Full'}]){
+   const button=el('button','',item.label);button.type='button';button.dataset.newviewSize=item.key;
+   button.setAttribute('aria-label','Set video to '+(item.key==='third'?'one third':item.key==='half'?'half':'full')+' of the screen');
+   button.addEventListener('click',()=>{window.NewViewLayout?.setSize(item.key);showDock();});
+   mediaControls.append(button);sizeButtons.push(button);
+  }
   const state=el('p','newview-cast-state','No live video source');state.setAttribute('role','status');
-  tools.append(fold,dockSide,expand,close);top.append(heading,tools);dock.append(top,video,state);document.body.append(dock);
+  tools.append(fold,dockSide,expand,close);top.append(heading,tools);dock.append(top,video,youtube,mediaControls,state);document.body.append(dock);
   const trigger=el('button','newview-cast-trigger','▣ Screen cast');trigger.type='button';trigger.id='newview-cast-trigger';
   trigger.setAttribute('aria-label','Open floating screen viewer and device connection controls');
   const header=document.querySelector('main > header');header?.append(trigger);
@@ -52,13 +64,29 @@
   buttons.append(watch,send,stop);actions.append(apply,copyOffer,copyAnswer,viewMarket);
   card.append(eyebrow,title,note,status,buttons,offerLabel,offer,answerLabel,answer,actions,noAuto);deviceControls?.prepend(card);
   const report=text=>{status.textContent=text;state.textContent=text;};
+  function clearMedia(){youtube.removeAttribute('src');youtube.hidden=true;video.pause();video.removeAttribute('src');video.load();video.hidden=false;mediaMode='none';}
+  function playYouTube(raw){
+   const item=window.NewViewMedia?.parse?.(raw);
+   if(!item){report('Use a valid YouTube video URL');return false;}
+   reset();clearMedia();youtube.src=item.embed;youtube.hidden=false;video.hidden=true;mediaMode='youtube';heading.textContent='YouTube';showDock();report('Official YouTube embed. Ads or playback restrictions may apply.');return true;
+  }
+  function playIPTV(raw){
+   try{
+    const url=new URL(raw);
+    if(url.protocol!=='https:'||url.username||url.password||url.port||!/^https:\/\//.test(url.href)||! /\.(m3u8|mp4)$/i.test(url.pathname))throw Error('Choose a standard HTTPS HLS or MP4 channel');
+    reset();clearMedia();video.src=url.href;mediaMode='iptv';heading.textContent='IPTV';showDock();
+    video.play().catch(()=>report('Player ready: press Play. This stream may not support browser playback.'));
+    report('IPTV playback attempt. Stream availability and rights depend on publisher.');return true;
+   }catch(e){report(e?.message||'Invalid channel');return false;}
+  }
   const showDock=()=>{dock.hidden=false;dock.classList.remove('is-minimized');minimized=false;};
   function attachStream(stream){
-   currentStream=stream;video.srcObject=stream;showDock();video.play().catch(()=>report('Screen connected · press Play in the viewer'));
+   clearMedia();mediaMode='cast';heading.textContent='Device screen';currentStream=stream;video.srcObject=stream;showDock();video.play().catch(()=>report('Screen connected · press Play in the viewer'));
    if(mode==='watch')for(const track of stream.getTracks())track.addEventListener('ended',()=>{if(currentStream===stream)reset();},{once:true});
    report('Screen stream connected. Switch to Markets; the viewer stays open.');
   }
   function reset(){
+   clearMedia();heading.textContent='Device screen';
    if(expiryTimer)clearTimeout(expiryTimer);expiryTimer=null;
    if(disconnectTimer)clearTimeout(disconnectTimer);disconnectTimer=null;
    if(localCapture){localCapture.getTracks().forEach(track=>track.stop());localCapture=null;}
@@ -160,10 +188,10 @@
    report(onLeft?'Video docked on the left':'Video docked on the right');
   });
   expand.addEventListener('click',()=>{if(dock.requestFullscreen)Promise.resolve(dock.requestFullscreen()).catch(()=>report('Fullscreen unavailable'));});
-  close.addEventListener('click',()=>{reset();dock.hidden=true;window.NewViewShell?.select('devices');});
+  close.addEventListener('click',()=>{reset();dock.hidden=true;});
   stop.addEventListener('click',()=>{reset();dock.hidden=true;});
   window.addEventListener('pagehide',reset,{once:true});
-  window.NewViewCast={attachStream,stop:reset,open:showDock};
+  window.NewViewCast={attachStream,playYouTube,playIPTV,stop:reset,open:showDock,getMode:()=>mediaMode};
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
