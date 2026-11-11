@@ -841,3 +841,26 @@ body[dir="rtl"]>main>.newview-settings[open]>.newview-settings-content{right:aut
 @media (prefers-contrast:more){
   :is(.workspace-switcher,.workspace,.shell-page) :is(button,a,summary,[tabindex]):focus{outline-width:4px;outline-offset:3px}
 }
+
+
+/* Task 1: keep settings controls operable with TV remotes and short viewports. */
+body>main>.newview-settings[open]>.newview-settings-content{
+  max-height:calc(100dvh - 24px);
+  scrollbar-gutter:stable;
+  overscroll-behavior:contain;
+}
+body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,select,textarea,summary,[tabindex]):focus{
+  scroll-margin-block:32px;
+  scroll-margin-inline:24px;
+}
+@media(max-height:480px){
+  body>main>.newview-settings[open]>.newview-settings-content{
+    top:8px;
+    bottom:8px;
+    max-height:calc(100dvh - 16px);
+    padding:12px;
+  }
+}
+@media(forced-colors:active){
+  body>main>.newview-settings[open]>.newview-settings-content{border:2px solid CanvasText}
+}
