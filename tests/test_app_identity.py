@@ -31,7 +31,7 @@ class AppIdentityTest(unittest.TestCase):
             with self.subTest(label=label):
                 self.assertIn('newview.apk', content)
                 self.assertNotIn('market-charts.apk',content)
-        self.assertIn('newview-test-apk',workflow)
+        self.assertIn('TheNewView-test-APK',workflow)
 
 if __name__ == '__main__':
     unittest.main()
