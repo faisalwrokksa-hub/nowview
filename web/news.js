@@ -39,7 +39,7 @@
   readerBack.focus();
   return true;
  }
- window.NewViewNewsReader=Object.freeze({openByUrl:openReader,close:closeReader});
+ window.NewViewNewsReader=Object.freeze({openByUrl:openReader,close:closeReader,getItems:()=>lastItems.map(item=>({...item}))});
 
  const mode=document.createElement('select');mode.className='nv-news-mode';mode.setAttribute('aria-label','News filter');
  for(const [value,label] of [['hot','Top stories (4)'],['all','All headlines']]){const option=document.createElement('option');option.value=value;option.textContent=label;mode.append(option);}
