@@ -29,10 +29,10 @@ test('zero revenue shows undefined difference percentage',()=>{
  const rows=parseBusinessCsv(header+'2026-11-08,0,10,0,0');
  assert.equal(summarize(rows).margin,null);
 });
-test('business file upload is local and included in cloud and TV bundle',()=>{
+test('Power BI launch workspace replaces the CSV uploader while legacy CSV parsing stays testable',()=>{
  const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
  const build=fs.readFileSync(new URL('../cloud/build.mjs',import.meta.url),'utf8');
- assert.match(html,/id="business-file"/);assert.match(html,/id="business-kpis"/);assert.match(build,/business\.js/);
+ assert.match(html,/id="powerbi-report-url"/);assert.match(html,/https:\/\/app\.powerbi\.com\//);assert.doesNotMatch(html,/id="business-file"/);assert.match(build,/business\.js/);assert.match(build,/powerbi\.js/);
 });
 
 test('stale asynchronous CSV reads cannot restore cleared or replaced data',()=>{

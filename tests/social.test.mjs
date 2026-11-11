@@ -90,7 +90,7 @@ test('display profiles validate workspace IDs, refresh intervals and persistence
  const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
  for(const id of ['display-profile','display-save','display-fullscreen','display-next','display-refresh','display-status'])assert.ok(html.includes('id="'+id+'"'));
  assert.match(shell,/newview\.display\.profiles\.v1/);
- assert.match(shell,/list\.map\(v=>v==='news'\?'media':v\)\.filter\(v=>views\.includes\(v\)\)/);
+ assert.match(shell,/list\.map\(legacyView\)\.filter\(v=>views\.includes\(v\)\)/);
  assert.match(shell,/\[0,30,60,120,300\]\.includes\(seconds\)/);
  assert.match(shell,/profiles\.slice\(0,5\)/);
  assert.match(shell,/document\.hidden/);

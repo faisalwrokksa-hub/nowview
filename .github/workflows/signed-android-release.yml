@@ -1,0 +1,76 @@
+name: NewView signed Android release (manual approval)
+on:
+  workflow_dispatch:
+    inputs:
+      release_label:
+        description: 'Internal release label (letters, digits, periods, underscores, dashes)'
+        required: true
+        default: 'candidate'
+permissions:
+  contents: read
+jobs:
+  sign-apks:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: newview-android-release
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-35 platforms;android-34 build-tools;35.0.0 build-tools;34.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Validate manually approved signing credentials
+        env:
+          KEYSTORE_BASE64: ${{ secrets.NEWVIEW_SIGNING_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.NEWVIEW_SIGNING_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.NEWVIEW_SIGNING_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.NEWVIEW_SIGNING_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_BASE64" && test -n "$KEYSTORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD" || {
+            echo "::error::Missing Android release signing secrets in the approved environment"
+            exit 1
+          }
+      - name: Build unsigned Android release packages
+        run: |
+          bash build-apk.sh
+          gradle -p phone-caster :app:assembleRelease --no-daemon
+          test -s build/newview-unsigned.apk
+          test -s phone-caster/app/build/outputs/apk/release/app-release-unsigned.apk
+      - name: Sign and verify both production APKs
+        env:
+          KEYSTORE_BASE64: ${{ secrets.NEWVIEW_SIGNING_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.NEWVIEW_SIGNING_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.NEWVIEW_SIGNING_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.NEWVIEW_SIGNING_KEY_PASSWORD }}
+          RELEASE_LABEL: ${{ inputs.release_label }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_LABEL" =~ ^[A-Za-z0-9._-]{1,48}$ ]] || { echo "::error::Invalid release label"; exit 1; }
+          umask 077
+          KEYSTORE_FILE="$(mktemp)"
+          trap 'rm -f "$KEYSTORE_FILE"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_FILE"
+          mkdir -p signed
+          SIGNER="$ANDROID_HOME/build-tools/35.0.0/apksigner"
+          "$SIGNER" sign --ks "$KEYSTORE_FILE" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+            --out "signed/NewView-TV-${RELEASE_LABEL}.apk" build/newview-unsigned.apk
+          "$SIGNER" sign --ks "$KEYSTORE_FILE" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+            --out "signed/NewView-Phone-Caster-${RELEASE_LABEL}.apk" phone-caster/app/build/outputs/apk/release/app-release-unsigned.apk
+          "$SIGNER" verify --verbose "signed/NewView-TV-${RELEASE_LABEL}.apk"
+          "$SIGNER" verify --verbose "signed/NewView-Phone-Caster-${RELEASE_LABEL}.apk"
+          sha256sum signed/*.apk > signed/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NewView-manually-approved-signed-release
+          path: signed/
+          retention-days: 14

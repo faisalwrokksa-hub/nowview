@@ -3,8 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {pathToFileURL} from 'node:url';
 const root=path.resolve(import.meta.dirname,'..');
+async function importBuiltWorker(){
+ // Node cannot import cloudflare:workers; isolate the DO base without changing the deployed bundle.
+ const file=fs.readFileSync(path.join(root,'dist/server/index.js'),'utf8');
+ const nodeSafe=file.replace("import { DurableObject } from 'cloudflare:workers';",'const DurableObject = class { constructor(ctx,env){this.ctx=ctx;this.env=env;} };');
+ if(nodeSafe===file)throw Error('Durable Object module import not found in Worker bundle');
+ return import('data:text/javascript;base64,'+Buffer.from(nodeSafe).toString('base64'));
+}
 test('Cloudflare Worker build has explicit Wrangler entrypoint and valid bundle',()=>{
  const config=JSON.parse(fs.readFileSync(path.join(root,'wrangler.json'),'utf8'));
  assert.equal(config.name,'nowview');
@@ -13,13 +19,13 @@ test('Cloudflare Worker build has explicit Wrangler entrypoint and valid bundle'
  assert.match(config.compatibility_date,/^20\d{2}-\d{2}-\d{2}$/);
  execFileSync(process.execPath,[path.join(root,'cloud/build.mjs')],{cwd:root,stdio:'pipe'});
  const generated=fs.readFileSync(path.join(root,config.main),'utf8');
- assert.match(generated,/export default \{async fetch\(request\)/);
+ assert.match(generated,/export default \{async fetch\(request,env\)/);
  for(const asset of ['/index.html','/style.css','/watch.js','/myview.js','/connectivity.js','/tv-home.js','/offline-agents.js','/offline-controls.js'])assert.ok(generated.includes(asset),asset);
 });
 
 test('built Worker health endpoint reports only application readiness, not upstream success',async()=>{
  execFileSync(process.execPath,[path.join(root,'cloud/build.mjs')],{cwd:root,stdio:'pipe'});
- const {default:worker}=await import(pathToFileURL(path.join(root,'dist/server/index.js')).href+'?health-test='+Date.now());
+ const {default:worker}=await importBuiltWorker();
  const response=await worker.fetch(new Request('https://example.test/healthz'));
  assert.equal(response.status,200);
  assert.match(response.headers.get('content-type')||'',/application\/json/);
@@ -52,7 +58,7 @@ test('every local HTML script and stylesheet is included in the published Worker
 });
 
 test('Worker version is public commit metadata with no caching',async()=>{
- const {default:worker}=await import(pathToFileURL(path.join(root,'dist/server/index.js')).href+'?version-test='+Date.now());
+ const {default:worker}=await importBuiltWorker();
  const response=await worker.fetch(new Request('https://example.test/version'));
  assert.equal(response.status,200);
  assert.equal(response.headers.get('cache-control'),'no-store');

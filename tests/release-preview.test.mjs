@@ -15,7 +15,7 @@ test('footer identifies each workspace source truthfully',()=>{
  for(const view of ['myview','markets','business','media','social'])assert.match(shell,new RegExp(view+":"));
  assert.match(shell,/U\.S\. stock quotes unavailable/);
  assert.match(shell,/no live feeds/);
- assert.match(shell,/never uploaded/);
+ assert.match(shell,/Power BI/);
 });
 test('preview APK verification checks legacy assets and package identity',()=>{
  const verifier=read('../scripts/verify-preview-apk.sh');

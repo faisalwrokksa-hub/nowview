@@ -51,10 +51,21 @@ jobs:
         run: bash build-apk.sh
       - name: Verify preview APK identity and bundled workspace assets
         run: bash scripts/verify-preview-apk.sh
+      - name: Archive exact GitHub source revision for backup
+        run: |
+          mkdir -p build
+          git archive --format=zip --output=build/TheNewView-source.zip HEAD
       - uses: actions/upload-artifact@v4
         with:
-          name: newview-test-apk
+          name: TheNewView-source-backup
+          path: build/TheNewView-source.zip
+          retention-days: 14
+      - name: Prepare clearly named test APK for backup
+        run: cp build/newview.apk build/TheNewView-test.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TheNewView-test-APK
           path: |
-            build/newview.apk
+            build/TheNewView-test.apk
             build/newview-unsigned.apk
           retention-days: 14

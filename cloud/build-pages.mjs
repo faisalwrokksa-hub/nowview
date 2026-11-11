@@ -14,7 +14,7 @@ fs.copyFileSync(source, path.join(targetDir, '_worker.js'));
 // Cloudflare Pages advanced mode recognizes _worker.js, but the file is staged
 // for review only. No deployment or account credentials are needed to build.
 const generated = fs.readFileSync(path.join(targetDir, '_worker.js'), 'utf8');
-if (!generated.includes('export default') || !generated.includes('async fetch(request)')) {
+if (!generated.includes('export default') || !generated.includes('async fetch(request,env)')) {
   throw new Error('Expected Pages Worker fetch entrypoint is missing');
 }
 console.log('Prepared Cloudflare Pages preview artifact: dist/pages/_worker.js');

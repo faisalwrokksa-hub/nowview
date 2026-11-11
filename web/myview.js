@@ -5,11 +5,11 @@
   Object.freeze({id:'market',title:'Markets',description:'Open Binance market charts and watchlists; quotes are not independently verified.',view:'markets',label:'Market charts'}),
   Object.freeze({id:'news',title:'Headlines',description:'Read source-linked financial announcements in Watch & News.',view:'media',section:'headlines',label:'Financial announcements'}),
   Object.freeze({id:'media',title:'Video & TV',description:'Open the video and TV section of Watch & News.',view:'media',section:'videos',label:'Video and TV'}),
-  Object.freeze({id:'business',title:'Business',description:'Import your authorized business CSV locally to review KPIs.',view:'business',label:'Business KPIs'}),
+  Object.freeze({id:'business',title:'Business',description:'Open Microsoft Power BI reports and dashboards.',view:'business',label:'Power BI reporting'}),
   Object.freeze({id:'social',title:'Social',description:'Save and open public social profile bookmarks.',view:'social',label:'Social discovery'})
  ]);
  const ids=new Set(catalog.map(x=>x.id));
- // Daily Brief starts with markets, official headlines and local business KPIs.
+ // Daily Brief starts with markets, official headlines and Power BI shortcuts.
  // Previously saved selections remain untouched by load().
  const defaults=['market','news','business'];
  const presets=Object.freeze({balanced:Object.freeze(['market','news','business']),markets:Object.freeze(['market','business','news']),media:Object.freeze(['media','news','social'])});
@@ -91,12 +91,14 @@
  const root=document.getElementById('myview-grid'),editor=document.getElementById('myview-editor'),summary=document.getElementById('myview-count');
  const presetBar=document.getElementById('myview-presets');
  let chosen=load();
+ // Only a drag started from one of our own cards can reorder the dashboard.
+ let activeDraggedWidget=null;
  const quoteHistory=new Map();
  const maxQuotePoints=36;
  function chartFor(symbol){
   const points=quoteHistory.get(symbol)||[];
   const container=document.createElement('div');container.className='myview-live-chart';
-  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two verified quotes';
+  const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two valid observed quotes';
   container.append(title);
   if(points.length<2)return container;
   const min=Math.min(...points),max=Math.max(...points),range=max-min||1;
@@ -153,13 +155,14 @@
    item.dataset.widget=id;
    item.draggable=true;
    item.setAttribute('aria-label',widget.title+' widget. Use move earlier or later buttons for keyboard and TV.');
-   item.addEventListener('dragstart',e=>{e.dataTransfer?.setData('text/plain',id);if(e.dataTransfer)e.dataTransfer.effectAllowed='move';});
-   item.addEventListener('dragover',e=>{if(e.dataTransfer?.types.includes('text/plain'))e.preventDefault();});
-   item.addEventListener('drop',e=>{e.preventDefault();const from=e.dataTransfer?.getData('text/plain');if(!ids.has(from)||!chosen.includes(from)||from===id)return;const next=chosen.filter(x=>x!==from);next.splice(next.indexOf(id),0,from);chosen=save(next);render();root.querySelector('[data-widget="'+from+'"] button')?.focus();});
+   item.addEventListener('dragstart',e=>{activeDraggedWidget=id;if(e.dataTransfer){e.dataTransfer.setData('text/plain',id);e.dataTransfer.effectAllowed='move';}});
+   item.addEventListener('dragend',()=>{activeDraggedWidget=null;});
+   item.addEventListener('dragover',e=>{if(activeDraggedWidget&&chosen.includes(activeDraggedWidget))e.preventDefault();});
+   item.addEventListener('drop',e=>{if(!activeDraggedWidget)return;e.preventDefault();const from=activeDraggedWidget;activeDraggedWidget=null;if(!ids.has(from)||!chosen.includes(from)||from===id)return;const next=chosen.filter(x=>x!==from);next.splice(next.indexOf(id),0,from);chosen=save(next);render();root.querySelector('[data-widget="'+from+'"] button')?.focus();});
    const heading=text('h3','',widget.title);
    const eyebrow=text('div','shell-eyebrow',widget.label);
    const description=text('p','',widget.description);
-   const insight=text('p','myview-insight',preview[id](snapshots[id]));
+   const insight=text('p','myview-insight',id==='business'?'Launch Power BI reports securely in Microsoft Power BI.':preview[id](snapshots[id]));
    insight.setAttribute('aria-label',widget.title+' source snapshot');
    insight.dataset.snapshot=id;
    insight.setAttribute('aria-live','off');
@@ -223,7 +226,7 @@ item.append(eyebrow,heading,description,insight);
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
-  if(id==='market'&&next&&typeof next.symbol==='string'&&Number.isFinite(next.price)&&Number.isFinite(next.quoteTime)){
+  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
    const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
    if(!points.length||points[points.length-1]!==next.price){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);}
    refreshChart();

@@ -1,0 +1,60 @@
+name: NewView complete Android test APK bundle
+on:
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'android/**'
+      - 'phone-caster/**'
+      - 'build-apk.sh'
+      - 'scripts/verify-preview-apk.sh'
+      - '.github/workflows/complete-apk-bundle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  complete-test-bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-34 platforms;android-35 build-tools;34.0.0 build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build NewView dashboard Android TV APK
+        run: |
+          bash build-apk.sh
+          bash scripts/verify-preview-apk.sh
+      - name: Build native Android phone caster APK
+        run: gradle -p phone-caster :app:assembleDebug --no-daemon
+      - name: Verify phone caster identity and debug signature
+        run: |
+          set -euo pipefail
+          APK=phone-caster/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | grep -F "package: name='app.newview.phonecaster'"
+      - name: Package both APKs with checksums and source revision
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p complete-apks
+          cp build/newview.apk complete-apks/NewView-Android-TV-test.apk
+          cp phone-caster/app/build/outputs/apk/debug/app-debug.apk complete-apks/NewView-Phone-Caster-test.apk
+          printf 'NewView Android test bundle\nSource commit: %s\n\nInstall NewView-Android-TV-test.apk on Android TV.\nInstall NewView-Phone-Caster-test.apk on your Android phone.\n\nBoth APKs use development signing identities and are NOT app-store production releases.\nCasting requires the same reachable local network and manual WebRTC offer/answer exchange.\nReal-device performance has not been certified.\n\nIf upgrading an APK fails due to an incompatible signing key, uninstall the previous DEVELOPMENT build first; this erases its locally stored app data.\n' "$SOURCE_SHA" > complete-apks/INSTALL.txt
+          (cd complete-apks && sha256sum *.apk > SHA256SUMS.txt)
+          test -s complete-apks/NewView-Android-TV-test.apk
+          test -s complete-apks/NewView-Phone-Caster-test.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NewView-complete-two-APK-test-bundle
+          path: complete-apks/
+          retention-days: 30
+          if-no-files-found: error

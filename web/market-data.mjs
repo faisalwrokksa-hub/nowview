@@ -29,7 +29,8 @@ export async function getChart(symbol,period){
    if(!response.ok)throw new Error('Binance data unavailable or rate-limited');return response.json();
   };
   const pair=symbol+'USDT',metadata=await read('exchangeInfo',{symbol:pair}),info=metadata.symbols?.[0];
-  if(!info||info.status!=='TRADING')throw new Error('This exact token pair is not trading on Binance Spot');
+  if(!info||info.symbol!==pair||info.baseAsset!==symbol||info.quoteAsset!=='USDT')throw new Error('Binance instrument identity mismatch');
+  if(info.status!=='TRADING')throw new Error('This exact token pair is not trading on Binance Spot');
   const [interval,seconds]=ranges[period];
   const [klines,ticker,trades]=await Promise.all([read('klines',{symbol:pair,interval,limit:'1000',startTime:String(Math.floor((now-seconds)*1000))}),read('ticker/24hr',{symbol:pair}),read('trades',{symbol:pair,limit:'1'})]);
   const answer=normalise(klines,ticker,trades,info,symbol,period,Date.now()/1000);cache.set(key,answer);return answer;

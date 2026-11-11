@@ -86,7 +86,10 @@ public final class ChartsView extends WebView {
             ||host.equals("news.google.com")||host.equals("trends.google.com")
             ||host.equals("www.reddit.com")
             ||host.equals("bsky.app")||host.equals("mastodon.social")
-            ||host.equals("iptv-org.github.io");
+            ||host.equals("iptv-org.github.io")
+            ||host.equals("www.bbc.com")||host.equals("www.bbc.co.uk")||host.equals("bbc.com")
+            ||host.equals("www.npr.org")||host.equals("text.npr.org")
+            ||host.equals("www.theguardian.com");
     }
     private boolean routeNavigation(Uri uri){
         if(isInternal(uri))return false;
@@ -105,6 +108,16 @@ public final class ChartsView extends WebView {
             }catch(Exception ignored){}
         });
     }
+    private static boolean approvedNewsLink(String source,Uri url){
+        if(!approvedUrl(url))return false;
+        String host=url.getHost().toLowerCase(java.util.Locale.ROOT);
+        if("fed".equals(source))return host.equals("www.federalreserve.gov");
+        if("sec".equals(source))return host.equals("www.sec.gov");
+        if("bbc".equals(source))return host.equals("www.bbc.com")||host.equals("bbc.com")||host.equals("www.bbc.co.uk");
+        if("npr".equals(source))return host.equals("www.npr.org")||host.equals("text.npr.org");
+        if("guardian".equals(source))return host.equals("www.theguardian.com");
+        return false;
+    }
     public void handleActivityResult(int request,int result,Intent data){
         if(request!=CSV_PICKER_REQUEST)return;
         ValueCallback<Uri[]> callback=pendingFiles;pendingFiles=null;
@@ -116,11 +129,38 @@ public final class ChartsView extends WebView {
     }
     private static String tagText(Element e,String tag){NodeList n=e.getElementsByTagName(tag);return n.getLength()>0?n.item(0).getTextContent().trim():"";}
     public final class Bridge {
+        @JavascriptInterface public void openDnsSettings(){
+            post(()->{
+                if(closed)return;
+                try{
+                    Intent settings=new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
+                    getContext().startActivity(settings);
+                }catch(Exception ignored){
+                    try{getContext().startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));}
+                    catch(Exception ignoredAgain){}
+                }
+            });
+        }
+        @JavascriptInterface public void openNewsBrowser(String url){
+            try{
+                Uri target=Uri.parse(url);
+                if(!NewsBrowserActivity.safePage(target))return;
+                post(()->{
+                    if(closed)return;
+                    Intent intent=new Intent(getContext(),NewsBrowserActivity.class);
+                    intent.setData(target);
+                    try{getContext().startActivity(intent);}catch(Exception ignored){}
+                });
+            }catch(Exception ignored){}
+        }
         @JavascriptInterface public void fetchPublicNews(String source,int id){
             worker.execute(()->{
                 JSONObject result=new JSONObject();JSONArray items=new JSONArray();
                 String feed="fed".equals(source)?"https://www.federalreserve.gov/feeds/press_all.xml":
-                            "sec".equals(source)?"https://www.sec.gov/news/pressreleases.rss":null;
+                            "sec".equals(source)?"https://www.sec.gov/news/pressreleases.rss":
+                            "bbc".equals(source)?"https://feeds.bbci.co.uk/news/world/rss.xml":
+                            "npr".equals(source)?"https://feeds.npr.org/1001/rss.xml":
+                            "guardian".equals(source)?"https://www.theguardian.com/world/rss":null;
                 try{
                     if(feed==null)throw new Exception("No approved native feed");
                     HttpURLConnection connection=(HttpURLConnection)new URL(feed).openConnection();
@@ -145,10 +185,10 @@ public final class ChartsView extends WebView {
                             Element item=(Element)nodes.item(i);
                             String title=tagText(item,"title"),link=tagText(item,"link");
                             Uri uri=Uri.parse(link);
-                            if(!approvedUrl(uri)||title.isEmpty())continue;
+                            if(!approvedNewsLink(source,uri)||title.isEmpty())continue;
                             JSONObject row=new JSONObject();
                             row.put("title",title);row.put("url",link);
-                            row.put("source","fed".equals(source)?"Federal Reserve":"SEC");
+                            row.put("source","fed".equals(source)?"Federal Reserve":"sec".equals(source)?"SEC":"bbc".equals(source)?"BBC World":"npr".equals(source)?"NPR News":"The Guardian");
                             row.put("publishedAt",tagText(item,"pubDate"));items.put(row);
                         }
                     }finally{connection.disconnect();}
@@ -157,11 +197,55 @@ public final class ChartsView extends WebView {
                 post(()->{if(!closed)evaluateJavascript("window.__newviewNewsResult&&window.__newviewNewsResult("+id+","+result.toString()+")",null);});
             });
         }
-        @JavascriptInterface public void fetchPublicPlaylist(int id){
+        @JavascriptInterface public void fetchPublicCatalog(String kind,int id){
+            final String path;
+            if("country".equals(kind))path="countries.json";
+            else if("language".equals(kind))path="languages.json";
+            else if("category".equals(kind))path="categories.json";
+            else{
+                post(()->{if(!closed)evaluateJavascript("window.__newviewCatalogResult&&window.__newviewCatalogResult("+id+",null,'Unsupported catalog')",null);});
+                return;
+            }
+            worker.execute(()->{
+                String result=null,error=null;
+                HttpURLConnection connection=null;
+                try{
+                    connection=(HttpURLConnection)new URL("https://iptv-org.github.io/api/"+path).openConnection();
+                    connection.setConnectTimeout(9000);connection.setReadTimeout(10000);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestProperty("Accept","application/json");
+                    if(connection.getResponseCode()!=200)throw new Exception("Catalog unavailable");
+                    ByteArrayOutputStream buffer=new ByteArrayOutputStream();
+                    try(InputStream stream=connection.getInputStream()){
+                        byte[] bytes=new byte[4096];int count;
+                        while((count=stream.read(bytes))!=-1){
+                            if(buffer.size()+count>220000)throw new Exception("Catalog too large");
+                            buffer.write(bytes,0,count);
+                        }
+                    }
+                    result=new String(buffer.toByteArray(),StandardCharsets.UTF_8);
+                    if(!result.trim().startsWith("["))throw new Exception("Invalid catalog");
+                }catch(Exception ignored){error="Public IPTV catalog unavailable";}
+                finally{if(connection!=null)connection.disconnect();}
+                final String data=result==null?"null":JSONObject.quote(result);
+                final String failure=error==null?"null":JSONObject.quote(error);
+                post(()->{if(!closed)evaluateJavascript("window.__newviewCatalogResult&&window.__newviewCatalogResult("+id+","+data+","+failure+")",null);});
+            });
+        }
+        @JavascriptInterface public void fetchPublicPlaylist(int id,String scope,String code){
+            final String path;
+            if("all".equals(scope))path="index.m3u";
+            else if("country".equals(scope)&&code!=null&&code.matches("[a-z]{2}"))path="countries/"+code+".m3u";
+            else if("language".equals(scope)&&code!=null&&code.matches("[a-z]{3}"))path="languages/"+code+".m3u";
+            else if("category".equals(scope)&&code!=null&&code.matches("[a-z][a-z0-9-]{1,31}"))path="categories/"+code+".m3u";
+            else{
+                post(()->{if(!closed)evaluateJavascript("window.__newviewPlaylistChunk&&window.__newviewPlaylistChunk("+id+",null,true,'Invalid playlist scope')",null);});
+                return;
+            }
             worker.execute(()->{
                 JSONObject result=new JSONObject();
                 try{
-                    URL url=new URL("https://iptv-org.github.io/iptv/index.m3u");
+                    URL url=new URL("https://iptv-org.github.io/iptv/"+path);
                     HttpURLConnection connection=(HttpURLConnection)url.openConnection();
                     connection.setConnectTimeout(9000);connection.setReadTimeout(12000);
                     connection.setInstanceFollowRedirects(false);

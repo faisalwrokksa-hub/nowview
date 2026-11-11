@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../web/workspace-shell.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
-test('five accessible workspaces have selector tabs',()=>{
- for(const id of ['myview','markets','business','media','social']){
+test('four primary workspaces have selector tabs',()=>{
+ for(const id of ['myview','markets','media','devices']){
   assert.match(html,new RegExp('data-workspace="'+id+'"'));
   assert.match(html,new RegExp('data-view-button="'+id+'"'));
  }
@@ -12,7 +12,7 @@ test('MyView is default and invalid saved workspaces fail closed',()=>{
  const localStorage={getItem:()=>null,setItem:()=>{}};
  vm.runInNewContext(source,{window,document,localStorage});
  assert.equal(window.NewViewShell.getStored(),'myview');
- assert.equal(window.NewViewShell.views.length,5);
+ assert.equal(window.NewViewShell.views.length,4);
 });
 test('workspace and stock board remain separate from market engine',()=>{
  const board=fs.readFileSync(new URL('../web/stock-board.js',import.meta.url),'utf8');
@@ -20,8 +20,8 @@ test('workspace and stock board remain separate from market engine',()=>{
  assert.match(build,/workspace-shell\.js/);
  assert.doesNotMatch(board,/Tadawul|id:'sa'|الأسهم السعودية/);
  assert.match(board,/U\.S\. Stocks/);
- assert.match(html,/id="business-file"/);
- assert.match(html,/id="business-kpis"/);
+ assert.match(html,/id="powerbi-report-url"/);
+ assert.match(html,/https:\/\/app\.powerbi\.com\//);
  assert.match(html,/id="social-add"/);
 });
 

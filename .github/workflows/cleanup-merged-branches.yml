@@ -1,0 +1,23 @@
+name: NewView remove verified merged branches
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/cleanup-merged-branches.sh'
+      - '.github/workflows/cleanup-merged-branches.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Delete only allowlisted and provably merged branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/cleanup-merged-branches.sh

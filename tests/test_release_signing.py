@@ -18,7 +18,8 @@ class SigningPolicyTests(unittest.TestCase):
     def test_ci_does_not_run_release_signer(self):
         w=(ROOT/".github/workflows/dashboard.yml").read_text(encoding="utf-8")
         self.assertNotIn("sign-release.sh",w)
-        self.assertIn("newview-test-apk",w)
+        self.assertIn("TheNewView-test-APK",w)
+        self.assertIn("build/TheNewView-test.apk",w)
         self.assertNotIn("NEWVIEW_RELEASE_STORE_PASSWORD",w)
 
     def test_gitignore_excludes_private_keys(self):

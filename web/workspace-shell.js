@@ -1,14 +1,16 @@
 'use strict';
-/* Shared NewView shell: five workspaces, with no fake financial/social data. */
+/* Shared NewView shell: four primary workspaces with legacy navigation aliases. */
 (function(){
- const views=['myview','markets','business','media','social'];
- const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',media:'Watch & News',social:'NewViewSocial'};
+ const views=['myview','markets','media','devices'];
+ const legacyView=view=>view==='business'?'myview':view==='social'||view==='news'?'media':view;
+ const names={myview:'MyView',markets:'NewViewMarkets',business:'NewViewBusiness',media:'Discover',social:'NewViewSocial',devices:'NewViewDevice'};
  const sourceNotes={
-  myview:'MyView · preferences stored on this device',
+  myview:'MyView · local widgets and Power BI shortcut · Microsoft sign-in stays with Microsoft',
   markets:'Binance public token prices in USDT · U.S. stock quotes unavailable without authorized feed',
-  business:'Business · CSV processed locally and never uploaded',
-  media:'Watch & News · publisher-linked headlines and official video embeds; source rights vary',
-  social:'Social · saved public profile links only, no live feeds'
+  business:'Power BI · opens via Microsoft and saved shortcuts',
+  media:'Discover · publisher-linked headlines, official video embeds, public social bookmarks',
+  social:'Social · saved public profile links only, no live feeds',
+  devices:'NewViewDevice · encrypted layout pairing and experimental consent-based browser screen sharing'
  };
  const FIRST_LAUNCH_KEY='newview.first-launch.v1';
  const FIRST_LAUNCH_DEFAULT=Object.freeze({interests:['markets','business','news'],coverage:'global',video:'manual',refresh:'balanced'});
@@ -58,18 +60,20 @@
   const target=document.getElementById('workspace-intro');target?.parentNode?.insertBefore(container,target);
  }
  const DISPLAY_KEY='newview.display.profiles.v1';
- const DISPLAY_DEFAULT={name:'Default TV',views:['myview','markets','business','media','social'],refreshSeconds:60,fullscreen:false};
+ const DISPLAY_DEFAULT={name:'Default TV',views:['myview','markets','media','devices'],refreshSeconds:60,fullscreen:false};
  function sanitizeDisplay(value){
   if(!value||typeof value!=='object')return {...DISPLAY_DEFAULT,views:[...DISPLAY_DEFAULT.views]};
   const list=Array.isArray(value.views)?value.views:DISPLAY_DEFAULT.views;
-  const selected=[...new Set(list.map(v=>v==='news'?'media':v).filter(v=>views.includes(v)))];
+  const selected=[...new Set(list.map(legacyView).filter(v=>views.includes(v)))];
   const seconds=Number(value.refreshSeconds);
   return {name:typeof value.name==='string'?value.name.slice(0,40):DISPLAY_DEFAULT.name,views:selected.length?selected:[...DISPLAY_DEFAULT.views],refreshSeconds:[0,30,60,120,300].includes(seconds)?seconds:60,fullscreen:value.fullscreen===true};
  }
  function loadDisplays(){try{const x=JSON.parse(localStorage.getItem(DISPLAY_KEY)||'[]');return Array.isArray(x)?x.slice(0,5).map(sanitizeDisplay):[];}catch{return [];}}
  function saveDisplays(profiles){const safe=profiles.slice(0,5).map(sanitizeDisplay);try{localStorage.setItem(DISPLAY_KEY,JSON.stringify(safe));}catch{}return safe;}
- const getStored=()=>{try{const v=localStorage.getItem('newview.workspace');return v==='news'?'media':views.includes(v)?v:'myview';}catch{return 'myview';}};
+ const getStored=()=>{try{const v=localStorage.getItem('newview.workspace');const mapped=legacyView(v);return views.includes(mapped)?mapped:'myview';}catch{return 'myview';}};
  function select(view){
+  const requested=view;
+  view=legacyView(view);
   if(!views.includes(view)||document.body.classList.contains('home-panel'))return false;
   const market=document.getElementById('market-shell');
   const chart=document.querySelector('.workspace');
@@ -132,6 +136,8 @@
   try{localStorage.setItem('newview.workspace',view);}catch{}
   const page=document.querySelector('[data-workspace="'+view+'"]');
   if(page&&page.scrollTo)page.scrollTo({top:0,behavior:'auto'});
+  if(requested==='social')window.NewViewWatch?.select?.('social');
+  if(requested==='business')document.getElementById('newview-powerbi-portal')?.scrollIntoView?.({block:'start',behavior:'smooth'});
   return true;
  }
  function installDisplay(){
@@ -168,8 +174,146 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('display-mode')){document.body.classList.remove('display-mode');active=sanitizeDisplay({...active,fullscreen:false});}});
   renderProfiles();apply(active);
  }
+
+ // Fast workspace navigator: local commands only, with no external search or data collection.
+ function installCommandPalette(){
+  const header=document.querySelector('main > header');
+  if(!header||document.getElementById('newview-command-open'))return;
+  const trigger=document.createElement('button');
+  trigger.type='button';trigger.id='newview-command-open';trigger.className='newview-command-trigger';
+  trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-keyshortcuts','Control+k Meta+k');
+  trigger.textContent='⌕ Find workspace';header.append(trigger);
+  const overlay=document.createElement('div');overlay.id='newview-command-overlay';overlay.className='newview-command-overlay';overlay.hidden=true;
+  const dialog=document.createElement('section');dialog.className='newview-command-dialog';dialog.setAttribute('role','dialog');
+  dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','newview-command-label');
+  const label=document.createElement('label');label.id='newview-command-label';label.htmlFor='newview-command-input';label.textContent='Jump to a workspace';
+  const input=document.createElement('input');input.id='newview-command-input';input.type='search';
+  input.placeholder='Search Markets, Power BI, Discover, Devices…';input.autocomplete='off';
+  const hint=document.createElement('p');hint.className='newview-command-hint';hint.textContent='↑ ↓ select · Enter open · Esc close';
+  const results=document.createElement('div');results.id='newview-command-results';results.setAttribute('role','listbox');results.setAttribute('aria-label','Workspace results');
+  const close=document.createElement('button');close.type='button';close.className='newview-command-close';close.textContent='Close';close.setAttribute('aria-label','Close workspace search');
+  const top=document.createElement('div');top.className='newview-command-top';top.append(label,close);
+  dialog.append(top,input,results,hint);overlay.append(dialog);document.body.append(overlay);
+  const actions=[
+   {name:'MyView',detail:'Personal dashboard and widgets',view:'myview'},
+   {name:'Power BI',detail:'Microsoft reporting portal',view:'business'},
+   {name:'Markets',detail:'Charts and watchlists',view:'markets'},
+   {name:'Business',detail:'Microsoft Power BI reports and workspaces',view:'business'},
+   {name:'Discover',detail:'News, social and video',view:'media'},
+   {name:'Headlines',detail:'Publisher-linked news',view:'media',section:'headlines'},
+   {name:'Live TV',detail:'Public channel directory',view:'media',section:'channels'},
+   {name:'Videos',detail:'Official video embeds',view:'media',section:'videos'},
+   {name:'Social',detail:'Public profile bookmarks',view:'media',section:'social'},
+   {name:'NewViewDevice',detail:'Pair phone, browser and TV layouts',view:'devices'}
+  ];
+  let visible=actions,selected=0,restoreFocus=trigger;
+  function closePalette(){
+   if(overlay.hidden)return false;
+   overlay.hidden=true;input.value='';
+   if(restoreFocus?.isConnected)restoreFocus.focus({preventScroll:true});
+   return true;
+  }
+  function openPalette(){
+   if(document.body.classList.contains('home-panel'))return;
+   restoreFocus=document.activeElement instanceof HTMLElement?document.activeElement:trigger;
+   overlay.hidden=false;selected=0;input.value='';render();input.focus();
+  }
+  function choose(action){
+   if(!action)return;closePalette();select(action.view);
+   if(action.section)window.NewViewWatch?.select?.(action.section);
+  }
+  function render(){
+   const q=input.value.trim().toLocaleLowerCase();
+   visible=actions.filter(a=>(a.name+' '+a.detail).toLocaleLowerCase().includes(q));
+   selected=Math.min(selected,Math.max(visible.length-1,0));results.replaceChildren();
+   visible.forEach((action,i)=>{
+    const item=document.createElement('button');item.type='button';item.className='newview-command-result';item.setAttribute('role','option');
+    item.setAttribute('aria-selected',String(i===selected));item.tabIndex=-1;
+    const name=document.createElement('strong');name.textContent=action.name;
+    const description=document.createElement('small');description.textContent=action.detail;
+    item.append(name,description);item.addEventListener('click',()=>choose(action));results.append(item);
+   });
+   if(!visible.length){const empty=document.createElement('p');empty.className='newview-command-empty';empty.textContent='No matching workspace';results.append(empty);}
+   input.setAttribute('aria-activedescendant','');
+   [...results.querySelectorAll('[role="option"]')].forEach((el,i)=>{el.id='newview-command-item-'+i;if(i===selected)input.setAttribute('aria-activedescendant',el.id);});
+  }
+  trigger.addEventListener('click',openPalette);close.addEventListener('click',closePalette);
+  input.addEventListener('input',()=>{selected=0;render();});
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closePalette();});
+  overlay.addEventListener('keydown',e=>{
+   if(e.key==='Escape'||e.key==='BrowserBack'){e.preventDefault();e.stopPropagation();closePalette();return;}
+   if(e.key==='Tab'){
+    // Only the close button and search input are tabbable inside this dialog.
+    // Keep focus inside the modal for TV remotes, browsers and screen readers.
+    e.preventDefault();
+    (document.activeElement===input?close:input).focus();
+   }
+   if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();if(visible.length){selected=(selected+(e.key==='ArrowDown'?1:-1)+visible.length)%visible.length;render();}
+   }
+   if(e.key==='Enter'&&document.activeElement===input){e.preventDefault();choose(visible[selected]);}
+  });
+  document.addEventListener('keydown',e=>{
+   if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='k'){e.preventDefault();overlay.hidden?openPalette():closePalette();}
+  });
+  window.NewViewCloseCommandPalette=closePalette;
+ }
+ function installQuickActions(){
+  const intro=document.getElementById('workspace-intro');
+  if(!intro||document.getElementById('newview-quick-actions'))return;
+  const bar=document.createElement('nav');bar.id='newview-quick-actions';bar.className='newview-quick-actions';
+  bar.setAttribute('aria-label','Workspace quick actions');
+  const items=[
+   {id:'markets',label:'Open charts',view:'markets'},
+   {id:'powerbi',label:'Power BI',view:'business'},
+   {id:'headlines',label:'Headlines',view:'media',section:'headlines'},
+   {id:'social',label:'Social',view:'media',section:'social'},
+   {id:'cast',label:'Screen cast',view:'devices'}
+  ];
+  for(const item of items){
+   const button=document.createElement('button');button.type='button';button.dataset.quickAction=item.id;
+   button.textContent=item.label;button.setAttribute('aria-label',item.label);
+   button.addEventListener('click',()=>{
+    if(item.id==='cast'){
+     window.NewViewCast?.open?.();
+     select('devices');
+    }else{
+     select(item.view);
+     if(item.section)window.NewViewWatch?.select?.(item.section);
+    }
+   });
+   bar.append(button);
+  }
+  intro.after(bar);
+  function sync(){
+   const current=document.body.dataset.currentWorkspace;
+   for(const button of bar.querySelectorAll('button')){
+    const selected=button.dataset.quickAction==='markets'?current==='markets':
+      button.dataset.quickAction==='powerbi'?current==='myview':
+      button.dataset.quickAction==='cast'?current==='devices':
+      current==='media'&&window.NewViewWatch?.currentSection?.()===button.dataset.quickAction;
+    button.setAttribute('aria-pressed',String(!!selected));
+   }
+  }
+  document.addEventListener('newview:workspace-change',sync);
+  bar.addEventListener('keydown',event=>{
+   if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+   const buttons=[...bar.querySelectorAll('button')];
+   const index=buttons.indexOf(document.activeElement);
+   if(index===-1)return;
+   event.preventDefault();
+   const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:
+     (index+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;
+   buttons[next].focus();
+  });
+  sync();
+ }
  function install(){
   if(document.body.classList.contains('home-panel'))return;
+  // Migrate the former Business page into MyView without recreating its buttons.
+  const powerbi=document.querySelector('[data-workspace="business"]');
+  const home=document.querySelector('[data-workspace="myview"]');
+  if(powerbi&&home){powerbi.removeAttribute('data-workspace');powerbi.classList.remove('shell-page');powerbi.id='newview-powerbi-portal';home.appendChild(powerbi);}
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
   nav.addEventListener('click',event=>{const b=event.target instanceof Element?event.target.closest('[data-view-button]'):null;if(b)select(b.dataset.viewButton);});
   // Keep the mobile/tablet selector synchronized with the actual pinned widgets.
@@ -200,7 +344,7 @@
   });
   if(panelGrid){new MutationObserver(syncPanels).observe(panelGrid,{childList:true});syncPanels();}
 
-  document.querySelector('[data-workspace="myview"]')?.addEventListener('click',event=>{const b=event.target.closest('[data-home-view]');if(!b)return;const view=b.dataset.homeView;if(!views.includes(view))return;select(view);if(b.dataset.homeSection)window.NewViewWatch?.select(b.dataset.homeSection);});
+  document.querySelector('[data-workspace="myview"]')?.addEventListener('click',event=>{const b=event.target.closest('[data-home-view]');if(!b)return;const view=b.dataset.homeView;if(!views.includes(legacyView(view)))return;select(view);if(b.dataset.homeSection)window.NewViewWatch?.select(b.dataset.homeSection);});
   // Settings drawer: Escape/TV Back closes it, and focus returns to its opener.
   const settingsDrawer=document.getElementById('newview-settings');
   if(settingsDrawer){
@@ -237,11 +381,14 @@
   const marketActions=document.getElementById('shell-market-actions');
   if(boardButton&&marketActions)marketActions.appendChild(boardButton);
   select(window.NewViewApps?'myview':getStored());
+  installCommandPalette();
+  installQuickActions();
   installDisplay();
   installFirstLaunch();
  }
  // Native Android Back uses the same ordered dismissal as keyboard navigation.
  window.NewViewBack=()=>{
+  if(window.NewViewCloseCommandPalette?.())return true;
   const drawer=document.getElementById('newview-settings');
   if(drawer?.open){drawer.open=false;drawer.querySelector('summary')?.focus();return true;}
   if(window.NewViewHomeBack?.())return true;

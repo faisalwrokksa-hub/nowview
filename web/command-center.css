@@ -1,0 +1,481 @@
+/* NewView Command Center — original CSS, informed by Homarr/Glance layout patterns.
+   Scope to the standard web shell; embedded Android home-panel styles stay intact. */
+:root {
+  color-scheme:dark;
+  --bg:#090f1a;--panel:#131d2c;--line:#2c3c50;--muted:#a5b6cb;
+  --text:#f5f8fd;--cyan:#65dbc8;--green:#75e0aa;--red:#ff929f;
+  --nv-accent:#65dbc8;--nv-surface:#111b2a;--nv-surface-raised:#192639;
+  --nv-outline:#34465d;--nv-radius:18px;--nv-shadow:0 14px 40px rgba(2,8,18,.24);
+}
+body:not(.home-panel) {
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(ellipse 60% 42% at 94% 0%,rgba(52,104,144,.22),transparent 80%),#090f1a;
+  color:var(--text);letter-spacing:-.01em;
+}
+body:not(.home-panel)>main{max-width:1920px;gap:clamp(10px,1.3vw,19px);padding:clamp(14px,1.8vw,28px)}
+body:not(.home-panel)>main>header{min-width:0;gap:16px}
+body:not(.home-panel)>main>header h1{font-weight:800;letter-spacing:-.06em;margin-top:2px;line-height:1}
+body:not(.home-panel)>main>header .eyebrow{font-size:11px;letter-spacing:.2em;color:#8ca8bd;font-weight:700}
+body:not(.home-panel) .brand-dot{background:var(--nv-accent);box-shadow:0 0 0 5px rgba(101,219,200,.1)}
+body:not(.home-panel)>main .clocks{color:#e9f3fa;font-variant-numeric:tabular-nums}
+body:not(.home-panel)>main .clocks span{color:var(--muted)}
+body:not(.home-panel)>main>.workspace-switcher{background:var(--nv-surface);border:1px solid var(--nv-outline);border-radius:var(--nv-radius);padding:10px;gap:5px}
+body:not(.home-panel)>main>.workspace-switcher .workspace-tab{
+  background:transparent;border:1px solid transparent;border-radius:12px;
+  color:#a9bad0;display:flex;align-items:center;justify-content:flex-start;gap:13px;
+  padding:13px 15px;min-height:48px;font-size:clamp(13px,.95vw,16px);
+  font-weight:650;transition:background .15s ease,border-color .15s ease,color .15s ease
+}
+body:not(.home-panel)>main>.workspace-switcher .workspace-tab:hover{background:#223247;color:#fff}
+body:not(.home-panel)>main>.workspace-switcher .workspace-tab[aria-pressed="true"]{
+  background:linear-gradient(105deg,#194a4b,#1d3947);border-color:#32726f;color:#cbfff5;
+  box-shadow:inset 3px 0 0 var(--nv-accent)
+}
+body:not(.home-panel)>main .nv-nav-icon{width:21px;height:21px;opacity:.9}
+body:not(.home-panel)>main #workspace-intro{min-height:48px}
+body:not(.home-panel)>main #workspace-title{font-weight:750;letter-spacing:-.035em;font-size:clamp(20px,1.7vw,30px)}
+body:not(.home-panel)>main .newview-settings>summary{
+  background:var(--nv-surface-raised);border:1px solid var(--nv-outline);
+  border-radius:12px;color:#e4f2f6;min-height:44px
+}
+body:not(.home-panel)>main .newview-settings[open]>.newview-settings-content{
+  background:#152234;border-color:#426075;box-shadow:0 0 0 100vmax rgba(1,7,15,.72),0 24px 70px #0009
+}
+body:not(.home-panel)>main :is(.shell-card,.myview-widget,.workspace,.board-card){
+  background:linear-gradient(155deg,#172538,#111b2a);border:1px solid var(--nv-outline);
+  border-radius:var(--nv-radius);box-shadow:var(--nv-shadow);color:var(--text)
+}
+body:not(.home-panel)>main :is(.shell-card,.myview-widget,.workspace,.board-card):focus-within{border-color:#547d90}
+body:not(.home-panel)>main :is(.myview-widget,.shell-card) :is(h2,h3){color:#f5f8fd;letter-spacing:-.025em}
+body:not(.home-panel)>main :is(.shell-eyebrow,.board-subtitle,.chart-caption,.quote-meta){color:var(--muted)}
+body:not(.home-panel)>main button{
+  border-radius:10px;border-color:#3b4e63;background:#213249;color:#e5eff9;
+  min-height:40px;transition:background .15s ease,border-color .15s ease
+}
+body:not(.home-panel)>main button:hover:not(:disabled){background:#2a425b;border-color:#65849e}
+body:not(.home-panel)>main button[aria-pressed="true"],body:not(.home-panel)>main button.active{
+  background:#1a4c4d;border-color:#398980;color:#d0fff5
+}
+body:not(.home-panel)>main :is(button,a,input,select,summary,[tabindex]):focus-visible{
+  outline:3px solid #a7f7e9!important;outline-offset:3px!important
+}
+body:not(.home-panel)>main :is(input,select,textarea){background:#0d1927;color:#eef7ff;border:1px solid #476076;border-radius:10px}
+body:not(.home-panel)>main :is(.myview-widget,.shell-card,.board-card){overflow-wrap:anywhere}
+body:not(.home-panel)>main .board-heading h3{color:#dceff3}
+body:not(.home-panel)>main .board-row{border-color:#34445b}
+body:not(.home-panel)>main .board-name strong,body:not(.home-panel)>main .board-price{color:#f2f7ff}
+body:not(.home-panel)>main .board-note{color:#afbdd0}
+body:not(.home-panel)>main .positive,body:not(.home-panel)>main .board-up .board-change{color:var(--green)!important}
+body:not(.home-panel)>main .negative,body:not(.home-panel)>main .board-down .board-change{color:var(--red)!important}
+body:not(.home-panel)>main>footer{color:#94a9bc;border-top:1px solid #253449;padding-top:9px}
+body:not(.home-panel)>main>[data-workspace="myview"] .myview-grid{
+  gap:clamp(10px,1.4vw,20px);grid-template-columns:minmax(0,1.65fr) minmax(0,1fr)
+}
+body:not(.home-panel)>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{
+  grid-column:1;grid-row:span 2;min-height:310px
+}
+body:not(.home-panel)>main>[data-workspace="myview"] .newview-personalize>summary{color:#bfd1df}
+@media(min-width:1200px) and (min-height:650px){
+ body:not(.home-panel)>main{grid-template-columns:minmax(200px,246px) minmax(0,1fr)}
+ body:not(.home-panel)>main>.workspace-switcher{padding:15px 10px}
+ body:not(.home-panel)>main>.workspace-switcher::before{
+   content:"WORKSPACES";display:block;padding:5px 15px 13px;color:#7f9caf;
+   font-size:11px;letter-spacing:.18em;font-weight:800
+ }
+}
+@media(max-width:1199px){
+ body:not(.home-panel)>main>.workspace-switcher{padding:6px;overflow-x:auto}
+ body:not(.home-panel)>main>.workspace-switcher .workspace-tab{
+  justify-content:center;white-space:nowrap;min-height:48px;padding:10px 15px
+ }
+ body:not(.home-panel)>main>.workspace-switcher .workspace-tab[aria-pressed="true"]{
+  box-shadow:inset 0 -3px 0 var(--nv-accent)
+ }
+}
+@media(max-width:900px){
+ body:not(.home-panel)>main>[data-workspace="myview"] .myview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body:not(.home-panel)>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:1/-1;grid-row:auto;min-height:240px}
+}
+@media(max-width:650px){
+ body:not(.home-panel)>main{padding:10px;gap:8px}
+ body:not(.home-panel)>main>.workspace-switcher{order:10;gap:3px}
+ body:not(.home-panel)>main>.workspace-switcher .workspace-tab{
+  flex:1 0 auto;flex-direction:column;gap:4px;font-size:11px;min-height:54px;
+  padding:7px 4px;min-width:65px;white-space:normal
+ }
+ body:not(.home-panel)>main .nv-nav-icon{height:19px;width:19px}
+ body:not(.home-panel)>main>[data-workspace="myview"] .myview-grid{display:block}
+ body:not(.home-panel)>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:auto;min-height:0}
+ body:not(.home-panel)>main #workspace-title{font-size:21px}
+}
+@media(prefers-reduced-motion:reduce){
+ body:not(.home-panel)>main *,body:not(.home-panel)>main *::before,body:not(.home-panel)>main *::after{transition:none!important}
+}
+@media(forced-colors:active){
+ body:not(.home-panel)>main>.workspace-switcher .workspace-tab[aria-pressed="true"]{border:2px solid Highlight}
+ body:not(.home-panel)>main :is(.shell-card,.myview-widget,.workspace){border:1px solid CanvasText}
+}
+
+/* Homepage-inspired service groups. Original implementation, no upstream code copied. */
+body:not(.home-panel)>main>[data-workspace="myview"] .homepage-launcher{display:flex;flex-direction:column;gap:11px;flex:none;min-width:0}
+body:not(.home-panel)>main .homepage-launcher-heading{display:flex;justify-content:space-between;align-items:end;gap:15px}
+body:not(.home-panel)>main .homepage-launcher-heading h3{font-size:clamp(16px,1.3vw,22px);margin:4px 0 0;font-weight:750;letter-spacing:-.035em}
+body:not(.home-panel)>main .homepage-launcher-hint{font-size:12px;color:#9caebf}
+body:not(.home-panel)>main .homepage-launcher-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile{
+  white-space:normal;text-align:start;display:flex;align-items:center;gap:11px;
+  padding:13px 11px;border:1px solid #32465b;background:#162336;
+  border-radius:13px;min-width:0;min-height:72px;box-shadow:none;
+}
+body:not(.home-panel)>main .homepage-launcher-tile strong{display:block;color:#f1f8fe;font-size:13px;font-weight:750}
+body:not(.home-panel)>main .homepage-launcher-tile small{display:block;color:#9fb1c5;font-size:11px;margin-top:4px;line-height:1.3}
+body:not(.home-panel)>main .homepage-tile-icon{display:grid;place-items:center;background:#24424b;color:#89e8d5;border-radius:11px;width:34px;height:34px;flex:none;font-size:20px}
+body:not(.home-panel)>main .homepage-tile-arrow{margin-inline-start:auto;align-self:start;font-size:14px;color:#829dad}
+body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile:hover{border-color:#5ba69f;background:#20384a}
+@media(max-width:1400px){body:not(.home-panel)>main .homepage-launcher-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){body:not(.home-panel)>main .homepage-launcher-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+ body:not(.home-panel)>main .homepage-launcher{display:flex;gap:9px}
+ body:not(.home-panel)>main .homepage-launcher-heading{align-items:start}
+ body:not(.home-panel)>main .homepage-launcher-hint{display:none}
+ body:not(.home-panel)>main .homepage-launcher-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile{min-height:72px;padding:10px 8px;gap:8px}
+ body:not(.home-panel)>main .homepage-launcher-tile strong{font-size:12px}
+ body:not(.home-panel)>main .homepage-launcher-tile small{font-size:10px}
+ body:not(.home-panel)>main .homepage-tile-icon{height:31px;width:31px;font-size:18px}
+ body:not(.home-panel)>main .homepage-tile-arrow{display:none}
+}
+@media(max-height:740px) and (min-width:651px){body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile{min-height:58px}}
+
+/* Accessible command palette; local workspace navigation only. */
+body:not(.home-panel) .newview-command-trigger{
+ margin-inline-start:auto;padding:9px 15px;border:1px solid #456579;border-radius:12px;
+ background:#16283a;color:#d9f1f1;font-weight:650;font-size:13px;min-height:44px;cursor:pointer
+}
+body:not(.home-panel) .newview-command-trigger:hover{background:#234052;border-color:#6cd8c7}
+body:not(.home-panel) .newview-command-overlay:not([hidden]){
+ position:fixed;inset:0;z-index:9999;background:rgba(3,9,18,.8);display:flex;
+ justify-content:center;align-items:flex-start;padding:clamp(18px,10vh,100px) 16px 16px
+}
+body:not(.home-panel) .newview-command-dialog{
+ box-sizing:border-box;width:min(100%,580px);max-height:80vh;overflow-y:auto;
+ background:#111d2d;border:1px solid #4a6077;border-radius:20px;
+ box-shadow:0 28px 100px rgba(0,0,0,.55);padding:20px;display:grid;gap:12px
+}
+body:not(.home-panel) .newview-command-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+body:not(.home-panel) .newview-command-top label{font-size:18px;font-weight:800;color:#effbf9}
+body:not(.home-panel) .newview-command-close{background:transparent;border:1px solid #53677b;border-radius:9px;color:#cddfe9;padding:8px 12px;cursor:pointer}
+body:not(.home-panel) #newview-command-input{
+ font:inherit;font-size:16px;background:#081523;color:#fff;border:2px solid #53778a;
+ border-radius:12px;min-height:52px;padding:12px 14px;width:100%
+}
+body:not(.home-panel) #newview-command-results{display:grid;gap:6px;max-height:45vh;overflow-y:auto}
+body:not(.home-panel) .newview-command-result{
+ display:flex;flex-direction:column;text-align:start;gap:4px;padding:13px 15px;
+ background:#17283a;border:1px solid transparent;border-radius:12px;color:#eef6fd;cursor:pointer
+}
+body:not(.home-panel) .newview-command-result small{color:#a9bfd0;font-size:12px}
+body:not(.home-panel) .newview-command-result[aria-selected="true"],
+body:not(.home-panel) .newview-command-result:hover{background:#22463f;border-color:#68d5bf}
+body:not(.home-panel) .newview-command-hint,body:not(.home-panel) .newview-command-empty{color:#a9bfd0;font-size:12px;margin:0}
+body:not(.home-panel) .newview-command-overlay :focus-visible{outline:3px solid #9af5de;outline-offset:2px}
+@media(max-width:650px){body:not(.home-panel) .newview-command-trigger{font-size:12px;padding:8px;min-height:42px}}
+@media(forced-colors:active){body:not(.home-panel) .newview-command-result[aria-selected="true"]{border:2px solid Highlight}}
+
+/* Keep quick destinations discoverable and usable by keyboard, touch, and TV remotes. */
+body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile:focus-visible{
+ outline:3px solid #91f3de;outline-offset:3px;border-color:#91f3de
+}
+@media(hover:none){body:not(.home-panel)>main .homepage-launcher-grid .homepage-launcher-tile{touch-action:manipulation}}
+
+/* Truthful, user-triggered diagnostics. Never imply third-party feeds were checked. */
+body:not(.home-panel)>main .newview-diagnostics{display:grid;gap:9px}
+body:not(.home-panel)>main .newview-diagnostics h3{margin:0;font-size:17px}
+body:not(.home-panel)>main .newview-diagnostics p{margin:0;line-height:1.5}
+body:not(.home-panel)>main #newview-health-check{justify-self:start;min-height:44px}
+body:not(.home-panel)>main #newview-health-check:disabled{opacity:.7;cursor:progress}
+body:not(.home-panel)>main #newview-health-result{font-weight:700;color:#b9cbdf}
+body:not(.home-panel)>main #newview-health-result[data-health="ok"]{color:#8cf3c1}
+body:not(.home-panel)>main #newview-health-result[data-health="error"]{color:#ffb4bc}
+body:not(.home-panel)>main .newview-diagnostics-note{font-size:12px;color:#b4c2d0}
+@media(forced-colors:active){body:not(.home-panel)>main #newview-health-result{color:CanvasText}}
+
+/* Opt-in device layout sync: no screen capture or account impersonation. */
+body:not(.home-panel)>main .device-sync{display:grid;gap:12px}
+body:not(.home-panel)>main .device-sync h3{margin:0;font-size:18px}
+body:not(.home-panel)>main .device-sync p{margin:0;color:#b9cbdc;line-height:1.55}
+body:not(.home-panel)>main .device-sync-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+body:not(.home-panel)>main .device-sync-actions input{flex:1 1 220px;min-width:0;min-height:44px;padding:9px 11px}
+body:not(.home-panel)>main .device-sync-actions button{min-height:44px;padding:9px 13px}
+body:not(.home-panel)>main #newview-sync-status{color:#bce9df;overflow-wrap:anywhere}
+body:not(.home-panel)>main .device-sync-actions :focus-visible{outline:3px solid #91f3de;outline-offset:3px}
+@media(max-width:650px){body:not(.home-panel)>main .device-sync-actions button{flex:1 1 130px}}
+
+/* NewViewDevice is a full dashboard workspace, not a hidden Settings subsection. */
+body:not(.home-panel)>main .newview-device-page{min-width:0;gap:clamp(12px,1.6vw,20px)}
+body:not(.home-panel)>main .newview-device-hero{padding:clamp(20px,3vw,36px);border:1px solid #326a69;border-radius:18px;background:linear-gradient(120deg,#183d42,#102034 72%);color:#f0fcfa}
+body:not(.home-panel)>main .newview-device-hero h3{font-size:clamp(25px,3vw,42px);margin:10px 0;letter-spacing:-.05em}
+body:not(.home-panel)>main .newview-device-hero p{max-width:720px;color:#c3d9e4;line-height:1.6;margin:0}
+body:not(.home-panel)>main .newview-device-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+body:not(.home-panel)>main .newview-device-cards>.shell-card{min-width:0;display:flex;flex-direction:column;gap:12px}
+body:not(.home-panel)>main .newview-device-cards h3{margin:0;font-size:clamp(17px,1.5vw,22px)}
+body:not(.home-panel)>main .newview-device-cards p{margin:0;line-height:1.55;color:#c0d0df}
+body:not(.home-panel)>main .newview-device-note{font-size:12px;color:#aebfd0!important}
+body:not(.home-panel)>main .newview-device-coming{display:inline-block;align-self:flex-start;border:1px solid #48657a;border-radius:10px;padding:9px;color:#c5d7e5;font-size:12px}
+body:not(.home-panel)>main .newview-device-controls{min-width:0}
+body:not(.home-panel)>main .newview-device-controls .device-sync{padding:0;background:transparent;border:0}
+body:not(.home-panel)>main .newview-device-controls .device-sync h4{margin:0;color:#dff8f5}
+@media(max-width:900px){body:not(.home-panel)>main .newview-device-cards{grid-template-columns:1fr}}
+@media(forced-colors:active){body:not(.home-panel)>main .newview-device-hero{border:1px solid CanvasText}}
+
+/* Global persistent cast panel: survives workspace changes, including Markets. */
+body:not(.home-panel) .newview-cast-trigger{
+ min-height:44px;padding:9px 14px;border-radius:12px;border:1px solid #4b797b;
+ background:linear-gradient(120deg,#17464b,#18334c);color:#d8fff5;
+ font-weight:750;cursor:pointer;box-shadow:0 5px 18px rgba(3,14,24,.18)
+}
+body:not(.home-panel) .newview-cast-trigger:hover{border-color:#84f0d8;background:#20575b}
+body:not(.home-panel) .newview-cast-dock:not([hidden]){
+ position:fixed;bottom:clamp(12px,2vw,28px);right:clamp(12px,2vw,28px);
+ z-index:950;width:clamp(260px,29vw,510px);min-width:240px;
+ max-width:calc(100vw - 24px);max-height:min(75vh,670px);
+ overflow:auto;resize:both;border:1px solid #508d93;border-radius:18px;
+ background:#0c1827;color:#eefaff;box-shadow:0 24px 75px rgba(0,0,0,.65);
+ display:flex;flex-direction:column;gap:0
+}
+body:not(.home-panel) .newview-cast-bar{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:10px;background:linear-gradient(115deg,#183e47,#16283b);
+ min-height:46px;padding:7px 10px 7px 16px
+}
+body:not(.home-panel) .newview-cast-bar strong{font-size:13px}
+body:not(.home-panel) .newview-cast-tools{display:flex;gap:4px}
+body:not(.home-panel) .newview-cast-tools button{border:1px solid #557587;border-radius:8px;background:#1b3041;color:#edf9fc;min-width:37px;min-height:34px;cursor:pointer}
+body:not(.home-panel) #newview-cast-video{display:block;width:100%;aspect-ratio:16/9;min-height:0;object-fit:contain;background:#010610}
+body:not(.home-panel) .newview-cast-dock.is-minimized{width:210px;resize:none}
+body:not(.home-panel) .newview-cast-dock.is-minimized #newview-cast-video,
+body:not(.home-panel) .newview-cast-dock.is-minimized .newview-cast-state{display:none}
+body:not(.home-panel) .newview-cast-state{color:#b3ceda;padding:9px 12px;font-size:12px;margin:0;line-height:1.4}
+body:not(.home-panel) .newview-cast-dock:fullscreen{width:100%;max-width:none;max-height:none;height:100%;border:0;border-radius:0}
+body:not(.home-panel) .newview-cast-dock:fullscreen #newview-cast-video{flex:1}
+body:not(.home-panel) .newview-cast-setup{display:flex;flex-direction:column;gap:11px;grid-column:1/-1}
+body:not(.home-panel) .newview-cast-setup :is(textarea){width:100%;box-sizing:border-box;min-height:80px;padding:10px;font:12px/1.4 ui-monospace,monospace;overflow-wrap:anywhere}
+body:not(.home-panel) .newview-cast-setup label{font-size:12px;font-weight:700;color:#c6dfdf}
+body:not(.home-panel) .newview-cast-actions{display:flex;gap:8px;flex-wrap:wrap}
+body:not(.home-panel) .newview-cast-actions button{min-height:44px;padding:9px 12px;border:1px solid #577f88;border-radius:10px;background:#1b3444;color:#f2ffff;cursor:pointer}
+body:not(.home-panel) .newview-cast-actions button:hover:not(:disabled){background:#23525b;border-color:#8bffdf}
+body:not(.home-panel) .newview-cast-actions button:disabled{opacity:.5;cursor:not-allowed}
+body:not(.home-panel) .newview-cast-info{padding:9px 12px;background:#132d3c;border-radius:10px;color:#a5eadc!important}
+body:not(.home-panel) .newview-cast-note{font-size:12px;color:#b4c4ce!important}
+body:not(.home-panel) :is(.newview-cast-setup,.newview-cast-dock) button:focus-visible{outline:3px solid #9dffe0;outline-offset:3px}
+@media(max-width:750px){
+ body:not(.home-panel) .newview-cast-dock:not([hidden]){width:min(340px,calc(100vw - 24px));bottom:12px;right:12px}
+ body:not(.home-panel) .newview-cast-trigger{padding:8px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){body:not(.home-panel) .newview-cast-dock{scroll-behavior:auto}}
+@media(forced-colors:active){body:not(.home-panel) .newview-cast-dock{border:2px solid CanvasText}}
+
+/* Drag handle is separate from interactive video and accessible viewer buttons. */
+body:not(.home-panel) .newview-cast-bar{cursor:grab;touch-action:none;user-select:none}
+body:not(.home-panel) .newview-cast-bar:active{cursor:grabbing}
+body:not(.home-panel) .newview-cast-tools button{cursor:pointer;touch-action:manipulation}
+
+/* Power BI is a trusted external business portal, not an unauthorized iframe. */
+body:not(.home-panel)>main .newview-powerbi{min-width:0;gap:clamp(14px,2vw,24px)}
+body:not(.home-panel)>main .newview-powerbi-hero{
+ padding:clamp(24px,4vw,48px);border-radius:22px;border:1px solid #46648a;
+ background:radial-gradient(circle at 100% 0%,rgba(242,186,48,.18),transparent 48%),linear-gradient(120deg,#1b293c,#101b2b);display:grid;justify-items:start;gap:13px
+}
+body:not(.home-panel)>main .newview-powerbi-hero h3{margin:0;font-size:clamp(25px,3vw,42px);max-width:850px;letter-spacing:-.045em}
+body:not(.home-panel)>main .newview-powerbi-hero p{color:#c6d4e5;max-width:740px;line-height:1.6;margin:0}
+body:not(.home-panel)>main .newview-powerbi-primary{display:inline-flex;align-items:center;gap:16px;text-decoration:none;border-radius:12px;padding:13px 18px;min-height:44px;background:#f2c34f;color:#171d28;font-weight:800}
+body:not(.home-panel)>main .newview-powerbi-primary:hover{background:#ffe09a}
+body:not(.home-panel)>main .newview-powerbi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+body:not(.home-panel)>main .newview-powerbi-grid>.shell-card{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+body:not(.home-panel)>main .newview-powerbi-grid h3{margin:0;font-size:19px}
+body:not(.home-panel)>main .newview-powerbi-grid p{margin:0;color:#b9c9dc;line-height:1.55}
+body:not(.home-panel)>main .newview-powerbi-grid a{color:#f8d376;font-weight:750}
+body:not(.home-panel)>main #powerbi-report-url{width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:44px;padding:10px}
+body:not(.home-panel)>main .newview-powerbi-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+body:not(.home-panel)>main .newview-powerbi-actions button{min-height:44px;padding:9px 12px}
+body:not(.home-panel)>main .newview-powerbi :is(a,button,input):focus-visible{outline:3px solid #ffe09a;outline-offset:3px}
+@media(max-width:850px){body:not(.home-panel)>main .newview-powerbi-grid{grid-template-columns:1fr}}
+
+/* Universal quick actions: persistent across the four workspaces without
+   interrupting the separate, draggable screen stream. */
+body:not(.home-panel)>main #newview-quick-actions{
+ display:flex;align-items:center;gap:8px;min-width:0;padding:7px 0 12px;
+ overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;
+ scroll-snap-type:x proximity
+}
+body:not(.home-panel)>main #newview-quick-actions button{
+ flex:0 0 auto;min-height:44px;min-width:100px;padding:9px 14px;
+ background:#172638;border:1px solid #345368;border-radius:999px;
+ color:#d1e4ee;font:inherit;font-size:13px;font-weight:700;
+ cursor:pointer;scroll-snap-align:start;touch-action:manipulation
+}
+body:not(.home-panel)>main #newview-quick-actions button:hover{
+ background:#214357;border-color:#79cabf;color:#fff
+}
+body:not(.home-panel)>main #newview-quick-actions button[aria-pressed="true"]{
+ background:#1a504e;border-color:#7ce2c8;color:#f1fffc
+}
+body:not(.home-panel)>main #newview-quick-actions button:focus-visible{
+ outline:3px solid #95f4df;outline-offset:3px
+}
+@media(max-width:650px){
+ body:not(.home-panel)>main #newview-quick-actions{padding-bottom:10px}
+ body:not(.home-panel)>main #newview-quick-actions button{min-height:48px}
+}
+@media(forced-colors:active){
+ body:not(.home-panel)>main #newview-quick-actions button[aria-pressed="true"]{border:2px solid Highlight}
+}
+
+/* Market search is strictly local to the documented Binance-listed instrument list. */
+body:not(.home-panel)>main .newview-market-search{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:#101b2a;border:1px solid #2e4b60;border-radius:14px;padding:12px;margin-block:10px}
+body:not(.home-panel)>main .newview-market-search label{font-size:13px;font-weight:750;color:#d8ecf5}
+body:not(.home-panel)>main #newview-market-filter{min-width:180px;flex:1 1 200px;min-height:44px;padding:9px 12px;color:#eef9ff;background:#1b2a3d;border:1px solid #3e6373;border-radius:10px}
+body:not(.home-panel)>main .newview-market-search button{min-height:44px;border:1px solid #4a7384;border-radius:10px;background:#20344a;color:#e8f5fb;padding:9px 13px;cursor:pointer}
+body:not(.home-panel)>main .newview-market-search button:disabled{opacity:.55;cursor:default}
+body:not(.home-panel)>main #newview-market-filter-count{flex-basis:100%;color:#bad0e2;font-size:12px}
+body:not(.home-panel)>main .newview-market-search :focus-visible{outline:3px solid #8ef4dc;outline-offset:2px}
+body:not(.home-panel)>main #symbols button[hidden]{display:none!important}
+@media(max-width:650px){body:not(.home-panel)>main .newview-market-search label{flex-basis:100%}}
+
+/* Explicit dock-side control for Android TV remotes and keyboard use. */
+body:not(.home-panel) .newview-cast-dock.is-left:not([hidden]){left:clamp(12px,2vw,28px);right:auto}
+@media(max-width:750px){body:not(.home-panel) .newview-cast-dock.is-left:not([hidden]){left:12px;right:auto}}
+
+/* News browsing hub: keyboard and D-pad first, open publishers externally on web. */
+body:not(.home-panel)>main #newview-news-browser{
+ display:flex;flex-direction:column;gap:12px;min-width:0;margin-bottom:16px;
+ border:1px solid #375e70;border-radius:18px;padding:clamp(14px,2vw,24px);
+ background:linear-gradient(115deg,#122c3b,#101a2b)
+}
+body:not(.home-panel)>main #newview-news-browser h3{font-size:clamp(19px,2.3vw,28px);margin:0}
+body:not(.home-panel)>main #newview-news-browser p{margin:0;line-height:1.5;color:#c5d6e3}
+body:not(.home-panel)>main .news-browser-form{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+body:not(.home-panel)>main .news-browser-form label{flex-basis:100%;font-size:12px;color:#b8d0da;font-weight:700}
+body:not(.home-panel)>main #newview-news-address{
+ min-width:160px;flex:1 1 240px;min-height:48px;border:1px solid #56818c;
+ border-radius:10px;padding:10px 12px;color:#ecffff;background:#122032;
+ box-sizing:border-box
+}
+body:not(.home-panel)>main .news-browser-form button,
+body:not(.home-panel)>main .news-browser-sites button{
+ min-height:48px;padding:9px 14px;background:#214254;color:#f0fbff;
+ border:1px solid #507989;border-radius:11px;cursor:pointer;font-size:13px;font-weight:700
+}
+body:not(.home-panel)>main .news-browser-form button:hover,
+body:not(.home-panel)>main .news-browser-sites button:hover{border-color:#8df0d8;background:#29615a}
+body:not(.home-panel)>main .news-browser-sites{display:flex;flex-wrap:wrap;gap:9px}
+body:not(.home-panel)>main .news-browser-dns{font-size:12px;color:#bfd1df!important}
+body:not(.home-panel)>main #newview-news-browser a{color:#91e9dc;font-size:13px}
+body:not(.home-panel)>main #newview-news-browser :focus-visible,
+body:not(.home-panel)>main .news-items .news-link:focus-visible{outline:3px solid #a1ffe9;outline-offset:3px}
+body:not(.home-panel)>main .news-items .news-link{display:block;min-height:42px;padding:8px 4px}
+@media(max-width:650px){body:not(.home-panel)>main .news-browser-sites{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* MyView pane density: one, two or three independently focusable columns. */
+body:not(.home-panel)>main #newview-screen-layout{display:flex;flex-direction:column;gap:12px}
+body:not(.home-panel)>main .newview-screen-layout-actions{display:flex;flex-wrap:wrap;gap:8px}
+body:not(.home-panel)>main .newview-screen-layout-actions button{min-height:48px;min-width:84px;padding:9px 13px;border-radius:11px;border:1px solid #4b7581;background:#1a3144;color:#f4ffff;font-weight:750;cursor:pointer}
+body:not(.home-panel)>main .newview-screen-layout-actions button[aria-pressed="true"]{background:#256058;border-color:#a4ffe6}
+body:not(.home-panel)>main .newview-screen-layout-actions button:focus-visible{outline:3px solid #95f5db;outline-offset:3px}
+body:not(.home-panel)>main .newview-screen-panes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body:not(.home-panel)>main .newview-screen-panes[hidden]{display:none}
+body:not(.home-panel)>main [data-screen-count="3"] .newview-screen-panes{grid-template-columns:repeat(3,minmax(0,1fr))}
+body:not(.home-panel)>main .newview-screen-pane{display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #385e71;border-radius:12px;background:#101f30}
+body:not(.home-panel)>main .newview-screen-pane :is(h3,p){margin:0}
+body:not(.home-panel)>main .newview-screen-pane button{align-self:flex-start;min-height:44px;border:1px solid #5a8c91;border-radius:10px;background:#254457;color:#efffff;padding:9px}
+body:not(.home-panel)>main [data-screen-count="1"] .myview-grid{grid-template-columns:minmax(0,1fr)}
+body:not(.home-panel)>main [data-screen-count="2"] .myview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+body:not(.home-panel)>main [data-screen-count="3"] .myview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+body:not(.home-panel)>main [data-screen-count="2"] .myview-widget[data-widget="market"],
+body:not(.home-panel)>main [data-screen-count="3"] .myview-widget[data-widget="market"]{grid-column:auto;grid-row:auto}
+body:not(.home-panel) .newview-cast-media-controls{display:flex;gap:7px;padding:8px;justify-content:center;background:#15283a}
+body:not(.home-panel) .newview-cast-media-controls button{flex:1;min-height:44px;background:#26445a;color:#fff;border:1px solid #537f89;border-radius:8px;font-weight:700;cursor:pointer}
+body:not(.home-panel) #newview-cast-youtube:not([hidden]){width:100%;aspect-ratio:16/9;border:0;background:#020710}
+body:not(.home-panel) .newview-cast-dock:not([hidden]) #newview-cast-video[hidden]{display:none}
+body:not(.home-panel)[data-newview-video-size="third"] .newview-cast-dock:not([hidden]){width:clamp(280px,33vw,660px);height:auto}
+body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock:not([hidden]){
+ width:min(50vw,1000px);height:calc(100dvh - 32px);max-height:none
+}
+body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock:not([hidden]){
+ inset:0!important;left:0!important;top:0!important;right:0!important;bottom:0!important;
+ width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;border-radius:0;resize:none
+}
+body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock #newview-cast-video:not([hidden]),
+body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock #newview-cast-video:not([hidden]),
+body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock #newview-cast-youtube:not([hidden]),
+body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock #newview-cast-youtube:not([hidden]){flex:1;min-height:0;aspect-ratio:auto;object-fit:contain}
+body:not(.home-panel) .newview-cast-dock.is-minimized #newview-cast-youtube,
+body:not(.home-panel) .newview-cast-dock.is-minimized .newview-cast-media-controls{display:none}
+@media(max-width:850px){
+ body:not(.home-panel)>main [data-screen-count="2"] .myview-grid,
+ body:not(.home-panel)>main [data-screen-count="3"] .myview-grid,
+ body:not(.home-panel)>main .newview-screen-panes,
+ body:not(.home-panel)>main [data-screen-count="3"] .newview-screen-panes{grid-template-columns:1fr}
+ body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock:not([hidden]){width:calc(100vw - 24px);height:50dvh}
+ body:not(.home-panel)[data-newview-video-size="third"] .newview-cast-dock:not([hidden]){width:calc(100vw - 24px)}
+}
+
+/* Make the split view useful: reserve real chart space instead of obscuring it. */
+@media(min-width:1100px){
+ body:not(.home-panel).newview-video-active[data-newview-video-size="third"]>main{
+  width:calc(66.666vw - 30px);max-width:none;margin-left:0;margin-right:auto;box-sizing:border-box
+ }
+ body:not(.home-panel).newview-video-active[data-newview-video-size="half"]>main{
+  width:calc(50vw - 20px);max-width:none;margin-left:0;margin-right:auto;box-sizing:border-box
+ }
+ body:not(.home-panel).newview-video-active.newview-video-left[data-newview-video-size="third"]>main,
+ body:not(.home-panel).newview-video-active.newview-video-left[data-newview-video-size="half"]>main{
+  margin-left:auto;margin-right:0
+ }
+}
+
+/* Minimize always returns to a compact, movable control bar, including Full. */
+body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock.is-minimized:not([hidden]){
+ inset:auto 16px 16px auto!important;left:auto!important;top:auto!important;right:16px!important;bottom:16px!important;
+ width:210px!important;height:auto!important;max-height:none!important;border-radius:14px!important
+}
+
+/* Online IPTV catalog controls: accessible from TV remotes and keyboard. */
+body:not(.home-panel) #newview-channel-directory #newview-iptv-scope,
+body:not(.home-panel) #newview-channel-directory #newview-iptv-scope-value{
+ min-width:min(260px,100%);max-width:100%;min-height:50px;padding:8px 12px;
+ border:1px solid #537d8d;border-radius:12px;background:#172c3f;color:#f3fdff;
+ font-size:15px;cursor:pointer
+}
+body:not(.home-panel) #newview-channel-directory #newview-iptv-scope:focus-visible,
+body:not(.home-panel) #newview-channel-directory #newview-iptv-scope-value:focus-visible{
+ outline:3px solid #9bffe3;outline-offset:3px
+}
+body:not(.home-panel) #newview-channel-directory .newview-iptv-catalog-status{
+ color:#b6d5e0;font-size:13px;line-height:1.5
+}
+
+
+/* Homepage-inspired keyboard command launcher + locally saved HTTPS shortcuts. */
+.newview-command-open{min-height:42px;border:1px solid #4a7484;border-radius:12px;padding:9px 14px;background:#173248;color:#ebf9ff;font:inherit;cursor:pointer}
+.newview-command-open:focus-visible,.newview-command-panel button:focus-visible,.newview-command-panel input:focus-visible,.newview-quicklinks button:focus-visible,.newview-quicklinks a:focus-visible,.newview-quicklinks input:focus-visible{outline:3px solid #81eed6;outline-offset:2px}
+.newview-command-overlay:not([hidden]){position:fixed;z-index:9999;inset:0;background:rgba(4,12,21,.85);display:flex;justify-content:center;align-items:flex-start;padding:clamp(16px,10vh,96px) 12px 16px}
+.newview-command-panel{width:min(640px,100%);max-height:80vh;overflow:auto;padding:20px;border:1px solid #41617a;border-radius:18px;background:#101d2f;box-shadow:0 20px 70px rgba(0,0,0,.5);display:grid;gap:12px;color:#f1f8fc}
+.newview-command-panel label{font-weight:700}
+.newview-command-panel input{width:100%;min-height:50px;border-radius:10px;border:1px solid #588197;background:#152c42;padding:12px;color:#fff;font:inherit}
+.newview-command-panel button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid #476779;background:#1a3447;color:#f6ffff;padding:10px}
+#newview-command-results{display:grid;gap:6px;max-height:48vh;overflow-y:auto}
+.newview-command-result{display:flex;align-items:center;justify-content:space-between;text-align:left;gap:16px}
+.newview-command-result:hover{background:#28566b}
+.newview-command-result span{font-size:12px;color:#b9d6e1}
+.newview-command-help{font-size:13px;color:#bfcedb}
+.newview-quicklinks{display:grid;gap:12px}
+.newview-quicklinks-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+.newview-quicklink-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#183046;padding:8px 12px;border-radius:10px;min-width:0}
+.newview-quicklink-row a{color:#b4f0e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.newview-quicklink-row button,.newview-quicklinks-form button{min-height:40px;border-radius:9px;border:1px solid #547989;padding:7px 10px;background:#254257;color:#fff;cursor:pointer}
+.newview-quicklinks-form{display:grid;grid-template-columns:minmax(100px,1fr) minmax(180px,2fr) auto;gap:8px}
+.newview-quicklinks-form input{min-height:44px;border-radius:9px;border:1px solid #55798f;background:#142a40;color:#fff;padding:8px;font:inherit;min-width:0}
+.newview-quicklinks-status{font-size:13px}
+@media(max-width:670px){.newview-quicklinks-form{grid-template-columns:1fr}.newview-command-open{font-size:13px}.newview-command-panel{padding:14px}}
+@media(prefers-reduced-motion:reduce){.newview-command-overlay *{transition:none!important;animation:none!important}}
