@@ -5,7 +5,10 @@ export const NEWS_SOURCES=Object.freeze({
  stocktwits:Object.freeze({name:'Stocktwits News',url:'https://stocktwits.com/sitemap/rss_feed.xml',host:'stocktwits.com',homepage:'https://stocktwits.com/'}),
  bbc:Object.freeze({name:'BBC World',url:'https://feeds.bbci.co.uk/news/world/rss.xml',host:'feeds.bbci.co.uk',articleHosts:['www.bbc.com','www.bbc.co.uk','bbc.com','www.bbc.co.uk'],homepage:'https://www.bbc.com/news'}),
  npr:Object.freeze({name:'NPR News',url:'https://feeds.npr.org/1001/rss.xml',host:'feeds.npr.org',articleHosts:['www.npr.org','text.npr.org'],homepage:'https://www.npr.org/'}),
- guardian:Object.freeze({name:'The Guardian',url:'https://www.theguardian.com/world/rss',host:'www.theguardian.com',articleHosts:['www.theguardian.com'],homepage:'https://www.theguardian.com/world'})
+ guardian:Object.freeze({name:'The Guardian',url:'https://www.theguardian.com/world/rss',host:'www.theguardian.com',articleHosts:['www.theguardian.com'],homepage:'https://www.theguardian.com/world'}),
+ aljazeera:Object.freeze({name:'Al Jazeera English',url:'https://www.aljazeera.com/xml/rss/all.xml',host:'www.aljazeera.com',articleHosts:['www.aljazeera.com','aljazeera.com'],homepage:'https://www.aljazeera.com/'}),
+ dw:Object.freeze({name:'DW English',url:'https://rss.dw.com/xml/rss-en-all',host:'rss.dw.com',articleHosts:['www.dw.com','dw.com'],homepage:'https://www.dw.com/en/top-stories/s-9097'}),
+ pbs:Object.freeze({name:'PBS NewsHour',url:'https://www.pbs.org/newshour/feeds/rss/headlines',host:'www.pbs.org',articleHosts:['www.pbs.org','pbs.org'],homepage:'https://www.pbs.org/newshour/'})
 });
 const xmlDecode=s=>String(s).replace(/&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos);/gi,(whole,key)=>{
  if(key[0]==='#'){const n=key[1]?.toLowerCase()==='x'?parseInt(key.slice(2),16):parseInt(key.slice(1),10);
@@ -19,7 +22,7 @@ const validArticleLink=(value,source)=>{
 };
 export function parseNewsXml(xml,sourceId){
  const source=NEWS_SOURCES[sourceId];if(!source)throw new Error('Unknown news source');
- if(typeof xml!=='string'||xml.length>524288||!/<(?:rss|feed)\b/i.test(xml))throw new Error('Invalid or oversized RSS feed');
+ if(typeof xml!=='string'||xml.length>524288||!/<(?:rss|feed|rdf:RDF)\b/i.test(xml))throw new Error('Invalid or oversized RSS feed');
  const chunks=xml.match(/<item(?:\s[^>]*)?>[\s\S]*?<\/item>/gi)||[];
  const seen=new Set(),items=[];
  for(const chunk of chunks.slice(0,50)){
