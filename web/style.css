@@ -812,3 +812,8 @@ body>main>.newview-settings-content :is(input,select,button){max-width:100%}
 .nv-nav-icon{display:inline-block;width:1.15em;height:1.15em;flex:none;vertical-align:-.12em;pointer-events:none}
 @media(max-width:400px){[role="status"],[role="alert"]{overflow-wrap:anywhere}.workspace-switcher .workspace-tab{min-width:64px}}
 @media(forced-colors:active){button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid Highlight;box-shadow:none}}
+
+/* Older Android TV WebViews lack dynamic viewport units: preserve settings scrolling. */
+body>main>.newview-settings[open]>.newview-settings-content{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto}
+@media(max-height:480px){body>main>.newview-settings[open]>.newview-settings-content{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}}
+@media(hover:none){.newview-settings-content :is(button,a,input,select,textarea,summary,[tabindex]):focus{scroll-margin-block:32px}}
