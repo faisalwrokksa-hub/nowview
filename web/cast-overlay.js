@@ -3,8 +3,8 @@
    demonstration. Manual SDP exchange, LAN ICE only; NOT an Android phone
    capture app, automatic cloud signaling, account login or remote control. */
 (function(){
- const MAX_SIGNAL=120000;
- let peer=null, localCapture=null, currentStream=null, mode=null, minimized=false;
+ const MAX_SIGNAL=120000, MAX_SESSION_MS=30*60*1000, DISCONNECT_GRACE_MS=20000;
+ let peer=null, localCapture=null, currentStream=null, mode=null, minimized=false, expiryTimer=null, disconnectTimer=null;
  const el=(tag,cls,value)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(value)e.textContent=value;return e;};
  function parseSignal(raw,type){
   if(typeof raw!=='string'||raw.length>MAX_SIGNAL)throw Error('Invalid or oversized connection code');
@@ -55,21 +55,36 @@
   const showDock=()=>{dock.hidden=false;dock.classList.remove('is-minimized');minimized=false;};
   function attachStream(stream){
    currentStream=stream;video.srcObject=stream;showDock();video.play().catch(()=>report('Screen connected · press Play in the viewer'));
+   if(mode==='watch')for(const track of stream.getTracks())track.addEventListener('ended',()=>{if(currentStream===stream)reset();},{once:true});
    report('Screen stream connected. Switch to Markets; the viewer stays open.');
   }
   function reset(){
+   if(expiryTimer)clearTimeout(expiryTimer);expiryTimer=null;
+   if(disconnectTimer)clearTimeout(disconnectTimer);disconnectTimer=null;
    if(localCapture){localCapture.getTracks().forEach(track=>track.stop());localCapture=null;}
    if(peer){peer.close();peer=null;}
    if(currentStream){video.srcObject=null;currentStream=null;}
    mode=null;offer.value='';answer.value='';apply.disabled=copyOffer.disabled=copyAnswer.disabled=true;stop.disabled=true;watch.disabled=send.disabled=false;report('Disconnected · no screen is being shared');
   }
   function fail(error){report(error instanceof Error?error.message:'Screen connection unavailable');}
+  function startSessionLimit(){
+   if(expiryTimer)clearTimeout(expiryTimer);
+   expiryTimer=setTimeout(()=>{reset();dock.hidden=true;report('Screen-sharing session expired after 30 minutes. Start a new session to continue.');},MAX_SESSION_MS);
+  }
   const supported=()=>typeof RTCPeerConnection==='function';
   function createPeer(){
    if(!supported())throw Error('This browser does not support WebRTC');
    const pc=new RTCPeerConnection({iceServers:[]});peer=pc;
    pc.ontrack=e=>{const stream=e.streams[0]||new MediaStream([e.track]);attachStream(stream);};
-   pc.onconnectionstatechange=()=>{if(pc!==peer)return;if(pc.connectionState==='failed'||pc.connectionState==='closed')reset();else if(pc.connectionState==='disconnected')report('Connection interrupted; check both devices');};
+   pc.onconnectionstatechange=()=>{
+    if(pc!==peer)return;
+    if(pc.connectionState==='failed'||pc.connectionState==='closed'){reset();return;}
+    if(disconnectTimer){clearTimeout(disconnectTimer);disconnectTimer=null;}
+    if(pc.connectionState==='disconnected'){
+     report('Connection interrupted; closing if not restored within 20 seconds');
+     disconnectTimer=setTimeout(()=>{if(peer===pc&&pc.connectionState==='disconnected'){reset();dock.hidden=true;}},DISCONNECT_GRACE_MS);
+    }
+   };
    return pc;
   }
   async function waitIce(pc){
@@ -82,7 +97,7 @@
    });
   }
   watch.addEventListener('click',async()=>{
-   reset();mode='watch';watch.disabled=send.disabled=true;stop.disabled=false;
+   reset();mode='watch';video.muted=false;watch.disabled=send.disabled=true;stop.disabled=false;startSessionLimit();
    try{
     const pc=createPeer();pc.addTransceiver('video',{direction:'recvonly'});
     await pc.setLocalDescription(await pc.createOffer());await waitIce(pc);
@@ -98,7 +113,7 @@
    let capture;
    try{capture=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});}
    catch{report('Screen permission denied or capture cancelled; nothing was shared');return;}
-   reset();offer.value=JSON.stringify(receivedOffer);localCapture=capture;mode='send';watch.disabled=send.disabled=true;stop.disabled=false;
+   reset();offer.value=JSON.stringify(receivedOffer);localCapture=capture;mode='send';watch.disabled=send.disabled=true;stop.disabled=false;startSessionLimit();
    capture.getVideoTracks()[0]?.addEventListener('ended',reset,{once:true});
    try{
     const pc=createPeer();capture.getTracks().forEach(track=>pc.addTrack(track,capture));
