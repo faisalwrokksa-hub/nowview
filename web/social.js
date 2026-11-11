@@ -81,6 +81,8 @@
  let items=load();let metadata=loadMetadata();
  const filter=document.createElement('input');filter.type='search';filter.id='social-saved-search';filter.placeholder='Search saved profiles';filter.setAttribute('aria-label','Search saved social profiles');links.parentElement?.insertBefore(filter,links);
  filter.addEventListener('input',()=>render());
+ filter.addEventListener('keydown',event=>{if(event.key==='Escape'&&filter.value){event.preventDefault();filter.value='';render();}});
+ const matchStatus=document.createElement('p');matchStatus.id='social-saved-match-count';matchStatus.setAttribute('role','status');matchStatus.setAttribute('aria-live','polite');links.parentElement?.insertBefore(matchStatus,links);
  const collectionFilter=document.createElement('select');collectionFilter.setAttribute('aria-label','Filter saved profiles by collection');links.parentElement?.insertBefore(collectionFilter,links);
  collectionFilter.addEventListener('change',()=>render());
  const tagFilter=document.createElement('select');tagFilter.setAttribute('aria-label','Filter saved profiles by tag');links.parentElement?.insertBefore(tagFilter,links);
@@ -110,9 +112,10 @@
   const tags=[...new Set(items.map(item=>metadata[item.url]?.tag).filter(Boolean))].sort();
   tagFilter.replaceChildren(...[['','All tags'],...tags.map(x=>[x,x])].map(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;return option;}));
   tagFilter.value=tags.includes(selectedTag)?selectedTag:'';
-  if(!items.length){links.append(text('p','social-empty','No public profiles saved. Add a public profile URL to open it from your dashboard.'));return;}
+  if(!items.length){matchStatus.textContent='0 saved profiles';links.append(text('p','social-empty','No public profiles saved. Add a public profile URL to open it from your dashboard.'));return;}
   const term=filter.value.trim().toLowerCase().slice(0,100);
   const matching=items.filter(item=>(!collectionFilter.value||metadata[item.url]?.collection===collectionFilter.value)&&(!tagFilter.value||metadata[item.url]?.tag===tagFilter.value)&&(!term||(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||'')).toLowerCase().includes(term)));
+  matchStatus.textContent=matching.length+' of '+items.length+' saved profiles shown';
   if(!matching.length){links.append(text('p','social-empty','No saved profiles match your search.'));return;}
   for(const item of matching){
    const article=text('article','social-link-card','');
