@@ -27,6 +27,7 @@ public final class NewsBrowserActivity extends Activity {
         if(u==null||!"https".equalsIgnoreCase(u.getScheme())||u.getHost()==null||
            u.getUserInfo()!=null||u.getPort()!=-1)return false;
         String host=u.getHost().toLowerCase(java.util.Locale.ROOT);
+        if(host.matches("[0-9.]+")||host.contains(":")||!host.contains("."))return false;
         return !host.equals("localhost")&&!host.endsWith(".localhost")&&
                !host.equals("127.0.0.1")&&!host.equals("0.0.0.0")&&
                !host.equals("[::1]")&&!host.equals("::1")&&
