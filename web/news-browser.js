@@ -75,6 +75,7 @@
    result.textContent='Opening the requested website';
   });
   latest.addEventListener('click',()=>{
+   window.NewViewWatch?.select?.('headlines');
    const first=items.querySelector('a.news-link');
    if(first)first.focus();else{document.getElementById('news-refresh')?.click();result.textContent='Refreshing headlines';}
   });
