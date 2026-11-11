@@ -36,3 +36,28 @@ test('TV guide avoids fake uptime claims, arbitrary stream probing, and duplicat
  assert.match(build,/tv-guide\.js/);
  assert.match(apk,/tv-guide\.js/);
 });
+
+test('compact channel picker replaces lengthy channel tile gallery',()=>{
+ assert.match(code,/nv-tv-channel-picker/);
+ assert.match(code,/nv-tv-category/);
+ assert.match(code,/channelPicker\.addEventListener\('change'/);
+ assert.doesNotMatch(code,/nv-tv-grid/);
+ const css=readFileSync(new URL('../web/simplified-ui.css',import.meta.url),'utf8');
+ assert.match(css,/#nv-tv-guide \.nv-tv-controls/);
+});
+test('read shows at most four hot story cards with summaries',()=>{
+ const news=readFileSync(new URL('../web/news.js',import.meta.url),'utf8');
+ const cloud=readFileSync(new URL('../cloud/news.mjs',import.meta.url),'utf8');
+ assert.match(news,/slice\(0,4\):matches/);
+ assert.match(news,/nv-news-summary/);
+ assert.match(cloud,/summary:cleanText/);
+});
+test('Power BI shortcut removed and native browser bookmarks remain local',()=>{
+ const ui=readFileSync(new URL('../web/simplified-ui.js',import.meta.url),'utf8');
+ const browser=readFileSync(new URL('../android/src/dev/fintech/marketcharts/NewsBrowserActivity.java',import.meta.url),'utf8');
+ assert.doesNotMatch(ui,/app\.powerbi\.com|id:'business'|Power BI reports/);
+ assert.match(browser,/BOOKMARK_PREFS/);
+ assert.match(browser,/SharedPreferences/);
+ assert.match(browser,/toggleBookmark\(\)/);
+ assert.match(browser,/showBookmarks\(\)/);
+});
