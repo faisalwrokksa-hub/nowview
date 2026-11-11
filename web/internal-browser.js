@@ -46,7 +46,8 @@
   const status=make('p','nv-browser-status');status.setAttribute('role','status');
   const frame=make('iframe','nv-browser-frame');frame.title='Sandboxed website preview';
   frame.referrerPolicy='no-referrer';frame.loading='lazy';
-  frame.setAttribute('sandbox','allow-scripts allow-forms allow-same-origin allow-popups');
+  frame.setAttribute('sandbox','allow-scripts allow-forms allow-same-origin allow-popups allow-presentation');
+  frame.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;
   const excerpt=make('div','nv-browser-excerpt');excerpt.hidden=true;
   panel.append(toolbar,status,excerpt,frame);
   (document.getElementById('nv-read-hub')||document.getElementById('nv-watch-headlines')||document.body).append(panel);
@@ -95,6 +96,7 @@
    }
    external.textContent=video?'Open YouTube':'Open publisher';
    renderMarks();
+   panel.scrollIntoView?.({block:'start',behavior:'smooth'});
    return true;
   }
   function closeBrowser(){
