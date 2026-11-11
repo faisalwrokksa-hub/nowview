@@ -46,3 +46,15 @@ test('half and third video actually reserve chart space and release it on close'
  assert.match(css,/newview-video-active\[data-newview-video-size="third"\]>main/);
  assert.match(css,/newview-video-active\.newview-video-left/);
 });
+
+test('live multi-screen panes use source-linked events and never fabricate quotes',()=>{
+ assert.match(layout,/newview-pane-live/);
+ assert.match(layout,/newview:market/);
+ assert.match(layout,/newview:news/);
+ assert.match(layout,/newview:update/);
+ assert.match(layout,/quote\.source!=='binance'/);
+ assert.match(layout,/Number\.isFinite\(quote\.price\)/);
+ assert.match(layout,/stale quote/);
+ assert.match(layout,/Waiting for a current market quote/);
+ assert.doesNotMatch(layout,/Math\.random\(\)/);
+});
