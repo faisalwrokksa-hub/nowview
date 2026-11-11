@@ -80,3 +80,14 @@ test('default TV profile uses the four primary workspaces and retains legacy mig
  assert.doesNotMatch(shell,/Local CSV analytics/);
  assert.match(shell,/Microsoft Power BI reports and workspaces/);
 });
+
+test('Markets filters only its predefined instruments and describes their true source',()=>{
+ const app=readFileSync(new URL('../web/app.js',import.meta.url),'utf8');
+ assert.match(app,/function installMarketFilter\(symbolNav\)/);
+ assert.match(app,/document\.getElementById\('newview-market-filter'\)/);
+ assert.match(app,/symbols\[index\]\.includes\(term\)/);
+ assert.match(app,/Binance Spot tokens, not direct stock quotes/);
+ assert.match(app,/reset\.addEventListener\('click'/);
+ assert.match(css,/#symbols button\[hidden\]\{display:none!important\}/);
+ assert.match(css,/newview-market-search :focus-visible/);
+});
