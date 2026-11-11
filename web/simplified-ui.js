@@ -26,10 +26,127 @@
   const nav=el('nav','nv-simple-nav');nav.id='nv-simple-nav';nav.setAttribute('aria-label','NewView main navigation');
   const sections=[['home','Home'],['watch','Watch'],['read','Read'],['customize','Customize']];
   const buttons=new Map();let active='home',state=read();
+  // Always show three primary boxes on Home; saved preferences choose which.
+  state.count=3;
   const content=el('section','nv-simple-home');content.id='nv-simple-home';content.setAttribute('aria-label','Personalized Home');
   const grid=el('div','nv-simple-grid');
   grid.id='nv-simple-grid';
-  content.append(grid);home.prepend(content);
+  // Home is a fixed three-destination command deck; the other sections remain available.
+  const homeNews=el('section','nv-home-top-news');homeNews.id='nv-home-top-news';homeNews.setAttribute('aria-label','Suggested top news');
+  const newsHeading=el('div','nv-home-news-heading');
+  newsHeading.append(el('strong','','Top news'));
+  const moreNews=el('button','','More headlines');moreNews.type='button';moreNews.addEventListener('click',()=>show('read'));
+  newsHeading.append(moreNews);
+  const newsStrip=el('div','nv-home-news-strip');newsStrip.setAttribute('aria-label','Latest publisher stories');
+  homeNews.append(newsHeading,newsStrip);
+  const homeLower=el('div','nv-home-lower');homeLower.id='nv-home-lower';
+  const mainChart=el('section','nv-home-chart');mainChart.id='nv-home-chart';mainChart.setAttribute('aria-label','Market charts or article reader');
+  const chartHeading=el('div','nv-home-chart-head');
+  chartHeading.append(el('strong','','Charts'));
+  const openCharts=el('button','','Open charts');openCharts.type='button';openCharts.addEventListener('click',()=>window.NewViewShell?.select?.('markets'));
+  chartHeading.append(openCharts);
+  const chartCanvas=el('canvas');chartCanvas.id='nv-home-chart-preview';chartCanvas.setAttribute('aria-label','Preview of the main market chart');
+  chartCanvas.setAttribute('role','img');chartCanvas.width=680;chartCanvas.height=360;
+  const chartNotice=el('p','nv-home-chart-notice','The market chart is loading. Open Charts for full controls and live data.');
+  mainChart.append(chartHeading,chartCanvas,chartNotice);
+  const articlePanel=el('section','nv-home-article');articlePanel.id='nv-home-article';articlePanel.hidden=true;
+  articlePanel.setAttribute('aria-label','Readable article inside Home');
+  const articleToolbar=el('div','nv-home-article-toolbar');
+  const backChart=el('button','','← Charts');backChart.type='button';backChart.addEventListener('click',()=>{articlePanel.hidden=true;mainChart.hidden=false;});
+  const articleSize=el('select');articleSize.setAttribute('aria-label','Article panel size');
+  for(const [value,label] of [['normal','Normal reader'],['wide','Wide reader'],['large','Large reader']]){
+   const opt=el('option','',label);opt.value=value;articleSize.append(opt);
+  }
+  articleSize.addEventListener('change',()=>{homeLower.dataset.articleSize=articleSize.value;});
+  const fullArticle=el('button','','Full publisher page');fullArticle.type='button';
+  const articleTitle=el('h2'),articleInfo=el('p','nv-home-article-meta'),articleBody=el('p','nv-home-article-body');
+  let articleUrl='';
+  function openPublisher(){
+   if(!articleUrl)return;
+   if(typeof window.NewViewNative?.openNewsBrowser==='function')window.NewViewNative.openNewsBrowser(articleUrl);
+   else window.open(articleUrl,'_blank','noopener,noreferrer');
+  }
+  fullArticle.addEventListener('click',openPublisher);
+  articleToolbar.append(backChart,articleSize,fullArticle);
+  articlePanel.append(articleToolbar,articleTitle,articleInfo,articleBody);
+  function readAtHome(item){
+   if(!item||typeof item.url!=='string'||!item.url.startsWith('https://'))return;
+   articleUrl=item.url;articleTitle.textContent=item.title;
+   articleInfo.textContent=item.source+(item.publishedAt?' · '+new Date(item.publishedAt).toLocaleString():'');
+   articleBody.textContent=item.summary||'This publisher provides a headline without an excerpt. Choose Full publisher page to continue reading in NewView on Android or the publisher tab on the web.';
+   mainChart.hidden=true;articlePanel.hidden=false;homeLower.dataset.articleSize=articleSize.value;
+   articlePanel.scrollIntoView?.({block:'start',behavior:'smooth'});
+  }
+  const featured=el('section','nv-home-featured');featured.id='nv-home-featured';featured.setAttribute('aria-label','Featured channel and floating cast');
+  const featuredHeading=el('div','nv-home-featured-heading');featuredHeading.append(el('strong','','Featured channel · Video cast'));
+  const featuredSelect=el('select');featuredSelect.setAttribute('aria-label','Featured IPTV channel');
+  const featuredPlay=el('button','','▶ Play in floating video');featuredPlay.type='button';
+  const featuredStatus=el('p','nv-home-featured-status','Choose a public channel. Untested streams are not guaranteed to play.');
+  featured.append(featuredHeading,featuredSelect,featuredPlay,featuredStatus);
+  function syncFeatured(){
+   const catalog=document.querySelector('#newview-channel-directory select[aria-label="Available IPTV channels"]');
+   if(!catalog||!catalog.options.length)return;
+   const old=featuredSelect.value;
+   featuredSelect.replaceChildren();
+   const candidates=[...catalog.options].filter(o=>o.value.startsWith('https://'));
+   const prior=new Set();let count=0;
+   for(const opt of candidates){
+    if(prior.has(opt.value))continue;prior.add(opt.value);
+    const option=el('option','',opt.textContent||'Public channel');option.value=opt.value;featuredSelect.append(option);
+    if(++count>=120)break;
+   }
+   if([...featuredSelect.options].some(o=>o.value===old))featuredSelect.value=old;
+   else {
+    const checked=[...featuredSelect.options].find(o=>window.NewViewSourceMonitor?.status?.('iptv',o.value)==='ok');
+    if(checked)featuredSelect.value=checked.value;
+   }
+   featuredStatus.textContent=featuredSelect.options.length
+    ? 'Public IPTV candidates · playback starts only when you press Play'
+    : 'No playable channel candidates loaded yet. Open Watch and refresh the directory.';
+  }
+  featuredPlay.addEventListener('click',()=>{
+   if(!featuredSelect.value){featuredStatus.textContent='Choose a channel first.';return;}
+   if(window.NewViewCast?.playIPTV?.(featuredSelect.value)){featuredStatus.textContent='Floating video opened. Playback confirmation depends on the broadcaster.';}
+   else featuredStatus.textContent='This stream cannot be played in the floating viewer; try another channel.';
+  });
+  function populateTopNews(){
+   const items=window.NewViewNewsReader?.getItems?.()||[];
+   newsStrip.replaceChildren();
+   const latest=[...items].sort((a,b)=>(Date.parse(b.publishedAt)||0)-(Date.parse(a.publishedAt)||0)).slice(0,4);
+   if(!latest.length){newsStrip.append(el('p','nv-home-news-empty','Loading publisher headlines…'));return;}
+   for(const item of latest){
+    const btn=el('button','nv-home-news-story');btn.type='button';
+    btn.append(el('strong','',item.title),el('small','',item.summary||item.source));
+    btn.addEventListener('click',()=>readAtHome(item));
+    newsStrip.append(btn);
+   }
+  }
+  let lastChartCopy=0;
+  function updateChartPreview(){
+   if(active==='home'&&!mainChart.hidden){
+    const original=document.getElementById('chart');
+    try{
+     if(original&&original.width>0&&original.height>0){
+      const ctx=chartCanvas.getContext('2d');
+      if(ctx){ctx.clearRect(0,0,chartCanvas.width,chartCanvas.height);ctx.drawImage(original,0,0,chartCanvas.width,chartCanvas.height);chartNotice.textContent='Live market chart preview · Open Charts for full interaction';}
+     }
+    }catch{chartNotice.textContent='Open Charts for live market prices.';}
+   }
+  }
+  // Reuse the existing chart's pixels; do not create simulated market data.
+  // A slow, visibility-scoped refresh avoids a second chart calculation/fetch.
+  window.setInterval(()=>{if(!document.hidden)updateChartPreview();},2500);
+  window.addEventListener('newview:news',populateTopNews);
+  window.addEventListener('newview:source-status',e=>{if(e.detail?.kind==='iptv')syncFeatured();});
+  const originalDirectory=document.getElementById('newview-channel-directory');
+  if(originalDirectory){
+   const select=originalDirectory.querySelector('select[aria-label="Available IPTV channels"]');
+   if(select)new MutationObserver(syncFeatured).observe(select,{childList:true});
+  }
+  homeLower.append(mainChart,articlePanel,featured);
+  content.append(grid,homeNews,homeLower);home.prepend(content);
+  populateTopNews();syncFeatured();
+
   const watch=el('section','nv-hub-panel');watch.id='nv-watch-hub';watch.hidden=true;
   const watchActions=el('div','nv-hub-grid');watch.append(watchActions);home.append(watch);
   const readPanel=el('section','nv-hub-panel');readPanel.id='nv-read-hub';readPanel.hidden=true;
@@ -62,7 +179,7 @@
    b.append(icon,label);b.addEventListener('click',()=>navigate(item.id));return b;
   }
   function render(){
-   grid.replaceChildren();const chosen=state.items.slice(0,state.count);
+   grid.replaceChildren();const chosen=state.items.slice(0,3);
    for(const id of chosen){const item=choices.find(x=>x.id===id);if(item)grid.append(actionTile(item));}
    if(!chosen.length)grid.append(el('p','','Choose a box in Customize.'));
    grid.dataset.boxCount=String(chosen.length);
@@ -76,10 +193,10 @@
     });
     label.append(check,el('span','',item.label));optionGrid.append(label);
    }
-   selectCount.value=String(state.count);
+   selectCount.value='3';
    now.textContent=chosen.length+' Home box'+(chosen.length===1?'':'es')+' selected';
   }
-  selectCount.addEventListener('change',()=>{state.count=Math.max(1,Math.min(4,Number(selectCount.value)||4));store(state);render();});
+  selectCount.value='3';selectCount.disabled=true;selectCount.title='Home always displays three primary boxes';
   // Watch uses the already initialized IPTV catalog; Read uses the
   // already initialized publisher RSS reader. Do not duplicate fetchers.
   const mediaContent=document.getElementById('nv-watch-channels');
@@ -158,6 +275,7 @@
    if(settings)settings.hidden=true;
    if(id==='read'&&!document.getElementById('news-items')?.children.length)document.getElementById('news-refresh')?.click();
    syncNav();
+   if(id==='home'){populateTopNews();syncFeatured();updateChartPreview();if(!window.NewViewNewsReader?.getItems?.().length)document.getElementById('news-refresh')?.click();}
    // One document-level scroller: returning to the top of a new section avoids
    // inheriting the previous section's vertical position on phones.
    if(typeof window.scrollTo==='function')window.scrollTo({top:0,behavior:'instant'});
