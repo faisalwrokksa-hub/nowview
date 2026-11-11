@@ -10,13 +10,19 @@ test('NewView has exactly four top-level destinations and no duplicate header ca
  assert.doesNotMatch(cast,/header\?\.append\(trigger\)/);
  assert.doesNotMatch(ui,/header\.append\(devices\)/);
 });
-test('Custom home maintains 1 through 4 local layout choices and all remaining core destinations',()=>{
+test('Home always shows three primary choices with news, chart and floating IPTV split',()=>{
  assert.match(ui,/newview\.home\.box-count\.v2/);
- assert.match(ui,/n<=4/);
- assert.match(ui,/state\.items\.slice\(0,state\.count\)/);
+ assert.match(ui,/state\.count=3/);
+ assert.match(ui,/\.slice\(0,3\)/);
+ assert.match(ui,/nv-home-top-news/);
+ assert.match(ui,/nv-home-chart-preview/);
+ assert.match(ui,/nv-home-featured/);
+ assert.match(ui,/nv-home-article/);
+ assert.match(ui,/NewViewCast\?\.playIPTV/);
  for(const key of ['markets','iptv','youtube','news','devices'])assert.match(ui,new RegExp("id:'"+key+"'"));
  assert.doesNotMatch(ui,/id:'business'|Power BI reports|app\.powerbi\.com/);
  assert.match(ui,/newview-cast-trigger'\)\?\.remove\(\)/);
- assert.match(css,/nv-simple-grid\[data-box-count="4"\]/);
+ assert.match(css,/nv-simple-grid\[data-box-count="3"\]/);
+ assert.match(css,/nv-home-lower/);
  assert.match(css,/nv-hub-panel/);
 });
