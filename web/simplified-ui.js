@@ -121,7 +121,6 @@
     newsStrip.append(btn);
    }
   }
-  let lastChartCopy=0;
   function updateChartPreview(){
    if(active==='home'&&!mainChart.hidden){
     const original=document.getElementById('chart');
@@ -152,8 +151,8 @@
   const readPanel=el('section','nv-hub-panel');readPanel.id='nv-read-hub';readPanel.hidden=true;
   const readActions=el('div','nv-hub-grid');readPanel.append(readActions);home.append(readPanel);
   const customize=el('section','nv-hub-panel');customize.id='nv-customize-hub';customize.hidden=true;
-  const selectCount=el('select','nv-custom-count');selectCount.id='nv-custom-count';selectCount.setAttribute('aria-label','Number of Home boxes');
-  for(let n=1;n<=4;n++){const option=el('option','',n+' box'+(n===1?'':'es'));option.value=String(n);selectCount.append(option);}
+  const selectCount=el('select','nv-custom-count');selectCount.id='nv-custom-count';selectCount.setAttribute('aria-label','Home box count');
+  const fixedCount=el('option','','3 boxes · fixed Home layout');fixedCount.value='3';selectCount.append(fixedCount);
   const optionGrid=el('div','nv-custom-options');
   customize.append(selectCount,optionGrid);home.append(customize);
   const now=el('p','nv-custom-state');now.setAttribute('role','status');customize.append(now);
@@ -179,7 +178,7 @@
    b.append(icon,label);b.addEventListener('click',()=>navigate(item.id));return b;
   }
   function render(){
-   grid.replaceChildren();const chosen=state.items.slice(0,3);
+   grid.replaceChildren();const chosen=[...new Set([...state.items,...['markets','iptv','news']])].slice(0,3);
    for(const id of chosen){const item=choices.find(x=>x.id===id);if(item)grid.append(actionTile(item));}
    if(!chosen.length)grid.append(el('p','','Choose a box in Customize.'));
    grid.dataset.boxCount=String(chosen.length);
@@ -194,7 +193,7 @@
     label.append(check,el('span','',item.label));optionGrid.append(label);
    }
    selectCount.value='3';
-   now.textContent=chosen.length+' Home box'+(chosen.length===1?'':'es')+' selected';
+   now.textContent='Home shows three main boxes. Select preferred shortcuts below.';
   }
   selectCount.value='3';selectCount.disabled=true;selectCount.title='Home always displays three primary boxes';
   // Watch uses the already initialized IPTV catalog; Read uses the
