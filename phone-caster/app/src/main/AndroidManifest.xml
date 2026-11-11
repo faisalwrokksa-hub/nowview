@@ -6,7 +6,8 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <application android:label="NewView Phone Cast" android:allowBackup="false"
         android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.NoActionBar">
-        <activity android:name=".CasterActivity" android:exported="true">
+        <activity android:name=".CasterActivity" android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
