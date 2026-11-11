@@ -53,6 +53,7 @@
   articlePanel.setAttribute('aria-label','Readable article inside Home');
   const articleToolbar=el('div','nv-home-article-toolbar');
   const backChart=el('button','','← Charts');backChart.type='button';backChart.addEventListener('click',()=>{window.NewViewInternalBrowser?.close?.();articlePanel.hidden=true;mainChart.hidden=false;});
+  document.addEventListener('newview:browser-close',event=>{if(event.detail?.area==='home'){articlePanel.hidden=true;mainChart.hidden=false;}});
   const articleSize=el('select');articleSize.setAttribute('aria-label','Article panel size');
   for(const [value,label] of [['normal','Normal reader'],['wide','Wide reader'],['large','Large reader']]){
    const opt=el('option','',label);opt.value=value;articleSize.append(opt);
@@ -79,7 +80,8 @@
    mainChart.hidden=true;articlePanel.hidden=false;homeLower.dataset.articleSize=articleSize.value;
    const browser=window.NewViewInternalBrowser;
    if(browser){
-    articleTitle.hidden=true;articleInfo.hidden=true;articleBody.hidden=true;
+    const isNative=typeof window.NewViewNative?.openNewsBrowser==='function';
+    articleTitle.hidden=!isNative;articleInfo.hidden=!isNative;articleBody.hidden=!isNative;
     browser.open(item.url,{area:'home',title:item.title,summary:item.summary||''});
    }else{articleTitle.hidden=false;articleInfo.hidden=false;articleBody.hidden=false;}
    articlePanel.scrollIntoView?.({block:'start',behavior:'smooth'});
