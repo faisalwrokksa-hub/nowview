@@ -83,7 +83,8 @@
     report('IPTV playback attempt. Stream availability and rights depend on publisher.');return true;
    }catch(e){report(e?.message||'Invalid channel');return false;}
   }
-  const showDock=()=>{dock.hidden=false;dock.classList.remove('is-minimized');minimized=false;};
+  const updateViewport=()=>{document.body.classList.toggle('newview-video-active',!dock.hidden&&!minimized);document.body.classList.toggle('newview-video-left',dock.classList.contains('is-left'));};
+  const showDock=()=>{dock.hidden=false;dock.classList.remove('is-minimized');minimized=false;updateViewport();};
   function attachStream(stream){
    clearMedia();mediaMode='cast';heading.textContent='Device screen';currentStream=stream;video.srcObject=stream;showDock();video.play().catch(()=>report('Screen connected · press Play in the viewer'));
    if(mode==='watch')for(const track of stream.getTracks())track.addEventListener('ended',()=>{if(currentStream===stream)reset();},{once:true});
@@ -101,7 +102,7 @@
   function fail(error){report(error instanceof Error?error.message:'Screen connection unavailable');}
   function startSessionLimit(){
    if(expiryTimer)clearTimeout(expiryTimer);
-   expiryTimer=setTimeout(()=>{reset();dock.hidden=true;report('Screen-sharing session expired after 30 minutes. Start a new session to continue.');},MAX_SESSION_MS);
+   expiryTimer=setTimeout(()=>{reset();dock.hidden=true;updateViewport();report('Screen-sharing session expired after 30 minutes. Start a new session to continue.');},MAX_SESSION_MS);
   }
   const supported=()=>typeof RTCPeerConnection==='function';
   function createPeer(){
@@ -114,7 +115,7 @@
     if(disconnectTimer){clearTimeout(disconnectTimer);disconnectTimer=null;}
     if(pc.connectionState==='disconnected'){
      report('Connection interrupted; closing if not restored within 20 seconds');
-     disconnectTimer=setTimeout(()=>{if(peer===pc&&pc.connectionState==='disconnected'){reset();dock.hidden=true;}},DISCONNECT_GRACE_MS);
+     disconnectTimer=setTimeout(()=>{if(peer===pc&&pc.connectionState==='disconnected'){reset();dock.hidden=true;updateViewport();}},DISCONNECT_GRACE_MS);
     }
    };
    return pc;
@@ -182,18 +183,18 @@
   top.addEventListener('pointerup',releaseDrag);top.addEventListener('pointercancel',releaseDrag);
   window.addEventListener('resize',()=>{if(dock.hidden)return;const rect=dock.getBoundingClientRect();if(rect.left>window.innerWidth-50||rect.top>window.innerHeight-50){dock.style.removeProperty('left');dock.style.removeProperty('top');dock.style.removeProperty('right');dock.style.removeProperty('bottom');}});
   trigger.addEventListener('click',()=>{showDock();window.NewViewShell?.select('devices');});
-  fold.addEventListener('click',()=>{minimized=!minimized;dock.classList.toggle('is-minimized',minimized);fold.textContent=minimized?'+':'−';fold.setAttribute('aria-label',minimized?'Restore floating screen':'Minimize floating screen');});
+  fold.addEventListener('click',()=>{minimized=!minimized;dock.classList.toggle('is-minimized',minimized);fold.textContent=minimized?'+':'−';fold.setAttribute('aria-label',minimized?'Restore floating screen':'Minimize floating screen');updateViewport();});
   let onLeft=false;
   dockSide.addEventListener('click',()=>{
    onLeft=!onLeft;
    dock.style.removeProperty('top');dock.style.removeProperty('right');dock.style.removeProperty('bottom');dock.style.removeProperty('left');
-   dock.classList.toggle('is-left',onLeft);
+   dock.classList.toggle('is-left',onLeft);updateViewport();
    dockSide.setAttribute('aria-label',onLeft?'Move floating screen to right':'Move floating screen to left');
    report(onLeft?'Video docked on the left':'Video docked on the right');
   });
   expand.addEventListener('click',()=>{if(dock.requestFullscreen)Promise.resolve(dock.requestFullscreen()).catch(()=>report('Fullscreen unavailable'));});
-  close.addEventListener('click',()=>{reset();dock.hidden=true;});
-  stop.addEventListener('click',()=>{reset();dock.hidden=true;});
+  close.addEventListener('click',()=>{reset();dock.hidden=true;updateViewport();});
+  stop.addEventListener('click',()=>{reset();dock.hidden=true;updateViewport();});
   window.addEventListener('pagehide',reset,{once:true});
   window.NewViewCast={attachStream,playYouTube,playIPTV,stop:reset,open:showDock,getMode:()=>mediaMode};
  }
