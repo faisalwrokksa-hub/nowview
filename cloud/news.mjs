@@ -31,7 +31,7 @@ export function parseNewsXml(xml,sourceId){
   seen.add(url);
   const rawDate=cleanText(tag(chunk,'pubDate')||tag(chunk,'updated')||tag(chunk,'published'));
   const parsedDate=Date.parse(rawDate);
-  items.push({title,url,publishedAt:Number.isFinite(parsedDate)?new Date(parsedDate).toISOString():null,source:source.name});
+  items.push({title,url,summary:cleanText(tag(chunk,'description')||tag(chunk,'summary')||tag(chunk,'content')),publishedAt:Number.isFinite(parsedDate)?new Date(parsedDate).toISOString():null,source:source.name});
   if(items.length>=12)break;
  }
  return items;
