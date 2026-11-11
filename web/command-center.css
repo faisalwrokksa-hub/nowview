@@ -454,3 +454,28 @@ body:not(.home-panel) #newview-channel-directory #newview-iptv-scope-value:focus
 body:not(.home-panel) #newview-channel-directory .newview-iptv-catalog-status{
  color:#b6d5e0;font-size:13px;line-height:1.5
 }
+
+
+/* Homepage-inspired keyboard command launcher + locally saved HTTPS shortcuts. */
+.newview-command-open{min-height:42px;border:1px solid #4a7484;border-radius:12px;padding:9px 14px;background:#173248;color:#ebf9ff;font:inherit;cursor:pointer}
+.newview-command-open:focus-visible,.newview-command-panel button:focus-visible,.newview-command-panel input:focus-visible,.newview-quicklinks button:focus-visible,.newview-quicklinks a:focus-visible,.newview-quicklinks input:focus-visible{outline:3px solid #81eed6;outline-offset:2px}
+.newview-command-overlay:not([hidden]){position:fixed;z-index:9999;inset:0;background:rgba(4,12,21,.85);display:flex;justify-content:center;align-items:flex-start;padding:clamp(16px,10vh,96px) 12px 16px}
+.newview-command-panel{width:min(640px,100%);max-height:80vh;overflow:auto;padding:20px;border:1px solid #41617a;border-radius:18px;background:#101d2f;box-shadow:0 20px 70px rgba(0,0,0,.5);display:grid;gap:12px;color:#f1f8fc}
+.newview-command-panel label{font-weight:700}
+.newview-command-panel input{width:100%;min-height:50px;border-radius:10px;border:1px solid #588197;background:#152c42;padding:12px;color:#fff;font:inherit}
+.newview-command-panel button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid #476779;background:#1a3447;color:#f6ffff;padding:10px}
+#newview-command-results{display:grid;gap:6px;max-height:48vh;overflow-y:auto}
+.newview-command-result{display:flex;align-items:center;justify-content:space-between;text-align:left;gap:16px}
+.newview-command-result:hover{background:#28566b}
+.newview-command-result span{font-size:12px;color:#b9d6e1}
+.newview-command-help{font-size:13px;color:#bfcedb}
+.newview-quicklinks{display:grid;gap:12px}
+.newview-quicklinks-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+.newview-quicklink-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#183046;padding:8px 12px;border-radius:10px;min-width:0}
+.newview-quicklink-row a{color:#b4f0e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.newview-quicklink-row button,.newview-quicklinks-form button{min-height:40px;border-radius:9px;border:1px solid #547989;padding:7px 10px;background:#254257;color:#fff;cursor:pointer}
+.newview-quicklinks-form{display:grid;grid-template-columns:minmax(100px,1fr) minmax(180px,2fr) auto;gap:8px}
+.newview-quicklinks-form input{min-height:44px;border-radius:9px;border:1px solid #55798f;background:#142a40;color:#fff;padding:8px;font:inherit;min-width:0}
+.newview-quicklinks-status{font-size:13px}
+@media(max-width:670px){.newview-quicklinks-form{grid-template-columns:1fr}.newview-command-open{font-size:13px}.newview-command-panel{padding:14px}}
+@media(prefers-reduced-motion:reduce){.newview-command-overlay *{transition:none!important;animation:none!important}}
