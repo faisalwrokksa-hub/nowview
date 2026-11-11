@@ -1,0 +1,49 @@
+name: Auto merge verified pull requests
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: nowview-auto-merge-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+jobs:
+  merge:
+    # A trusted workflow_run job never checks out or executes PR branch code.
+    if: >-
+      ${{ github.event.workflow_run.event == 'pull_request' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge PR only if the tested commit remains current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          # workflow_run.pull_requests may be empty for fork PRs; only same-repo PRs qualify.
+          prs=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '.pull_requests[]?.number')
+          if [[ -z "$prs" ]]; then
+            echo "No linked pull request; nothing to merge."
+            exit 0
+          fi
+          while IFS= read -r pr; do
+            [[ "$pr" =~ ^[0-9]+$ ]] || continue
+            state=$(gh api "repos/$REPO/pulls/$pr" --jq '.state')
+            draft=$(gh api "repos/$REPO/pulls/$pr" --jq '.draft')
+            head=$(gh api "repos/$REPO/pulls/$pr" --jq '.head.sha')
+            base=$(gh api "repos/$REPO/pulls/$pr" --jq '.base.ref')
+            head_repo=$(gh api "repos/$REPO/pulls/$pr" --jq '.head.repo.full_name')
+            if [[ "$state" != "open" || "$draft" != "false" || "$head" != "$TESTED_SHA" || "$base" != "main" || "$head_repo" != "$REPO" ]]; then
+              echo "PR #$pr no longer matches the verified main-targeting branch; skipping."
+              continue
+            fi
+            # GitHub enforces branch protection, required reviews, and mergeability.
+            # Never pass --admin or bypass required checks.
+            gh pr merge "$pr" --repo "$REPO" --squash --delete-branch
+          done <<< "$prs"
