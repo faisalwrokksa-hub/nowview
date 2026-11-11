@@ -10,11 +10,12 @@ test('NewView has exactly four top-level destinations and no duplicate header ca
  assert.doesNotMatch(cast,/header\?\.append\(trigger\)/);
  assert.doesNotMatch(ui,/header\.append\(devices\)/);
 });
-test('Custom home maintains 1 through 4 local layout choices and all core destinations',()=>{
+test('Custom home maintains 1 through 4 local layout choices and all remaining core destinations',()=>{
  assert.match(ui,/newview\.home\.box-count\.v2/);
  assert.match(ui,/n<=4/);
  assert.match(ui,/state\.items\.slice\(0,state\.count\)/);
- for(const key of ['markets','iptv','youtube','news','devices','business'])assert.match(ui,new RegExp("id:'"+key+"'"));
+ for(const key of ['markets','iptv','youtube','news','devices'])assert.match(ui,new RegExp("id:'"+key+"'"));
+ assert.doesNotMatch(ui,/id:'business'|Power BI reports|app\.powerbi\.com/);
  assert.match(ui,/newview-cast-trigger'\)\?\.remove\(\)/);
  assert.match(css,/nv-simple-grid\[data-box-count="4"\]/);
  assert.match(css,/nv-hub-panel/);
