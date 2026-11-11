@@ -91,15 +91,17 @@
    }catch(e){fail(e);reset();}
   });
   send.addEventListener('click',async()=>{
+   let receivedOffer;
+   try{receivedOffer=parseSignal(offer.value,'offer');}catch(error){report('Paste a valid viewer offer before starting screen capture');return;}
    if(!navigator.mediaDevices?.getDisplayMedia){report('Screen capture unavailable in this browser. Use a supported desktop browser or a permission-based native Android sender.');return;}
    let capture;
    try{capture=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});}
    catch{report('Screen permission denied or capture cancelled; nothing was shared');return;}
-   reset();localCapture=capture;mode='send';watch.disabled=send.disabled=true;stop.disabled=false;
+   reset();offer.value=JSON.stringify(receivedOffer);localCapture=capture;mode='send';watch.disabled=send.disabled=true;stop.disabled=false;
    capture.getVideoTracks()[0]?.addEventListener('ended',reset,{once:true});
    try{
     const pc=createPeer();capture.getTracks().forEach(track=>pc.addTrack(track,capture));
-    await pc.setRemoteDescription(parseSignal(offer.value,'offer'));
+    await pc.setRemoteDescription(receivedOffer);
     await pc.setLocalDescription(await pc.createAnswer());await waitIce(pc);
     answer.value=JSON.stringify({type:'answer',sdp:pc.localDescription.sdp});copyAnswer.disabled=false;
     showDock();video.muted=true;attachStream(capture);
