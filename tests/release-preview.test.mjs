@@ -8,10 +8,11 @@ test('app has unified branding with a distinct renamed package identifier',()=>{
  assert.match(manifest,/android:usesCleartextTraffic="false"/);
  assert.doesNotMatch(manifest,/REQUEST_INSTALL_PACKAGES/);
 });
-test('footer identifies each workspace source truthfully',()=>{
+test('simplified dashboard omits inactive footer while preserving internal source metadata',()=>{
  const shell=read('../web/workspace-shell.js');
  const html=read('../web/index.html');
- assert.match(html,/id="footer-source"/);
+ assert.doesNotMatch(html,/id="footer-source"/);
+ assert.doesNotMatch(html,/Back Exit|OK Open/);
  for(const view of ['myview','markets','business','media','social'])assert.match(shell,new RegExp(view+":"));
  assert.match(shell,/U\.S\. stock quotes unavailable/);
  assert.match(shell,/no live feeds/);
