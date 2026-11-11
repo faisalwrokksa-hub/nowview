@@ -168,6 +168,85 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('display-mode')){document.body.classList.remove('display-mode');active=sanitizeDisplay({...active,fullscreen:false});}});
   renderProfiles();apply(active);
  }
+
+ // Fast workspace navigator: local commands only, with no external search or data collection.
+ function installCommandPalette(){
+  const header=document.querySelector('main > header');
+  if(!header||document.getElementById('newview-command-open'))return;
+  const trigger=document.createElement('button');
+  trigger.type='button';trigger.id='newview-command-open';trigger.className='newview-command-trigger';
+  trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-keyshortcuts','Control+k Meta+k');
+  trigger.textContent='⌕ Find workspace';header.append(trigger);
+  const overlay=document.createElement('div');overlay.id='newview-command-overlay';overlay.className='newview-command-overlay';overlay.hidden=true;
+  const dialog=document.createElement('section');dialog.className='newview-command-dialog';dialog.setAttribute('role','dialog');
+  dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','newview-command-label');
+  const label=document.createElement('label');label.id='newview-command-label';label.htmlFor='newview-command-input';label.textContent='Jump to a workspace';
+  const input=document.createElement('input');input.id='newview-command-input';input.type='search';
+  input.placeholder='Search Markets, News, Watch, Business…';input.autocomplete='off';
+  const hint=document.createElement('p');hint.className='newview-command-hint';hint.textContent='↑ ↓ select · Enter open · Esc close';
+  const results=document.createElement('div');results.id='newview-command-results';results.setAttribute('role','listbox');results.setAttribute('aria-label','Workspace results');
+  const close=document.createElement('button');close.type='button';close.className='newview-command-close';close.textContent='Close';close.setAttribute('aria-label','Close workspace search');
+  const top=document.createElement('div');top.className='newview-command-top';top.append(label,close);
+  dialog.append(top,input,results,hint);overlay.append(dialog);document.body.append(overlay);
+  const actions=[
+   {name:'MyView',detail:'Personal dashboard and widgets',view:'myview'},
+   {name:'Markets',detail:'Charts and watchlists',view:'markets'},
+   {name:'Business',detail:'Local CSV analytics',view:'business'},
+   {name:'Headlines',detail:'Publisher-linked news',view:'media',section:'headlines'},
+   {name:'Live TV',detail:'Public channel directory',view:'media',section:'channels'},
+   {name:'Videos',detail:'Official video embeds',view:'media',section:'videos'},
+   {name:'Social',detail:'Public profile bookmarks',view:'social'}
+  ];
+  let visible=actions,selected=0,restoreFocus=trigger;
+  function closePalette(){
+   if(overlay.hidden)return false;
+   overlay.hidden=true;input.value='';
+   if(restoreFocus?.isConnected)restoreFocus.focus({preventScroll:true});
+   return true;
+  }
+  function openPalette(){
+   if(document.body.classList.contains('home-panel'))return;
+   restoreFocus=document.activeElement instanceof HTMLElement?document.activeElement:trigger;
+   overlay.hidden=false;selected=0;input.value='';render();input.focus();
+  }
+  function choose(action){
+   if(!action)return;closePalette();select(action.view);
+   if(action.section)window.NewViewWatch?.select?.(action.section);
+  }
+  function render(){
+   const q=input.value.trim().toLocaleLowerCase();
+   visible=actions.filter(a=>(a.name+' '+a.detail).toLocaleLowerCase().includes(q));
+   selected=Math.min(selected,Math.max(visible.length-1,0));results.replaceChildren();
+   visible.forEach((action,i)=>{
+    const item=document.createElement('button');item.type='button';item.className='newview-command-result';item.setAttribute('role','option');
+    item.setAttribute('aria-selected',String(i===selected));item.tabIndex=-1;
+    const name=document.createElement('strong');name.textContent=action.name;
+    const description=document.createElement('small');description.textContent=action.detail;
+    item.append(name,description);item.addEventListener('click',()=>choose(action));results.append(item);
+   });
+   if(!visible.length){const empty=document.createElement('p');empty.className='newview-command-empty';empty.textContent='No matching workspace';results.append(empty);}
+   input.setAttribute('aria-activedescendant','');
+   [...results.querySelectorAll('[role="option"]')].forEach((el,i)=>{el.id='newview-command-item-'+i;if(i===selected)input.setAttribute('aria-activedescendant',el.id);});
+  }
+  trigger.addEventListener('click',openPalette);close.addEventListener('click',closePalette);
+  input.addEventListener('input',()=>{selected=0;render();});
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closePalette();});
+  overlay.addEventListener('keydown',e=>{
+   if(e.key==='Escape'||e.key==='BrowserBack'){e.preventDefault();e.stopPropagation();closePalette();return;}
+   if(e.key==='Tab'){
+    const target=e.shiftKey?close:input;
+    if((e.shiftKey&&document.activeElement===input)||(!e.shiftKey&&document.activeElement===close)){e.preventDefault();target.focus();}
+   }
+   if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();if(visible.length){selected=(selected+(e.key==='ArrowDown'?1:-1)+visible.length)%visible.length;render();}
+   }
+   if(e.key==='Enter'&&document.activeElement===input){e.preventDefault();choose(visible[selected]);}
+  });
+  document.addEventListener('keydown',e=>{
+   if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='k'){e.preventDefault();overlay.hidden?openPalette():closePalette();}
+  });
+  window.NewViewCloseCommandPalette=closePalette;
+ }
  function install(){
   if(document.body.classList.contains('home-panel'))return;
   const nav=document.getElementById('workspace-switcher');if(!nav)return;
@@ -237,11 +316,13 @@
   const marketActions=document.getElementById('shell-market-actions');
   if(boardButton&&marketActions)marketActions.appendChild(boardButton);
   select(window.NewViewApps?'myview':getStored());
+  installCommandPalette();
   installDisplay();
   installFirstLaunch();
  }
  // Native Android Back uses the same ordered dismissal as keyboard navigation.
  window.NewViewBack=()=>{
+  if(window.NewViewCloseCommandPalette?.())return true;
   const drawer=document.getElementById('newview-settings');
   if(drawer?.open){drawer.open=false;drawer.querySelector('summary')?.focus();return true;}
   if(window.NewViewHomeBack?.())return true;
