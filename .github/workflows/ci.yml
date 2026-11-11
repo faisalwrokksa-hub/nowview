@@ -1,0 +1,26 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate and build Worker + Pages preview
+        run: npm run verify
+      - name: Check Worker release entrypoint
+        run: test -s dist/server/index.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: newview-worker-${{ github.sha }}
+          path: dist/server/index.js
+          retention-days: 14
