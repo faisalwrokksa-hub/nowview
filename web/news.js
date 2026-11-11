@@ -11,6 +11,36 @@
  const nativePending=new Map();
  window.__newviewNewsResult=(id,data)=>{const entry=nativePending.get(id);if(!entry)return;nativePending.delete(id);clearTimeout(entry.timer);if(data?.error)entry.reject(Error(data.error));else entry.resolve(data);};
  let lastItems=[];let lastFetchLabel='';
+ // Read source-provided headline and excerpt inside the Read workspace.
+ // Do not iframe publishers or scrape copyrighted article bodies.
+ const reader=document.createElement('section');reader.className='nv-article-reader';reader.id='nv-article-reader';reader.hidden=true;reader.setAttribute('aria-label','Article reader');
+ const readerBack=document.createElement('button');readerBack.type='button';readerBack.className='nv-article-back';readerBack.textContent='← Back to headlines';
+ const readerTitle=document.createElement('h2'),readerMeta=document.createElement('p'),readerSummary=document.createElement('p');
+ readerMeta.className='nv-article-meta';readerSummary.className='nv-article-content';
+ const originalLink=document.createElement('a');originalLink.textContent='Read full article at publisher';originalLink.className='nv-article-original';originalLink.target='_blank';originalLink.rel='noopener noreferrer';
+ reader.append(readerBack,readerTitle,readerMeta,readerSummary,originalLink);
+ container.parentElement?.insertBefore(reader,container);
+ const shell=document.getElementById('nv-watch-headlines');
+ function closeReader(){
+  reader.hidden=true;container.hidden=false;readerBack.blur();
+  const previous=container.querySelector('.news-link');previous?.focus?.();
+ }
+ readerBack.addEventListener('click',closeReader);
+ function openReader(url){
+  const item=lastItems.find(x=>x.url===url);
+  if(!item)return false;
+  readerTitle.textContent=item.title;
+  const date=item.publishedAt?new Date(item.publishedAt):null;
+  readerMeta.textContent=item.source+(date&&Number.isFinite(date.getTime())?' · '+date.toLocaleString():'');
+  readerSummary.textContent=String(item.summary||'').trim()||'This publisher provides a headline without a full excerpt in its news feed. Open the original article to continue reading.';
+  originalLink.href=item.url;
+  reader.hidden=false;container.hidden=true;
+  reader.scrollIntoView?.({block:'start',behavior:'smooth'});
+  readerBack.focus();
+  return true;
+ }
+ window.NewViewNewsReader=Object.freeze({openByUrl:openReader,close:closeReader});
+
  const mode=document.createElement('select');mode.className='nv-news-mode';mode.setAttribute('aria-label','News filter');
  for(const [value,label] of [['hot','Top stories (4)'],['all','All headlines']]){const option=document.createElement('option');option.value=value;option.textContent=label;mode.append(option);}
  mode.value='hot';
@@ -34,6 +64,7 @@
  window.addEventListener?.('newview:source-filter',()=>{hideFailed.checked=window.NewViewSourceMonitor?.getSettings?.().hideFailed!==false;filterSources();});
  refresh.parentElement?.append(search,autoLabel,auto,hiddenLabel,hideFailed);
  function renderItems(){
+  reader.hidden=true;container.hidden=false;
   container.replaceChildren();
   container.classList.toggle('nv-news-cards',mode.value==='hot');
   const term=search.value.trim().toLowerCase().slice(0,120);
@@ -69,7 +100,7 @@
   for(const [id,p] of nativePending){clearTimeout(p.timer);p.reject(new DOMException('Superseded','AbortError'));nativePending.delete(id);}
   controller=new AbortController();
   const current=controller;
-  sourceLink();status.textContent='Loading source-linked headlines…';container.replaceChildren();lastItems=[];
+  sourceLink();status.textContent='Loading source-linked headlines…';reader.hidden=true;container.hidden=false;container.replaceChildren();lastItems=[];
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:null}));
   try{
    let feed;
