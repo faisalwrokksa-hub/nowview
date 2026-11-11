@@ -4,7 +4,8 @@
  const container=document.getElementById('news-items'),status=document.getElementById('news-status');
  const choose=document.getElementById('news-source'),refresh=document.getElementById('news-refresh');
  if(!container||!choose||!refresh)return;
- const external={'fed':'https://www.federalreserve.gov/newsevents/pressreleases.htm','sec':'https://www.sec.gov/newsroom/press-releases','stocktwits':'https://stocktwits.com/'};
+ const external={'fed':'https://www.federalreserve.gov/newsevents/pressreleases.htm','sec':'https://www.sec.gov/newsroom/press-releases','stocktwits':'https://stocktwits.com/','bbc':'https://www.bbc.com/news','npr':'https://www.npr.org/','guardian':'https://www.theguardian.com/world'};
+ const articleHosts=new Set(['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com','www.bbc.com','bbc.com','www.bbc.co.uk','www.npr.org','text.npr.org','www.theguardian.com']);
  let controller=null;
  let nativeRequestId=0;
  const nativePending=new Map();
@@ -18,7 +19,7 @@
   container.replaceChildren();const term=search.value.trim().toLowerCase().slice(0,120);
   for(const item of lastItems){if(term&&!item.title.toLowerCase().includes(term))continue;
    let url;try{url=new URL(item.url);}catch{continue;}
-   if(url.protocol!=='https:'||url.username||url.password||url.port||!['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com'].includes(url.hostname))continue;
+   if(url.protocol!=='https:'||url.username||url.password||url.port||!articleHosts.has(url.hostname))continue;
    const article=line('article','news-item','');const link=line('a','news-link',item.title);
    link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';
    const date=item.publishedAt?new Date(item.publishedAt):null;
@@ -58,7 +59,7 @@
    }
    if(current!==controller)return;
    if(!Array.isArray(feed.items)||!feed.items.length){status.textContent='No headlines returned by this source. Check the original publisher.';return;}
-   lastItems=feed.items.filter(item=>{try{const url=new URL(item.url);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com'].includes(url.hostname)&&typeof item.title==='string'&&item.title.trim();}catch{return false;}}).slice(0,100);
+   lastItems=feed.items.filter(item=>{try{const url=new URL(item.url);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&articleHosts.has(url.hostname)&&typeof item.title==='string'&&item.title.trim();}catch{return false;}}).slice(0,100);
    if(!lastItems.length){status.textContent='No valid announcements returned by this source';return;}
    renderItems();
    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:choose.value,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
