@@ -14,9 +14,9 @@ function shell(saved = 'news') {
   vm.runInNewContext(source, { window, document, localStorage });
   return window.NewViewShell;
 }
-test('exactly five top-level navigation tabs, and one Watch & News', () => {
+test('exactly six top-level navigation tabs, and one Watch & News', () => {
   const buttons = [...html.matchAll(/data-view-button="([^"]+)"/g)].map(x => x[1]);
-  assert.deepEqual(buttons, ['myview', 'markets', 'business', 'media', 'social']);
+  assert.deepEqual(buttons, ['myview', 'markets', 'business', 'media', 'social', 'devices']);
   assert.match(html, /Watch &amp; News/);
   assert.match(html, /src="watch.js"/);
   assert.doesNotMatch(html, /data-view-button="news"/);
@@ -27,7 +27,7 @@ test('exactly five top-level navigation tabs, and one Watch & News', () => {
 test('saved news tab migrates to Watch & News', () => {
   const api = shell('news');
   assert.equal(api.getStored(), 'media');
-  assert.deepEqual(Array.from(api.views), ['myview','markets','business','media','social']);
+  assert.deepEqual(Array.from(api.views), ['myview','markets','business','media','social','devices']);
   assert.deepEqual(Array.from(api.sanitizeDisplay({views:['news','markets','media','unknown']}).views), ['media','markets']);
 });
 test('invalid legacy workspace remains closed', () => {
