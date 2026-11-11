@@ -602,3 +602,22 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
 @media (forced-colors:active){
   :where(.shell-card,.shell-page) [role="alert"]{border-inline-start-color:Mark}
 }
+
+
+/* Task 1: safe-area aware workspace rail and visible keyboard skip targets. */
+@supports (padding-inline: max(0px, 1px)) {
+  .workspace-switcher {
+    padding-inline-start:max(8px,env(safe-area-inset-left));
+    padding-inline-end:max(8px,env(safe-area-inset-right));
+  }
+}
+:where(.shell-page,.shell-card) :is(a,button,input,select,textarea,[tabindex]):focus-visible {
+  scroll-margin-block:16px;
+  scroll-margin-inline:16px;
+}
+@media (forced-colors:active) {
+  :where(.shell-page,.shell-card) :is(a,button,input,select,textarea,[tabindex]):focus-visible {
+    outline:2px solid Highlight;
+    outline-offset:2px;
+  }
+}
