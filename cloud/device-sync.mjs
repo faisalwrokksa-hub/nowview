@@ -14,7 +14,12 @@ export async function handleDeviceSync(request,env,url,fetcher=fetch){
  if(!access.ok)return reply({error:'Sign in through the protected NewView domain before using device sync'},401);
  const match=/^\/api\/device-sync\/([A-Za-z0-9_-]{43})$/.exec(url.pathname);
  if(!match)return reply({error:'Invalid sync room'},404);
- const path='v1:'+match[1],method=request.method;
+ // A room is scoped to the cryptographically verified Cloudflare Access user.
+ // The pairing link alone does not authorize another signed-in user.
+ const roomKey=new TextEncoder().encode(access.subject+String.fromCharCode(0)+match[1]);
+ const digest=await crypto.subtle.digest('SHA-256',roomKey);
+ const partition=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+ const path='v2:'+partition,method=request.method;
  if(!['GET','PUT'].includes(method))return new Response('Method not allowed',{status:405,headers:{...base,Allow:'GET, PUT'}});
  if(method==='PUT'){
   const origin=request.headers.get('Origin');
