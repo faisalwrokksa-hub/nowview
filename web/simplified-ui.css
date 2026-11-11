@@ -206,3 +206,21 @@ body.nv-simple #nv-watch-hub .newview-inline-tv{max-width:100%}
  body.nv-simple #nv-read-hub .nv-read-toolbar{display:grid}
  body.nv-simple #nv-simple-home{min-height:0}
 }
+
+
+/* Official YouTube video viewer: single dark surface, responsive 16:9 player. */
+body.nv-simple .nv-youtube{min-width:0;display:grid;gap:16px;padding:clamp(14px,2.5vw,28px);border-radius:18px;border:1px solid #394c5b;background:#0d1018;box-shadow:0 18px 55px #0006}
+body.nv-simple .nv-youtube[hidden]{display:none!important}
+body.nv-simple .nv-youtube-heading{display:flex;align-items:start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+body.nv-simple .nv-youtube-heading h3{font-size:clamp(22px,3vw,32px);margin:0;color:#fff}
+body.nv-simple .nv-youtube-heading p{font-size:14px;color:#b1b8c5;margin:8px 0 0}
+body.nv-simple .nv-youtube-close{min-height:44px;padding:10px 16px;border-radius:10px;background:#242a35;border:1px solid #656f7d;color:#fff;cursor:pointer}
+body.nv-simple .nv-youtube-form{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+body.nv-simple .nv-youtube-form input{flex:1;min-width:min(260px,100%);min-height:48px;background:#171d29;color:#fff;border:1px solid #556476;border-radius:11px;padding:11px 14px;font:inherit}
+body.nv-simple .nv-youtube-form button{min-height:48px;padding:10px 21px;border:1px solid #dd3947;background:#bc2333;color:#fff;border-radius:10px;font:inherit;cursor:pointer}
+body.nv-simple .nv-youtube-open{display:inline-flex;min-height:48px;align-items:center;justify-content:center;text-decoration:none;border:1px solid #626e81;color:#e3eaf6;border-radius:10px;padding:10px 16px}
+body.nv-simple .nv-youtube-stage{aspect-ratio:16/9;min-height:140px;width:100%;background:#05070b;border:1px solid #323846;border-radius:14px;overflow:hidden;display:grid;place-items:center}
+body.nv-simple .nv-youtube-stage iframe{width:100%;height:100%;aspect-ratio:16/9;border:0}
+body.nv-simple .nv-youtube-stage p{color:#aeb7c8;padding:18px;text-align:center}
+body.nv-simple .nv-youtube-status{font-size:12px;color:#afb9c9;margin:0;line-height:1.5}
+@media(max-width:640px){body.nv-simple .nv-youtube-form{display:grid;grid-template-columns:1fr}body.nv-simple .nv-youtube-form input{min-width:0}}
