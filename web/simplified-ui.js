@@ -60,8 +60,7 @@
    if(target==='devices'){window.NewViewShell?.select?.('devices');window.NewViewCast?.open?.();return;}
    if(target==='business'){window.open('https://app.powerbi.com/','_blank','noopener,noreferrer');return;}
    if(target==='youtube'){
-    if(typeof window.NewViewNative?.openNewsBrowser==='function')window.NewViewNative.openNewsBrowser('https://www.youtube.com/');
-    else window.open('https://www.youtube.com/','_blank','noopener,noreferrer');
+    show('watch');window.NewViewYouTube?.open?.();return;
    }
   }
   function actionTile(item){
@@ -110,7 +109,7 @@
    body.append(el('strong','',label),el('small','',description));btn.append(body);
    btn.addEventListener('click',onClick);area.append(btn);
   }
-  addAction(watchActions,'YouTube','Open YouTube',()=>launch('https://www.youtube.com/'));
+  addAction(watchActions,'YouTube','Watch videos within NewView',()=>window.NewViewYouTube?.open?.());
   addAction(watchActions,'Mirror device','Phone and TV screen sharing',()=>{window.NewViewShell?.select?.('devices');window.NewViewCast?.open?.();});
   // Read focuses on text. Market charts and business sites are optional links,
   // never video controls or duplicate headline navigation.
@@ -142,6 +141,7 @@
   document.getElementById('newview-quick-actions')?.remove();
   function show(id){
    if(!sections.some(x=>x[0]===id))return;
+   if(id!=='watch')window.NewViewYouTube?.close?.();
    active=id;
    const view='myview';
    if(window.NewViewShell?.select?.(view)===false)return;
