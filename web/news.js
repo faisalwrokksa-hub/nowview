@@ -4,8 +4,8 @@
  const container=document.getElementById('news-items'),status=document.getElementById('news-status');
  const choose=document.getElementById('news-source'),refresh=document.getElementById('news-refresh');
  if(!container||!choose||!refresh)return;
- const external={'fed':'https://www.federalreserve.gov/newsevents/pressreleases.htm','sec':'https://www.sec.gov/newsroom/press-releases','stocktwits':'https://stocktwits.com/','bbc':'https://www.bbc.com/news','npr':'https://www.npr.org/','guardian':'https://www.theguardian.com/world'};
- const articleHosts=new Set(['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com','www.bbc.com','bbc.com','www.bbc.co.uk','www.npr.org','text.npr.org','www.theguardian.com']);
+ const external={'fed':'https://www.federalreserve.gov/newsevents/pressreleases.htm','sec':'https://www.sec.gov/newsroom/press-releases','stocktwits':'https://stocktwits.com/','bbc':'https://www.bbc.com/news','npr':'https://www.npr.org/','guardian':'https://www.theguardian.com/world','aljazeera':'https://www.aljazeera.com/','dw':'https://www.dw.com/en/top-stories/s-9097','pbs':'https://www.pbs.org/newshour/'};
+ const articleHosts=new Set(['www.sec.gov','www.federalreserve.gov','stocktwits.com','www.stocktwits.com','www.bbc.com','bbc.com','www.bbc.co.uk','www.npr.org','text.npr.org', 'www.theguardian.com','www.aljazeera.com','aljazeera.com','www.dw.com','dw.com','www.pbs.org','pbs.org']);
  let controller=null;
  let nativeRequestId=0;
  const nativePending=new Map();
@@ -60,7 +60,7 @@
   try{
    let feed;
    if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicNews==='function'){
-    if(sourceId==='stocktwits'){status.textContent='This publisher does not have a verified native RSS feed. Open the source below.';return;}
+    if(!['fed','sec','bbc','npr','guardian'].includes(sourceId)){status.textContent='This publisher is available through the NewView web news service. In the Android TV APK, open the publisher link below.';return;}
     feed=await new Promise((resolve,reject)=>{
      const id=++nativeRequestId;
      const timer=setTimeout(()=>{nativePending.delete(id);reject(Error('News timeout'));},20000);
