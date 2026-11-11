@@ -1,6 +1,6 @@
 # Bulk branch reconciliation — 2026-11-11
 
-Snapshot contains 106 branches. All snapshotted heads are preserved as ancestors of the reconciliation commit. Duplicate fixes are consolidated; the Cinema TV presentation wins conflicting older themes while retaining SVG icons, accessibility, local time, focus restoration, app discovery and media safety fixes. The MyView provenance chain, CSV validation, date filters, Retry-After handling, stale quote tests, social filters and all additional regression suites are retained.
+Snapshot contains 108 branches (including two branches created during recovery). All snapshotted heads are preserved as ancestors of the reconciliation commit. Duplicate fixes are consolidated; the Cinema TV presentation wins conflicting older themes while retaining SVG icons, accessibility, local time, focus restoration, app discovery and media safety fixes. The MyView provenance chain, CSV validation, date filters, Retry-After handling, stale quote tests, social filters and all additional regression suites are retained.
 
 Native playback synchronous/Promise false, thrown exceptions, chunk errors, timeout and browser-player failure paths remain handled. Physical TV, signing continuity and actual codec/device acceptance are not certified by browser or CI tests.
 
@@ -112,3 +112,5 @@ Native playback synchronous/Promise false, thrown exceptions, chunk errors, time
 | `fix/watch-stream-reset-20261111-1130` | `57bbf34a791d36368fc2d664562b74a04f468baa` | diverged |
 | `main` | `81eb435c2810f3f1a760da75e597e1ccfa8857df` | behind |
 | `test/iptv-playback-regression-20261110` | `be1eb44ee84ddf0d7685d41d81d6c5e1c0460786` | behind |
+| `fix/social-filter-feedback-20261111-1522` | `2aef433666f78a798ddbae522c9350696b53f836` | Duplicate accessible social filter feedback consolidated |
+| `fix/myview-market-provider-preview-20261111-1530` | `4cc80d2be27c708b04c905cec8cc13505cd7e616` | Explicit provider preview and regression test retained |

@@ -53,7 +53,7 @@ function button(text,active,onClick){const b=document.createElement('button');b.
 const date=(t,zone='Asia/Riyadh',short=false)=>new Intl.DateTimeFormat('en-GB',{timeZone:zone,month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',...(short?{}:{year:'numeric'})}).format(new Date(t*1000));
 function money(value,currency='USDT'){return new Intl.NumberFormat('en-US',{maximumFractionDigits:2,minimumFractionDigits:2}).format(value)+' '+currency;}
 function render(){
- if(data&&typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:market',{detail:{symbol:data.symbol,price:data.price,currency:data.currency,quoteTime:data.quoteTime,changePercent:data.changePercent}}));
+ if(data&&typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:market',{detail:{source:data.source==='Binance public market-data API'?'binance':undefined,symbol:data.symbol,price:data.price,currency:data.currency,quoteTime:data.quoteTime,changePercent:data.changePercent}}));
  if(window.NewViewBoard)window.NewViewBoard.update(data);
  $('security').textContent=data.symbol+' / USDT · '+data.name;
  $('price').textContent=money(data.price,data.currency);
