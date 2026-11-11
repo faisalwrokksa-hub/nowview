@@ -832,3 +832,12 @@ body[dir="rtl"]>main>.newview-settings[open]>.newview-settings-content{right:aut
 @media(max-width:520px){
  body>main>.newview-settings[open]>.newview-settings-content{inset:8px;width:auto;max-width:none;padding:clamp(12px,3vw,20px);overscroll-behavior:contain}
 }
+
+/* TV and keyboard users: preserve a visible focus target when panels scroll. */
+.workspace-switcher,.workspace,.shell-page,.newview-settings-content{scroll-padding:24px}
+@media (hover:none) and (pointer:coarse){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,summary,input,select,textarea,[tabindex]):focus{outline:3px solid #ffd6a3;outline-offset:3px}
+}
+@media (prefers-contrast:more){
+  :is(.workspace-switcher,.workspace,.shell-page) :is(button,a,summary,[tabindex]):focus{outline-width:4px;outline-offset:3px}
+}
