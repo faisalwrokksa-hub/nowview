@@ -60,9 +60,10 @@
   const copyOffer=el('button','','Copy offer');copyOffer.type='button';copyOffer.disabled=true;
   const copyAnswer=el('button','','Copy answer');copyAnswer.type='button';copyAnswer.disabled=true;
   const viewMarket=el('button','','Open Markets with floating screen');viewMarket.type='button';
+  const phoneHelp=el('p','newview-cast-note','Android phone sender: install NewView Phone Caster test APK from the GitHub Actions artifact. On this TV choose “Watch another screen”, copy the offer into the phone sender, approve Android screen capture, then paste the phone answer here and choose “Finish viewer connection”. Both devices must be on the same local network.');
   const noAuto=el('p','newview-cast-note','No recording, background capture, remote commands, or unattended access. Browser permission and peer connection must both be active.');
   buttons.append(watch,send,stop);actions.append(apply,copyOffer,copyAnswer,viewMarket);
-  card.append(eyebrow,title,note,status,buttons,offerLabel,offer,answerLabel,answer,actions,noAuto);deviceControls?.prepend(card);
+  card.append(eyebrow,title,note,status,buttons,offerLabel,offer,answerLabel,answer,actions,phoneHelp,noAuto);deviceControls?.prepend(card);
   const report=text=>{status.textContent=text;state.textContent=text;};
   function clearMedia(){
    iptvAttempt++;
