@@ -753,3 +753,33 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:4px solid 
 }
 @media(hover:none){.workspace-switcher .workspace-tab{min-height:56px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+
+/* Studio Admin-inspired clarity + Cinema TV focus: consolidate the visible home, not its capabilities. */
+body>main{display:flex;flex-direction:column}
+body>main>.newview-settings{flex-shrink:0}
+body>main>#workspace-intro{flex-shrink:0}
+body>main>.workspace-switcher{flex-shrink:0}
+body>main>.shell-page,body>main>.workspace{min-width:0}
+body>main>[data-workspace="myview"] .newview-home-hero{display:none}
+body>main>[data-workspace="myview"] .newview-panel-tabs{display:none}
+body>main>[data-workspace="myview"] .newview-personalize{margin-top:12px}
+body>main>[data-workspace="myview"] .myview-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:clamp(12px,1.4vw,24px);align-items:stretch}
+body>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:1;grid-row:span 2}
+body>main>[data-workspace="myview"] .myview-widget{min-height:180px}
+body>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{min-height:340px}
+body>main>.newview-settings:not([open]){opacity:.85}
+body>main>.newview-settings summary{cursor:pointer}
+@media(min-width:1200px) and (min-height:650px){
+ body>main{display:grid;grid-template-columns:minmax(185px,220px) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;gap:clamp(10px,1.5vh,22px)}
+ body>main>header{grid-column:1/-1;grid-row:1}
+ body>main>.workspace-switcher{grid-column:1;grid-row:2/4;align-self:stretch;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;align-items:stretch;padding:12px;background:#11151e;border:1px solid #303745;border-radius:22px}
+ body>main>.workspace-switcher .workspace-tab{text-align:left;white-space:normal}
+ body>main>.newview-settings{grid-column:2;grid-row:2;justify-self:end;max-width:100%}
+ body>main>#workspace-intro{grid-column:2;grid-row:2;justify-self:start;align-self:center;max-width:70%}
+ body>main>.shell-page,body>main>.workspace,body>main>[data-workspace]{grid-column:2;grid-row:3;min-width:0;min-height:0;overflow:auto}
+ body>main>footer{grid-column:1/-1;grid-row:4}
+}
+@media(max-width:1199px){body>main{display:flex;flex-direction:column;min-height:100dvh;height:auto}body>main>.workspace-switcher{display:flex;flex-direction:row;overflow-x:auto}}
+@media(max-width:900px){body>main>[data-workspace="myview"] .myview-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}body>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:1/-1;grid-row:auto;min-height:260px}}
+@media(max-width:600px){body>main>[data-workspace="myview"] .myview-grid{grid-template-columns:minmax(0,1fr)}body>main>[data-workspace="myview"] .myview-widget[data-widget="market"]{grid-column:1;min-height:220px}body>main>.newview-settings{align-self:flex-end}}
