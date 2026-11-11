@@ -279,3 +279,24 @@ body:not(.home-panel) :is(.newview-cast-setup,.newview-cast-dock) button:focus-v
 body:not(.home-panel) .newview-cast-bar{cursor:grab;touch-action:none;user-select:none}
 body:not(.home-panel) .newview-cast-bar:active{cursor:grabbing}
 body:not(.home-panel) .newview-cast-tools button{cursor:pointer;touch-action:manipulation}
+
+/* Power BI is a trusted external business portal, not an unauthorized iframe. */
+body:not(.home-panel)>main .newview-powerbi{min-width:0;gap:clamp(14px,2vw,24px)}
+body:not(.home-panel)>main .newview-powerbi-hero{
+ padding:clamp(24px,4vw,48px);border-radius:22px;border:1px solid #46648a;
+ background:radial-gradient(circle at 100% 0%,rgba(242,186,48,.18),transparent 48%),linear-gradient(120deg,#1b293c,#101b2b);display:grid;justify-items:start;gap:13px
+}
+body:not(.home-panel)>main .newview-powerbi-hero h3{margin:0;font-size:clamp(25px,3vw,42px);max-width:850px;letter-spacing:-.045em}
+body:not(.home-panel)>main .newview-powerbi-hero p{color:#c6d4e5;max-width:740px;line-height:1.6;margin:0}
+body:not(.home-panel)>main .newview-powerbi-primary{display:inline-flex;align-items:center;gap:16px;text-decoration:none;border-radius:12px;padding:13px 18px;min-height:44px;background:#f2c34f;color:#171d28;font-weight:800}
+body:not(.home-panel)>main .newview-powerbi-primary:hover{background:#ffe09a}
+body:not(.home-panel)>main .newview-powerbi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+body:not(.home-panel)>main .newview-powerbi-grid>.shell-card{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+body:not(.home-panel)>main .newview-powerbi-grid h3{margin:0;font-size:19px}
+body:not(.home-panel)>main .newview-powerbi-grid p{margin:0;color:#b9c9dc;line-height:1.55}
+body:not(.home-panel)>main .newview-powerbi-grid a{color:#f8d376;font-weight:750}
+body:not(.home-panel)>main #powerbi-report-url{width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:44px;padding:10px}
+body:not(.home-panel)>main .newview-powerbi-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+body:not(.home-panel)>main .newview-powerbi-actions button{min-height:44px;padding:9px 12px}
+body:not(.home-panel)>main .newview-powerbi :is(a,button,input):focus-visible{outline:3px solid #ffe09a;outline-offset:3px}
+@media(max-width:850px){body:not(.home-panel)>main .newview-powerbi-grid{grid-template-columns:1fr}}
