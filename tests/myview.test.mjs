@@ -168,3 +168,9 @@ test('MyView rejects external text-drag reorder attempts',()=>{
  assert.match(src,/item.addEventListener\('dragend'/);
  assert.doesNotMatch(src,/const from=e.dataTransfer\?\.getData\('text\/plain'\)/);
 });
+
+
+test('Business Pulse initial render uses live CSV snapshot preview rather than fixed Power BI text',()=>{
+ assert.match(src,/const insight=text\('p','myview-insight',preview\[id\]\(snapshots\[id\]\)\)/);
+ assert.doesNotMatch(src,/id==='business'\?'Launch Power BI reports securely/);
+});
