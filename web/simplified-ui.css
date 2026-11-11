@@ -300,3 +300,57 @@ body.nv-simple #nv-customize-hub .nv-custom-advanced[open]>.newview-settings-con
 }
 @media(max-width:390px){body.nv-simple .nv-tv-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html:has(body.nv-simple){scroll-behavior:auto}}
+
+
+/* Gold containment frame: boundaries remain visible as the page scrolls. */
+body.nv-simple{--nv-gold:#cda55c;--nv-gold-light:#f3db9b;--nv-frame-padding:clamp(10px,2vw,24px)}
+body.nv-simple>main{
+ border:2px solid var(--nv-gold)!important;border-radius:clamp(12px,2vw,22px)!important;
+ background:linear-gradient(160deg,rgba(10,19,32,.91),rgba(8,15,26,.91))!important;
+ box-shadow:0 0 0 1px #76572d,0 14px 48px #0008,inset 0 0 0 1px #e6be7030!important;
+ width:min(1440px,calc(100% - 20px))!important;max-width:calc(100% - 20px)!important;
+ margin:10px auto!important;padding:var(--nv-frame-padding)!important;
+ min-width:0!important;overflow:clip!important;overflow-clip-margin:0!important;
+}
+body.nv-simple #nv-simple-nav{border:1px solid #b78d4b!important;box-shadow:0 0 0 1px #af873522}
+body.nv-simple :is(.nv-hub-panel,.nv-simple-home,.nv-custom-advanced,.nv-youtube,.nv-tv-guide){min-width:0;max-width:100%;box-sizing:border-box}
+body.nv-simple :is(.nv-simple-tile,.nv-tv-channel,.nv-youtube,.nv-hub-panel,.nv-custom-advanced,.nv-simple-welcome){border-color:#997849a8!important}
+body.nv-simple :is(.nv-simple-tab.active,.nv-tv-filter.active){box-shadow:inset 0 -2px var(--nv-gold-light)}
+body.nv-simple :is(.nv-youtube,.nv-tv-guide,.nv-hub-panel,#news-items) :is(img,video,iframe,svg,canvas){max-width:100%;min-width:0}
+body.nv-simple .nv-monitor-disclosure{width:100%;max-width:100%;min-width:0;border:1px solid #a88a55;border-radius:12px;background:#101f30;padding:12px}
+body.nv-simple .nv-monitor-disclosure>summary{min-height:42px;padding:8px;font-weight:650;cursor:pointer}
+body.nv-simple #newview-monitor-panel{position:static!important;max-width:100%;width:100%;min-width:0;height:auto;max-height:none;overflow:visible;word-break:break-word}
+body.nv-simple #newview-monitor-panel .newview-monitor-entry{overflow-wrap:anywhere;font-size:12px;line-height:1.5;margin:5px 0;border-bottom:1px solid #4f4231;padding:5px 0}
+body.nv-simple .nv-monitor-disclosure:not([open]) #newview-monitor-panel{display:none!important}
+/* Floating player stays inside the gold frame and visual viewport on desktop and phone. */
+body.nv-simple .newview-cast-dock:not([hidden]){
+ position:fixed!important;z-index:40!important;box-sizing:border-box!important;
+ max-width:calc(min(1440px,100vw - 20px) - 2 * var(--nv-frame-padding) - 4px)!important;
+ max-height:calc(100dvh - 32px)!important;overflow:auto!important;
+ border:2px solid var(--nv-gold)!important;border-radius:15px;
+}
+body.nv-simple[data-newview-video-size="third"] .newview-cast-dock:not([hidden]){
+ width:min(30vw,440px)!important;min-width:min(280px,calc(100vw - 48px))!important;
+}
+body.nv-simple[data-newview-video-size="half"] .newview-cast-dock:not([hidden]){
+ width:min(50vw,700px)!important;min-width:min(280px,calc(100vw - 48px))!important;
+ height:auto!important;
+}
+body.nv-simple[data-newview-video-size="full"] .newview-cast-dock:not([hidden]):not(.is-minimized){
+ width:calc(min(1440px,100vw - 20px) - 2 * var(--nv-frame-padding) - 4px)!important;
+ height:calc(100dvh - 52px)!important;inset:auto!important;
+ left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;
+ transform:translate(-50%,-50%)!important;
+}
+body.nv-simple .newview-cast-dock.is-minimized:not([hidden]){width:min(240px,calc(100vw - 42px))!important;height:auto!important}
+body.nv-simple .newview-cast-dock button,body.nv-simple .nv-custom-advanced button{max-width:100%;white-space:normal}
+@media(max-width:700px){
+ body.nv-simple>main{width:calc(100% - 12px)!important;max-width:calc(100% - 12px)!important;margin:6px auto!important;padding:10px!important;border-radius:12px!important}
+ body.nv-simple[data-newview-video-size="third"] .newview-cast-dock:not([hidden]){
+  width:min(94vw,360px)!important;
+ }
+ body.nv-simple[data-newview-video-size="half"] .newview-cast-dock:not([hidden]){
+  width:min(94vw,560px)!important;height:auto!important;
+ }
+ body.nv-simple .newview-cast-dock:not([hidden]){max-width:calc(100vw - 28px)!important;max-height:calc(100dvh - 24px)!important}
+}
