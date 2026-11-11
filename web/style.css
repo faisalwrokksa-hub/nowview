@@ -870,3 +870,16 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
   body>main>.newview-settings[open]>.newview-settings-content{border:2px solid CanvasText}
 }
 
+
+/* Task 1: short landscape displays (TV browser windows and rotated phones).
+   Keep workspace tabs reachable without shrinking remote-control targets. */
+@media (max-height:520px) and (orientation:landscape){
+ body>main{min-height:100vh;min-height:100dvh}
+ body>main>.workspace-switcher{min-height:0;max-width:100%;overflow-x:auto;overflow-y:hidden;scroll-padding-inline:20px;overscroll-behavior-inline:contain}
+ body>main>.workspace-switcher .workspace-tab{flex:0 0 auto;min-height:44px}
+ body>main>.shell-page,body>main>.workspace,body>main>[data-workspace]{min-height:180px}
+ body>main>.newview-settings[open]>.newview-settings-content{overflow-y:auto}
+}
+@media(forced-colors:active){
+ body>main>.workspace-switcher .workspace-tab.selected{outline:2px solid Highlight;outline-offset:-3px}
+}
