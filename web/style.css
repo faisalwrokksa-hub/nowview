@@ -717,6 +717,37 @@ body>main>[data-workspace="myview"] #myview-grid{overscroll-behavior:contain}
 
 
 
+
+
+/* Task 1: dynamic viewport sizing and reliable keyboard/TV focus in scrollable workspaces.
+   Keep embedded home-panel sizing untouched. */
+@supports (height: 100dvh) {
+  body:not(.home-panel) > main { height:100dvh; }
+  body:not(.home-panel) .board-active main { height:100dvh; }
+}
+@media (max-width:650px) {
+  body:not(.home-panel) > main {
+    min-height:0;
+    height:auto;
+    min-block-size:100vh;
+  }
+  @supports (min-height:100dvh) {
+    body:not(.home-panel) > main { min-block-size:100dvh; }
+  }
+  .shell-page { overscroll-behavior-y:contain; }
+}
+.workspace-switcher :is(button,a,[tabindex]):focus,
+.shell-page :is(button,a,input,select,textarea,[tabindex]):focus {
+  scroll-margin-block:20px;
+  scroll-margin-inline:20px;
+}
+@media (forced-colors:active) {
+  .workspace-switcher :is(button,a,[tabindex]):focus {
+    outline:3px solid Highlight;
+    outline-offset:2px;
+  }
+}
+
 /* Cinema TV — consolidated design layer. Inspired by open dashboard design patterns;
    no third-party CSS or proprietary assets are included. */
 :root{--bg:#08090e;--panel:#151922;--line:#343b48;--muted:#aab3c4;--text:#f7f8fc;--cyan:#e4a66c;--green:#79dfb4;--red:#ff8f9c;--cinema-radius:18px;--cinema-gap:clamp(10px,1.4vw,22px)}

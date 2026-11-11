@@ -114,3 +114,5 @@ Native playback synchronous/Promise false, thrown exceptions, chunk errors, time
 | `test/iptv-playback-regression-20261110` | `be1eb44ee84ddf0d7685d41d81d6c5e1c0460786` | behind |
 | `fix/social-filter-feedback-20261111-1522` | `2aef433666f78a798ddbae522c9350696b53f836` | Duplicate accessible social filter feedback consolidated |
 | `fix/myview-market-provider-preview-20261111-1530` | `4cc80d2be27c708b04c905cec8cc13505cd7e616` | Explicit provider preview and regression test retained |
+
+Final cleanup check found a late viewport/focus update on `feat/newview-theme-nav-20261110` (`f860700521b0b83ee98069865fb764bc5e1fb08f`). Its dynamic viewport, scroll-margin and forced-colors rules are retained before the Cinema TV layer so the final layout remains coherent.
