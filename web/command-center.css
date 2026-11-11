@@ -419,3 +419,17 @@ body:not(.home-panel) .newview-cast-dock.is-minimized .newview-cast-media-contro
  body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock:not([hidden]){width:calc(100vw - 24px);height:50dvh}
  body:not(.home-panel)[data-newview-video-size="third"] .newview-cast-dock:not([hidden]){width:calc(100vw - 24px)}
 }
+
+/* Make the split view useful: reserve real chart space instead of obscuring it. */
+@media(min-width:1100px){
+ body:not(.home-panel).newview-video-active[data-newview-video-size="third"]>main{
+  width:calc(66.666vw - 30px);max-width:none;margin-left:0;margin-right:auto;box-sizing:border-box
+ }
+ body:not(.home-panel).newview-video-active[data-newview-video-size="half"]>main{
+  width:calc(50vw - 20px);max-width:none;margin-left:0;margin-right:auto;box-sizing:border-box
+ }
+ body:not(.home-panel).newview-video-active.newview-video-left[data-newview-video-size="third"]>main,
+ body:not(.home-panel).newview-video-active.newview-video-left[data-newview-video-size="half"]>main{
+  margin-left:auto;margin-right:0
+ }
+}
