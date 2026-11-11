@@ -889,3 +889,11 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media (prefers-contrast:more){button:focus-visible,[role="tab"]:focus-visible,[tabindex]:focus-visible{outline:3px solid CanvasText;outline-offset:3px}}
 #message,[role="status"],[role="alert"]{overflow-wrap:anywhere;min-width:0;max-width:100%}
 @media (prefers-reduced-motion:reduce){[role="status"],[role="alert"]{animation:none!important;transition:none!important}}
+
+/* Task 1: accessible link/summary focus on TV and keyboard without changing layout. */
+@media (hover:none){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(a,summary,select,textarea):focus-visible{outline:3px solid #ffd6a3;outline-offset:3px;scroll-margin:24px}
+}
+@media (forced-colors:active){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(a,summary,select,textarea):focus-visible{outline:3px solid Highlight;outline-offset:3px}
+}
