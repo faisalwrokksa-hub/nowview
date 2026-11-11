@@ -8,8 +8,7 @@
   {id:'iptv',label:'IPTV',sub:'Live public TV directory',section:'watch'},
   {id:'youtube',label:'YouTube',sub:'Browse YouTube in NewView',section:'watch'},
   {id:'news',label:'News',sub:'Worldwide publisher headlines',section:'read'},
-  {id:'devices',label:'Mirroring',sub:'Phone and TV casting',section:'watch'},
-  {id:'business',label:'Business',sub:'Open authorized reports',section:'read'}
+  {id:'devices',label:'Mirroring',sub:'Phone and TV casting',section:'watch'}
  ];
  function safeItems(value){return Array.isArray(value)?[...new Set(value.filter(x=>choices.some(c=>c.id===x)))].slice(0,4):[];}
  function read(){
@@ -52,14 +51,13 @@
    if(target==='iptv'){window.NewViewShell?.select?.('media');window.NewViewWatch?.select?.('channels');return;}
    if(target==='news'){window.NewViewShell?.select?.('media');window.NewViewWatch?.select?.('headlines');return;}
    if(target==='devices'){window.NewViewShell?.select?.('devices');window.NewViewCast?.open?.();return;}
-   if(target==='business'){window.open('https://app.powerbi.com/','_blank','noopener,noreferrer');return;}
    if(target==='youtube'){
     show('watch');window.NewViewYouTube?.open?.();return;
    }
   }
   function actionTile(item){
    const b=el('button','nv-simple-tile');b.type='button';b.dataset.simpleTarget=item.id;
-   const icon=el('span','nv-simple-tile-icon',({markets:'▤',iptv:'▣',youtube:'▶',news:'▥',devices:'▧',business:'▦'})[item.id]);icon.setAttribute('aria-hidden','true');
+   const icon=el('span','nv-simple-tile-icon',({markets:'▤',iptv:'▣',youtube:'▶',news:'▥',devices:'▧'})[item.id]);icon.setAttribute('aria-hidden','true');
    const label=el('span','nv-simple-tile-text');label.append(el('strong','',item.label),el('small','',item.sub));
    b.append(icon,label);b.addEventListener('click',()=>navigate(item.id));return b;
   }
@@ -96,7 +94,6 @@
   const mediaHub=document.querySelector('[data-workspace="media"]');
   mediaHub?.querySelector('.shell-eyebrow')?.setAttribute('hidden','');
 
-  const launch=(url)=>{if(typeof window.NewViewNative?.openNewsBrowser==='function')window.NewViewNative.openNewsBrowser(url);else window.open(url,'_blank','noopener,noreferrer');};
   function addAction(area,label,description,onClick){
    const btn=el('button','nv-simple-tile');btn.type='button';
    const body=el('span','nv-simple-tile-text');
@@ -108,7 +105,6 @@
   // Read focuses on text. Market charts and business sites are optional links,
   // never video controls or duplicate headline navigation.
   addAction(readActions,'Markets','Binance charts',()=>window.NewViewShell?.select?.('markets'));
-  addAction(readActions,'Business','Power BI reports',()=>launch('https://app.powerbi.com/'));
   const readToolbar=el('div','nv-read-toolbar');
   const sourcePicker=document.getElementById('news-source'),headlineSearch=document.querySelector('#nv-watch-headlines input[aria-label="Filter news headlines"]');
   if(sourcePicker){const wrap=el('label','nv-read-source-label','Publisher');wrap.append(sourcePicker);readToolbar.append(wrap);}
