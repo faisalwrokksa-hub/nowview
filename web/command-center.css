@@ -210,3 +210,20 @@ body:not(.home-panel)>main .device-sync-actions button{min-height:44px;padding:9
 body:not(.home-panel)>main #newview-sync-status{color:#bce9df;overflow-wrap:anywhere}
 body:not(.home-panel)>main .device-sync-actions :focus-visible{outline:3px solid #91f3de;outline-offset:3px}
 @media(max-width:650px){body:not(.home-panel)>main .device-sync-actions button{flex:1 1 130px}}
+
+/* NewViewDevice is a full dashboard workspace, not a hidden Settings subsection. */
+body:not(.home-panel)>main .newview-device-page{min-width:0;gap:clamp(12px,1.6vw,20px)}
+body:not(.home-panel)>main .newview-device-hero{padding:clamp(20px,3vw,36px);border:1px solid #326a69;border-radius:18px;background:linear-gradient(120deg,#183d42,#102034 72%);color:#f0fcfa}
+body:not(.home-panel)>main .newview-device-hero h3{font-size:clamp(25px,3vw,42px);margin:10px 0;letter-spacing:-.05em}
+body:not(.home-panel)>main .newview-device-hero p{max-width:720px;color:#c3d9e4;line-height:1.6;margin:0}
+body:not(.home-panel)>main .newview-device-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+body:not(.home-panel)>main .newview-device-cards>.shell-card{min-width:0;display:flex;flex-direction:column;gap:12px}
+body:not(.home-panel)>main .newview-device-cards h3{margin:0;font-size:clamp(17px,1.5vw,22px)}
+body:not(.home-panel)>main .newview-device-cards p{margin:0;line-height:1.55;color:#c0d0df}
+body:not(.home-panel)>main .newview-device-note{font-size:12px;color:#aebfd0!important}
+body:not(.home-panel)>main .newview-device-coming{display:inline-block;align-self:flex-start;border:1px solid #48657a;border-radius:10px;padding:9px;color:#c5d7e5;font-size:12px}
+body:not(.home-panel)>main .newview-device-controls{min-width:0}
+body:not(.home-panel)>main .newview-device-controls .device-sync{padding:0;background:transparent;border:0}
+body:not(.home-panel)>main .newview-device-controls .device-sync h4{margin:0;color:#dff8f5}
+@media(max-width:900px){body:not(.home-panel)>main .newview-device-cards{grid-template-columns:1fr}}
+@media(forced-colors:active){body:not(.home-panel)>main .newview-device-hero{border:1px solid CanvasText}}
