@@ -88,6 +88,7 @@
   render();event('newview:update',{source,message});
  }
  function render(){
+  if(typeof document==='undefined')return;
   const host=document.getElementById('newview-monitor-feed'),summary=document.getElementById('newview-monitor-summary');
   if(summary)summary.textContent=(active&&settings.autoCheck?'Monitoring while NewView is open':'Monitoring paused')+' · News 2m · Market freshness 15s · IPTV directory 3h';
   if(!host)return;
