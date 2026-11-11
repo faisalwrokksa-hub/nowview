@@ -31,3 +31,12 @@ test('command palette stays local, supports keyboard navigation, and preserves b
  assert.match(css,/newview-command-overlay:not\(\[hidden\]\)/);
  assert.match(css,/newview-command-result\[aria-selected="true"\]/);
 });
+
+test('Homepage quick access remains visible at mobile and short TV heights',()=>{
+ assert.match(css,/@media\(max-width:650px\)\{\s*body:not\(\.home-panel\)>main \.homepage-launcher\{display:flex/);
+ assert.doesNotMatch(css,/\.homepage-launcher\{display:none\}/);
+ assert.match(css,/homepage-launcher-tile:focus-visible/);
+ assert.match(css,/@media\(hover:none\)/);
+ assert.match(html,/data-home-view="markets"/);
+ assert.match(html,/data-home-view="media" data-home-section="channels"/);
+});
