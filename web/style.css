@@ -714,3 +714,42 @@ body>main>[data-workspace="myview"] #myview-grid{overscroll-behavior:contain}
 .myview-video-panel p{margin:0;font-size:12px}
 @media(pointer:fine){.myview-widget[draggable="true"]{cursor:grab}.myview-widget[draggable="true"]:active{cursor:grabbing}}
 @media(pointer:coarse){.myview-widget[draggable="true"]{cursor:default}}
+
+
+/* Cinema TV theme: NewView original interface, no external theme assets or code. */
+:root{--bg:#08090e;--panel:#151922;--line:#323744;--muted:#a7b0c2;--text:#f7f8fc;--cyan:#e4a66c;--green:#79dfb4;--red:#ff8f9c}
+body{background:radial-gradient(ellipse at 75% -10%,rgba(90,66,123,.27),transparent 55%),#08090e;color:var(--text)}
+body>main{max-width:2200px;margin-inline:auto;padding:clamp(12px,2.3vw,38px);gap:clamp(10px,1.4vh,22px)}
+body>main>header{min-height:56px}
+body>main>header h1{font-weight:750;letter-spacing:-.06em}
+.brand-dot{background:var(--cyan);box-shadow:0 0 15px rgba(228,166,108,.45)}
+.workspace-switcher{gap:clamp(8px,.9vw,18px);scrollbar-width:thin;scrollbar-color:#646474 transparent}
+.workspace-switcher .workspace-tab{background:#1b202b;border:1px solid #384151;border-radius:16px;color:#e2e5ed;min-height:52px;padding:clamp(12px,1.2vw,20px) clamp(16px,1.5vw,28px);font-weight:650}
+.workspace-switcher .workspace-tab.active,.workspace-switcher .workspace-tab[aria-pressed="true"]{background:linear-gradient(125deg,#413029,#25212c);border-color:#e4a66c;color:#ffe4c7}
+.workspace{background:linear-gradient(145deg,#1b202b,#10131b);border:1px solid #353c4a;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.myview-widget{min-width:0;border-radius:20px;background:#1b202b;border-color:#374050}
+.myview-widget h2,.myview-widget h3{overflow-wrap:anywhere}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:4px solid #ffd6a3!important;outline-offset:4px!important;box-shadow:0 0 0 8px rgba(228,166,108,.2)!important}
+@media(min-width:1200px) and (min-height:650px){
+ body>main{display:grid;grid-template-columns:minmax(184px,230px) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;align-items:stretch}
+ body>main>header{grid-column:1/-1}
+ body>main>.workspace-switcher{grid-column:1;grid-row:2;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;align-items:stretch;align-self:stretch;padding:12px;background:#11151e;border:1px solid #303745;border-radius:22px}
+ body>main>.workspace-switcher .workspace-tab{text-align:left;white-space:normal}
+ body>main>.workspace,body>main>[data-workspace]{grid-column:2;grid-row:2;min-height:0;min-width:0}
+ body>main>footer{grid-column:1/-1}
+}
+@media(max-width:1199px){
+ body>main{display:flex;flex-direction:column;min-height:100dvh;height:auto}
+ body>main>.workspace-switcher{display:flex;flex-direction:row;overflow-x:auto;flex-shrink:0}
+ body>main>.workspace,body>main>[data-workspace]{min-height:58vh;min-width:0}
+}
+@media(max-width:700px){
+ body>main{padding:10px;gap:10px}
+ body>main>header{flex-wrap:wrap;gap:8px}
+ body>main>header h1{font-size:28px}
+ .workspace-switcher .workspace-tab{min-height:48px;padding:11px 15px;border-radius:13px}
+ body>main>.workspace,body>main>[data-workspace]{padding:12px;border-radius:16px;min-height:65vh}
+ .myview-widget{width:100%;max-width:100%;min-width:0}
+}
+@media(hover:none){.workspace-switcher .workspace-tab{min-height:56px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
