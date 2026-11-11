@@ -536,3 +536,15 @@ summary:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
     opacity:1;color:GrayText;border-color:GrayText;
   }
 }
+
+/* Task 1: visible focus for native disclosure and ARIA tab controls. */
+:where(.shell-page,.shell-card) :is(summary,[role="tab"],[role="menuitem"],[role="option"]):focus-visible{
+  outline:3px solid var(--cyan,#56e0d0);
+  outline-offset:3px;
+  scroll-margin:12px;
+}
+@media (forced-colors:active){
+  :where(.shell-page,.shell-card) :is(summary,[role="tab"],[role="menuitem"],[role="option"]):focus-visible{
+    outline-color:Highlight;
+  }
+}
