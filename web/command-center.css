@@ -375,3 +375,47 @@ body:not(.home-panel)>main #newview-news-browser :focus-visible,
 body:not(.home-panel)>main .news-items .news-link:focus-visible{outline:3px solid #a1ffe9;outline-offset:3px}
 body:not(.home-panel)>main .news-items .news-link{display:block;min-height:42px;padding:8px 4px}
 @media(max-width:650px){body:not(.home-panel)>main .news-browser-sites{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* MyView pane density: one, two or three independently focusable columns. */
+body:not(.home-panel)>main #newview-screen-layout{display:flex;flex-direction:column;gap:12px}
+body:not(.home-panel)>main .newview-screen-layout-actions{display:flex;flex-wrap:wrap;gap:8px}
+body:not(.home-panel)>main .newview-screen-layout-actions button{min-height:48px;min-width:84px;padding:9px 13px;border-radius:11px;border:1px solid #4b7581;background:#1a3144;color:#f4ffff;font-weight:750;cursor:pointer}
+body:not(.home-panel)>main .newview-screen-layout-actions button[aria-pressed="true"]{background:#256058;border-color:#a4ffe6}
+body:not(.home-panel)>main .newview-screen-layout-actions button:focus-visible{outline:3px solid #95f5db;outline-offset:3px}
+body:not(.home-panel)>main .newview-screen-panes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body:not(.home-panel)>main .newview-screen-panes[hidden]{display:none}
+body:not(.home-panel)>main [data-screen-count="3"] .newview-screen-panes{grid-template-columns:repeat(3,minmax(0,1fr))}
+body:not(.home-panel)>main .newview-screen-pane{display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #385e71;border-radius:12px;background:#101f30}
+body:not(.home-panel)>main .newview-screen-pane :is(h3,p){margin:0}
+body:not(.home-panel)>main .newview-screen-pane button{align-self:flex-start;min-height:44px;border:1px solid #5a8c91;border-radius:10px;background:#254457;color:#efffff;padding:9px}
+body:not(.home-panel)>main [data-screen-count="1"] .myview-grid{grid-template-columns:minmax(0,1fr)}
+body:not(.home-panel)>main [data-screen-count="2"] .myview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+body:not(.home-panel)>main [data-screen-count="3"] .myview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+body:not(.home-panel)>main [data-screen-count="2"] .myview-widget[data-widget="market"],
+body:not(.home-panel)>main [data-screen-count="3"] .myview-widget[data-widget="market"]{grid-column:auto;grid-row:auto}
+body:not(.home-panel) .newview-cast-media-controls{display:flex;gap:7px;padding:8px;justify-content:center;background:#15283a}
+body:not(.home-panel) .newview-cast-media-controls button{flex:1;min-height:44px;background:#26445a;color:#fff;border:1px solid #537f89;border-radius:8px;font-weight:700;cursor:pointer}
+body:not(.home-panel) #newview-cast-youtube:not([hidden]){width:100%;aspect-ratio:16/9;border:0;background:#020710}
+body:not(.home-panel) .newview-cast-dock:not([hidden]) #newview-cast-video[hidden]{display:none}
+body:not(.home-panel)[data-newview-video-size="third"] .newview-cast-dock:not([hidden]){width:clamp(280px,33vw,660px);height:auto}
+body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock:not([hidden]){
+ width:min(50vw,1000px);height:calc(100dvh - 32px);max-height:none
+}
+body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock:not([hidden]){
+ inset:0!important;left:0!important;top:0!important;right:0!important;bottom:0!important;
+ width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;border-radius:0;resize:none
+}
+body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock #newview-cast-video:not([hidden]),
+body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock #newview-cast-video:not([hidden]),
+body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock #newview-cast-youtube:not([hidden]),
+body:not(.home-panel)[data-newview-video-size="full"] .newview-cast-dock #newview-cast-youtube:not([hidden]){flex:1;min-height:0;aspect-ratio:auto;object-fit:contain}
+body:not(.home-panel) .newview-cast-dock.is-minimized #newview-cast-youtube,
+body:not(.home-panel) .newview-cast-dock.is-minimized .newview-cast-media-controls{display:none}
+@media(max-width:850px){
+ body:not(.home-panel)>main [data-screen-count="2"] .myview-grid,
+ body:not(.home-panel)>main [data-screen-count="3"] .myview-grid,
+ body:not(.home-panel)>main .newview-screen-panes,
+ body:not(.home-panel)>main [data-screen-count="3"] .newview-screen-panes{grid-template-columns:1fr}
+ body:not(.home-panel)[data-newview-video-size="half"] .newview-cast-dock:not([hidden]){width:calc(100vw - 24px);height:50dvh}
+ body:not(.home-panel)[data-newview-video-size="third"] .newview-cast-dock:not([hidden]){width:calc(100vw - 24px)}
+}
