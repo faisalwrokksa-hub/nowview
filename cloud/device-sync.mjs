@@ -1,3 +1,4 @@
+import {checkNewViewAccess} from './access-auth.mjs';
 /* Cloudflare KV encrypted device-layout relay.
    This is a capability-link prototype, not a sign-in provider.
    Configure NEWVIEW_SYNC KV binding before enabling on a public deployment.
