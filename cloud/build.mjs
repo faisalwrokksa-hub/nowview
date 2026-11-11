@@ -6,7 +6,7 @@ for(const name of fs.readdirSync(path.join(root,'web')).filter(name=>/\.(?:html|
 const requiredAssets=['index.html','style.css','app.js','live.js','indicators.js',
  'stock-board.js','source-monitor.js','screen-layout.js','workspace-shell.js','news.js','news-browser.js','channel-filters.js','public-sources.js',
  'media.js','watch.js','offline-agents.js','offline-controls.js','business.js',
- 'social.js','powerbi.js','external-links.js','myview.js','connectivity.js','device-sync.js','cast-overlay.js','tv-home.js','market-data.mjs'];
+ 'social.js','powerbi.js','external-links.js','myview.js','connectivity.js','device-sync.js','cast-overlay.js','dashboard-tools.js','tv-home.js','market-data.mjs'];
 for(const name of requiredAssets)if(!Object.hasOwn(assets,'/'+name))throw new Error('Missing required frontend asset: '+name);
 const source=fs.readFileSync(path.join(root,'web','market-data.mjs'),'utf8');
 const deviceSync=fs.readFileSync(path.join(root,'cloud','device-sync.mjs'),'utf8').replace(/^import .*?;$/gm,'').replace(/^export /gm,'');
