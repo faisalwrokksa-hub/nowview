@@ -50,6 +50,7 @@
   const link=document.getElementById('news-original');if(link)link.href=external[choose.value]||external.fed;
  }
  async function refreshNews(){
+  const sourceId=choose.value;
   if(controller)controller.abort();
   for(const [id,p] of nativePending){clearTimeout(p.timer);p.reject(new DOMException('Superseded','AbortError'));nativePending.delete(id);}
   controller=new AbortController();
@@ -59,32 +60,32 @@
   try{
    let feed;
    if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicNews==='function'){
-    if(choose.value==='stocktwits'){status.textContent='This publisher does not have a verified native RSS feed. Open the source below.';return;}
+    if(sourceId==='stocktwits'){status.textContent='This publisher does not have a verified native RSS feed. Open the source below.';return;}
     feed=await new Promise((resolve,reject)=>{
      const id=++nativeRequestId;
      const timer=setTimeout(()=>{nativePending.delete(id);reject(Error('News timeout'));},20000);
      nativePending.set(id,{resolve,reject,timer});
-     window.NewViewNative.fetchPublicNews(choose.value,id);
+     window.NewViewNative.fetchPublicNews(sourceId,id);
     });
    }else{
-    const response=await fetch('/api/news?source='+encodeURIComponent(choose.value),{signal:current.signal});
+    const response=await fetch('/api/news?source='+encodeURIComponent(sourceId),{signal:current.signal});
     if(!response.ok)throw new Error('News service unavailable');
     feed=await response.json();
    }
    if(current!==controller)return;
-   if(!Array.isArray(feed.items)||!feed.items.length){window.NewViewSourceMonitor?.mark?.('news',choose.value,'failed','No headlines returned');status.textContent='No headlines returned by this source. Check the original publisher.';return;}
+   if(!Array.isArray(feed.items)||!feed.items.length){window.NewViewSourceMonitor?.mark?.('news',sourceId,'failed','No headlines returned');status.textContent='No headlines returned by this source. Check the original publisher.';return;}
    lastItems=feed.items.filter(item=>{try{const url=new URL(item.url);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&articleHosts.has(url.hostname)&&typeof item.title==='string'&&item.title.trim();}catch{return false;}}).slice(0,100);
-   if(!lastItems.length){window.NewViewSourceMonitor?.mark?.('news',choose.value,'failed','No valid source-linked articles');status.textContent='No valid announcements returned by this source';return;}
-   window.NewViewSourceMonitor?.mark?.('news',choose.value,'ok',lastItems.length+' valid headlines');
+   if(!lastItems.length){window.NewViewSourceMonitor?.mark?.('news',sourceId,'failed','No valid source-linked articles');status.textContent='No valid announcements returned by this source';return;}
+   window.NewViewSourceMonitor?.mark?.('news',sourceId,'ok',lastItems.length+' valid headlines');
    renderItems();
-   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:choose.value,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
+   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:sourceId,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
    const fetched=new Date(typeof feed.fetchedAt==='number'?feed.fetchedAt:feed.fetchedAt);
    const age=Date.now()-fetched.getTime();
    const freshness=Number.isFinite(age)&&age>=0&&age<=3600000?'Recently fetched':'Fetch time unavailable or older than one hour';
    lastFetchLabel=freshness+' · fetched '+(Number.isFinite(fetched.getTime())?fetched.toLocaleString():'unknown');renderItems();
   }catch(err){
    if(current!==controller||err.name==='AbortError')return;
-   window.NewViewSourceMonitor?.mark?.('news',choose.value,'failed',String(err?.message||'Feed unavailable'));
+   window.NewViewSourceMonitor?.mark?.('news',sourceId,'failed',String(err?.message||'Feed unavailable'));
    status.textContent='Headlines unavailable. Open the official source below.';
   }
  }
