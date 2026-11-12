@@ -99,9 +99,13 @@
  // Only a drag started from one of our own cards can reorder the dashboard.
  let activeDraggedWidget=null;
  const quoteHistory=new Map();
+ const lastQuoteTime=new Map();
  const maxQuotePoints=36;
  function chartFor(symbol){
-  const points=quoteHistory.get(symbol)||[];
+  // Partition session observations by quote currency as well as symbol.
+  const currency=snapshots.market?.currency;
+  const key=symbol==='Market'?'':symbol+'|'+currency;
+  const points=quoteHistory.get(key)||[];
   const container=document.createElement('div');container.className='myview-live-chart';
   const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two valid observed quotes';
   container.append(title);
@@ -110,7 +114,8 @@
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 320 90');svg.setAttribute('role','img');svg.setAttribute('aria-label',symbol+' observed session quote trend');
   const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','#24b9a2');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');line.setAttribute('points',points.map((v,i)=>(i*320/(points.length-1)).toFixed(1)+','+(82-(v-min)/range*74).toFixed(1)).join(' '));svg.append(line);container.append(svg);return container;
  }
- function refreshChart(){const card=root.querySelector('[data-widget="market"]');if(!card)return;card.querySelector('.myview-live-chart')?.replaceWith(chartFor(snapshots.market?.symbol||'Market'));}
+ function chartSymbol(){const q=snapshots.market;return q&&q.source==='binance'&&typeof q.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(q.symbol.trim())&&typeof q.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(q.currency)&&Number.isFinite(q.price)&&q.price>=0&&Number.isSafeInteger(q.quoteTime)&&q.quoteTime>0&&q.quoteTime*1000<=Date.now()+300000&&q.quoteTime*1000>=Date.now()-86400000?q.symbol.trim():'Market';}
+ function refreshChart(){const card=root.querySelector('[data-widget="market"]');if(!card)return;card.querySelector('.myview-live-chart')?.replaceWith(chartFor(chartSymbol()));}
 
  const snapshots={market:null,business:null,news:null,social:null};
  const preview={
@@ -140,8 +145,22 @@
   link.hidden=!verified;
   if(!verified){link.removeAttribute('href');link.textContent='Source unavailable';return;}
   const fed=snapshot.source==='fed';
-  link.href=fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom';
-  link.textContent=fed?'Federal Reserve announcements (publisher index)':'SEC newsroom (publisher index)';
+  // Link to the actual announcement only when its HTTPS host is the verified publisher.
+  // Never promote arbitrary event-provided URLs into clickable links.
+  let direct=null;
+  if(typeof snapshot.url==='string'){
+   try{
+    const url=new URL(snapshot.url);
+    if(url.protocol==='https:'&&url.username===''&&url.password===''&&url.port===''&&
+      (fed?url.hostname==='www.federalreserve.gov':url.hostname==='www.sec.gov')&&
+      (fed?url.pathname.startsWith('/newsevents/pressreleases/'):url.pathname.startsWith('/newsroom/'))){
+     direct=url.href;
+    }
+   }catch{}
+  }
+  link.href=direct||(fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom');
+  link.textContent=direct?'Read original announcement':fed?'Federal Reserve announcements (publisher index)':'SEC newsroom (publisher index)';
+  link.setAttribute('aria-label',direct?'Read original '+(fed?'Federal Reserve':'SEC')+' announcement':'Open '+(fed?'Federal Reserve announcements':'SEC newsroom')+' publisher index; not a direct headline link');
  }
  function render(){
   root.replaceChildren();editor.replaceChildren();
@@ -167,7 +186,7 @@
    const heading=text('h3','',widget.title);
    const eyebrow=text('div','shell-eyebrow',widget.label);
    const description=text('p','',widget.description);
-   const insight=text('p','myview-insight',id==='business'?'Launch Power BI reports securely in Microsoft Power BI.':preview[id](snapshots[id]));
+   const insight=text('p','myview-insight',preview[id](snapshots[id]));
    insight.setAttribute('aria-label',widget.title+' source snapshot');
    insight.dataset.snapshot=id;
    insight.setAttribute('aria-live','off');
@@ -203,7 +222,7 @@
     actions.append(source);
    }
 item.append(eyebrow,heading,description,insight);
-   if(id==='market')item.append(chartFor(snapshots.market?.symbol||'Market'));
+   if(id==='market')item.append(chartFor(chartSymbol()));
    if(id==='media'){
     const player=document.createElement('div');player.className='myview-video-panel';
     const label=text('p','','Floating video supports official YouTube embeds on web. Native IPTV requires Android TV support.');
@@ -231,11 +250,11 @@ item.append(eyebrow,heading,description,insight);
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
-  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
-   const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
-   if(!points.length||points[points.length-1]!==next.price){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);}
-   refreshChart();
+  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol.trim())&&typeof next.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(next.currency)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
+   const key=next.symbol.trim().slice(0,24)+'|'+next.currency;const points=quoteHistory.get(key)||[];
+   if(next.quoteTime>(lastQuoteTime.get(key)||0)){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);lastQuoteTime.set(key,next.quoteTime);}
   }
+  if(id==='market')refreshChart(); // Invalid or missing snapshots must not leave an unrelated chart visible.
   // Update only the live insight text: rebuilding the grid would steal TV remote/keyboard focus.
   const insight=root.querySelector('[data-widget="'+id+'"] .myview-insight');
   if(insight)insight.textContent=preview[id](next);
@@ -251,6 +270,8 @@ item.append(eyebrow,heading,description,insight);
   const updated=preview.market(quote);
   if(live&&live.textContent!==updated)live.textContent=updated;
   updateMarketSourceLink();
+  // Expired quotes must also lose their chart context, without rebuilding cards or moving TV focus.
+  refreshChart();
  }
  const freshnessTimer=setInterval(refreshMarketAge,60000);
  freshnessTimer.unref?.();
