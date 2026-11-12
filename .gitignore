@@ -29,3 +29,10 @@ Thumbs.db
 *release*.local.json
 signed/
 release-out/
+
+# Owner-only commercial operations, support drafts and pending notice review
+*ops.private.json
+*operations.private.json
+*commercial.private.json
+*support-request*.private.json
+*notices.preview.json
