@@ -137,6 +137,20 @@
   link.href='https://www.binance.com/en/markets';
   link.textContent='Binance markets (general reference, not quote verification)';
  }
+ function officialAnnouncementUrl(source,raw){
+  if((source!=='fed'&&source!=='sec')||typeof raw!=='string')return null;
+  const fed=source==='fed';
+  try{
+   const url=new URL(raw);
+   if(url.protocol!=='https:'||url.username||url.password||url.port)return null;
+   if(url.hostname!==(fed?'www.federalreserve.gov':'www.sec.gov'))return null;
+   const article=fed
+    ? /^\/newsevents\/pressreleases\/[a-z]{3,30}20\d{6}[a-z]\.htm$/i.test(url.pathname)
+    : /^\/newsroom\/(?:press-releases|press-release|speeches-statements|public-statement)\/[a-z0-9][a-z0-9_-]{4,180}$/i.test(url.pathname);
+   // Omit tracking query/fragment from publisher-provided links.
+   return article?url.origin+url.pathname:null;
+  }catch{return null;}
+ }
  function updateNewsSourceLink(){
   const link=root.querySelector('[data-widget="news"] [data-source-link="news"]');
   if(!link)return;
@@ -145,20 +159,7 @@
   link.hidden=!verified;
   if(!verified){link.removeAttribute('href');link.textContent='Source unavailable';return;}
   const fed=snapshot.source==='fed';
-  // Link to the actual announcement only when its HTTPS host is the verified publisher.
-  // Never promote arbitrary event-provided URLs into clickable links.
-  // A publisher newsroom/index page is not itself an announcement; only article-shaped paths qualify.
-  let direct=null;
-  if(typeof snapshot.url==='string'){
-   try{
-    const url=new URL(snapshot.url);
-    if(url.protocol==='https:'&&url.username===''&&url.password===''&&url.port===''&&
-      (fed?url.hostname==='www.federalreserve.gov':url.hostname==='www.sec.gov')&&
-      (fed?/^\/newsevents\/pressreleases\/[a-z]{3,30}20\d{6}[a-z]\.htm$/i.test(url.pathname):/^\/newsroom\/(?:press-releases|press-release|speeches-statements|public-statement)\/[a-z0-9][a-z0-9_-]{4,180}$/i.test(url.pathname))){
-     direct=url.href;
-    }
-   }catch{}
-  }
+  const direct=officialAnnouncementUrl(snapshot.source,snapshot.url);
   link.href=direct||(fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom');
   link.textContent=direct?'Read original announcement':fed?'Federal Reserve announcements (publisher index)':'SEC newsroom (publisher index)';
   link.setAttribute('aria-label',direct?'Read original '+(fed?'Federal Reserve':'SEC')+' announcement':'Open '+(fed?'Federal Reserve announcements':'SEC newsroom')+' publisher index; not a direct headline link');
@@ -281,6 +282,6 @@ item.append(eyebrow,heading,description,insight);
  // Refresh source eligibility on page restoration and window focus as well.
  window.addEventListener('pageshow',refreshMarketAge);
  window.addEventListener('focus',refreshMarketAge);
- window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview};
+ window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,render,preview,officialAnnouncementUrl};
  installPresets();render();
 })();
