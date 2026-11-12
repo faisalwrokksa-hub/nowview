@@ -68,3 +68,10 @@ test('CSV validation failure clears file input for retry and keeps bounded async
  assert.match(src,/status\.textContent='Reading and validating CSV locally…'/);
  assert.match(src,/if\(version!==selectionVersion\)return/);
 });
+
+
+test('reset clears pending CSV busy indicators after an in-flight read',()=>{
+ assert.match(src,/function reset\(\)\{[^\n]*picker\.removeAttribute\('aria-busy'\);cards\.removeAttribute\('aria-busy'\)/);
+ assert.match(src,/selectionVersion\+\+/);
+ assert.match(src,/finally\{if\(version===selectionVersion\)\{/);
+});
