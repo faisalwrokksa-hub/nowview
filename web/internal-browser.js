@@ -106,20 +106,14 @@
    excerpt.hidden=!(title||summary);
    // A YouTube homepage cannot be framed; full website navigation will use an
    // external tab, while a video URL may use YouTube's official embed.
+   fallbackText.textContent='If this preview is blank or restricted, open the publisher’s full website. Some websites do not allow iframe previews.';
+   openFull.textContent='Open full website';
    if(youtube.test(new URL(url).hostname)&&!video){
     frame.hidden=true;frame.removeAttribute('src');
-    fallbackText.textContent='YouTube blocks its full website inside embedded frames. Select Open YouTube to use the full site in a new tab; individual videos can play inside NewView.';
+    fallbackText.textContent='YouTube does not allow its full website inside an iframe. Open the full site in a separate tab; individual videos can play in NewView.';
     openFull.textContent='Open YouTube in new tab';
-    external.textContent='Open YouTube';
-    status.textContent='Full YouTube requires a separate browser tab. Video links can use the official embedded player.';
-    // An unusable blank iframe must not be the destination for TV remote focus.
+    status.textContent='Full YouTube cannot play in this embedded browser. Choose Open YouTube in new tab.';
     openFull.focus?.({preventScroll:true});
-   }else{
-    fallbackText.textContent='If this preview is blank or restricted, open the publisher’s full website. Some websites do not allow iframe previews.';
-    openFull.textContent='Open full website';
-   }
-   if(youtube.test(new URL(url).hostname)&&!video){
-    // The browser is intentionally not framing the YouTube homepage.
    }else if(!video&&prefersFullBrowser(url)){
     frame.hidden=true;frame.removeAttribute('src');
     retryPreview.hidden=false;
