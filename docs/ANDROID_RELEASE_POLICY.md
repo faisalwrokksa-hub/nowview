@@ -32,7 +32,14 @@ bash sign-release.sh
 
 The helper fails closed if required inputs are missing or a release artifact already exists. It reads passwords from the local environment via apksigner's `env:` provider and verifies the signature. Do not put release secrets in GitHub PR workflow variables.
 
-**Windows:** this batch preserves the test APK build on PowerShell; release signing from Windows is not yet separately scripted/validated. Use the documented Android tooling on a trusted machine or implement a securely reviewed Windows equivalent later.
+**Windows (owner-invoked helper):** `sign-release.ps1` now implements the same non-overwriting, local-only release signing policy using Android SDK build-tools 34.0.0 `apksigner.bat`. From PowerShell in the repository checkout, after configuring the **same four protected environment variables on the trusted owner machine** (never in source, scripts or chat):
+
+```powershell
+.\build-apk.ps1
+.\sign-release.ps1
+```
+
+It requires `NEWVIEW_RELEASE_KEYSTORE` to be outside the repository, rejects existing `build\newview-release.apk`, reads both passwords through `env:` providers without inserting their values into CLI arguments, verifies the signature and prints a SHA-256 digest. **The helper has not been used to sign an owner build or tested on the owner's Windows installation; that remains an explicit acceptance gate.** The output must be checked against the previous owner-held signing certificate and installed on the actual devices before distribution.
 
 ## Upgrade gate
 - Bump `android:versionCode` strictly upward for each delivered customer APK and update `versionName` appropriately.
