@@ -34,3 +34,26 @@ Old overlapping **drafts** have been reconciled into #167 only at the feature-le
 5. Only after GO: use a single controlled Cloudflare native deployment, confirm the exact public `/version`, `/healthz` and asset smoke, and retain the prior Cloudflare version for rollback.
 
 A passing PR check, an APK test bundle, a Cloudflare preview URL, or closing duplicate PRs **does not authorize commercial release**.
+
+## One-command owner setup for main protection (Windows)
+
+The GitHub connector available for this review has **no repository Administration or Actions-write capability**. It can audit rulesets but cannot enforce protection or turn off workflows currently active on main.
+
+Run the bundled, fail-closed PowerShell helper **from a trusted checkout of this integration branch** on an owner-admin Windows workstation:
+
+```powershell
+gh auth status
+.\tools\secure-main.ps1          # Read-only plan: prints proposed rules
+.\tools\secure-main.ps1 -Apply   # Owner action: disables both legacy auto-mergers and creates main ruleset
+```
+
+GitHub CLI `gh` must already be authenticated with repository **Actions write** and **Administration write** permissions. Never paste a token here or commit it. The helper checks the repository and current main, refuses to overwrite an existing named ruleset, disables both old workflows and verifies their `disabled_manually` state, creates an active ruleset for `main`, and checks that the new rule appears. Default invocation makes **no changes**.
+
+The ruleset requires a pull request, one *independent* approval (which requires a second authorized reviewer), resolved conversations, the always-running `verify` status context, and blocks force pushes and deletions. If this is a one-maintainer repository without an independent reviewer, **do not apply blindly**: the review rule would block merges. Add a collaborator with write access or use an explicitly reviewed owner-only alternative. Conditional checks such as `import-safety` and `dry-run` are **not** universally required because they can be skipped for documentation-only PRs.
+
+The helper deliberately does **not** merge PR #167, modify the Worker, disable production Builds, access secrets, authorize commercial release or mark device/legal checks PASS.
+
+Official references:
+- https://docs.github.com/en/rest/actions/workflows#disable-a-workflow
+- https://docs.github.com/en/rest/repos/rules#create-a-repository-ruleset
+
