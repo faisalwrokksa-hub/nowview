@@ -87,6 +87,16 @@ jobs:
           "$SIGNER" verify --verbose "signed/NewView-TV-${RELEASE_LABEL}.apk"
           "$SIGNER" verify --verbose "signed/NewView-Phone-Caster-${RELEASE_LABEL}.apk"
           sha256sum signed/*.apk > signed/SHA256SUMS.txt
+      - name: Record measured signed APK identity (unapproved worksheet)
+        env:
+          RELEASE_LABEL: ${{ inputs.release_label }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 tools/build-release-candidate-manifest.py \
+            --tv "signed/NewView-TV-${RELEASE_LABEL}.apk" \
+            --phone "signed/NewView-Phone-Caster-${RELEASE_LABEL}.apk" \
+            --output signed/CANDIDATE-UNAPPROVED.json
       - name: Generate signed artifact provenance (does not approve distribution)
         uses: actions/attest@v4
         with:
