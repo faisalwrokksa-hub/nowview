@@ -131,6 +131,7 @@
   }
   list.replaceChildren(...displayed.map(c=>{const option=document.createElement('option');option.value=c.url;option.textContent=c.name||c.id||'Unnamed channel';return option;}));
   if(selectedBefore&&displayed.some(c=>c.url===selectedBefore))list.value=selectedBefore;
+  if(selectedBefore&&list.value!==selectedBefore)stopInline();
   const hasSelection=Boolean(list.value)&&displayed.some(c=>c.url===list.value);
   open.hidden=!hasSelection;
   playChannel.disabled=!hasSelection;
