@@ -895,3 +895,5 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 .nv-watch-bookmark-form button,.nv-watch-bookmarks select{min-height:44px}
 .nv-watch-bookmarks button:focus-visible,.nv-watch-bookmarks input:focus-visible,.nv-watch-bookmarks select:focus-visible{outline:3px solid #6ee7db;outline-offset:2px}
 @media(max-width:600px){.nv-watch-bookmarks{padding:12px}.nv-watch-bookmark-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.nv-watch-dns{margin-block:16px;padding:16px}.nv-watch-dns summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}.nv-watch-dns li{margin-block:8px}.nv-watch-dns a{display:inline-block;margin-top:8px;overflow-wrap:anywhere}.nv-watch-dns summary:focus-visible,.nv-watch-dns a:focus-visible{outline:3px solid #6ee7db;outline-offset:2px}
