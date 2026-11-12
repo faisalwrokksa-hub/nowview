@@ -16,3 +16,9 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+
+# Local acceptance evidence may contain device identifiers and private test notes
+*qa-evidence*.local.json
+*qa-evidence*.local.md
+*readiness*.local.json
+*readiness*.local.md
