@@ -994,3 +994,18 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
  .newview-settings-content details>summary:focus-visible,
  :is(.workspace,.shell-page,.newview-settings-content) :is([role="alert"],[role="status"]) :is(button,a):focus-visible{outline-color:Highlight}
 }
+
+/* Task 1: focus indicators remain visible when users tab through widget actions. */
+@supports selector(:focus-visible){
+  :is(.myview-widget,.workspace,.shell-page) :is(button,a,[role="button"],[role="link"]):focus-visible{
+    outline:3px solid #ffd6a3;
+    outline-offset:2px;
+    scroll-margin:24px;
+  }
+}
+@media (forced-colors:active){
+  :is(.myview-widget,.workspace,.shell-page) :is(button,a,[role="button"],[role="link"]):focus-visible{
+    outline-color:Highlight;
+    box-shadow:none;
+  }
+}
