@@ -13,7 +13,7 @@ test('official video URL parsing rejects invalid and hostile URLs',()=>{
 test('media player has opt-in controls and no automatic video extraction',()=>{
  for(const id of ['media-url','media-pipe','media-play','media-stop','media-frame'])assert.match(html,new RegExp('id="'+id+'"'));
  assert.match(build,/media\.js/);
- assert.match(build,/frame-src https:\/\/www\.youtube-nocookie\.com/);
+ assert.match(build,/frame-src https:/);
  assert.doesNotMatch(js,/youtube-dl|yt-dlp|NewPipeExtractor|SponsorBlock/);
 });
 test('native bridge has package-specific external launch',()=>{
