@@ -132,7 +132,7 @@ test('frontend preserves encryption and explicitly creates rooms; an old link ne
  assert.match(js,/request\('POST',sealed\)/);
  assert.match(js,/if\(!createdRoom\)/);
  assert.match(js,/request\('PUT',sealed,previousVersion\)/);
- assert.match(js,/previousVersion=conflict.cloudVersion;previousLocal=JSON.stringify\(conflict.incoming\)/);
+ assert.match(js,/previousVersion=conflict.cloudVersion;previousViewing=conflict.incoming.viewing\|\|null;previousLocal=JSON.stringify\(visible\(conflict.incoming\)\)/);
 
  assert.match(js,/Revoke pairing for all devices/);
  assert.match(js,/history\.replaceState\(null,'',location\.pathname\+location\.search\)/);

@@ -5,15 +5,49 @@
  const PREFIX='newview-sync-', INTERVAL=15000, encoder=new TextEncoder(),decoder=new TextDecoder();
  const allowed=new Set(['myview','markets','media','devices']);
  const mapWorkspace=v=>v==='business'?'myview':v==='news'||v==='social'?'media':v;
- let room=null, key=null, timer=null, busy=false, previousLocal=null, previousVersion=null, createdRoom=false, session=0, conflict=null;
+ let room=null, key=null, timer=null, busy=false, previousLocal=null, previousVersion=null, previousViewing=null, createdRoom=false, session=0, conflict=null;
+ const VIEW_KEY='newview.sync.include-viewing.v1';
+ const shareViewing=()=>{try{return localStorage.getItem(VIEW_KEY)==='yes';}catch{return false;}};
  const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
  function unb64(s){if(!/^[A-Za-z0-9_-]+$/.test(s))throw Error('Invalid pairing key');const str=atob(s.replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(str,c=>c.charCodeAt(0));}
+ function safeStream(url){
+  try{const u=new URL(url);return url.length<=300&&u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&/\.(m3u8|mp4)$/i.test(u.pathname);}
+  catch{return false;}
+ }
+ function viewingSnapshot(){
+  let saved=[],preferences={};
+  try{const raw=JSON.parse(localStorage.getItem('newview.media.channel-favorites.v1')||'[]');
+   if(Array.isArray(raw))saved=raw.filter(safeStream).slice(0,8);
+  }catch{}
+  try{preferences=JSON.parse(localStorage.getItem('newview.recommendation.preferences.v1')||'{}');}catch{}
+  const language=['any','english','arabic','spanish','french'].includes(preferences.language)?preferences.language:'any';
+  const interest=['all','news','business','sports','music'].includes(preferences.interest)?preferences.interest:'all';
+  const history=(window.NewViewViewing?.read?.()||[]).filter(x=>safeStream(x.url)).slice(0,6);
+  return {favorites:saved,history,language,interest};
+ }
  function snapshot(){
-  return {widgets:window.NewViewPersonal?.load?.()||[],workspace:allowed.has(mapWorkspace(document.body.dataset.currentWorkspace))?mapWorkspace(document.body.dataset.currentWorkspace):'myview'};
+  const data={widgets:window.NewViewPersonal?.load?.()||[],workspace:allowed.has(mapWorkspace(document.body.dataset.currentWorkspace))?mapWorkspace(document.body.dataset.currentWorkspace):'myview'};
+  if(shareViewing())data.viewing=viewingSnapshot();
+  return data;
  }
  function validate(data){
   if(!data||!Array.isArray(data.widgets)||data.widgets.length>5||!data.widgets.every(w=>typeof w==='string'&&['market','news','media','business','social'].includes(w))||typeof data.workspace!=='string'||!allowed.has(mapWorkspace(data.workspace)))throw Error('Invalid paired dashboard data');
-  return {widgets:window.NewViewPersonal?.sanitize?.(data.widgets)||[],workspace:mapWorkspace(data.workspace)};
+  const clean={widgets:window.NewViewPersonal?.sanitize?.(data.widgets)||[],workspace:mapWorkspace(data.workspace)};
+  if(data.viewing!==undefined){
+   const v=data.viewing;
+   if(!v||!Array.isArray(v.favorites)||v.favorites.length>8||!v.favorites.every(safeStream)||!Array.isArray(v.history)||v.history.length>6||!v.history.every(x=>x&&safeStream(x.url)&&Number.isFinite(x.at)&&Date.now()-x.at<30*86400000&&x.at<=Date.now()+60000&&typeof x.name==='string'&&x.name.length<=90)||!['any','english','arabic','spanish','french'].includes(v.language)||!['all','news','business','sports','music'].includes(v.interest))throw Error('Invalid encrypted viewing preferences');
+   clean.viewing={favorites:[...new Set(v.favorites)],history:v.history.map(x=>({url:x.url,name:x.name,at:x.at})),language:v.language,interest:v.interest};
+  }
+  return clean;
+ }
+ function visible(data){
+  const clean={widgets:data.widgets,workspace:data.workspace};
+  if(shareViewing()&&data.viewing)clean.viewing=data.viewing;
+  return clean;
+ }
+ function preserved(data){
+  if(!shareViewing()&&previousViewing&&!data.viewing)return {...data,viewing:previousViewing};
+  return data;
  }
  async function encrypt(data){
   const iv=crypto.getRandomValues(new Uint8Array(12));
@@ -80,7 +114,17 @@
   const leave=document.createElement('button');leave.type='button';leave.textContent='Disconnect this device';leave.hidden=true;
   const revoke=document.createElement('button');revoke.type='button';revoke.textContent='Revoke pairing for all devices';revoke.hidden=true;
   const status=document.createElement('p');status.id=PREFIX+'status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.textContent='Not connected. Pairing is not account sign-in.';
-  actions.append(create,pairing,join,copy,push,useCloud,useLocal,leave,revoke);section.append(title,description,actions,status);settings.append(section);
+  const shareLabel=document.createElement('label');shareLabel.className='newview-sync-viewing-consent';
+  const shareBox=document.createElement('input');shareBox.type='checkbox';shareBox.checked=shareViewing();
+  shareBox.setAttribute('aria-label','Sync viewing preferences with paired browsers');
+  const shareText=document.createElement('span');shareText.textContent='Also sync my favourite channels, recently confirmed viewing, language and interests (opt in on each browser)';
+  shareLabel.append(shareBox,shareText);
+  actions.append(create,pairing,join,copy,push,useCloud,useLocal,leave,revoke);section.append(title,description,shareLabel,actions,status);settings.append(section);
+  shareBox.addEventListener('change',()=>{
+   try{localStorage.setItem(VIEW_KEY,shareBox.checked?'yes':'no');}catch{shareBox.checked=shareViewing();}
+   report(shareBox.checked?'Viewing preferences may sync with authorized paired browsers.':'Viewing-preference sync disabled on this browser. Layout sync remains available.');
+   if(room)update();
+  });
   function report(message){status.textContent=message;const badge=document.getElementById('newview-device-status');if(badge)badge.textContent=message;}
   function connected(value){copy.hidden=push.hidden=leave.hidden=revoke.hidden=!value;copy.disabled=value;create.hidden=join.hidden=value;pairing.hidden=value;if(!value){useCloud.hidden=useLocal.hidden=true;conflict=null;pairing.value='';}}
   function resolveConflict(){useCloud.hidden=useLocal.hidden=!conflict;}
@@ -88,6 +132,14 @@
    window.NewViewPersonal?.save?.(incoming.widgets);
    window.NewViewPersonal?.render?.();
    window.NewViewShell?.select?.(incoming.workspace);
+   if(shareViewing()&&incoming.viewing){
+    try{
+     localStorage.setItem('newview.media.channel-favorites.v1',JSON.stringify(incoming.viewing.favorites));
+     localStorage.setItem('newview.recommendation.preferences.v1',JSON.stringify({language:incoming.viewing.language,interest:incoming.viewing.interest}));
+    }catch{}
+    window.NewViewViewing?.importConfirmed?.(incoming.viewing.history);
+    window.dispatchEvent?.(new CustomEvent('newview:source-filter',{detail:{synced:true}}));
+   }
   }
   async function update(){
    if(!room||busy||document.hidden||conflict)return;
@@ -100,13 +152,14 @@
     if(activeSession!==session)return;
     if(!remote){
      if(!createdRoom){report('Pairing room not found or expired. Create a fresh link on the first device.');return;}
-     const sealed=await encrypt(current);if(activeSession!==session)return;
+     const sealed=await encrypt(preserved(current));if(activeSession!==session)return;
      await request('POST',sealed);if(activeSession!==session)return;
      previousLocal=local;previousVersion=sealed;createdRoom=false;copy.disabled=false;
      report('Encrypted room created · sharing layouts only, no screen video');
     }else if(remote.blob!==previousVersion){
      const incoming=await decrypt(remote.blob);if(activeSession!==session)return;
-     const serialized=JSON.stringify(incoming);
+     previousViewing=incoming.viewing||null;
+     const serialized=JSON.stringify(visible(incoming));
      // Joining an existing room must never silently replace this device's layout.
      // Ask before overwriting local preferences, even on the first sync.
      if(previousLocal===null&&!createdRoom&&serialized!==local){
@@ -143,19 +196,19 @@
   });
   useLocal.addEventListener('click',()=>{
    if(!conflict)return;
-   previousVersion=conflict.cloudVersion;previousLocal=JSON.stringify(conflict.incoming);
+   previousVersion=conflict.cloudVersion;previousViewing=conflict.incoming.viewing||null;previousLocal=JSON.stringify(visible(conflict.incoming));
    conflict=null;resolveConflict();
    // The next sync pass will propose this local layout after checking cloud again.
    report('Keeping this layout. Synchronizing the selected version…');update();
   });
   function disconnect(){
-   session++;busy=false;if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=null;createdRoom=false;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
+   session++;busy=false;if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=previousViewing=null;createdRoom=false;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
    if(location.hash.startsWith('#sync='))history.replaceState(null,'',location.pathname+location.search);
    connected(false);report('Disconnected on this device; other devices keep their copies');
   }
   async function pair(value,isNew){
    session++;busy=false;if(timer)clearInterval(timer);timer=null;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
-   room=value.room;key=value.key;previousLocal=previousVersion=null;createdRoom=isNew;connected(true);
+   room=value.room;key=value.key;previousLocal=previousVersion=previousViewing=null;createdRoom=isNew;connected(true);
    const pairingSession=session;pairing.value='';report('Pairing…');
    await update();
    if(pairingSession!==session)return;
