@@ -116,9 +116,11 @@
   loadedRows=null;period.value='all';periodLabel.hidden=true;
   cards.replaceChildren();bars.replaceChildren();
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));
-  if(file.size>limitBytes){status.textContent='File too large: maximum 1 MB';picker.value='';return;}
+  if(file.size>limitBytes){status.textContent='File too large: maximum 1 MB. Choose a smaller CSV to retry.';picker.value='';return;}
+  picker.setAttribute('aria-busy','true');cards.setAttribute('aria-busy','true');status.textContent='Reading and validating CSV locally…';
   try{const text=await file.text();if(version!==selectionVersion)return;const rows=parseBusinessCsv(text);loadedRows=rows;period.value='all';periodLabel.hidden=false;render(selectedRows());}
-  catch(error){if(version===selectionVersion){loadedRows=null;periodLabel.hidden=true;status.textContent='CSV rejected: '+error.message;}}
+  catch(error){if(version===selectionVersion){loadedRows=null;periodLabel.hidden=true;status.textContent='CSV rejected: '+error.message+'. Choose a corrected CSV to retry.';}}
+  finally{if(version===selectionVersion){picker.removeAttribute('aria-busy');cards.removeAttribute('aria-busy');}}
  });
  clear?.addEventListener('click',reset);
  window.NewViewBusiness={parseCsv,parseBusinessCsv,summarize,reset};

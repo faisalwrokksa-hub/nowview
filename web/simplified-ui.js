@@ -26,8 +26,7 @@
   const nav=el('nav','nv-simple-nav');nav.id='nv-simple-nav';nav.setAttribute('aria-label','NewView main navigation');
   const sections=[['home','Home'],['watch','Watch'],['read','Read'],['customize','Customize']];
   const buttons=new Map();let active='home',state=read();
-  // Always show three primary boxes on Home; saved preferences choose which.
-  state.count=3;
+  // Respect the saved 1–4 shortcut preference on Home.
   const content=el('section','nv-simple-home');content.id='nv-simple-home';content.setAttribute('aria-label','Personalized Home');
   const grid=el('div','nv-simple-grid');
   grid.id='nv-simple-grid';
@@ -94,7 +93,7 @@
   featured.append(featuredHeading,featuredSelect,featuredPlay,featuredStatus);
   function syncFeatured(){
    const catalog=document.querySelector('#newview-channel-directory select[aria-label="Available IPTV channels"]');
-   if(!catalog||!catalog.options.length)return;
+   if(!catalog||!catalog.options.length){featuredStatus.textContent='No channels loaded yet. Open Watch to refresh the channel directory.';return;}
    const old=featuredSelect.value;
    featuredSelect.replaceChildren();
    const candidates=[...catalog.options].filter(o=>o.value.startsWith('https://'));
@@ -122,7 +121,7 @@
    const items=window.NewViewNewsReader?.getItems?.()||[];
    newsStrip.replaceChildren();
    const latest=[...items].sort((a,b)=>(Date.parse(b.publishedAt)||0)-(Date.parse(a.publishedAt)||0)).slice(0,4);
-   if(!latest.length){newsStrip.append(el('p','nv-home-news-empty','Loading publisher headlines…'));return;}
+   if(!latest.length){const offline=typeof navigator!=='undefined'&&!navigator.onLine;newsStrip.append(el('p','nv-home-news-empty',offline?'Offline — headlines unavailable. Reconnect to refresh.':'No publisher headlines available yet. Open Read to retry.'));return;}
    for(const item of latest){
     const btn=el('button','nv-home-news-story');btn.type='button';
     btn.append(el('strong','',item.title),el('small','',item.summary||item.source));
@@ -161,7 +160,8 @@
   const readActions=el('div','nv-hub-grid');readPanel.append(readActions);home.append(readPanel);
   const customize=el('section','nv-hub-panel');customize.id='nv-customize-hub';customize.hidden=true;
   const selectCount=el('select','nv-custom-count');selectCount.id='nv-custom-count';selectCount.setAttribute('aria-label','Home box count');
-  const fixedCount=el('option','','3 boxes · fixed Home layout');fixedCount.value='3';selectCount.append(fixedCount);
+  for(let n=1;n<=4;n++){const option=el('option','',n+' shortcut'+(n===1?'':'s'));option.value=String(n);selectCount.append(option);}
+  selectCount.addEventListener('change',()=>{state.count=Number(selectCount.value);store(state);render();});
   const optionGrid=el('div','nv-custom-options');
   customize.append(selectCount,optionGrid);home.append(customize);
   const now=el('p','nv-custom-state');now.setAttribute('role','status');customize.append(now);
@@ -187,7 +187,7 @@
    b.append(icon,label);b.addEventListener('click',()=>navigate(item.id));return b;
   }
   function render(){
-   grid.replaceChildren();const chosen=[...new Set([...state.items,...['markets','iptv','news']])].slice(0,3);
+   grid.replaceChildren();const chosen=[...new Set([...state.items,...['markets','iptv','news']])].slice(0,state.count);
    for(const id of chosen){const item=choices.find(x=>x.id===id);if(item)grid.append(actionTile(item));}
    if(!chosen.length)grid.append(el('p','','Choose a box in Customize.'));
    grid.dataset.boxCount=String(chosen.length);
@@ -201,10 +201,10 @@
     });
     label.append(check,el('span','',item.label));optionGrid.append(label);
    }
-   selectCount.value='3';
-   now.textContent='Home shows three main boxes. Select preferred shortcuts below.';
+   selectCount.value=String(state.count);
+   now.textContent='Home shows '+chosen.length+' shortcut'+(chosen.length===1?'':'s')+'. Choose up to four shortcuts.';
   }
-  selectCount.value='3';selectCount.disabled=true;selectCount.title='Home always displays three primary boxes';
+  selectCount.value=String(state.count);
   // Watch uses the already initialized IPTV catalog; Read uses the
   // already initialized publisher RSS reader. Do not duplicate fetchers.
   const mediaContent=document.getElementById('nv-watch-channels');

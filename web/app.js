@@ -84,10 +84,11 @@ function render(){
  $('bar-caption').textContent=period+' · '+data.currency+' · '+(candles?'OHLC candles':'Close prices')+' · EMA 20/50 · RSI 14';checkSignals();draw();
 }
 async function load(quiet=false){
- const ticket=++generation;nav();
+ const ticket=++generation;nav();const chart=$('chart');chart?.setAttribute('aria-busy','true');
  if(!quiet||!data||data.symbol!==selected||data.period!==period){data=null;$('price').textContent='—';$('security').textContent=selected;$('change').textContent='Loading historical prices…';$('change').className='';$('asof').textContent='Waiting for a quote';$('session').textContent='—';$('status').textContent='Loading';$('received').textContent='—';$('bar-caption').textContent='Historical prices';$('message').textContent='Connecting to the market source…';$('message').classList.remove('hidden');}
  try{const result=await request(selected,period);if(ticket!==generation)return;if(!result.bars||!result.bars.length||!Number.isFinite(result.price))throw new Error('No valid market data received');data=result;subscribe();$('message').classList.add('hidden');render();}
  catch(error){if(ticket!==generation)return;if(data){$('status').textContent='Refresh failed / cached';$('received').textContent='Refresh failed · last fetched '+date(data.fetchedAt,'Asia/Riyadh',true);draw();}else{$('status').textContent='Unavailable';$('message').textContent=error.message+'\nUse Refresh to retry. No substitute prices are shown.';$('message').classList.remove('hidden');}}
+ finally{if(ticket===generation)chart?.removeAttribute('aria-busy');}
 }
 function draw(){
  if(!data)return;const canvas=$('chart'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);const w=rect.width,h=rect.height,pad={l:10,r:78,t:12,b:30},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;if(cw<10||ch<10)return;
