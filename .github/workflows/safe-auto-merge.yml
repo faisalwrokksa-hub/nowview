@@ -1,20 +1,16 @@
-name: Safe automatic PR merge
-
+# The historical cross-repository scheduled auto-merge is deliberately retired.
+# Never allow an external reusable workflow to promote unapproved NewView PRs.
+name: NewView scheduled auto-merge retired
 on:
-  schedule:
-    - cron: '*/15 * * * *'
   workflow_dispatch:
-
 permissions:
-  contents: write
-  pull-requests: write
-  checks: read
-  statuses: read
-
-concurrency:
-  group: guarded-auto-merge
-  cancel-in-progress: false
-
+  contents: read
 jobs:
-  merge:
-    uses: 2029TEBE/TEBE/.github/workflows/reusable-auto-merge.yml@5a33c633d2a8382844b9931b27da9b0ce42e54e1
+  guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require human release review
+        run: |
+          echo "NO-GO: scheduled/cross-repository automatic merging is disabled."
+          echo "Use an owner-reviewed PR against protected main only after release acceptance."

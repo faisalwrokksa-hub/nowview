@@ -33,5 +33,15 @@
   ],
   "build": {
     "command": "npm run build"
+  },
+  "previews": {
+    "durable_objects": {
+      "bindings": [
+        {
+          "name": "NEWVIEW_SYNC_ROOMS",
+          "class_name": "NewViewSyncRoom"
+        }
+      ]
+    }
   }
 }

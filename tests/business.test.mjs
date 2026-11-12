@@ -29,10 +29,10 @@ test('zero revenue shows undefined difference percentage',()=>{
  const rows=parseBusinessCsv(header+'2026-11-08,0,10,0,0');
  assert.equal(summarize(rows).margin,null);
 });
-test('Power BI launch workspace replaces the CSV uploader while legacy CSV parsing stays testable',()=>{
+test('Power BI launch and private local CSV analysis coexist',()=>{
  const html=fs.readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
  const build=fs.readFileSync(new URL('../cloud/build.mjs',import.meta.url),'utf8');
- assert.match(html,/id="powerbi-report-url"/);assert.match(html,/https:\/\/app\.powerbi\.com\//);assert.doesNotMatch(html,/id="business-file"/);assert.match(build,/business\.js/);assert.match(build,/powerbi\.js/);
+ assert.match(html,/id="powerbi-report-url"/);assert.match(html,/https:\/\/app\.powerbi\.com\//);assert.match(html,/id="business-file"/);assert.match(html,/id="business-status"/);assert.match(html,/id="business-kpis"/);assert.match(html,/id="business-trend"/);assert.match(html,/id="business-clear"/);assert.match(build,/business\.js/);assert.match(build,/powerbi\.js/);
 });
 
 test('stale asynchronous CSV reads cannot restore cleared or replaced data',()=>{
@@ -61,4 +61,24 @@ test('preserves valid quoted CSV fields at end of line and end of file',()=>{
  assert.equal(rows.length,3);
  assert.equal(rows[1][1],'second');
  assert.equal(rows[2][1],'fourth');
+});
+
+test('CSV validation failure clears file input for retry and keeps bounded async state',()=>{
+ assert.match(src,/catch\(error\)\{if\(version===selectionVersion\)\{loadedRows=null;periodLabel\.hidden=true;picker\.value='';/);
+ assert.match(src,/status\.textContent='Reading and validating CSV locally…'/);
+ assert.match(src,/if\(version!==selectionVersion\)return/);
+});
+
+
+test('reset clears pending CSV busy indicators after an in-flight read',()=>{
+ assert.match(src,/function reset\(\)\{[^\n]*picker\.removeAttribute\('aria-busy'\);cards\.removeAttribute\('aria-busy'\)/);
+ assert.match(src,/selectionVersion\+\+/);
+ assert.match(src,/finally\{if\(version===selectionVersion\)\{/);
+});
+
+
+test('oversized or replacement CSV clears stale busy state before early return',()=>{
+ assert.match(src,/const file=picker\.files\?\.\[0\];if\(!file\)return;\s*const version=\+\+selectionVersion;/);
+ assert.match(src,/picker\.removeAttribute\('aria-busy'\);cards\.removeAttribute\('aria-busy'\);/);
+ assert.match(src,/if\(file\.size>limitBytes\)/);
 });

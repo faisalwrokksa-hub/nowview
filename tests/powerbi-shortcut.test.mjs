@@ -19,6 +19,6 @@ test('Power BI shortcuts reject other hosts and unsupported schemes',()=>{
 test('business workspace launches official Power BI, never collects credentials',()=>{
  assert.match(html,/data-workspace="business"/);
  assert.match(html,/id="powerbi-report-save"/);
- assert.doesNotMatch(html,/id="business-file"/);
+ assert.match(html,/id="business-file"/);
  assert.doesNotMatch(js,/fetch\(|XMLHttpRequest|client_secret|access_token/);
 });

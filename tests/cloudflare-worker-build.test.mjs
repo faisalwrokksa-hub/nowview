@@ -17,6 +17,14 @@ test('Cloudflare Worker build has explicit Wrangler entrypoint and valid bundle'
  assert.equal(config.main,'dist/server/index.js');
  assert.equal(config.build?.command,'npm run build','wrangler deploy must build assets even if Cloudflare Builds has no separate build command');
  assert.equal(config.workers_dev,true);
+ assert.equal(config.build?.command,'npm run build');
+ assert.deepEqual(config.previews?.durable_objects?.bindings,config.durable_objects.bindings,
+  'Preview sync must have its own isolated Durable Object namespace binding');
+ assert.equal(config.previews?.vars,undefined);
+ assert.equal(config.previews?.kv_namespaces,undefined);
+ assert.equal(config.previews?.d1_databases,undefined);
+ assert.equal(config.previews?.routes,undefined);
+ assert.equal(config.previews?.triggers,undefined);
  assert.match(config.compatibility_date,/^20\d{2}-\d{2}-\d{2}$/);
  execFileSync(process.execPath,[path.join(root,'cloud/build.mjs')],{cwd:root,stdio:'pipe'});
  const generated=fs.readFileSync(path.join(root,config.main),'utf8');

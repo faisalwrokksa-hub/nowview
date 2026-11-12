@@ -1,0 +1,60 @@
+name: NewView Android TV emulator acceptance (synthetic only)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'android/**'
+      - 'web/**'
+      - 'tools/qa-android-tv-emulator.sh'
+      - 'build-apk.sh'
+      - '.github/workflows/android-tv-emulator-acceptance.yml'
+permissions:
+  contents: read
+concurrency:
+  group: newview-tv-emulator-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  tv-emulator-smoke:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'integration/ux-media-business-20261112' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+      - name: Build test-only Android TV APK
+        run: |
+          bash build-apk.sh
+          bash scripts/verify-preview-apk.sh
+      - name: Enable Linux KVM for isolated emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run Android TV emulator with synthetic D-pad navigation
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: android-tv
+          arch: x86
+          profile: tv_1080p
+          cores: 2
+          ram-size: 2048M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash tools/qa-android-tv-emulator.sh
+      - name: Retain synthetic screenshot and test checksum
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newview-android-tv-emulator-evidence
+          path: tv-emulator-evidence/
+          retention-days: 14
+          if-no-files-found: ignore

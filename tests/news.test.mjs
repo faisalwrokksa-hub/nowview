@@ -32,14 +32,16 @@ test('browser news view ignores stale responses after source changes',()=>{
  const source=readFileSync(new URL('../web/news.js',import.meta.url),'utf8');
  assert.match(source,/const current=controller/);
  assert.match(source,/if\(current!==controller\)return/);
- assert.match(source,/if\(current!==controller\|\|err\.name==='AbortError'\)return/);
+ assert.match(source,/const reason=err\?\.name==='AbortError'\?'Request timed out'/);
+ assert.match(source,/cacheBySource\.set\(sourceId/);
 });
 
 test('browser news rejects malformed article URLs without dropping the entire feed',()=>{
  const source=readFileSync(new URL('../web/news.js',import.meta.url),'utf8');
  assert.match(source,/try\{url=new URL\(item\.url\);\}catch\{continue;\}/);
  assert.match(source,/url\.username\|\|url\.password\|\|url\.port/);
- assert.match(source,/No valid announcements returned by this source/);
+ assert.match(source,/No valid source-linked articles/);
+ assert.match(source,/Live headlines unavailable/);
 });
 
 test('Stocktwits publisher RSS is allowlisted and keeps same-host article links',()=>{

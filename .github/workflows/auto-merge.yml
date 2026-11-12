@@ -1,64 +1,18 @@
-name: Auto merge verified pull requests
+# NewView releases are not safe to merge automatically: public repo + unprotected main.
+# Keep this file as a self-documenting manual policy until branch protection is enabled.
+name: NewView automated merge disabled (release approval required)
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
+  workflow_dispatch:
 permissions:
-  actions: write
-  contents: write
-  pull-requests: write
-concurrency:
-  group: nowview-auto-merge-${{ github.event.workflow_run.head_branch }}
-  cancel-in-progress: false
+  contents: read
 jobs:
-  merge:
-    # A trusted workflow_run job never checks out or executes PR branch code.
-    if: >-
-      ${{ github.event.workflow_run.event == 'pull_request' &&
-          github.event.workflow_run.conclusion == 'success' &&
-          github.event.workflow_run.head_repository.full_name == github.repository }}
-    runs-on: ubuntu-latest
+  release-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
     steps:
-      - name: Merge PR only if the tested commit remains current
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
-          REPO: ${{ github.repository }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
+      - name: Explain required manual release approval
         run: |
-          set -euo pipefail
-          # workflow_run.pull_requests may be empty for fork PRs; only same-repo PRs qualify.
-          prs=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '.pull_requests[]?.number')
-          # Some Actions events omit their pull_requests array. Resolve only
-          # PRs pointing to this exact tested commit, then recheck each head.
-          if [[ -z "$prs" ]]; then
-            prs=$(gh api "repos/$REPO/commits/$TESTED_SHA/pulls" --jq '.[] | select(.state == "open") | .number')
-          fi
-          if [[ -z "$prs" ]]; then
-            echo "No linked pull request; nothing to merge."
-            exit 0
-          fi
-          while IFS= read -r pr; do
-            [[ "$pr" =~ ^[0-9]+$ ]] || continue
-            state=$(gh api "repos/$REPO/pulls/$pr" --jq '.state')
-            draft=$(gh api "repos/$REPO/pulls/$pr" --jq '.draft')
-            head=$(gh api "repos/$REPO/pulls/$pr" --jq '.head.sha')
-            base=$(gh api "repos/$REPO/pulls/$pr" --jq '.base.ref')
-            head_repo=$(gh api "repos/$REPO/pulls/$pr" --jq '.head.repo.full_name')
-            if [[ "$state" != "open" || "$draft" != "false" || "$head" != "$TESTED_SHA" || "$base" != "main" || "$head_repo" != "$REPO" ]]; then
-              echo "PR #$pr no longer matches the verified main-targeting branch; skipping."
-              continue
-            fi
-            # GitHub enforces branch protection, required reviews, and mergeability.
-            # Never pass --admin or bypass required checks.
-            # Queue native auto-merge if an approval or protection requirement
-            # is still pending. Never bypass repository branch protection.
-            gh pr merge "$pr" --repo "$REPO" --auto --squash --delete-branch
-            # A merge made with GITHUB_TOKEN does not emit normal push events.
-            # Dispatch only if the PR actually merged now. Queued merges
-            # will create a main push when GitHub completes them later.
-            merged=$(gh api "repos/$REPO/pulls/$pr" --jq '.merged')
-            if [[ "$merged" == "true" ]]; then
-              gh workflow run deploy-production.yml --repo "$REPO" --ref main
-            fi
-          done <<< "$prs"
+          echo "NO-GO: automatic PR merges are disabled for NewView."
+          echo "Require protected main, explicit release-owner review, real-device evidence, rights clearance and signing gates."
+          echo "Do not use CI success alone as production-merge authorization."
+          echo "Review PR #167 and docs/RELEASE_ACCEPTANCE_MATRIX.md."

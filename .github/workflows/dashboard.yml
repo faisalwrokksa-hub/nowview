@@ -1,12 +1,16 @@
 name: NewView dashboard TV and web
 on:
   push:
+    branches: [main]
     paths: ['web/**', 'cloud/**', 'tools/**', 'package.json', 'wrangler.json', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', 'scripts/verify-preview-apk.sh', '.github/workflows/dashboard.yml']
   pull_request:
     paths: ['web/**', 'cloud/**', 'tools/**', 'package.json', 'wrangler.json', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', 'scripts/verify-preview-apk.sh', '.github/workflows/dashboard.yml']
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: newview-dashboard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   test-and-build:
     runs-on: ubuntu-24.04
@@ -38,19 +42,9 @@ jobs:
           node --check web/external-links.js
           node --check cloud/news.mjs
           node cloud/build.mjs
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Android SDK packages
-        uses: android-actions/setup-android@v4
-        with:
-          cmdline-tools-version: '11076708'
-          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
-      - name: Build universal TV and phone APK
-        run: bash build-apk.sh
-      - name: Verify preview APK identity and bundled workspace assets
-        run: bash scripts/verify-preview-apk.sh
+      # Android is built exactly once by complete-apk-bundle.yml (and independently
+      # on the simulated TV-emulator job). Repeating Android SDK and APK builds
+      # in this dashboard validation job wasted runner time.
       - name: Archive exact GitHub source revision for backup
         run: |
           mkdir -p build
@@ -59,13 +53,4 @@ jobs:
         with:
           name: TheNewView-source-backup
           path: build/TheNewView-source.zip
-          retention-days: 14
-      - name: Prepare clearly named test APK for backup
-        run: cp build/newview.apk build/TheNewView-test.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          name: TheNewView-test-APK
-          path: |
-            build/TheNewView-test.apk
-            build/newview-unsigned.apk
           retention-days: 14

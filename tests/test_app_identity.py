@@ -26,12 +26,15 @@ class AppIdentityTest(unittest.TestCase):
     def test_test_artifact_naming_matches_ci(self):
         bash = (ROOT / 'build-apk.sh').read_text(encoding='utf-8')
         powershell = (ROOT / 'build-apk.ps1').read_text(encoding='utf-8')
-        workflow = (ROOT / '.github/workflows/dashboard.yml').read_text(encoding='utf-8')
+        workflow = (ROOT / '.github/workflows/complete-apk-bundle.yml').read_text(encoding='utf-8')
+        dashboard = (ROOT / '.github/workflows/dashboard.yml').read_text(encoding='utf-8')
         for label, content in [('bash',bash),('powershell',powershell),('workflow',workflow)]:
             with self.subTest(label=label):
                 self.assertIn('newview.apk', content)
                 self.assertNotIn('market-charts.apk',content)
-        self.assertIn('TheNewView-test-APK',workflow)
+        self.assertIn('NewView-complete-two-APK-test-bundle',workflow)
+        self.assertIn('NewView-Android-TV-test.apk',workflow)
+        self.assertNotIn('bash build-apk.sh',dashboard)
 
 if __name__ == '__main__':
     unittest.main()

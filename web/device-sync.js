@@ -30,7 +30,7 @@
   return validate(JSON.parse(decoder.decode(clear)));
  }
  const endpoint=()=>'/api/device-sync/'+room;
- async function request(method,blob){
+ async function request(method,blob,expected){
   const requestRoom=room;
   if(!requestRoom)throw Error('No paired room active');
   const controller=new AbortController();
@@ -38,9 +38,11 @@
   const headers={Accept:'application/json'};
   if(blob!==undefined)headers['Content-Type']='application/json';
   try{
-   const response=await fetch('/api/device-sync/'+requestRoom,{method,cache:'no-store',credentials:'same-origin',signal:controller.signal,headers,body:blob===undefined?undefined:JSON.stringify({blob})});
-   if(response.status===404)return null;
+   const response=await fetch('/api/device-sync/'+requestRoom,{method,cache:'no-store',credentials:'same-origin',signal:controller.signal,headers,body:blob===undefined?undefined:JSON.stringify(expected===undefined?{blob}:{blob,expected})});
+   if(response.status===404){if(method==='GET')return null;throw Error('Pairing room expired or was not found. Create a fresh pairing link.');}
    if(response.status===410)throw Error('This pairing room has been revoked. Create a new pairing link.');
+   if(response.status===409)throw Error(method==='PUT'?'Room changed on another device. Check for updates to resolve the conflict.':'This pairing room already exists. Create another pairing link.');
+   if(response.status===428)throw Error('Sync update missing its expected room version; retry from an updated client.');
    if(response.status===401||response.status===403)throw Error('Cloud sync requires an authorized Cloudflare Access sign-in');
    if(response.status===503)throw Error('Cloud sync Durable Object or Access policy is not configured on this server');
    if(!response.ok)throw Error('Sync request failed (HTTP '+response.status+')');
@@ -105,6 +107,14 @@
     }else if(remote.blob!==previousVersion){
      const incoming=await decrypt(remote.blob);if(activeSession!==session)return;
      const serialized=JSON.stringify(incoming);
+     // Joining an existing room must never silently replace this device's layout.
+     // Ask before overwriting local preferences, even on the first sync.
+     if(previousLocal===null&&!createdRoom&&serialized!==local){
+      conflict={incoming,cloudVersion:remote.blob};
+      resolveConflict();
+      report('Paired layout differs from this device. Choose the cloud layout or keep this layout.');
+      return;
+     }
      if(previousLocal!==null&&local!==previousLocal&&serialized!==local){
       conflict={incoming,cloudVersion:remote.blob};
       resolveConflict();
@@ -116,14 +126,14 @@
      report('Cloud layout checked · no screen video');
     }else if(local!==previousLocal){
      const sealed=await encrypt(current);if(activeSession!==session)return;
-     await request('PUT',sealed);if(activeSession!==session)return;
+     await request('PUT',sealed,previousVersion);if(activeSession!==session)return;
      previousLocal=local;previousVersion=sealed;
      report('Local layout sent to paired devices');
     }else report('Up to date · encrypted layout only');
    }catch(error){
     if(activeSession===session&&/room has been revoked/.test(String(error?.message||''))){disconnect();report('This room was revoked. The pairing link is no longer valid.');}
     else if(activeSession===session)report(error?.name==='AbortError'?'Cloud sync timed out; retry':(error?.message||'Unable to synchronize right now'));
-   }finally{busy=false;push.disabled=false;push.removeAttribute('aria-busy');}
+   }finally{if(activeSession===session){busy=false;push.disabled=false;push.removeAttribute('aria-busy');}}
   }
   useCloud.addEventListener('click',()=>{
    if(!conflict)return;
@@ -133,18 +143,18 @@
   });
   useLocal.addEventListener('click',()=>{
    if(!conflict)return;
-   previousVersion=conflict.cloudVersion;previousLocal=null;
+   previousVersion=conflict.cloudVersion;previousLocal=JSON.stringify(conflict.incoming);
    conflict=null;resolveConflict();
    // The next sync pass will propose this local layout after checking cloud again.
    report('Keeping this layout. Synchronizing the selected version…');update();
   });
   function disconnect(){
-   session++;if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=null;createdRoom=false;conflict=null;
+   session++;busy=false;if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=null;createdRoom=false;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
    if(location.hash.startsWith('#sync='))history.replaceState(null,'',location.pathname+location.search);
    connected(false);report('Disconnected on this device; other devices keep their copies');
   }
   async function pair(value,isNew){
-   session++;if(timer)clearInterval(timer);timer=null;conflict=null;
+   session++;busy=false;if(timer)clearInterval(timer);timer=null;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
    room=value.room;key=value.key;previousLocal=previousVersion=null;createdRoom=isNew;connected(true);
    const pairingSession=session;pairing.value='';report('Pairing…');
    await update();
@@ -162,9 +172,10 @@
   revoke.addEventListener('click',async()=>{
    if(!room||busy)return;
    if(!window.confirm('Revoke this encrypted pairing room for every device? This cannot be undone.'))return;
+   const revokeSession=session;
    revoke.disabled=true;
-   try{await request('DELETE');disconnect();report('Pairing room revoked. Old links will no longer work.');}
-   catch(error){report(error?.message||'Could not revoke pairing. Retry.');}
+   try{await request('DELETE');if(revokeSession===session){disconnect();report('Pairing room revoked. Old links will no longer work.');}}
+   catch(error){if(revokeSession===session)report(error?.message||'Could not revoke pairing. Retry.');}
    finally{revoke.disabled=false;}
   });
   if(location.hash.startsWith('#sync=')){

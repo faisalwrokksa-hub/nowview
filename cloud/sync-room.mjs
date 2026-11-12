@@ -30,13 +30,18 @@ export class NewViewSyncRoom extends DurableObject {
   this.ctx.storage.sql.exec('INSERT INTO room(id,blob,expires_at,revoked) VALUES (1,?,?,0) ON CONFLICT(id) DO UPDATE SET blob=excluded.blob,expires_at=excluded.expires_at,revoked=0',blob,until);
   return {status:204};
  }
- async update(blob){
+ async update(blob,expected){
   if(typeof blob!=='string'||blob.length>8000||!/^[A-Za-z0-9_-]{16,64}\.[A-Za-z0-9_-]{20,7950}$/.test(blob))
    return {status:400};
+  if(typeof expected!=='string'||expected.length>8000||!/^[A-Za-z0-9_-]{16,64}\.[A-Za-z0-9_-]{20,7950}$/.test(expected))
+   return {status:428};
+  // Synchronous read/compare/conditional update ensures one device cannot
+  // silently overwrite a newer encrypted layout. No await between these steps.
   const row=this.state(),now=Date.now();
   if(row?.revoked)return {status:410};
   if(!row||row.expires_at<=now||!row.blob)return {status:404};
-  this.ctx.storage.sql.exec('UPDATE room SET blob=?,expires_at=? WHERE id=1 AND revoked=0',blob,now+604800000);
+  if(row.blob!==expected)return {status:409};
+  this.ctx.storage.sql.exec('UPDATE room SET blob=?,expires_at=? WHERE id=1 AND revoked=0 AND blob=?',blob,now+604800000,expected);
   return {status:204};
  }
  async revoke(){

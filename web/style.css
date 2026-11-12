@@ -912,3 +912,135 @@ body[data-nv-motion="reduced"] *,body[data-nv-motion="reduced"] *::before,body[d
 /* Shared asynchronous source-state affordances */
 [aria-busy="true"]{cursor:progress}[aria-busy="true"]:is(select,button){opacity:.72}button:disabled{cursor:not-allowed;opacity:.55}.nv-home-news-empty,.nv-home-featured-status,.nv-browser-status,.nv-ux-network{line-height:1.5;overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){.nv-simple-tile,.nv-simple-nav button{transition:none!important}}
+
+
+/* Task 1: avoid clipped settings controls when the on-screen keyboard opens. */
+@media (max-width:700px){
+ body>main>.newview-settings[open]>.newview-settings-content{
+  box-sizing:border-box;
+  max-height:calc(100vh - 16px);
+  max-height:calc(100dvh - 16px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+ }
+ body>main>.newview-settings[open]>.newview-settings-content :is(input,select,textarea,button){min-width:0}
+}
+
+
+/* Task 1: predictable feedback and remote focus across compact workspaces. */
+:is(.workspace,.shell-page,[data-workspace]) :is([role="status"],[role="alert"],[aria-live]){
+  min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:normal;
+}
+:is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,summary,input,select,textarea,[tabindex]):focus{
+  scroll-margin:28px;
+}
+@media (max-width:600px){
+  body>main>.workspace-switcher{max-width:100%;scroll-padding-inline:16px;-webkit-overflow-scrolling:touch}
+  body>main>.workspace-switcher .workspace-tab{flex-shrink:0}
+}
+@media (prefers-reduced-motion:reduce){
+  :is(.workspace,.shell-page,[data-workspace]) :is([role="status"],[role="alert"],[aria-live]){animation:none!important}
+}
+
+
+/* Short landscape Android TV: retain the normal rail without rewriting the
+   simplified four-tab launcher. Consolidates the safe part of PR #133. */
+@media (min-width:1200px) and (min-height:480px) and (max-height:649px) and (orientation:landscape){
+ body:not(.home-panel):not(.nv-simple)>main{
+  display:grid;grid-template-columns:minmax(185px,220px) minmax(0,1fr);
+  grid-template-rows:auto auto minmax(0,1fr) auto;
+  align-items:stretch;min-height:0;height:100vh;height:100dvh;
+ }
+ body:not(.home-panel):not(.nv-simple)>main>header{grid-column:1/-1;grid-row:1}
+ body:not(.home-panel):not(.nv-simple)>main>.workspace-switcher{
+  grid-column:1;grid-row:2/4;display:flex;flex-direction:column;
+  align-items:stretch;overflow-x:hidden;overflow-y:auto;
+  padding:10px;min-width:0;min-height:0;max-width:none;
+  scroll-padding-block:20px;overscroll-behavior-y:contain;
+ }
+ body:not(.home-panel):not(.nv-simple)>main>.workspace-switcher .workspace-tab{
+  flex:0 0 auto;min-height:44px;text-align:start;white-space:normal;
+ }
+ body:not(.home-panel):not(.nv-simple)>main>.newview-settings{
+  grid-column:2;grid-row:2;justify-self:end;
+ }
+ body:not(.home-panel):not(.nv-simple)>main>#workspace-intro{
+  grid-column:2;grid-row:2;justify-self:start;align-self:center;max-width:65%;
+ }
+ body:not(.home-panel):not(.nv-simple)>main :is(.shell-page,.workspace,[data-workspace],#market-shell){
+  grid-column:2;grid-row:3;min-width:0;min-height:0;overflow:auto;
+ }
+ body:not(.home-panel):not(.nv-simple)>main>footer{grid-column:1/-1;grid-row:4}
+}
+
+
+/* Deferred TV-focus accessibility parity from #133, without its global grid
+   rewrite. Applies to existing workspace controls, status actions and fallback
+   WebViews that lack :focus-visible support. */
+@media (hover:none) {
+ :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content)
+ :is(a,button,summary,select,textarea,input,[tabindex]):focus-visible {
+  outline:3px solid #ffd6a3;outline-offset:2px;scroll-margin:24px;
+ }
+}
+@supports not selector(:focus-visible) {
+ :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content,#message)
+ :is(button,a,summary,input,select,textarea,[tabindex]):focus {
+  outline:3px solid #ffd6a3;outline-offset:2px;scroll-margin:24px;
+ }
+}
+@media (forced-colors:active) {
+ :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content,#message)
+ :is(button,a,summary,input,select,textarea,[tabindex]):focus {
+  outline:3px solid Highlight;outline-offset:2px;box-shadow:none;
+ }
+}
+.newview-settings-content details>summary {
+ min-height:44px;cursor:pointer;scroll-margin-block:24px;
+}
+.workspace-switcher .workspace-tab { overflow-wrap:anywhere; }
+#message:not(.hidden) {
+ overflow-y:auto;max-height:100%;min-height:0;overflow-wrap:anywhere;
+}
+#message :is(button,a) { min-height:44px;max-width:100%; }
+@media (prefers-reduced-motion:reduce) {
+ .workspace-switcher,.newview-settings-content {scroll-behavior:auto}
+ .workspace-switcher .workspace-tab{transition:none!important}
+}
+
+
+/* Short TV/landscape error overlays keep recovery links and buttons reachable.
+   Deliberately scoped; do not import the legacy global body>main grid. */
+@media (max-height:520px){
+ #message:not(.hidden){justify-content:flex-start;padding:12px 16px;max-height:100dvh;overflow-y:auto}
+ #message :is(button,a,[tabindex]):focus-visible{scroll-margin-block:16px;outline:3px solid #ffd6a3;outline-offset:2px}
+}
+@media (forced-colors:active){
+ #message :is(button,a,[tabindex]):focus-visible{outline-color:Highlight}
+}
+
+
+/* In-app launch support and privacy-safe local diagnostics. */
+.newview-support-center{display:grid;gap:12px;min-width:0}
+.newview-support-center h3,.newview-support-center h4{margin:0}
+.newview-support-center p{line-height:1.5;overflow-wrap:anywhere}
+.newview-support-center .newview-release-status{font-weight:650}
+.newview-support-center .newview-help-guide{min-width:0}
+.newview-support-center .newview-help-guide summary{cursor:pointer;min-height:44px;padding:8px 10px;border:1px solid currentColor;border-radius:8px}
+.newview-support-center ol{margin:10px 0;padding-inline-start:26px}
+.newview-support-center li{padding-block:5px;overflow-wrap:anywhere}
+.newview-support-center .newview-support-actions,.newview-support-center .newview-local-data{display:grid;gap:9px;min-width:0;padding:12px;border:1px solid rgba(128,151,168,.4);border-radius:10px}
+.newview-support-center button{min-height:44px;max-width:100%;width:max-content;white-space:normal;text-align:start;overflow-wrap:anywhere}
+.newview-support-center [role=status]{min-height:1.2em}
+.newview-support-center button:focus-visible,.newview-support-center summary:focus-visible{outline:3px solid #ffd6a3;outline-offset:3px}
+@media(max-width:480px),(max-height:520px){
+ .newview-support-center .newview-support-actions,.newview-support-center .newview-local-data{padding:9px}
+ .newview-support-center button{width:100%;text-align:center}
+}
+@media(forced-colors:active){
+ .newview-support-center button:focus-visible,.newview-support-center summary:focus-visible{outline-color:Highlight}
+}
+@media(prefers-reduced-motion:reduce){
+ .newview-support-center *{scroll-behavior:auto}
+}

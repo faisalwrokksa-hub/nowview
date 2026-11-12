@@ -1,6 +1,7 @@
 name: NewView frontend auto-publish (verified)
 on:
   push:
+    branches: [main]
     paths:
       - 'web/**'
       - 'cloud/**'
@@ -22,7 +23,7 @@ permissions:
   contents: read
 concurrency:
   group: newview-frontend-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   validate:
     runs-on: ubuntu-24.04
@@ -46,7 +47,7 @@ jobs:
     if: >-
       github.ref == 'refs/heads/main' &&
       vars.FRONTEND_DEPLOY_VIA_GITHUB == 'true' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy))
+      github.event_name == 'workflow_dispatch' && inputs.deploy == true
     runs-on: ubuntu-24.04
     environment: newview-frontend
     timeout-minutes: 10

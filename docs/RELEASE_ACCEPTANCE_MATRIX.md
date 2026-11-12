@@ -45,6 +45,14 @@ For each test record: device model, Android version, APK SHA-256, build commit, 
 - [ ] Confirm support contact, customer-facing policies, and release approval.
 - [ ] Release owner signs off explicitly before public distribution.
 
+## Automated preview evidence (does not replace field acceptance)
+
+Draft integration PR #167 includes the read-only `.github/workflows/integration-preview-acceptance.yml` workflow. It waits for the **exact source SHA** on the isolated Cloudflare preview, checks public routes, then runs Chromium navigation, keyboard-focus and overflow smoke tests at 390×844, 768×1024, 1440×900 and 1920×1080. It uploads screenshots for visual review. Both Chromium and Firefox are now tested at four viewports and an Android TV emulator checks synthetic D-pad navigation. These automated tests do **not** establish physical Android TV behavior, real remote hardware, broadcaster/codec/DRM availability, pairing, endurance or human browser acceptance. The 20 manual/evidence scenarios above remain `NOT RUN` until independently observed.
+
+## Source-rights release gate
+
+`config/commercial-source-rights.json` contains seven usage categories, all initially `unverified`. `node tools/check-commercial-rights.mjs` returns **NO-GO** until a human reviewer records actual HTTPS evidence, review date and reviewer per source usage. `tools/release-readiness-report.mjs` now requires that registry to pass in addition to acceptance evidence and the seven other release gates; a simple `mediaRights: true` boolean cannot waive it. A playlist listing, public RSS URL or an official YouTube embed is **not** blanket permission to resell, rebroadcast or redistribute content.
+
 ## Automated evidence check
 
 Record results as a JSON array using the fields below (camelCase: `buildCommit`, `apkSha256`, `result`, `device`, `expected`, `observed`, `tester`, `date`, `evidence`). Run `node tools/check-release-evidence.mjs path/to/evidence.json` locally. The checker fails closed on missing tests, duplicates, malformed PASS records, and missing device/build evidence. It does **not** validate that submitted observations are truthful; human review and all production gates remain mandatory. Never commit private pairing links or keys.

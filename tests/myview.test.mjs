@@ -3,7 +3,7 @@ const src=fs.readFileSync(new URL('../web/myview.js',import.meta.url),'utf8');
 function setup(value=null){
  const window={};const document={getElementById:()=>null};let saved=value;
  const localStorage={getItem:()=>saved,setItem:(k,v)=>{saved=v;}};
- vm.runInNewContext(src,{window,document,localStorage});
+ vm.runInNewContext(src,{window,document,localStorage,URL});
  return {api:window.NewViewPersonal,saved:()=>saved};
 }
 test('MyView Daily Brief defaults include Markets, News and Business',()=>{const {api}=setup();assert.deepEqual([...api.load()],['market','news','business']);});
@@ -167,4 +167,54 @@ test('MyView rejects external text-drag reorder attempts',()=>{
  assert.match(src,/const from=activeDraggedWidget;activeDraggedWidget=null/);
  assert.match(src,/item.addEventListener\('dragend'/);
  assert.doesNotMatch(src,/const from=e.dataTransfer\?\.getData\('text\/plain'\)/);
+});
+
+test('Market Watch clears chart context for invalid or missing snapshots',()=>{
+ assert.match(src,/function chartSymbol\(\)/);
+ assert.match(src,/q\.source==='binance'/);
+ assert.ok(src.includes("q.quoteTime*1000>=Date.now()-86400000?q.symbol.trim():'Market'"));
+ assert.match(src,/if\(id==='market'\)refreshChart\(\)/);
+ assert.match(src,/if\(id==='market'\)item\.append\(chartFor\(chartSymbol\(\)\)\)/);
+});
+
+
+test('Market Watch partitions session chart observations by quote currency',()=>{
+ assert.match(src,/symbol\+'\|'\+currency/);
+ assert.match(src,/next\.symbol\.trim\(\)\.slice\(0,24\)\+'\|'\+next\.currency/);
+ assert.match(src,/quoteHistory\.get\(key\)/);
+ assert.match(src,/lastQuoteTime\.get\(key\)/);
+});
+
+test('Official headline direct links are restricted to testable publisher announcement policy',()=>{
+ assert.match(src,/function officialAnnouncementUrl\(source,raw\)/);
+ assert.match(src,/url\.protocol!=='https:'/);
+ assert.match(src,/url\.username\|\|url\.password\|\|url\.port/);
+ assert.match(src,/press-releases\|press-release\|speeches-statements\|public-statement/);
+ assert.match(src,/link\.href=direct\|\|/);
+});
+
+test('Official Fed/SEC deep links accept article pages but never publisher indexes or redirects',()=>{
+ const {api}=setup();
+ const fed='https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm';
+ const sec='https://www.sec.gov/newsroom/press-releases/2026-113-sec-announces-enforcement-annual-results-fiscal-year-2026';
+ assert.equal(api.officialAnnouncementUrl('fed',fed),fed);
+ assert.equal(api.officialAnnouncementUrl('sec',sec),sec);
+ assert.equal(api.officialAnnouncementUrl('sec',sec+'?utm_source=feed#article'),null,'reject untrusted search/fragment');
+ assert.equal(api.officialAnnouncementUrl('fed',fed+'#target'),null);
+ assert.equal(api.officialAnnouncementUrl('sec',sec+'?year=2026'),null);
+ const blocked=[
+  ['fed','https://www.federalreserve.gov/newsevents/pressreleases/'],
+  ['fed','https://www.federalreserve.gov/newsevents/pressreleases/2026-press.htm'],
+  ['sec','https://www.sec.gov/newsroom/'],
+  ['sec','https://www.sec.gov/newsroom/press-releases'],
+  ['sec','https://www.sec.gov/newsroom/press-releases?year=2026'],
+  ['sec','https://www.sec.gov/newsroom/press-releases/page'],
+  ['sec','https://www.sec.gov.evil.example/newsroom/press-releases/2026-story'],
+  ['sec','https://user@www.sec.gov/newsroom/press-releases/2026-story'],
+  ['sec','http://www.sec.gov/newsroom/press-releases/2026-story'],
+  ['sec','https://www.sec.gov:444/newsroom/press-releases/2026-story'],
+  ['sec','https://www.sec.gov/newsroom/other/2026-story'],
+  ['other',sec]
+ ];
+ for(const [source,url] of blocked)assert.equal(api.officialAnnouncementUrl(source,url),null,'Must reject '+url);
 });

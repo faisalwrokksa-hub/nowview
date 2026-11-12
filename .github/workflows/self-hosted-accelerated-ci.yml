@@ -1,0 +1,80 @@
+name: NewView accelerated CI on isolated self-hosted runner (manual only)
+# SECURITY: never run pull_request or forked/untrusted events on this runner.
+# Use only with a disposable isolated Linux VM and owner-approved main SHA.
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: 'Exact 40-character main SHA approved for execution on an isolated runner'
+        type: string
+        required: true
+      approve_isolated_runner:
+        description: 'I verified this is a trusted main commit and an isolated, disposable runner'
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: newview-self-hosted-build
+  cancel-in-progress: false
+jobs:
+  accelerated-test-apks:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner && github.ref == 'refs/heads/main' && vars.NEWVIEW_SELF_HOSTED_ENABLED == 'true' && inputs.approve_isolated_runner == true && inputs.expected_main_sha == github.sha }}
+    runs-on: [self-hosted, linux, x64, newview-ci-isolated]
+    environment: newview-self-hosted-approval
+    timeout-minutes: 40
+    env:
+      CI: 'true'
+    steps:
+      - name: Check out only the approved main revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Record source identity before any verification
+        shell: bash
+        run: |
+          mkdir -p accelerated-test-artifacts
+          printf 'Source SHA: %s\nRun ID: %s\nRunner: %s\n' \
+            "$GITHUB_SHA" "$GITHUB_RUN_ID" "$RUNNER_NAME" > accelerated-test-artifacts/SOURCE.txt
+      - name: Fail closed if main changed or host prerequisites are missing
+        run: bash tools/check-self-hosted-runner.sh
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          # Use the checked image's Gradle 8.9; never install tools in a build job.
+          cache-read-only: false
+          cache-cleanup: on-success
+      - name: Verify frontend and build independent development APKs in parallel
+        shell: bash
+        run: |
+          set -euo pipefail
+          START=${SECONDS}
+          bash tools/run-accelerated-checks.sh
+          echo "Parallel verification + two APKs: $((SECONDS - START)) seconds" >> "$GITHUB_STEP_SUMMARY"
+      - name: Package development-only artifacts with SHA-256 and provenance
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p accelerated-test-artifacts
+          cp build/newview.apk accelerated-test-artifacts/NewView-TV-test.apk
+          cp phone-caster/app/build/outputs/apk/debug/app-debug.apk accelerated-test-artifacts/NewView-Phone-Caster-test.apk
+          (cd accelerated-test-artifacts && sha256sum *.apk > SHA256SUMS.txt)
+          printf 'Approved source revision: %s\nSELF-HOSTED DEVELOPMENT BUILD ONLY.\nNot signed for production, not deployed, not certified for hardware/media rights.\n' "$SOURCE_SHA" > accelerated-test-artifacts/README.txt
+      - name: Retain build logs and timing even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newview-self-hosted-two-test-apks-${{ github.sha }}
+          path: accelerated-test-artifacts/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Clean generated APKs and development signing material
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf -- build phone-caster/.gradle phone-caster/build phone-caster/app/build accelerated-test-artifacts
+          rm -f -- "$HOME/.android/debug.keystore"

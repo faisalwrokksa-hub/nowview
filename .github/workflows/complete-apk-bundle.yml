@@ -6,11 +6,15 @@ on:
       - 'android/**'
       - 'phone-caster/**'
       - 'build-apk.sh'
+      - 'build-apk.ps1'
       - 'scripts/verify-preview-apk.sh'
       - '.github/workflows/complete-apk-bundle.yml'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: newview-two-apks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   complete-test-bundle:
     runs-on: ubuntu-24.04

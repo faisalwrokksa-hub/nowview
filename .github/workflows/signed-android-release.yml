@@ -2,20 +2,38 @@ name: NewView signed Android release (manual approval)
 on:
   workflow_dispatch:
     inputs:
+      expected_main_sha:
+        description: 'Full 40-character trusted main SHA approved for signing'
+        required: true
+        type: string
+      approve_release_signing:
+        description: 'I approve creating signed candidate APKs, without deployment'
+        required: true
+        type: boolean
+        default: false
       release_label:
         description: 'Internal release label (letters, digits, periods, underscores, dashes)'
         required: true
         default: 'candidate'
 permissions:
   contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+concurrency:
+  group: newview-manual-signed-candidate
+  cancel-in-progress: false
 jobs:
   sign-apks:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && vars.NEWVIEW_SIGNED_RELEASE_ENABLED == 'true' && inputs.approve_release_signing == true && inputs.expected_main_sha == github.sha
     runs-on: ubuntu-24.04
     environment: newview-android-release
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -69,6 +87,25 @@ jobs:
           "$SIGNER" verify --verbose "signed/NewView-TV-${RELEASE_LABEL}.apk"
           "$SIGNER" verify --verbose "signed/NewView-Phone-Caster-${RELEASE_LABEL}.apk"
           sha256sum signed/*.apk > signed/SHA256SUMS.txt
+      - name: Record measured signed APK identity (unapproved worksheet)
+        env:
+          RELEASE_LABEL: ${{ inputs.release_label }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 tools/build-release-candidate-manifest.py \
+            --tv "signed/NewView-TV-${RELEASE_LABEL}.apk" \
+            --phone "signed/NewView-Phone-Caster-${RELEASE_LABEL}.apk" \
+            --output signed/CANDIDATE-UNAPPROVED.json
+      - name: Generate signed artifact provenance (does not approve distribution)
+        uses: actions/attest@v4
+        with:
+          subject-path: 'signed/*.apk'
+      - name: Capture signed candidate provenance and limits
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          printf 'Git commit: %s\nApproved source: main\nSignature: owner-held environment key (verify cert fingerprint against prior release)\nRelease status: CANDIDATE ONLY; NOT AUTOMATICALLY PUBLISHED\n' "$SOURCE_SHA" > signed/RELEASE-CANDIDATE.txt
       - uses: actions/upload-artifact@v4
         with:
           name: NewView-manually-approved-signed-release

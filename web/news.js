@@ -11,6 +11,7 @@
  const nativePending=new Map();
  window.__newviewNewsResult=(id,data)=>{const entry=nativePending.get(id);if(!entry)return;nativePending.delete(id);clearTimeout(entry.timer);if(data?.error)entry.reject(Error(data.error));else entry.resolve(data);};
  let lastItems=[];let lastFetchLabel='';
+ const cacheBySource=new Map(),CACHE_MAX_AGE_MS=3600000; // bounded to the declared nine publishers, memory-only
  // Read source-provided headline and excerpt inside the Read workspace.
  // Do not iframe publishers or scrape copyrighted article bodies.
  const reader=document.createElement('section');reader.className='nv-article-reader';reader.id='nv-article-reader';reader.hidden=true;reader.setAttribute('aria-label','Article reader');
@@ -96,13 +97,20 @@
  }
  async function refreshNews(){
   const sourceId=choose.value;
+  const previous=cacheBySource.get(sourceId);
+  const cached=previous&&Date.now()-previous.savedAt<CACHE_MAX_AGE_MS?previous:null;
   if(controller)controller.abort();
   for(const [id,p] of nativePending){clearTimeout(p.timer);p.reject(new DOMException('Superseded','AbortError'));nativePending.delete(id);}
   controller=new AbortController();
   const current=controller;
+  // A hung network request must not leave Refresh and the news list busy forever.
+  const requestTimeout=setTimeout(()=>current.abort(),12000);
   refresh.disabled=true;refresh.setAttribute('aria-busy','true');
   container.setAttribute('aria-busy','true');
-  sourceLink();status.textContent='Loading source-linked headlines…';reader.hidden=true;container.hidden=false;container.replaceChildren();lastItems=[];
+  sourceLink();reader.hidden=true;container.hidden=false;
+  lastItems=cached?cached.items.slice():[];lastFetchLabel=lastItems.length?'Previously verified headlines · refresh pending':'';
+  if(lastItems.length)renderItems();else container.replaceChildren();
+  status.textContent=lastItems.length?'Refreshing headlines · displaying earlier verified results':'Loading source-linked headlines…';
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:null}));
   try{
    let feed;
@@ -120,9 +128,11 @@
     feed=await response.json();
    }
    if(current!==controller)return;
-   if(!Array.isArray(feed.items)||!feed.items.length){window.NewViewSourceMonitor?.mark?.('news',sourceId,'failed','No headlines returned');status.textContent='No headlines returned by this source. Check the original publisher.';return;}
-   lastItems=feed.items.filter(item=>{try{const url=new URL(item.url);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&articleHosts.has(url.hostname)&&typeof item.title==='string'&&item.title.trim();}catch{return false;}}).slice(0,100);
-   if(!lastItems.length){window.NewViewSourceMonitor?.mark?.('news',sourceId,'failed','No valid source-linked articles');status.textContent='No valid announcements returned by this source';return;}
+   if(!Array.isArray(feed.items)||!feed.items.length)throw Error('No headlines returned');
+   const verified=feed.items.filter(item=>{try{const url=new URL(item.url);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&articleHosts.has(url.hostname)&&typeof item.title==='string'&&item.title.trim();}catch{return false;}}).slice(0,100);
+   if(!verified.length)throw Error('No valid source-linked articles');
+   lastItems=verified;
+   cacheBySource.set(sourceId,{savedAt:Date.now(),items:verified.slice()});
    window.NewViewSourceMonitor?.mark?.('news',sourceId,'ok',lastItems.length+' valid headlines');
    renderItems();
    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:sourceId,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
@@ -131,10 +141,18 @@
    const freshness=Number.isFinite(age)&&age>=0&&age<=3600000?'Recently fetched':'Fetch time unavailable or older than one hour';
    lastFetchLabel=freshness+' · fetched '+(Number.isFinite(fetched.getTime())?fetched.toLocaleString():'unknown');renderItems();
   }catch(err){
-   if(current!==controller||err.name==='AbortError')return;
-   window.NewViewSourceMonitor?.mark?.('news',sourceId,'failed',String(err?.message||'Feed unavailable'));
-   status.textContent='Headlines unavailable. Retry refresh or open the official source below.';
+   if(current!==controller)return;
+   const reason=err?.name==='AbortError'?'Request timed out':String(err?.message||'Feed unavailable');
+   if(cached?.items.length){
+    lastItems=cached.items.slice();lastFetchLabel='Stale saved results · last received '+new Date(cached.savedAt).toLocaleString();
+    window.NewViewSourceMonitor?.mark?.('news',sourceId,'unknown','Live refresh failed; previous verified headlines shown');
+    renderItems();status.textContent='Live headlines unavailable ('+reason+'). Showing previously verified headlines; retry or open the publisher.';
+   }else{
+    window.NewViewSourceMonitor?.mark?.('news',sourceId,'failed',reason);
+    status.textContent='Headlines unavailable ('+reason+'). Retry refresh or open the official source below.';
+   }
   }finally{
+   clearTimeout(requestTimeout);
    if(current===controller){refresh.disabled=false;refresh.removeAttribute('aria-busy');container.removeAttribute('aria-busy');}
   }
  }
