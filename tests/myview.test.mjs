@@ -190,7 +190,31 @@ test('Official headline direct links are restricted to publisher HTTPS announcem
  assert.match(src,/url\.username===''&&url\.password===''/);
  assert.match(src,/url\.hostname==='www\.federalreserve\.gov'/);
  assert.match(src,/url\.hostname==='www\.sec\.gov'/);
- assert.match(src,/url\.pathname\.startsWith\('\/newsevents\/pressreleases\/'\)/);
- assert.match(src,/url\.pathname\.startsWith\('\/newsroom\/'\)/);
+ assert.match(src,/\^\\\/newsevents\\\/pressreleases\\\//);
+ assert.match(src,/press-releases\|press-release\|speeches-statements\|public-statement/);
  assert.match(src,/link\.href=direct\|\|/);
+});
+
+test('Official Fed/SEC deep links accept article pages but never publisher indexes or redirects',()=>{
+ const {api}=setup();
+ const fed='https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm';
+ const sec='https://www.sec.gov/newsroom/press-releases/2026-113-sec-announces-enforcement-annual-results-fiscal-year-2026';
+ assert.equal(api.officialAnnouncementUrl('fed',fed),fed);
+ assert.equal(api.officialAnnouncementUrl('sec',sec),sec);
+ assert.equal(api.officialAnnouncementUrl('sec',sec+'?utm_source=feed#article'),sec,'strip untrusted search/fragment');
+ const blocked=[
+  ['fed','https://www.federalreserve.gov/newsevents/pressreleases/'],
+  ['fed','https://www.federalreserve.gov/newsevents/pressreleases/2026-press.htm'],
+  ['sec','https://www.sec.gov/newsroom/'],
+  ['sec','https://www.sec.gov/newsroom/press-releases'],
+  ['sec','https://www.sec.gov/newsroom/press-releases?year=2026'],
+  ['sec','https://www.sec.gov/newsroom/press-releases/page'],
+  ['sec','https://www.sec.gov.evil.example/newsroom/press-releases/2026-story'],
+  ['sec','https://user@www.sec.gov/newsroom/press-releases/2026-story'],
+  ['sec','http://www.sec.gov/newsroom/press-releases/2026-story'],
+  ['sec','https://www.sec.gov:444/newsroom/press-releases/2026-story'],
+  ['sec','https://www.sec.gov/newsroom/other/2026-story'],
+  ['other',sec]
+ ];
+ for(const [source,url] of blocked)assert.equal(api.officialAnnouncementUrl(source,url),null,'Must reject '+url);
 });
