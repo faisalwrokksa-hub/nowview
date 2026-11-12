@@ -62,3 +62,22 @@ test('integration UX: focus, announcements and compact settings remain usable',(
  assert.ok(css.includes('overflow-wrap:anywhere'));
  assert.ok(css.includes('prefers-reduced-motion:reduce'));
 });
+
+test('short landscape TV rail is scoped and does not override simplified or home layouts',()=>{
+ assert.match(css,/@media \(min-width:1200px\) and \(min-height:480px\) and \(max-height:649px\) and \(orientation:landscape\)/);
+ assert.match(css,/body:not\(\.home-panel\):not\(\.nv-simple\)>main>\.workspace-switcher/);
+ assert.match(css,/grid-template-rows:auto auto minmax\(0,1fr\) auto/);
+ assert.match(css,/body:not\(\.home-panel\):not\(\.nv-simple\)>main :is\(\.shell-page,\.workspace,\[data-workspace\],#market-shell\)/);
+ const simple=read('web/simplified-ui.css');
+ assert.match(simple,/@media\(min-width:1200px\)\{body\.nv-simple>main\{display:flex;flex-direction:column\}/);
+});
+
+test('Cloudflare previews declare isolated sync Durable Object binding without deployment routes',()=>{
+ const config=JSON.parse(read('wrangler.json'));
+ assert.equal(config.name,'nowview');
+ assert.equal(config.build.command,'npm run build');
+ assert.deepEqual(config.previews.durable_objects.bindings,config.durable_objects.bindings);
+ for(const restricted of ['routes','triggers','kv_namespaces','d1_databases','vars']){
+  assert.equal(config.previews[restricted],undefined,'Preview must not inherit '+restricted+' into configuration');
+ }
+});
