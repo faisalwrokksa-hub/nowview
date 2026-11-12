@@ -100,6 +100,8 @@
   for(const [id,p] of nativePending){clearTimeout(p.timer);p.reject(new DOMException('Superseded','AbortError'));nativePending.delete(id);}
   controller=new AbortController();
   const current=controller;
+  refresh.disabled=true;refresh.setAttribute('aria-busy','true');
+  container.setAttribute('aria-busy','true');
   sourceLink();status.textContent='Loading source-linked headlines…';reader.hidden=true;container.hidden=false;container.replaceChildren();lastItems=[];
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:null}));
   try{
@@ -131,7 +133,9 @@
   }catch(err){
    if(current!==controller||err.name==='AbortError')return;
    window.NewViewSourceMonitor?.mark?.('news',sourceId,'failed',String(err?.message||'Feed unavailable'));
-   status.textContent='Headlines unavailable. Open the official source below.';
+   status.textContent='Headlines unavailable. Retry refresh or open the official source below.';
+  }finally{
+   if(current===controller){refresh.disabled=false;refresh.removeAttribute('aria-busy');container.removeAttribute('aria-busy');}
   }
  }
  refresh.addEventListener('click',refreshNews);
