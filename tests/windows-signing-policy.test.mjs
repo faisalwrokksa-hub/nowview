@@ -21,8 +21,8 @@ test('Windows and Linux signers do not echo passwords or hardcode keystore ident
  for(const signer of [ps,shell]){
   assert.match(signer,/env:NEWVIEW_RELEASE_STORE_PASSWORD/);
   assert.match(signer,/env:NEWVIEW_RELEASE_KEY_PASSWORD/);
-  assert.doesNotMatch(signer,/--ks-pass\s+\S*(?:[A-Za-z0-9]{7,}|pass:)/i);
-  assert.doesNotMatch(signer,/--key-pass\s+\S*(?:[A-Za-z0-9]{7,}|pass:)/i);
+  assert.doesNotMatch(signer,/--ks-pass\s+(?!env:)\S+/);
+  assert.doesNotMatch(signer,/--key-pass\s+(?!env:)\S+/);
  }
  assert.match(ps,/apksigner verify|& \$apksigner verify/);
  assert.match(policy,/sign-release\.ps1/);
