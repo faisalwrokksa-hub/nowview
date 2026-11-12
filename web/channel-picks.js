@@ -8,8 +8,27 @@
  function state(url){const x=cache[url];return x&&Date.now()-x.time<TTL&&x.time<=Date.now()+60000?x.status:'unchecked';}
  function save(){const entries=Object.entries(cache).filter(([,v])=>v&&Number.isFinite(v.time)&&Date.now()-v.time<TTL).sort((a,b)=>b[1].time-a[1].time).slice(0,160);cache=Object.fromEntries(entries);try{localStorage.setItem(KEY,JSON.stringify(cache));}catch{}}
  function mark(url,status){if(!safe(url)||!['ready','playing','unavailable','unknown'].includes(status))return;cache[url]={status,time:Date.now()};save();root.dispatchEvent(new CustomEvent('newview:channel-check',{detail:{url,status}}));}
- function score(item){const s=state(item.url);let n=({playing:1000,ready:500,unchecked:0,unknown:-10,unavailable:-1000})[s]||0;if(/al jazeera english|france 24 english|dw english|sky news|bloomberg|cnbc|saudi|alarabiya|al arabiya/i.test(item.name))n+=35;if(/news|business|english|arabic/i.test(item.name))n+=10;return n;}
- function rank(items){return items.filter(x=>x&&safe(x.url)).map((x,index)=>({...x,index})).sort((a,b)=>score(b)-score(a)||a.index-b.index);}
+ function preferences(){
+  try{const x=JSON.parse(localStorage.getItem('newview.recommendation.preferences.v1')||'{}');
+   return {language:['any','english','arabic','spanish','french'].includes(x?.language)?x.language:'any',
+    interest:['all','news','business','sports','music'].includes(x?.interest)?x.interest:'all'};
+  }catch{return {language:'any',interest:'all'};}
+ }
+ function favorites(){
+  try{const data=JSON.parse(localStorage.getItem('newview.media.channel-favorites.v1')||'[]');
+   return new Set(Array.isArray(data)?data.filter(x=>typeof x==='string').slice(0,200):[]);
+  }catch{return new Set();}
+ }
+ function score(item,context){
+  const s=state(item.url);let n=({playing:1000,ready:500,unchecked:0,unknown:-10,unavailable:-1000})[s]||0;
+  if(context.favorites.has(item.url))n+=280;
+  const recent=context.history.findIndex(x=>x.url===item.url);if(recent>=0)n+=Math.max(30,210-recent*8);
+  if(context.prefs.language!=='any'&&String(item.name).toLowerCase().includes(context.prefs.language))n+=70;
+  if(context.prefs.interest!=='all'&&String(item.name+' '+(item.category||'')).toLowerCase().includes(context.prefs.interest))n+=85;
+  if(/news|business|english|arabic/i.test(item.name))n+=10;
+  return n;
+ }
+ function rank(items){const context={favorites:favorites(),history:root.NewViewViewing?.read?.()||[],prefs:preferences()};return items.filter(x=>x&&safe(x.url)).map((x,index)=>({...x,index})).sort((a,b)=>score(b,context)-score(a,context)||a.index-b.index);}
  function probe(url){return new Promise(resolve=>{
   const video=document.createElement('video');video.muted=true;video.playsInline=true;video.preload='auto';
   let done=false;const finish=status=>{if(done)return;done=true;clearTimeout(timer);video.onloadeddata=video.onerror=null;video.pause();video.removeAttribute('src');video.load();video.remove();resolve(status);};
