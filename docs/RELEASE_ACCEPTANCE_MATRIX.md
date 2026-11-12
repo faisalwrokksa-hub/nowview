@@ -49,6 +49,10 @@ For each test record: device model, Android version, APK SHA-256, build commit, 
 
 Record results as a JSON array using the fields below (camelCase: `buildCommit`, `apkSha256`, `result`, `device`, `expected`, `observed`, `tester`, `date`, `evidence`). Run `node tools/check-release-evidence.mjs path/to/evidence.json` locally. The checker fails closed on missing tests, duplicates, malformed PASS records, and missing device/build evidence. It does **not** validate that submitted observations are truthful; human review and all production gates remain mandatory. Never commit private pairing links or keys.
 
+## Consolidated readiness report
+
+After recording evidence, create a local JSON object with `records` (the evidence array) and `gates` (booleans: `ci`, `mediaRights`, `securityReview`, `signing`, `upgradeTest`, `supportPolicy`, `ownerApproval`). Run `node tools/release-readiness-report.mjs readiness.json report.md`. Every omitted gate is UNVERIFIED and the report is NO-GO by default. A generated report does not replace real verification or authorize distribution.
+
 ## Evidence template
 ```text
 Test ID:
