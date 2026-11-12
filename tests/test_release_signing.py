@@ -16,10 +16,14 @@ class SigningPolicyTests(unittest.TestCase):
         self.assertNotIn('keytool -genkeypair',s)
 
     def test_ci_does_not_run_release_signer(self):
-        w=(ROOT/".github/workflows/dashboard.yml").read_text(encoding="utf-8")
+        w=(ROOT/".github/workflows/complete-apk-bundle.yml").read_text(encoding="utf-8")
+        dashboard=(ROOT/".github/workflows/dashboard.yml").read_text(encoding="utf-8")
         self.assertNotIn("sign-release.sh",w)
-        self.assertIn("TheNewView-test-APK",w)
-        self.assertIn("build/TheNewView-test.apk",w)
+        self.assertNotIn("sign-release.sh",dashboard)
+        self.assertIn("NewView-complete-two-APK-test-bundle",w)
+        self.assertIn("NewView-Android-TV-test.apk",w)
+        self.assertIn("build/newview.apk",w)
+        self.assertNotIn("bash build-apk.sh",dashboard)
         self.assertNotIn("NEWVIEW_RELEASE_STORE_PASSWORD",w)
 
     def test_gitignore_excludes_private_keys(self):
