@@ -118,7 +118,7 @@
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));
   if(file.size>limitBytes){status.textContent='File too large: maximum 1 MB';picker.value='';return;}
   try{const text=await file.text();if(version!==selectionVersion)return;const rows=parseBusinessCsv(text);loadedRows=rows;period.value='all';periodLabel.hidden=false;render(selectedRows());}
-  catch(error){if(version===selectionVersion){loadedRows=null;periodLabel.hidden=true;status.textContent='CSV rejected: '+error.message;}}
+  catch(error){if(version===selectionVersion){loadedRows=null;periodLabel.hidden=true;picker.value='';status.textContent='CSV rejected: '+error.message;}}
  });
  clear?.addEventListener('click',reset);
  window.NewViewBusiness={parseCsv,parseBusinessCsv,summarize,reset};
