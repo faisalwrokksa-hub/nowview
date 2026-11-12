@@ -85,6 +85,35 @@
    importFile.value='';
   });
   importLabel.append(importFile);panel.append(importLabel,importStatus);
+  // Customer policy links must be configured only after the operator approves
+  // real public HTTPS pages. Never fill these slots with fictitious contact URLs.
+  const legal=document.createElement('section');legal.className='nv-legal-links';
+  const legalHeading=document.createElement('h3');legalHeading.textContent='Privacy & support';legal.append(legalHeading);
+  const links=[
+   ['newview-privacy-policy-url','Privacy policy'],
+   ['newview-support-url','Customer support']
+  ];
+  let missing=0;
+  for(const [metaName,caption] of links){
+   const raw=document.querySelector('meta[name="'+metaName+'"]')?.content?.trim();
+   let valid=null;
+   try{
+    if(raw){
+     const url=new URL(raw);
+     if(url.protocol==='https:'&&url.hostname.includes('.')&&!url.username&&!url.password&&!url.port&&!url.hash)valid=url.href;
+    }
+   }catch{}
+   if(valid){
+    const anchor=document.createElement('a');anchor.href=valid;anchor.textContent=caption;
+    anchor.target='_blank';anchor.rel='noopener noreferrer';legal.append(anchor);
+   }else missing++;
+  }
+  if(missing){
+   const notice=document.createElement('p');
+   notice.textContent='Public privacy policy and support destinations are pending owner approval. Commercial distribution is not yet authorized.';
+   legal.append(notice);
+  }
+  panel.append(legal);
   host.append(panel);
   // Preserve focus when a workspace switch removes or hides the focused control.
   const nav=document.getElementById('nv-simple-nav')||document.getElementById('workspace-switcher');
