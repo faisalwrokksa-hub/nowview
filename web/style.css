@@ -897,3 +897,14 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media (forced-colors:active){
   :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(a,summary,select,textarea):focus-visible{outline:3px solid Highlight;outline-offset:3px}
 }
+
+/* Task 1: keep focused workspace tabs visible during horizontal TV remote navigation. */
+.workspace-switcher{scroll-padding-inline:24px;overscroll-behavior-x:contain}
+.workspace-switcher .workspace-tab:focus-visible{scroll-margin-inline:24px;position:relative;z-index:1}
+@media (max-width:650px){
+ .workspace-switcher{max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden}
+ .workspace-switcher .workspace-tab{flex-shrink:0;min-height:44px}
+}
+@media (forced-colors:active){
+ .workspace-switcher .workspace-tab[aria-current="page"]{border:2px solid Highlight}
+}
