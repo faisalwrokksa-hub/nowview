@@ -99,7 +99,7 @@ export function applyCommand(state,command,now=new Date()){
    const customer=next.customers[ref];if(!customer)throw Error('Unknown customer reference');
    const plan=validateCatalog().valid&&catalog.plans.find(p=>p.id===command.planId);
    if(!plan||plan.id==='preview')throw Error('Only draft Personal or Business plans may be requested');
-   if(customer.planRequest&&['pending','reviewed','cancellation-requested'].includes(customer.planRequest.status))
+   if(customer.planRequest&&['pending','reviewed','renewal-requested','cancellation-requested'].includes(customer.planRequest.status))
     throw Error('Existing plan request must be resolved first');
    customer.planRequest={id:allocate(next,'request'),planId:plan.id,status:'pending',requestedAt:at,
     cancellationRequestedAt:null};
@@ -114,10 +114,26 @@ export function applyCommand(state,command,now=new Date()){
    customer.updatedAt=at;recordEvent(next,'plan-reviewed-not-activated',ref,at);
    break;
   }
+  case 'subscription:renewal':{
+   requireRef(ref,'Customer reference');
+   const customer=next.customers[ref];if(customer?.planRequest?.status!=='reviewed')
+    throw Error('A reviewed draft plan request is required before requesting renewal');
+   customer.planRequest.status='renewal-requested';customer.planRequest.renewalRequestedAt=at;
+   customer.updatedAt=at;recordEvent(next,'renewal-requested-not-billed',ref,at);
+   break;
+  }
+  case 'subscription:review-renewal':{
+   requireRef(ref,'Customer reference');
+   const customer=next.customers[ref];if(customer?.planRequest?.status!=='renewal-requested')
+    throw Error('No pending renewal request for review');
+   customer.planRequest.status='reviewed';customer.planRequest.renewalReviewedAt=at;
+   customer.updatedAt=at;recordEvent(next,'renewal-reviewed-not-billed',ref,at);
+   break;
+  }
   case 'subscription:cancel':{
    requireRef(ref,'Customer reference');
    const customer=next.customers[ref];if(!customer?.planRequest)throw Error('No plan request to cancel');
-   if(!['pending','reviewed'].includes(customer.planRequest.status))throw Error('Request cannot be cancelled in its current status');
+   if(!['pending','reviewed','renewal-requested'].includes(customer.planRequest.status))throw Error('Request cannot be cancelled in its current status');
    customer.planRequest.status='cancellation-requested';
    customer.planRequest.cancellationRequestedAt=at;customer.updatedAt=at;
    recordEvent(next,'cancellation-requested',ref,at);
