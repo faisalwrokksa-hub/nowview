@@ -28,7 +28,7 @@ NewView is a customizable, multi-screen dashboard product. Start with a **commer
 - No trade execution and no false equivalence between Binance tokenized instruments and actual US shares.
 - Release only after testing on real TV hardware and completing the checklist in the master prompt.
 
-**Current status:** market-dashboard code has been migrated on the review branch [`feat/market-dashboard-baseline`](https://github.com/faisalwrokksa-hub/nowview/pull/1). A test APK build has passed automated CI; commercial data rights, signing continuity and hardware QA remain unverified. No PR has been merged or deployed.
+**Current status:** Active multi-dashboard development. For the current implementation and release gaps, see [Production Gap Closure](docs/PRODUCTION_GAP_CLOSURE.md) and [GitHub Actions](https://github.com/faisalwrokksa-hub/nowview/actions). CI-built APKs are test-only; hardware QA, commercial rights and production signing must be verified before release.
 
 ## Release signing
 
