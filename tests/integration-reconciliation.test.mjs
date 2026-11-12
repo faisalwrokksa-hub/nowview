@@ -97,3 +97,14 @@ test('legacy TV WebView remote focus and accessible errors stay visible without 
  const smallRail=css.slice(css.indexOf('Short landscape Android TV: retain the normal rail'));
  assert.doesNotMatch(smallRail,/^\s*body>main\s*\{/m,'Never override the entire four-tab launcher');
 });
+
+
+test('live preview checks compact TV landscape in both Chromium and Firefox',()=>{
+ const browser=read('tools/verify-integration-browser.mjs');
+ assert.match(browser,/name:'shortTV1920',width:1920,height:540/);
+ assert.match(browser,/name:'shortTV1280',width:1280,height:500/);
+ assert.match(browser,/engine:chromium/);
+ assert.match(browser,/engine:firefox/);
+ assert.match(browser,/keyboard\.press\('ArrowRight'\)/);
+ assert.match(browser,/keyboard\.press\('Enter'\)/);
+});
