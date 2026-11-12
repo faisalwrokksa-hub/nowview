@@ -1,12 +1,16 @@
 name: NewView dashboard TV and web
 on:
   push:
+    branches: [main]
     paths: ['web/**', 'cloud/**', 'tools/**', 'package.json', 'wrangler.json', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', 'scripts/verify-preview-apk.sh', '.github/workflows/dashboard.yml']
   pull_request:
     paths: ['web/**', 'cloud/**', 'tools/**', 'package.json', 'wrangler.json', 'android/**', 'dashboard.py', 'tests/**', 'build-apk.*', 'scripts/verify-preview-apk.sh', '.github/workflows/dashboard.yml']
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: newview-dashboard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   test-and-build:
     runs-on: ubuntu-24.04
