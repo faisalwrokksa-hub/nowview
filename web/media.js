@@ -70,6 +70,8 @@
   const url=inlineSource;if(!url)return;
   clearInlineWatchdog();
   window.NewViewSourceMonitor?.mark?.('iptv',url,'ok','Browser playback started');
+  window.NewViewChannelPicks?.mark?.(url,'playing');
+  window.NewViewViewing?.confirmed?.(url,list.selectedOptions?.[0]?.textContent||'Live TV');
   inlineStatus.textContent='Live stream playing. Availability depends on the source.';
  });
  inlineVideo.addEventListener('waiting',()=>{
