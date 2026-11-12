@@ -969,3 +969,18 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
  .workspace-switcher{scrollbar-color:auto}
  :is(.shell-page,.workspace,.newview-settings-content) :is([role="alert"],[role="status"]) a:focus-visible{outline:3px solid Highlight}
 }
+
+/* Task 1: retain the wide-screen vertical rail on short Android TV viewports.
+   The compact-landscape rule above must not turn the desktop rail horizontal. */
+@media (min-width:1200px) and (max-height:600px) and (orientation:landscape){
+  body>main>.workspace-switcher{
+    overflow-x:hidden;
+    overflow-y:auto;
+    scroll-padding-block:24px;
+    overscroll-behavior-y:contain;
+  }
+  body>main>.workspace-switcher .workspace-tab{
+    flex:0 0 auto;
+    min-height:44px;
+  }
+}
