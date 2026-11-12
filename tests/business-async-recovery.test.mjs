@@ -61,7 +61,7 @@ test('invalid CSV clears picker for same-file retry, then valid CSV restores sum
  await h.select({size:21,text:async()=> 'date,revenue\nbad,row'});
  assert.equal(h.picker.value,'');
  assert.equal(h.picker.attributes.has('aria-busy'),false);
- assert.match(h.status.textContent,/CSV rejected/);
+ assert.match(h.status.textContent,/CSV rejected: Expected columns/);
  await h.select({size:valid.length,text:async()=>valid});
  assert.equal(h.cards.children.length,6);
  assert.equal(h.picker.attributes.has('aria-busy'),false);
