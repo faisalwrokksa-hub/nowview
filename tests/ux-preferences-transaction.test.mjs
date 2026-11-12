@@ -45,7 +45,7 @@ test('preference import rolls back every saved key after an intermediate storage
  await h.import(valid);
  assert.deepEqual([...h.state.entries()],[...before.entries()]);
  assert.match(h.importStatus.textContent,/Previous preferences were restored/);
- assert.deepEqual(h.root.NewViewUX.get(),initial);
+ assert.deepEqual(JSON.parse(JSON.stringify(h.root.NewViewUX.get())),initial);
  assert.equal(h.document.body.dataset.nvDensity,'comfortable');
  await h.import(valid);
  assert.equal(h.state.get(BOX),JSON.stringify(valid.homeShortcuts));
