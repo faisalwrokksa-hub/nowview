@@ -75,3 +75,10 @@ test('reset clears pending CSV busy indicators after an in-flight read',()=>{
  assert.match(src,/selectionVersion\+\+/);
  assert.match(src,/finally\{if\(version===selectionVersion\)\{/);
 });
+
+
+test('oversized or replacement CSV clears stale busy state before early return',()=>{
+ assert.match(src,/const file=picker\.files\?\.\[0\];if\(!file\)return;\s*const version=\+\+selectionVersion;/);
+ assert.match(src,/picker\.removeAttribute\('aria-busy'\);cards\.removeAttribute\('aria-busy'\);/);
+ assert.match(src,/if\(file\.size>limitBytes\)/);
+});
