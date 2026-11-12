@@ -125,7 +125,7 @@
   social:v=>v&&Number.isSafeInteger(v.count)&&v.count>=0?v.count+' locally saved public profiles':'No verified public-profile count available',
   media:()=> 'Open a video in Watch & News; no playback is started here'
  };
- if(!root||!editor){window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,preview};return;}
+ if(!root||!editor){window.NewViewPersonal={catalog,presets,preset,sanitize,load,save,preview,officialAnnouncementUrl};return;}
  function text(tag,cls,value){const el=document.createElement(tag);if(cls)el.className=cls;el.textContent=value;return el;}
  function updateMarketSourceLink(){
   const link=root.querySelector('[data-widget="market"] [data-source-link="market"]');
