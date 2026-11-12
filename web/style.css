@@ -1020,3 +1020,31 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media (prefers-reduced-motion:reduce){
   .workspace-switcher .workspace-tab{transition:none!important}
 }
+
+/* Task 1: wide but short TV screens use the same vertical navigation rail as
+   regular TVs. Earlier min-height:650px gating left these screens in flex mode. */
+@media (min-width:1200px) and (max-height:649px) and (orientation:landscape){
+  body>main{
+    display:grid;
+    grid-template-columns:minmax(185px,220px) minmax(0,1fr);
+    grid-template-rows:auto auto minmax(0,1fr) auto;
+    align-items:stretch;
+  }
+  body>main>header{grid-column:1/-1;grid-row:1}
+  body>main>.workspace-switcher{
+    grid-column:1;grid-row:2/4;
+    display:flex;flex-direction:column;align-items:stretch;
+    overflow-x:hidden;overflow-y:auto;
+    max-width:none;min-width:0;min-height:0;
+    padding:12px;
+  }
+  body>main>.workspace-switcher .workspace-tab{
+    flex:0 0 auto;min-height:44px;text-align:left;
+  }
+  body>main>.newview-settings{grid-column:2;grid-row:2;justify-self:end}
+  body>main>#workspace-intro{grid-column:2;grid-row:2;justify-self:start;align-self:center;max-width:65%}
+  body>main>.shell-page,body>main>.workspace,body>main>[data-workspace]{
+    grid-column:2;grid-row:3;min-width:0;min-height:0;overflow:auto;
+  }
+  body>main>footer{grid-column:1/-1;grid-row:4}
+}
