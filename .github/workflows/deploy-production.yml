@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           CURRENT_SHA="$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq .commit.sha)"
-          if [[ "$(git rev-parse HEAD)" != "$CURRENT_SHA" ]]; then
+          if [[ "$(git rev-parse HEAD)" != "$CURRENT_SHA" || "$GITHUB_SHA" != "$CURRENT_SHA" ]]; then
             echo "::error::main advanced during checkout; rerun this workflow against the latest commit."
             exit 1
           fi
