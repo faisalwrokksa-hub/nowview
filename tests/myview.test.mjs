@@ -176,3 +176,9 @@ test('Market Watch clears chart context for invalid or missing snapshots',()=>{
  assert.match(src,/if\(id==='market'\)refreshChart\(\)/);
  assert.match(src,/if\(id==='market'\)item\.append\(chartFor\(chartSymbol\(\)\)\)/);
 });
+
+
+test('Market Watch freshness refresh expires stale chart context without rebuilding dashboard',()=>{
+ assert.match(src,/function refreshMarketAge\(\)\{[\s\S]*?updateMarketSourceLink\(\);\s*refreshChart\(\);/);
+ assert.match(src,/document\.addEventListener\('visibilitychange',[^\n]*refreshMarketAge\(\)/);
+});
