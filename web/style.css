@@ -949,3 +949,14 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media (prefers-reduced-motion:reduce) {
   .workspace-switcher,.newview-settings-content {scroll-behavior:auto}
 }
+
+/* Task 1: prevent focus rings from being clipped by scrollable workspace tabs. */
+.workspace-switcher{scroll-padding-block:6px}
+.workspace-switcher .workspace-tab:focus-visible{outline-offset:-3px}
+/* Native details/summary and disabled controls retain predictable remote navigation. */
+.newview-settings-content details>summary{scroll-margin-block:24px}
+.newview-settings-content :is(button,input,select,textarea):disabled{cursor:not-allowed}
+@media (forced-colors:active){
+  .workspace-switcher .workspace-tab:focus-visible{outline:3px solid Highlight}
+  .newview-settings-content details>summary:focus-visible{outline:3px solid Highlight;outline-offset:2px}
+}
