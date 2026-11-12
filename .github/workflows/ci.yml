@@ -20,6 +20,20 @@ jobs:
           node-version: '22'
       - name: Validate and build Worker + Pages preview
         run: npm run verify
+      - name: Parse owner-only PowerShell governance/signing scripts (no execution)
+        shell: pwsh
+        run: |
+          foreach ($path in @('tools/secure-main.ps1', 'tools/check-owner-release-upgrade.ps1', 'sign-release.ps1')) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $path), [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | ForEach-Object { Write-Error $_.Message }
+              throw "Invalid PowerShell syntax: $path"
+            }
+            Write-Host "PASS PowerShell parser: $path"
+          }
+
       - name: Check Worker release entrypoint
         run: test -s dist/server/index.js
       - uses: actions/upload-artifact@v4
