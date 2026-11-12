@@ -34,7 +34,7 @@ test('confirmed history imports only bounded, validated HTTPS events',()=>{
  assert.equal(ctx.NewViewViewing.importConfirmed([{url:'https://example.com/video.m3u8',name:'News',at:t}]),true);
  assert.equal(ctx.NewViewViewing.read().length,1);
  assert.equal(ctx.NewViewViewing.importConfirmed(Array.from({length:9},()=>({url:'https://example.com/video.m3u8',name:'News',at:t}))),false);
- assert.equal(ctx.NewViewViewing.importConfirmed([{url:'http://local.invalid/x.mp4',name:'unsafe',at:t}]),true);
- assert.equal(ctx.NewViewViewing.read().length,0);
+ assert.equal(ctx.NewViewViewing.importConfirmed([{url:'http://local.invalid/x.mp4',name:'unsafe',at:t}]),false);
+ assert.equal(ctx.NewViewViewing.read().length,1);
  assert.equal(events.some(x=>x.type==='newview:viewing-history'),true);
 });
