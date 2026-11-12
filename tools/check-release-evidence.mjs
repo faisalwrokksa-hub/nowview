@@ -22,7 +22,7 @@ export function validate(record){
 }
 export function evaluate(records){
  const problems=[],byId=new Map();
- if(!Array.isArray(records))return {ready:false,problems:['Expected an array of evidence records'],summary:{}};
+ if(!Array.isArray(records))return {ready:false,problems:['Expected an array of evidence records'],missing:[...ids],summary:{PASS:0,FAIL:0,BLOCKED:0,'NOT RUN':ids.length}};
  for(const record of records){
   const errors=validate(record);if(errors.length)problems.push((record?.id||'unknown')+': '+errors.join('; '));
   if(record&&ids.includes(record.id)){if(byId.has(record.id))problems.push('Duplicate '+record.id);byId.set(record.id,record);}
