@@ -935,3 +935,17 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media (forced-colors:active){
   body>main .workspace-switcher .workspace-tab:focus-visible{outline:3px solid Highlight;outline-offset:2px}
 }
+
+/* Task 1: safe-area-aware settings and scroll targets for notched mobile displays. */
+@supports (padding: env(safe-area-inset-bottom)) {
+  @media (max-width:520px) {
+    body>main>.newview-settings[open]>.newview-settings-content {
+      padding-bottom:max(12px,env(safe-area-inset-bottom));
+      padding-left:max(12px,env(safe-area-inset-left));
+      padding-right:max(12px,env(safe-area-inset-right));
+    }
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .workspace-switcher,.newview-settings-content {scroll-behavior:auto}
+}
