@@ -6,6 +6,7 @@ on:
       - 'android/**'
       - 'phone-caster/**'
       - 'build-apk.sh'
+      - 'build-apk.ps1'
       - 'scripts/verify-preview-apk.sh'
       - '.github/workflows/complete-apk-bundle.yml'
   workflow_dispatch:
