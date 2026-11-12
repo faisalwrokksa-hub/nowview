@@ -4,8 +4,8 @@ import {readFileSync} from 'node:fs';
 const read=name=>readFileSync(new URL('../web/'+name,import.meta.url),'utf8');
 const ui=read('simplified-ui.js'),css=read('simplified-ui.css'),cast=read('cast-overlay.js');
 test('NewView has exactly four top-level destinations and no duplicate header cast button',()=>{
- for(const label of ['Home','Watch','Read','Customize'])assert.match(ui,new RegExp("'"+label+"'"));
- assert.match(ui,/\['home','Home'\],\['watch','Watch'\],\['read','Read'\],\['customize','Customize'\]/);
+ for(const label of ['Home','Watch','Discover','Settings'])assert.match(ui,new RegExp("'"+label+"'"));
+ assert.match(ui,/\['home','Home'\],\['watch','Watch'\],\['read','Discover'\],\['customize','Settings'\]/);
  assert.match(cast,/No redundant header launcher/);
  assert.doesNotMatch(cast,/header\?\.append\(trigger\)/);
  assert.doesNotMatch(ui,/header\.append\(devices\)/);

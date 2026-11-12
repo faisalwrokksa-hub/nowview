@@ -93,7 +93,7 @@
    window.NewViewSourceMonitor?.mark?.('iptv',iptvSource,status,detail);
   }
   video.addEventListener('playing',()=>{
-   if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;window.NewViewChannelPicks?.mark?.(iptvSource,'playing');flagIPTV('ok','Video playback confirmed');report('Live TV playing · change channel below');}
+   if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;window.NewViewChannelPicks?.mark?.(iptvSource,'playing');window.NewViewViewing?.confirmed?.(iptvSource,channels.find(c=>c.url===iptvSource)?.name||'Live TV');flagIPTV('ok','Video playback confirmed');report('Live TV playing · change channel below');}
   });
   video.addEventListener('error',()=>{
    if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;window.NewViewChannelPicks?.mark?.(iptvSource,'unavailable');flagIPTV('failed','Browser video playback failed');report('Channel unavailable here. Choose a Ready channel below.');}
