@@ -30,7 +30,7 @@
   return validate(JSON.parse(decoder.decode(clear)));
  }
  const endpoint=()=>'/api/device-sync/'+room;
- async function request(method,blob){
+ async function request(method,blob,expected){
   const requestRoom=room;
   if(!requestRoom)throw Error('No paired room active');
   const controller=new AbortController();
@@ -38,9 +38,11 @@
   const headers={Accept:'application/json'};
   if(blob!==undefined)headers['Content-Type']='application/json';
   try{
-   const response=await fetch('/api/device-sync/'+requestRoom,{method,cache:'no-store',credentials:'same-origin',signal:controller.signal,headers,body:blob===undefined?undefined:JSON.stringify({blob})});
-   if(response.status===404)return null;
+   const response=await fetch('/api/device-sync/'+requestRoom,{method,cache:'no-store',credentials:'same-origin',signal:controller.signal,headers,body:blob===undefined?undefined:JSON.stringify(expected===undefined?{blob}:{blob,expected})});
+   if(response.status===404){if(method==='GET')return null;throw Error('Pairing room expired or was not found. Create a fresh pairing link.');}
    if(response.status===410)throw Error('This pairing room has been revoked. Create a new pairing link.');
+   if(response.status===409)throw Error(method==='PUT'?'Room changed on another device. Check for updates to resolve the conflict.':'This pairing room already exists. Create another pairing link.');
+   if(response.status===428)throw Error('Sync update missing its expected room version; retry from an updated client.');
    if(response.status===401||response.status===403)throw Error('Cloud sync requires an authorized Cloudflare Access sign-in');
    if(response.status===503)throw Error('Cloud sync Durable Object or Access policy is not configured on this server');
    if(!response.ok)throw Error('Sync request failed (HTTP '+response.status+')');
@@ -116,7 +118,7 @@
      report('Cloud layout checked · no screen video');
     }else if(local!==previousLocal){
      const sealed=await encrypt(current);if(activeSession!==session)return;
-     await request('PUT',sealed);if(activeSession!==session)return;
+     await request('PUT',sealed,previousVersion);if(activeSession!==session)return;
      previousLocal=local;previousVersion=sealed;
      report('Local layout sent to paired devices');
     }else report('Up to date · encrypted layout only');
@@ -133,7 +135,7 @@
   });
   useLocal.addEventListener('click',()=>{
    if(!conflict)return;
-   previousVersion=conflict.cloudVersion;previousLocal=null;
+   previousVersion=conflict.cloudVersion;previousLocal=JSON.stringify(conflict.incoming);
    conflict=null;resolveConflict();
    // The next sync pass will propose this local layout after checking cloud again.
    report('Keeping this layout. Synchronizing the selected version…');update();
