@@ -42,11 +42,30 @@
   host.insertBefore(panel,host.querySelector('#nv-watch-channels'));
   const nativeBrowser=()=>typeof root.NewViewNative?.openNewsBrowser==='function';
   function openBrowser(url=HOME){
+   // Reject arbitrary destinations before native or top-level navigation.
+   try{
+    const parsed=new URL(url);
+    if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.port||
+       !['youtube.com','www.youtube.com','m.youtube.com','youtu.be','www.youtube-nocookie.com'].includes(parsed.hostname.toLowerCase()))return false;
+   }catch{return false;}
    if(nativeBrowser()){
     root.NewViewNative.openNewsBrowser(url);
     return true;
    }
-   return !!root.NewViewInternalBrowser?.open?.(url,{area:'watch'});
+   // Full YouTube navigation must be top-level: publisher frame policy
+   // prevents embedding the homepage in NewView's web iframe.
+   const link=document.createElement('a');
+   link.href=url;link.target='_blank';link.rel='noopener noreferrer';
+   const opened=root.open?.(url,'_blank','noopener,noreferrer');
+   if(opened)return true;
+   // Some browsers return null for noopener or block programmatic popups.
+   // Give the user a real, keyboard/remote-focusable link instead.
+   stage.replaceChildren(link);
+   link.textContent='Open YouTube in a new tab';
+   link.focus?.();
+   status.textContent='YouTube does not permit its homepage in an iframe. Select Open YouTube in a new tab, or paste a video link to play here.';
+   panel.hidden=false;
+   return true;
   }
   function clear(){
    stage.replaceChildren(placeholder);panel.hidden=true;input.value='';
@@ -83,7 +102,13 @@
   browse.addEventListener('click',()=>{
    if(!openBrowser())status.textContent='YouTube full-site browsing is blocked by iframe policy. Use Open YouTube or enter a video link.';
   });
-  form.addEventListener('submit',e=>{e.preventDefault();if(openBrowser(input.value))return;load();});
+  form.addEventListener('submit',e=>{
+   e.preventDefault();
+   // Video links are playable inside NewView with YouTube's official embed.
+   // Non-video YouTube pages use top-level browser navigation.
+   if(parseVideo(input.value)){load();return;}
+   openBrowser(input.value||HOME);
+  });
   close.addEventListener('click',clear);
   root.NewViewYouTube=Object.freeze({open,close:clear,parseVideo,openBrowser});
  }

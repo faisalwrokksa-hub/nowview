@@ -106,9 +106,14 @@
    excerpt.hidden=!(title||summary);
    // A YouTube homepage cannot be framed; full website navigation will use an
    // external tab, while a video URL may use YouTube's official embed.
+   fallbackText.textContent='If this preview is blank or restricted, open the publisher’s full website. Some websites do not allow iframe previews.';
+   openFull.textContent='Open full website';
    if(youtube.test(new URL(url).hostname)&&!video){
     frame.hidden=true;frame.removeAttribute('src');
-    status.textContent='YouTube’s full website cannot be embedded here. Choose Open full website; individual videos may use the official player.';
+    fallbackText.textContent='YouTube does not allow its full website inside an iframe. Open the full site in a separate tab; individual videos can play in NewView.';
+    openFull.textContent='Open YouTube in new tab';
+    status.textContent='Full YouTube cannot play in this embedded browser. Choose Open YouTube in new tab.';
+    openFull.focus?.({preventScroll:true});
    }else if(!video&&prefersFullBrowser(url)){
     frame.hidden=true;frame.removeAttribute('src');
     retryPreview.hidden=false;
