@@ -62,3 +62,7 @@ test('preserves valid quoted CSV fields at end of line and end of file',()=>{
  assert.equal(rows[1][1],'second');
  assert.equal(rows[2][1],'fourth');
 });
+
+test('rejected CSV resets picker so the same corrected file can be selected again',()=>{
+ assert.match(src,/catch\(error\)\{if\(version===selectionVersion\)\{[^\n]*picker\.value='';/);
+});
