@@ -1,5 +1,17 @@
 name: NewView complete Android test APK bundle
 on:
+  # Generate an installable test bundle from the exact merged main commit,
+  # not only from a pull request head (which can have a different revision).
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'android/**'
+      - 'phone-caster/**'
+      - 'build-apk.sh'
+      - 'build-apk.ps1'
+      - 'scripts/verify-preview-apk.sh'
+      - '.github/workflows/complete-apk-bundle.yml'
   pull_request:
     paths:
       - 'web/**'
