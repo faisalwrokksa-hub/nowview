@@ -42,6 +42,12 @@
   host.insertBefore(panel,host.querySelector('#nv-watch-channels'));
   const nativeBrowser=()=>typeof root.NewViewNative?.openNewsBrowser==='function';
   function openBrowser(url=HOME){
+   // Reject arbitrary destinations before native or top-level navigation.
+   try{
+    const parsed=new URL(url);
+    if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.port||
+       !['youtube.com','www.youtube.com','m.youtube.com','youtu.be','www.youtube-nocookie.com'].includes(parsed.hostname.toLowerCase()))return false;
+   }catch{return false;}
    if(nativeBrowser()){
     root.NewViewNative.openNewsBrowser(url);
     return true;
