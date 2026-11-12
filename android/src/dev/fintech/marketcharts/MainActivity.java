@@ -19,6 +19,7 @@ public final class MainActivity extends Activity {
         if(web!=null)web.handleActivityResult(requestCode,resultCode,data);
     }
     @Override public void onBackPressed(){
+        if(web!=null&&web.handleBoxBrowserBack())return;
         if(web==null){super.onBackPressed();return;}
         web.evaluateJavascript("Boolean(typeof window.NewViewBack==='function' && window.NewViewBack())",result->{
             if(!"true".equals(result))finishOnBack();

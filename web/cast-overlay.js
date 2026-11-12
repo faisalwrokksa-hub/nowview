@@ -36,8 +36,22 @@
    button.addEventListener('click',()=>{window.NewViewLayout?.setSize(item.key);showDock();});
    mediaControls.append(button);sizeButtons.push(button);
   }
+  const channelBar=el('div','nv-player-channels');
+  const previousChannel=el('button','','‹'),nextChannel=el('button','','›');
+  previousChannel.type=nextChannel.type='button';
+  previousChannel.setAttribute('aria-label','Previous channel');nextChannel.setAttribute('aria-label','Next channel');
+  const channelSelect=el('select');channelSelect.setAttribute('aria-label','Change TV channel');
+  let channels=[];
+  function chooseChannel(url){if(playIPTV(url)){channelSelect.value=url;heading.textContent=channels.find(c=>c.url===url)?.name||'Live TV';}}
+  function shiftChannel(step){if(!channels.length)return;const i=channels.findIndex(c=>c.url===channelSelect.value);chooseChannel(channels[(i+step+channels.length)%channels.length].url);}
+  channelSelect.addEventListener('change',()=>chooseChannel(channelSelect.value));
+  previousChannel.addEventListener('click',()=>shiftChannel(-1));nextChannel.addEventListener('click',()=>shiftChannel(1));
+  channelBar.append(previousChannel,channelSelect,nextChannel);channelBar.hidden=true;
+  const checkChannels=el('button','','Check channels');checkChannels.type='button';
+  checkChannels.addEventListener('click',()=>window.NewViewChannelPicks?.check?.(true));
+  channelBar.append(checkChannels);
   const state=el('p','newview-cast-state','No live video source');state.setAttribute('role','status');
-  tools.append(fold,dockSide,expand,close);top.append(heading,tools);dock.append(top,video,youtube,mediaControls,state);document.body.append(dock);
+  tools.append(fold,dockSide,expand,close);top.append(heading,tools);dock.append(top,video,youtube,channelBar,mediaControls,state);document.body.append(dock);
   const trigger=el('button','newview-cast-trigger','▣ Screen cast');trigger.type='button';trigger.id='newview-cast-trigger';
   trigger.setAttribute('aria-label','Open floating screen viewer and device connection controls');
   // Keep casting accessible from Watch; avoid duplicate header action.
@@ -79,10 +93,10 @@
    window.NewViewSourceMonitor?.mark?.('iptv',iptvSource,status,detail);
   }
   video.addEventListener('playing',()=>{
-   if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;flagIPTV('ok','Video playback confirmed');report('IPTV stream playing · broadcaster availability can change');}
+   if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;window.NewViewChannelPicks?.mark?.(iptvSource,'playing');flagIPTV('ok','Video playback confirmed');report('Live TV playing · change channel below');}
   });
   video.addEventListener('error',()=>{
-   if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;flagIPTV('failed','Browser video playback failed');report('This IPTV channel cannot play here. Try another channel or native TV playback.');}
+   if(mediaMode==='iptv'){if(iptvTimeout)clearTimeout(iptvTimeout);iptvTimeout=null;window.NewViewChannelPicks?.mark?.(iptvSource,'unavailable');flagIPTV('failed','Browser video playback failed');report('Channel unavailable here. Choose a Ready channel below.');}
   });
   function playYouTube(raw){
    const item=window.NewViewMedia?.parse?.(raw);
@@ -241,7 +255,16 @@
   close.addEventListener('click',()=>{reset();dock.hidden=true;updateViewport();});
   stop.addEventListener('click',()=>{reset();dock.hidden=true;updateViewport();});
   window.addEventListener('pagehide',reset,{once:true});
-  window.NewViewCast={attachStream,playYouTube,playIPTV,stop:reset,open:showDock,getMode:()=>mediaMode};
+  function setChannels(items){
+   channels=(window.NewViewChannelPicks?.rank?.(items)||items).filter(c=>typeof c.url==='string'&&c.url.startsWith('https://')).slice(0,120);
+   const old=iptvSource||channelSelect.value;channelSelect.replaceChildren();
+   for(const item of channels){const status=window.NewViewChannelPicks?.state?.(item.url);const label=status==='playing'?'Playing':status==='ready'?'Ready':status==='unavailable'?'Unavailable here':'Unchecked';const option=el('option','',item.name+' · '+label);option.value=item.url;channelSelect.append(option);}
+   if(channels.some(c=>c.url===old))channelSelect.value=old;
+   channelBar.hidden=!channels.length;previousChannel.disabled=nextChannel.disabled=!channels.length;
+  }
+  window.addEventListener('newview:channel-check',()=>setChannels(channels));
+  window.addEventListener('newview:channel-scan',event=>{checkChannels.disabled=event.detail?.running===true;checkChannels.textContent=checkChannels.disabled?'Checking…':'Check channels';});
+  window.NewViewCast={attachStream,playYouTube,playIPTV,setChannels,stop:reset,open:showDock,getMode:()=>mediaMode};
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();

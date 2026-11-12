@@ -27,7 +27,11 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
 
 public final class ChartsView extends WebView {
-    private final ExecutorService worker=Executors.newSingleThreadExecutor();
+    private final BoxBrowser boxBrowser=new BoxBrowser(this);
+    public boolean handleBoxBrowserBack(){return boxBrowser.back();}
+    @Override public void onPause(){boxBrowser.pause();super.onPause();}
+    @Override public void onResume(){super.onResume();boxBrowser.resume();}
+    private final ExecutorService worker=Executors.newFixedThreadPool(3);
     private volatile boolean closed=false;
     private static final int CSV_PICKER_REQUEST=2307;
     private ValueCallback<Uri[]> pendingFiles;
@@ -35,7 +39,7 @@ public final class ChartsView extends WebView {
         super(context);WebSettings s=getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(false);s.setAllowContentAccess(true);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         s.setAllowFileAccessFromFileURLs(false);
         s.setAllowUniversalAccessFromFileURLs(false);
-        s.setSupportMultipleWindows(false);
+        s.setSupportMultipleWindows(false);s.setMediaPlaybackRequiresUserGesture(false);
         if(Build.VERSION.SDK_INT>=26)s.setSafeBrowsingEnabled(true);
         setWebContentsDebuggingEnabled(false);
         setBackgroundColor(0xff080c13);
@@ -129,6 +133,9 @@ public final class ChartsView extends WebView {
     }
     private static String tagText(Element e,String tag){NodeList n=e.getElementsByTagName(tag);return n.getLength()>0?n.item(0).getTextContent().trim():"";}
     public final class Bridge {
+        @JavascriptInterface public void openBoxBrowser(String url,int x,int y,int width,int height,int viewport){post(()->{if(!closed)boxBrowser.open(url,x,y,width,height,viewport);});}
+        @JavascriptInterface public void moveBoxBrowser(int x,int y,int width,int height,int viewport){post(()->{if(!closed)boxBrowser.bounds(x,y,width,height,viewport);});}
+        @JavascriptInterface public void boxBrowserAction(String action){post(()->{if(!closed)boxBrowser.action(action);});}
         @JavascriptInterface public void openDnsSettings(){
             post(()->{
                 if(closed)return;
@@ -174,12 +181,20 @@ public final class ChartsView extends WebView {
                             byte[] chunk=new byte[4096];int n;
                             while((n=stream.read(chunk))!=-1){if(buffer.size()+n>1000000)throw new Exception("Feed too large");buffer.write(chunk,0,n);}
                         }
+                        String xml=new String(buffer.toByteArray(),StandardCharsets.UTF_8);
+                        if(xml.startsWith("\uFEFF"))xml=xml.substring(1);
+                        // Reject declarations before parsing, including on Android parsers
+                        // that do not implement the Apache feature flags.
+                        String upper=xml.toUpperCase(java.util.Locale.ROOT);
+                        if(upper.contains("<!DOCTYPE")||upper.contains("<!ENTITY")||xml.indexOf('\u0000')>=0)throw new Exception("XML declarations not allowed");
                         DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
-                        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
-                        factory.setFeature("http://xml.org/sax/features/external-general-entities",false);
-                        factory.setFeature("http://xml.org/sax/features/external-parameter-entities",false);
-                        factory.setXIncludeAware(false);factory.setExpandEntityReferences(false);
-                        Document doc=factory.newDocumentBuilder().parse(new java.io.ByteArrayInputStream(buffer.toByteArray()));
+                        try{factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);}catch(javax.xml.parsers.ParserConfigurationException unsupported){}
+                        try{factory.setFeature("http://xml.org/sax/features/external-general-entities",false);}catch(javax.xml.parsers.ParserConfigurationException unsupported){}
+                        try{factory.setFeature("http://xml.org/sax/features/external-parameter-entities",false);}catch(javax.xml.parsers.ParserConfigurationException unsupported){}
+                        factory.setExpandEntityReferences(false);
+                        javax.xml.parsers.DocumentBuilder builder=factory.newDocumentBuilder();
+                        builder.setEntityResolver((publicId,systemId)->{throw new org.xml.sax.SAXException("External entities not allowed");});
+                        Document doc=builder.parse(new org.xml.sax.InputSource(new java.io.StringReader(xml)));
                         NodeList nodes=doc.getElementsByTagName("item");
                         for(int i=0;i<Math.min(nodes.getLength(),40);i++){
                             Element item=(Element)nodes.item(i);
@@ -193,7 +208,7 @@ public final class ChartsView extends WebView {
                         }
                     }finally{connection.disconnect();}
                     result.put("items",items);result.put("fetchedAt",System.currentTimeMillis());
-                }catch(Exception ex){try{result.put("error","Official news feed unavailable");}catch(Exception ignored){}}
+                }catch(Exception ex){android.util.Log.w("NewViewFeeds","News fetch failed",ex);try{result.put("error","Official news feed unavailable");}catch(Exception ignored){}}
                 post(()->{if(!closed)evaluateJavascript("window.__newviewNewsResult&&window.__newviewNewsResult("+id+","+result.toString()+")",null);});
             });
         }
@@ -311,5 +326,6 @@ public final class ChartsView extends WebView {
     }
     private static JSONObject error(String s){JSONObject j=new JSONObject();try{j.put("error",s);}catch(Exception ignored){}return j;}
     private void deliver(int id,JSONObject j){post(()->{if(!closed)evaluateJavascript("window.__newviewResult("+id+","+j.toString()+")",null);});}
-    @Override public void destroy(){closed=true;worker.shutdownNow();if(pendingFiles!=null){pendingFiles.onReceiveValue(null);pendingFiles=null;}removeJavascriptInterface("NewViewNative");removeJavascriptInterface("NewViewApps");super.destroy();}
+    @Override public void destroy(){closed=true;boxBrowser.destroy();worker.shutdownNow();if(pendingFiles!=null){pendingFiles.onReceiveValue(null);pendingFiles=null;}removeJavascriptInterface("NewViewNative");removeJavascriptInterface("NewViewApps");super.destroy();}
 }
+

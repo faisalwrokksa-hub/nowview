@@ -119,7 +119,7 @@
     const isBoard=document.body.classList.contains('board-active');
     if(board)board.hidden=!isBoard;if(chart)chart.hidden=isBoard;
     if(!isBoard)requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
-  }else if(view==='myview'&&document.body.classList.contains('tv-launcher')){if(market)market.hidden=false;if(board)board.hidden=true;if(chart)chart.hidden=false;requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));}
+  }else if(view==='myview'&&document.body.classList.contains('tv-launcher')&&!document.body.classList.contains('nv-simple')){if(market)market.hidden=false;if(board)board.hidden=true;if(chart)chart.hidden=false;requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));}
   else{if(market)market.hidden=true;if(board)board.hidden=true;if(chart)chart.hidden=true;}
   if(focusWasInHiddenPanel){
    const destination=document.querySelector('[data-view-button="'+view+'"]');

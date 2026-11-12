@@ -1,0 +1,93 @@
+/* TV viewport contract: only panel interiors scroll. */
+html:has(body.nv-simple){height:100%!important;overflow:hidden!important}
+body.nv-simple{height:100vh!important;height:100dvh!important;min-height:0!important;max-height:100dvh!important;overflow:hidden!important;--nv-safe:clamp(12px,2.5vmin,28px)}
+body.nv-simple>main{width:calc(100% - 2 * var(--nv-safe))!important;max-width:none!important;height:calc(100vh - 2 * var(--nv-safe))!important;height:calc(100dvh - 2 * var(--nv-safe))!important;min-height:0!important;max-height:calc(100dvh - 2 * var(--nv-safe))!important;margin:var(--nv-safe)!important;padding:clamp(8px,1.4vmin,16px)!important;gap:10px!important;overflow:hidden!important}
+body.nv-simple #nv-simple-nav{min-height:0!important;padding:3px;overflow:hidden}
+body.nv-simple .nv-simple-tab{min-height:36px!important;padding:7px!important;font-size:clamp(12px,1.4vw,20px)!important}
+body.nv-simple>main>[data-workspace],body.nv-simple>main>#market-shell{flex:1 1 0!important;min-height:0!important;height:0!important;max-height:100%!important;overflow:auto!important;overscroll-behavior:contain!important;position:relative!important;inset:auto!important;transform:none!important}
+body.nv-simple>main>[data-workspace="myview"]{overflow:hidden!important}
+body.nv-simple #nv-simple-home{display:grid!important;grid-template-rows:minmax(80px,.32fr) minmax(0,1fr)!important;gap:10px!important;flex:1 1 0!important;height:100%!important;max-height:100%!important;min-height:0!important;max-width:none!important;overflow:hidden!important}
+body.nv-simple #nv-simple-home[hidden]{display:none!important}
+body.nv-simple #nv-simple-grid,body.nv-simple .tv-home-top,body.nv-simple .tv-home-favorites,body.nv-simple .home-apps,body.nv-simple #newview-screen-layout{display:none!important}
+body.nv-simple .nv-home-top-news{height:100%;min-height:0;overflow:auto;padding:10px 12px;overscroll-behavior:contain}
+body.nv-simple .nv-home-news-heading{margin:0 0 6px;font-size:14px}
+body.nv-simple .nv-home-news-heading button{padding:4px 10px;min-height:30px;font-size:12px}
+body.nv-simple .nv-home-news-strip{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+body.nv-simple .nv-home-news-story{min-height:0;padding:8px;gap:6px;overflow-wrap:anywhere}
+body.nv-simple .nv-home-news-story strong{font-size:clamp(12px,1.15vw,18px);line-height:1.35}
+body.nv-simple .nv-home-news-story small{font-size:11px;-webkit-line-clamp:2}
+body.nv-simple .nv-home-lower,body.nv-simple .nv-home-lower[data-article-size]{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr);gap:10px;min-height:0;height:100%;overflow:hidden;align-items:stretch}
+body.nv-simple :is(.nv-home-chart,.nv-home-featured,.nv-home-article){height:100%;max-height:100%;min-height:0!important;min-width:0;overflow:auto!important;overscroll-behavior:contain;padding:10px!important;contain:inline-size;scrollbar-width:thin}
+body.nv-simple .nv-home-chart-head,body.nv-simple .nv-home-featured-heading{font-size:14px;margin:0 0 8px}
+body.nv-simple .nv-home-chart-head button,body.nv-simple .nv-home-featured>button{min-height:30px;padding:5px 9px;font-size:12px}
+body.nv-simple .nv-home-featured>button{width:auto}
+body.nv-simple .nv-home-featured-status{font-size:11px;line-height:1.3;margin:6px 0}
+body.nv-simple #nv-home-chart>#market-shell{position:static!important;inset:auto!important;transform:none!important;width:100%!important;height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important;display:block!important}
+body.nv-simple #nv-home-chart #symbols{max-height:74px;overflow:auto;flex-wrap:wrap;gap:4px;padding:3px}
+body.nv-simple #nv-home-chart .workspace{height:auto!important;min-height:0!important;padding:8px!important;display:flex!important}
+body.nv-simple #nv-home-chart .quote{flex-wrap:wrap;gap:5px}
+body.nv-simple #nv-home-chart .quote h2{font-size:clamp(23px,3vw,40px)}
+body.nv-simple #nv-home-chart .quote-meta{font-size:10px;gap:3px;align-items:flex-start}
+body.nv-simple #nv-home-chart :is(button,#change,.eyebrow){font-size:11px}
+body.nv-simple #nv-home-chart .toolbar,body.nv-simple #nv-home-chart .chart-tools{flex-wrap:wrap}
+body.nv-simple #nv-home-chart #chart-wrap{flex:none;height:clamp(140px,27vh,360px)!important;min-height:140px!important;max-width:100%}
+body.nv-simple #nv-home-chart #chart{width:100%!important;height:100%!important}
+body.nv-simple #nv-home-chart .indicator-strip{flex-wrap:wrap;font-size:10px;gap:6px}
+body.nv-simple .nv-player-channels{display:flex;align-items:center;gap:5px;padding:7px;min-width:0}
+body.nv-simple .nv-player-channels select{flex:1;min-width:0;width:0;max-width:100%;min-height:34px;padding:6px;background:#152d41;color:white;border:1px solid #8c734a;border-radius:8px;font-size:12px;margin:0}
+body.nv-simple .nv-player-channels button{flex:none;min-width:30px!important;width:30px!important;min-height:34px;padding:4px!important}
+body.nv-simple .newview-cast-dock:not([hidden]){max-width:calc(100vw - 2 * var(--nv-safe))!important;max-height:calc(100vh - 2 * var(--nv-safe))!important;min-width:0!important;overflow:auto!important;overscroll-behavior:contain}
+body.nv-simple[data-simple-section="home"] .newview-cast-dock:not([hidden]):not(:fullscreen){position:relative!important;inset:auto!important;transform:none!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;max-height:100%!important;margin:0!important}
+body.nv-simple .newview-cast-dock video,body.nv-simple .newview-cast-dock iframe{width:100%!important;max-width:100%!important;height:auto!important;aspect-ratio:16/9;object-fit:contain;min-height:0!important;background:#000}
+body.nv-simple .newview-cast-bar{flex-wrap:wrap;gap:5px;padding:6px;font-size:12px}
+body.nv-simple .newview-cast-tools{display:flex;gap:4px}
+body.nv-simple .newview-cast-tools button{min-width:28px;min-height:28px;padding:3px!important;width:auto!important}
+body.nv-simple .newview-cast-state{font-size:11px;overflow-wrap:anywhere;padding:6px;margin:0}
+body.nv-simple .newview-cast-media-controls{display:flex;gap:4px;padding:5px}
+body.nv-simple .newview-cast-media-controls button{width:auto;min-height:28px;padding:4px 9px}
+body.nv-simple :is(#nv-watch-hub,#nv-read-hub,#nv-customize-hub){height:100%!important;max-height:100%!important;min-height:0!important;overflow:auto!important;overscroll-behavior:contain!important}
+body.nv-simple .nv-custom-count,body.nv-simple .nv-custom-options,body.nv-simple .nv-custom-state{display:none!important}
+@media(max-width:600px) and (orientation:portrait){body.nv-simple .nv-home-lower{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}body.nv-simple .nv-home-news-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+body.nv-simple #nv-home-chart .newview-market-search{display:none!important}
+body.nv-simple #nv-home-chart #symbols{display:flex!important;max-height:54px!important;overflow:auto!important;flex-wrap:nowrap!important}
+body.nv-simple #nv-home-chart .workspace{display:grid!important;grid-template-columns:minmax(0,1fr);gap:7px;padding:8px!important}
+body.nv-simple #nv-home-chart .quote{order:0}
+body.nv-simple #nv-home-chart .toolbar{order:2;margin:0!important}
+body.nv-simple #nv-home-chart .indicator-strip{order:3}
+body.nv-simple #nv-home-chart #chart-wrap{order:1;height:clamp(140px,26vh,300px)!important}
+body.nv-simple #nv-home-chart .chart-caption{order:4;font-size:10px}
+body.nv-simple #nv-home-chart :is(.toolbar button,#symbols button,#ranges button){min-height:28px!important;padding:4px 7px!important;font-size:11px!important}
+body.nv-simple #nv-home-chart .quote-meta{display:none}
+body.nv-simple #nv-home-chart #security{font-size:10px!important}
+body.nv-simple #nv-home-chart .quote h2{font-size:25px!important;margin:3px 0!important}
+body.nv-simple #nv-home-chart #change{font-size:11px!important}
+body.nv-simple .nv-player-channels{flex-wrap:wrap}
+body.nv-simple .nv-player-channels>button:last-child{width:auto!important;flex-basis:100%;font-size:11px}
+body.nv-simple #nv-home-chart .nv-home-chart-head{position:sticky;top:-10px;background:#0c1a27;z-index:2;padding:6px 0}
+/* Nested containment also overrides inherited nowrap on headline buttons. */
+body.nv-simple *,body.nv-simple *::before,body.nv-simple *::after{box-sizing:border-box;min-width:0}
+body.nv-simple :is(button,a,p,h1,h2,h3,h4,label,strong,small,span,summary){white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal;max-width:100%}
+body.nv-simple :is(input,select,textarea,img,video,iframe,canvas,svg){max-width:100%!important;min-width:0}
+body.nv-simple :is(.shell-card,.workspace,.quote,.quote-meta,.toolbar,.chart-tools,.indicator-strip,.nv-tv-now,.nv-tv-guide,.nv-hub-panel,.nv-custom-advanced,.nv-internal-browser){min-width:0!important;max-width:100%!important;overflow-wrap:anywhere}
+body.nv-simple :is(.shell-card,.workspace,.nv-tv-guide,.nv-custom-advanced,.nv-internal-browser){overflow:auto;overscroll-behavior:contain}
+body.nv-simple .nv-home-top-news{display:grid;grid-template-rows:auto minmax(0,1fr);gap:6px;overflow:hidden!important}
+body.nv-simple .nv-home-news-heading{min-width:0;flex-wrap:wrap;gap:6px;margin:0}
+body.nv-simple .nv-home-news-strip{height:100%;min-height:0;overflow:hidden}
+body.nv-simple .nv-home-news-story{height:100%;max-height:100%;overflow:auto!important;overscroll-behavior:contain;white-space:normal!important;scrollbar-width:thin}
+body.nv-simple .nv-home-news-story :is(strong,small){display:block!important;white-space:normal!important;overflow:visible!important;-webkit-line-clamp:unset;line-height:1.4;flex-shrink:0}
+body.nv-simple .nv-home-chart .toolbar,body.nv-simple .nv-home-chart .chart-tools,body.nv-simple .nv-home-chart .indicator-strip{flex-wrap:wrap!important}
+body.nv-simple .nv-home-chart .indicator-strip>span{flex:0 1 auto}
+body.nv-simple .newview-cast-bar{overflow:hidden;flex-wrap:wrap!important}
+body.nv-simple .newview-cast-tools{max-width:100%;flex-wrap:wrap}
+body.nv-simple .nv-home-featured .newview-cast-dock{overflow:auto!important}
+body.nv-simple .nv-home-chart #market-shell{border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important}
+body.nv-simple .nv-home-chart .workspace{border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+/* Native browser surface: its own isolated WebView is clipped to this slot. */
+body.nv-simple .nv-native-browser-slot{height:100%!important;min-height:90px!important;max-height:100%!important;border:0!important;border-radius:8px;background:#0c1928}
+body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot){display:grid;grid-template-rows:auto minmax(90px,1fr);height:65vh;max-height:100%;min-height:0;padding:6px!important;overflow:hidden!important;gap:6px}
+body.nv-simple #nv-home-article .nv-internal-browser:has(.nv-native-browser-slot){height:calc(100% - 56px)!important;margin:0!important}
+body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) :is(.nv-browser-status,.nv-browser-fallback,.nv-browser-excerpt,.nv-browser-external){display:none!important}
+body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) .nv-browser-toolbar{gap:4px;min-width:0;overflow:auto;max-height:98px}
+body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) .nv-browser-toolbar :is(button,input,select){min-height:30px!important;padding:4px 7px!important;font-size:12px!important}
+body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) .nv-browser-toolbar select{display:none}
+body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) .nv-browser-address-form{flex:1 1 160px}

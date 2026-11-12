@@ -48,6 +48,9 @@
     if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.port||
        !['youtube.com','www.youtube.com','m.youtube.com','youtu.be','www.youtube-nocookie.com'].includes(parsed.hostname.toLowerCase()))return false;
    }catch{return false;}
+   if(typeof root.NewViewNative?.openBoxBrowser==='function'&&root.NewViewInternalBrowser?.open){
+    root.NewViewInternalBrowser.open(url,{area:'watch'});return true;
+   }
    if(nativeBrowser()){
     root.NewViewNative.openNewsBrowser(url);
     return true;
@@ -68,6 +71,7 @@
    return true;
   }
   function clear(){
+   if(typeof root.NewViewNative?.openBoxBrowser==='function')root.NewViewInternalBrowser?.close?.();
    stage.replaceChildren(placeholder);panel.hidden=true;input.value='';
    host.querySelector('.nv-hub-grid')?.removeAttribute('hidden');
    host.querySelector('#nv-watch-channels')?.removeAttribute('hidden');
@@ -87,6 +91,7 @@
   function load(){
    const id=parseVideo(input.value);
    if(!id){status.textContent='Enter a valid YouTube video link.';return false;}
+   if(typeof root.NewViewNative?.openBoxBrowser==='function')return openBrowser('https://www.youtube.com/watch?v='+id);
    const frame=el('iframe');
    frame.title='YouTube video player';
    frame.src='https://www.youtube-nocookie.com/embed/'+id+'?rel=0';
