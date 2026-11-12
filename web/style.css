@@ -925,3 +925,13 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
     max-height:calc(100dvh - 16px);
   }
 }
+
+/* Task 1: preserve actionable focus targets on short TV and tablet viewports. */
+@media (max-height:600px) and (orientation:landscape){
+  body>main .workspace-switcher{scroll-padding-inline:20px;overscroll-behavior-inline:contain}
+  body>main .workspace-switcher .workspace-tab{min-height:44px;flex-shrink:0}
+  body>main .shell-page :is(button,a,select,input,textarea):focus-visible{scroll-margin-block:18px}
+}
+@media (forced-colors:active){
+  body>main .workspace-switcher .workspace-tab:focus-visible{outline:3px solid Highlight;outline-offset:2px}
+}
