@@ -47,7 +47,7 @@ For each test record: device model, Android version, APK SHA-256, build commit, 
 
 ## Automated preview evidence (does not replace field acceptance)
 
-Draft integration PR #167 includes the read-only `.github/workflows/integration-preview-acceptance.yml` workflow. It waits for the **exact source SHA** on the isolated Cloudflare preview, checks public routes, then runs Chromium navigation, keyboard-focus and overflow smoke tests at 390×844, 768×1024, 1440×900 and 1920×1080. It uploads screenshots for visual review. This is useful browser automation but does **not** establish Firefox, real Android TV D-pad, codec/DRM, pairing or endurance results. The 20 manual/evidence scenarios above remain `NOT RUN` until independently observed.
+Draft integration PR #167 includes the read-only `.github/workflows/integration-preview-acceptance.yml` workflow. It waits for the **exact source SHA** on the isolated Cloudflare preview, checks public routes, then runs Chromium navigation, keyboard-focus and overflow smoke tests at 390×844, 768×1024, 1440×900 and 1920×1080. It uploads screenshots for visual review. Both Chromium and Firefox are now tested at four viewports and an Android TV emulator checks synthetic D-pad navigation. These automated tests do **not** establish physical Android TV behavior, real remote hardware, broadcaster/codec/DRM availability, pairing, endurance or human browser acceptance. The 20 manual/evidence scenarios above remain `NOT RUN` until independently observed.
 
 ## Source-rights release gate
 
