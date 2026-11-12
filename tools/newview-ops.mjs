@@ -16,7 +16,8 @@ const HELP=[
  '  init  | status',
  '  customer:add <opaque-ref>',
  '  subscription:request <opaque-ref> personal|business',
- '  subscription:review <opaque-ref> | subscription:cancel <opaque-ref> | subscription:close <opaque-ref>',
+ '  subscription:review <opaque-ref> | subscription:renewal <opaque-ref> | subscription:review-renewal <opaque-ref>',
+ '  subscription:cancel <opaque-ref> | subscription:close <opaque-ref>',
  '  ticket:open <opaque-ref> technical|account|billing|privacy|media|other <summary-private-file>',
  '  ticket:status <case-id> open|investigating|awaiting-customer|resolved|closed',
  '  notice:draft <title-private-file> <message-private-file>',
@@ -67,7 +68,7 @@ function counts(store){
  return {mode:store.mode,customerCount:Object.keys(store.customers).length,
   supportCaseCount:Object.keys(store.tickets).length,
   pendingPlanRequests:Object.values(store.customers).filter(c=>c.planRequest&&
-   ['pending','reviewed','cancellation-requested'].includes(c.planRequest.status)).length,
+   ['pending','reviewed','renewal-requested','cancellation-requested'].includes(c.planRequest.status)).length,
   draftNotices:Object.values(store.notices).filter(n=>n.status==='draft').length,
   paidEntitlements:entitlementFor(store,'not-a-real-customer'),
   warning:'Owner-local administrative records, not authenticated accounts, billing, sent support tickets or a published release.'};
@@ -89,6 +90,8 @@ export function execute(argv){
   case 'customer:add':cmd={type:verb,customerRef:args[0]};break;
   case 'subscription:request':cmd={type:verb,customerRef:args[0],planId:args[1]};break;
   case 'subscription:review':
+  case 'subscription:renewal':
+  case 'subscription:review-renewal':
   case 'subscription:cancel':
   case 'subscription:close':cmd={type:verb,customerRef:args[0]};break;
   case 'ticket:open':
