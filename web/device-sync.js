@@ -107,6 +107,14 @@
     }else if(remote.blob!==previousVersion){
      const incoming=await decrypt(remote.blob);if(activeSession!==session)return;
      const serialized=JSON.stringify(incoming);
+     // Joining an existing room must never silently replace this device's layout.
+     // Ask before overwriting local preferences, even on the first sync.
+     if(previousLocal===null&&!createdRoom&&serialized!==local){
+      conflict={incoming,cloudVersion:remote.blob};
+      resolveConflict();
+      report('Paired layout differs from this device. Choose the cloud layout or keep this layout.');
+      return;
+     }
      if(previousLocal!==null&&local!==previousLocal&&serialized!==local){
       conflict={incoming,cloudVersion:remote.blob};
       resolveConflict();
