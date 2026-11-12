@@ -973,3 +973,38 @@ body[data-nv-motion="reduced"] *,body[data-nv-motion="reduced"] *::before,body[d
  }
  body:not(.home-panel):not(.nv-simple)>main>footer{grid-column:1/-1;grid-row:4}
 }
+
+
+/* Deferred TV-focus accessibility parity from #133, without its global grid
+   rewrite. Applies to existing workspace controls, status actions and fallback
+   WebViews that lack :focus-visible support. */
+@media (hover:none) {
+ :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content)
+ :is(a,button,summary,select,textarea,input,[tabindex]):focus-visible {
+  outline:3px solid #ffd6a3;outline-offset:2px;scroll-margin:24px;
+ }
+}
+@supports not selector(:focus-visible) {
+ :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content,#message)
+ :is(button,a,summary,input,select,textarea,[tabindex]):focus {
+  outline:3px solid #ffd6a3;outline-offset:2px;scroll-margin:24px;
+ }
+}
+@media (forced-colors:active) {
+ :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content,#message)
+ :is(button,a,summary,input,select,textarea,[tabindex]):focus {
+  outline:3px solid Highlight;outline-offset:2px;box-shadow:none;
+ }
+}
+.newview-settings-content details>summary {
+ min-height:44px;cursor:pointer;scroll-margin-block:24px;
+}
+.workspace-switcher .workspace-tab { overflow-wrap:anywhere; }
+#message:not(.hidden) {
+ overflow-y:auto;max-height:100%;min-height:0;overflow-wrap:anywhere;
+}
+#message :is(button,a) { min-height:44px;max-width:100%; }
+@media (prefers-reduced-motion:reduce) {
+ .workspace-switcher,.newview-settings-content {scroll-behavior:auto}
+ .workspace-switcher .workspace-tab{transition:none!important}
+}
