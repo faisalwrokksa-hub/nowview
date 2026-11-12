@@ -168,3 +168,11 @@ test('MyView rejects external text-drag reorder attempts',()=>{
  assert.match(src,/item.addEventListener\('dragend'/);
  assert.doesNotMatch(src,/const from=e.dataTransfer\?\.getData\('text\/plain'\)/);
 });
+
+test('Market Watch clears chart context for invalid or missing snapshots',()=>{
+ assert.match(src,/function chartSymbol\(\)/);
+ assert.match(src,/q\.source==='binance'/);
+ assert.match(src,/q\.quoteTime\*1000>=Date\.now\(\)-86400000\?q\.symbol:'Market'/);
+ assert.match(src,/if\(id==='market'\)refreshChart\(\)/);
+ assert.match(src,/if\(id==='market'\)item\.append\(chartFor\(chartSymbol\(\)\)\)/);
+});
