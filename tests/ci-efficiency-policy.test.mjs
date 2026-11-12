@@ -16,12 +16,17 @@ test('dashboard validation does not duplicate the two-APK build',()=>{
 });
 
 test('feature branches run PR checks once and superseded checks cancel only on PRs',()=>{
- for(const name of ['dashboard','phone-caster','frontend-auto-publish']){
+ for(const name of ['dashboard','frontend-auto-publish']){
   const text=read(name);
   assert.match(text,/on:\s*\n\s+push:\s*\n\s+branches: \[main\]/);
   assert.match(text,/^\s+pull_request:/m);
   assert.match(text,/cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}/);
  }
+ const phone=read('phone-caster');
+ assert.match(phone,/on:\s*\n\s+push:\s*\n\s+branches: \[main\]/);
+ assert.doesNotMatch(phone,/^\s+pull_request:/m,'Phone Caster PR must be built by the complete two-APK workflow only');
+ assert.match(read('complete-apk-bundle'),/\s+pull_request:/);
+ assert.match(read('complete-apk-bundle'),/gradle -p phone-caster :app:assembleDebug/);
  for(const name of ['ci','complete-apk-bundle']){
   const text=read(name);
   assert.match(text,/cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}/);
