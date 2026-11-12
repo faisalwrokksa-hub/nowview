@@ -984,3 +984,13 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
     min-height:44px;
   }
 }
+
+/* Task 1: accessible settings summaries and feedback when navigating by TV remote.
+   Restrict minimum hit areas to interactive controls, preserving existing layout. */
+.newview-settings-content details>summary{min-height:44px;display:list-item;cursor:pointer;scroll-margin-block:24px}
+.newview-settings-content details>summary:focus-visible{outline:3px solid #ffd6a3;outline-offset:2px}
+:is(.workspace,.shell-page,.newview-settings-content) :is([role="alert"],[role="status"]) :is(button,a):focus-visible{outline:3px solid #ffd6a3;outline-offset:2px}
+@media (forced-colors:active){
+ .newview-settings-content details>summary:focus-visible,
+ :is(.workspace,.shell-page,.newview-settings-content) :is([role="alert"],[role="status"]) :is(button,a):focus-visible{outline-color:Highlight}
+}
