@@ -67,7 +67,7 @@
  const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Refresh channels';
  directory.append(heading,catalogStatus,scope,scopeValue,sourceLink,status,search,secureLabel,secureOnly,favoritesLabel,favoritesOnly,failedLabel,hideFailed,list,favorite,playChannel,open,refresh,retryFailed,inlineWrap);
  category?.parentElement?.append(directory);
- let allChannels=[];let lastFetch=0;let loading=null,loadingUrl=null,loadedUrl=null;
+ let allChannels=[];let lastFetch=0;let loading=null,loadingUrl=null,loadedUrl=null,queuedRefresh=false;
  const catalogCache=new Map();
  const selectedPlaylist=()=>preferred?.scopedPlaylist?.(scope.value,scope.value==='all'?'':scopeValue.value)||null;
  async function readCatalog(kind,force=false){
@@ -112,7 +112,7 @@
    scopeValue.value=entries.some(x=>x.code===previous)?previous:entries.some(x=>x.code===desired)?desired:entries[0].code;
    catalogStatus.textContent=entries.length+' current '+kind+' choices from IPTV-org.';
    loadDirectory(true);
-  }catch(error){catalogStatus.textContent='Cannot refresh '+kind+' catalog ('+String(error?.message||error)+'). Using previous choices if available.';if(!scopeValue.options.length)scopeValue.replaceChildren();else loadDirectory(true);}
+  }catch(error){if(kind!==scope.value)return;catalogStatus.textContent='Cannot refresh '+kind+' catalog ('+String(error?.message||error)+'). Using previous choices if available.';if(!scopeValue.options.length)scopeValue.replaceChildren();else loadDirectory(true);}
  }
  scope.addEventListener('change',()=>updateScope(true));
  scopeValue.addEventListener('change',()=>loadDirectory(true));
@@ -174,9 +174,11 @@
  async function loadDirectory(force=false){
   const url=selectedPlaylist();
   if(!url){catalogStatus.textContent='Choose a supported country, language or category.';return;}
-  if(loading){if(url!==loadingUrl)loading.then(()=>loadDirectory(true));return loading;}
+  if(loading){if(url!==loadingUrl)queuedRefresh=true;return loading;}
   if(!force&&url===loadedUrl&&allChannels.length&&Date.now()-lastFetch<10800000){renderChannels();return;}
   loadingUrl=url;
+  // A previous catalog must not remain selectable while a new region/category loads.
+  if(loadedUrl!==url){stopInline();allChannels=[];loadedUrl=null;lastFetch=0;list.replaceChildren();playChannel.disabled=true;inlinePlay.disabled=true;floatChannel.disabled=true;favorite.disabled=true;retryFailed.disabled=true;open.hidden=true;open.removeAttribute('href');open.setAttribute('aria-disabled','true');}
   status.textContent='Loading public IPTV directory…';
   refresh.disabled=true;refresh.setAttribute('aria-busy','true');list.setAttribute('aria-busy','true');
   loading=(async()=>{try{
@@ -217,17 +219,24 @@
    if(content.length>16000000)throw Error('Playlist too large');
    if(typeof preferred?.parseM3U!=='function')throw Error('Playlist parser unavailable');
    const parsed=preferred.parseM3U(content);if(!Array.isArray(parsed)||!parsed.length)throw Error('No valid channels');
+    // Ignore an obsolete response after the user switches the directory scope.
+    if(url!==selectedPlaylist())return;
    const existing=loadedUrl===url&&allChannels.length?new Set(allChannels.map(channel=>channel.url)):null;
    const added=existing?parsed.filter(channel=>!existing.has(channel.url)).length:0;
    allChannels=parsed;loadedUrl=url;lastFetch=Date.now();
    if(added>0)window.NewViewSourceMonitor?.notify?.('IPTV',added+' newly listed streams in '+scope.value+' catalog; playback not yet verified');catalogStatus.textContent=parsed.length+' unique streams in '+scope.value+' · checked '+new Date(lastFetch).toLocaleTimeString();window.NewViewSourceMonitor?.mark?.('api','iptv-directory','ok','IPTV directory loaded');renderChannels();
   }catch(error){
+   if(url!==selectedPlaylist())return;
    const reason=error?.name==='AbortError'?'request timed out':String(error?.message||error);
    window.NewViewSourceMonitor?.mark?.('api','iptv-directory','failed',reason);
    if(allChannels.length&&loadedUrl===url){renderChannels();status.textContent='Refresh failed ('+reason+'). Showing '+allChannels.length+' previously loaded channels from this catalog; stream availability is not guaranteed.';}
    else{lastFetch=0;allChannels=[];loadedUrl=null;stopInline();list.replaceChildren();playChannel.disabled=true;inlinePlay.disabled=true;floatChannel.disabled=true;favorite.disabled=true;retryFailed.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+reason+'). Use the official playlist link or retry.';}
   }
-  finally{loading=null;loadingUrl=null;refresh.disabled=false;refresh.removeAttribute('aria-busy');list.removeAttribute('aria-busy');}})();return loading;
+  finally{
+    loading=null;loadingUrl=null;refresh.disabled=false;refresh.removeAttribute('aria-busy');list.removeAttribute('aria-busy');
+    // Switch to the latest requested catalog once; never fan out old .then() callbacks.
+    const latest=selectedPlaylist();if(queuedRefresh){queuedRefresh=false;if(latest&&latest!==url)void loadDirectory(true);}
+   }})();return loading;
  }
  refresh.addEventListener('click',()=>scope.value==='all'?loadDirectory(true):updateScope(true));
  category?.addEventListener('change',renderChannels);
