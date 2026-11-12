@@ -109,3 +109,8 @@ body.nv-simple :is(.nv-home-recent-item,.nv-home-featured button,.nv-home-featur
  body.nv-simple .nv-home-recommendation-controls{grid-template-columns:minmax(0,1fr)}
  body.nv-simple .nv-home-news-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Encrypted device viewing sync is opt-in and remains inside Settings. */
+body.nv-simple .newview-sync-viewing-consent{display:flex;align-items:flex-start;gap:10px;max-width:100%;min-width:0;padding:10px 12px;border:1px solid #52748a;border-radius:10px;background:#102b3e;line-height:1.5;color:#e2edf3;overflow-wrap:anywhere}
+body.nv-simple .newview-sync-viewing-consent input{width:20px;height:20px;flex:0 0 20px;margin-top:2px;accent-color:#e5ab64}
+body.nv-simple .newview-sync-viewing-consent:focus-within{outline:2px solid #f0bc73;outline-offset:2px}
