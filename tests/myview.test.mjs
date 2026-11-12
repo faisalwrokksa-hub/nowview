@@ -176,3 +176,11 @@ test('Market Watch clears chart context for invalid or missing snapshots',()=>{
  assert.match(src,/if\(id==='market'\)refreshChart\(\)/);
  assert.match(src,/if\(id==='market'\)item\.append\(chartFor\(chartSymbol\(\)\)\)/);
 });
+
+
+test('Market Watch partitions session chart observations by quote currency',()=>{
+ assert.match(src,/symbol\+'\|'\+currency/);
+ assert.match(src,/next\.symbol\.trim\(\)\.slice\(0,24\)\+'\|'\+next\.currency/);
+ assert.match(src,/quoteHistory\.get\(key\)/);
+ assert.match(src,/lastQuoteTime\.get\(key\)/);
+});
