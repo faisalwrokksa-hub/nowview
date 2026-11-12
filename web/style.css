@@ -1019,3 +1019,28 @@ body[data-nv-motion="reduced"] *,body[data-nv-motion="reduced"] *::before,body[d
 @media (forced-colors:active){
  #message :is(button,a,[tabindex]):focus-visible{outline-color:Highlight}
 }
+
+
+/* In-app launch support and privacy-safe local diagnostics. */
+.newview-support-center{display:grid;gap:12px;min-width:0}
+.newview-support-center h3,.newview-support-center h4{margin:0}
+.newview-support-center p{line-height:1.5;overflow-wrap:anywhere}
+.newview-support-center .newview-release-status{font-weight:650}
+.newview-support-center .newview-help-guide{min-width:0}
+.newview-support-center .newview-help-guide summary{cursor:pointer;min-height:44px;padding:8px 10px;border:1px solid currentColor;border-radius:8px}
+.newview-support-center ol{margin:10px 0;padding-inline-start:26px}
+.newview-support-center li{padding-block:5px;overflow-wrap:anywhere}
+.newview-support-center .newview-support-actions,.newview-support-center .newview-local-data{display:grid;gap:9px;min-width:0;padding:12px;border:1px solid rgba(128,151,168,.4);border-radius:10px}
+.newview-support-center button{min-height:44px;max-width:100%;width:max-content;white-space:normal;text-align:start;overflow-wrap:anywhere}
+.newview-support-center [role=status]{min-height:1.2em}
+.newview-support-center button:focus-visible,.newview-support-center summary:focus-visible{outline:3px solid #ffd6a3;outline-offset:3px}
+@media(max-width:480px),(max-height:520px){
+ .newview-support-center .newview-support-actions,.newview-support-center .newview-local-data{padding:9px}
+ .newview-support-center button{width:100%;text-align:center}
+}
+@media(forced-colors:active){
+ .newview-support-center button:focus-visible,.newview-support-center summary:focus-visible{outline-color:Highlight}
+}
+@media(prefers-reduced-motion:reduce){
+ .newview-support-center *{scroll-behavior:auto}
+}
