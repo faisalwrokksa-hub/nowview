@@ -110,8 +110,10 @@
   status.textContent=rows.length+' dated records loaded locally · most recent '+result.asOf+' · amounts in CSV units (currency not specified).';
  }
  picker.addEventListener('change',async()=>{
-  const version=++selectionVersion;
   const file=picker.files?.[0];if(!file)return;
+  const version=++selectionVersion;
+  // Invalidate the prior read and clear its busy indicator even if this file fails early.
+  picker.removeAttribute('aria-busy');cards.removeAttribute('aria-busy');
   // Invalidate prior data immediately, including when the new file fails validation.
   loadedRows=null;period.value='all';periodLabel.hidden=true;
   cards.replaceChildren();bars.replaceChildren();
