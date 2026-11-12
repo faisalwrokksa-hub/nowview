@@ -17,9 +17,13 @@ Open https://github.com/faisalwrokksa-hub/nowview/settings/rules, create an acti
 - Keep deployment approval separate: the production Cloudflare Git-integrated Worker should only publish an approved `main` commit. Turning on branch protection is a settings action, not something this draft can enforce by code.
 - Review available GitHub plan/ruleset capabilities before expecting these settings to apply. If protection is unavailable, keep draft PR #167 unmerged and use an owner-only/manual release process rather than assuming protection.
 
+## PR disposition — consolidated
+
+**Verified count:** 27 superseded PRs closed (unmerged, with source branches retained). Only three draft PRs remain open: #167 (shared integration), #133 (deferred broad TV layout CSS), #166 (reverse staging reconciliation). No production merge or Cloudflare deployment occurred during this cleanup.
+
 ## PR disposition
 
-Old overlapping **drafts** have been reconciled into #167 only at the feature-level: MyView source normalization, chart history/currency, publisher article linking, local Business CSV, Watch fallbacks, Social filter reset, focus/compact responsive UX. Do not merge these drafts individually. Close superseded PRs after documenting the integration reference and confirming current CI; **do not delete their source branches**. The #133 broad TV layout rewrite and #166 staging reverse-merge are not production candidates and must be reviewed separately.
+Old overlapping **drafts** have been reconciled into #167 only at the feature-level: MyView source normalization, chart history/currency, publisher article linking, local Business CSV, Watch fallbacks, Social filter reset, focus/compact responsive UX. Do not merge these drafts individually. The 27 superseded PRs are now closed with #167 references and verified CI; **none of their source branches were deleted**. Reopen any original if functionality from it is demonstrably missing. The #133 broad TV layout rewrite and #166 staging reverse-merge are not production candidates and must be reviewed separately.
 
 ## Commercial GO / NO-GO
 
