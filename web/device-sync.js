@@ -125,7 +125,7 @@
    }catch(error){
     if(activeSession===session&&/room has been revoked/.test(String(error?.message||''))){disconnect();report('This room was revoked. The pairing link is no longer valid.');}
     else if(activeSession===session)report(error?.name==='AbortError'?'Cloud sync timed out; retry':(error?.message||'Unable to synchronize right now'));
-   }finally{busy=false;push.disabled=false;push.removeAttribute('aria-busy');}
+   }finally{if(activeSession===session){busy=false;push.disabled=false;push.removeAttribute('aria-busy');}}
   }
   useCloud.addEventListener('click',()=>{
    if(!conflict)return;
@@ -141,12 +141,12 @@
    report('Keeping this layout. Synchronizing the selected version…');update();
   });
   function disconnect(){
-   session++;if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=null;createdRoom=false;conflict=null;
+   session++;busy=false;if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=null;createdRoom=false;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
    if(location.hash.startsWith('#sync='))history.replaceState(null,'',location.pathname+location.search);
    connected(false);report('Disconnected on this device; other devices keep their copies');
   }
   async function pair(value,isNew){
-   session++;if(timer)clearInterval(timer);timer=null;conflict=null;
+   session++;busy=false;if(timer)clearInterval(timer);timer=null;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
    room=value.room;key=value.key;previousLocal=previousVersion=null;createdRoom=isNew;connected(true);
    const pairingSession=session;pairing.value='';report('Pairing…');
    await update();
@@ -164,9 +164,10 @@
   revoke.addEventListener('click',async()=>{
    if(!room||busy)return;
    if(!window.confirm('Revoke this encrypted pairing room for every device? This cannot be undone.'))return;
+   const revokeSession=session;
    revoke.disabled=true;
-   try{await request('DELETE');disconnect();report('Pairing room revoked. Old links will no longer work.');}
-   catch(error){report(error?.message||'Could not revoke pairing. Retry.');}
+   try{await request('DELETE');if(revokeSession===session){disconnect();report('Pairing room revoked. Old links will no longer work.');}}
+   catch(error){if(revokeSession===session)report(error?.message||'Could not revoke pairing. Retry.');}
    finally{revoke.disabled=false;}
   });
   if(location.hash.startsWith('#sync=')){
