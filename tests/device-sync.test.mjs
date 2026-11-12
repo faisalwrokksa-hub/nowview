@@ -17,7 +17,7 @@ function authoritativeRooms(){
    return {
     async read(){operations.push({name,op:'read'});if(state.revoked)return {status:410};return state.blob&&Date.now()<state.expiresAt?{status:200,blob:state.blob}:{status:404};},
     async create(value){operations.push({name,op:'create'});if(state.revoked)return {status:410};if(state.blob&&Date.now()<state.expiresAt)return {status:409};state.blob=value;state.expiresAt=Date.now()+604800000;return {status:204};},
-    async update(value){operations.push({name,op:'update'});if(state.revoked)return {status:410};if(!state.blob||Date.now()>=state.expiresAt)return {status:404};state.blob=value;state.expiresAt=Date.now()+604800000;return {status:204};},
+    async update(value,expected){operations.push({name,op:'update'});if(typeof expected!=='string')return {status:428};if(state.revoked)return {status:410};if(!state.blob||Date.now()>=state.expiresAt)return {status:404};if(state.blob!==expected)return {status:409};state.blob=value;state.expiresAt=Date.now()+604800000;return {status:204};},
     async revoke(){operations.push({name,op:'revoke'});if(state.revoked)return {status:410};state.revoked=true;state.blob=null;return {status:204};}
    };
   }
@@ -34,7 +34,7 @@ test('device sync fails closed without configured Durable Object even when old K
 test('unknown/expired room requires explicit creation instead of adopting from linked client',async()=>{
  const store=authoritativeRooms(),env={NEWVIEW_SYNC_ROOMS:store.namespace};
  assert.equal((await secured(new Request(url),env,new URL(url))).status,404);
- assert.equal((await secured(mutation('PUT',{blob}),env,new URL(url))).status,404);
+ assert.equal((await secured(mutation('PUT',{blob,expected:blob}),env,new URL(url))).status,404);
  const invalid='https://newview.example/api/device-sync/not-a-room';
  assert.equal((await secured(new Request(invalid),env,new URL(invalid))).status,404);
  assert.equal(store.operations.some(x=>x.op==='create'),false);
@@ -47,10 +47,17 @@ test('create/update/read/revoke use one authoritative room; revocation cannot be
  assert.deepEqual(await loaded.json(),{blob});
  assert.equal(loaded.headers.get('cache-control'),'no-store');
  const replacement='D'.repeat(16)+'.'+'E'.repeat(40);
- assert.equal((await secured(mutation('PUT',{blob:replacement}),env,new URL(url))).status,204);
+ assert.equal((await secured(mutation('PUT',{blob:replacement,expected:blob}),env,new URL(url))).status,204);
  assert.deepEqual(await (await secured(new Request(url),env,new URL(url))).json(),{blob:replacement});
+ // An old client must never overwrite the newly saved encrypted layout.
+ const oldWriter=await secured(mutation('PUT',{blob,expected:blob}),env,new URL(url));
+ assert.equal(oldWriter.status,409);
+ assert.match((await oldWriter.json()).error,/another device/);
+ assert.deepEqual(await (await secured(new Request(url),env,new URL(url))).json(),{blob:replacement});
+ assert.equal((await secured(mutation('PUT',{blob:replacement}),env,new URL(url))).status,428);
+
  assert.equal((await secured(new Request(url,{method:'DELETE',headers:{Origin:'https://newview.example'}}),env,new URL(url))).status,204);
- for(const request of [new Request(url),mutation('POST',{blob}),mutation('PUT',{blob}),new Request(url,{method:'DELETE'})]){
+ for(const request of [new Request(url),mutation('POST',{blob}),mutation('PUT',{blob,expected:blob}),new Request(url,{method:'DELETE'})]){
   assert.equal((await secured(request,env,new URL(url))).status,410);
  }
  assert.equal(new Set(store.operations.map(x=>x.name)).size,1,'same room must always route to the same Durable Object');
@@ -98,18 +105,21 @@ test('Sqlite-backed implementation makes permanent tombstones and serializes sta
   if(query.startsWith('SELECT'))return {toArray:()=>row?[{...row}]:[]};
   if(query.startsWith('INSERT INTO room')&&query.includes('revoked=1')){row={blob:null,expires_at:0,revoked:1};return {toArray:()=>[]};}
   if(query.startsWith('INSERT INTO room')){row={blob:params[0],expires_at:params[1],revoked:0};return {toArray:()=>[]};}
-  if(query.startsWith('UPDATE room')){if(row?.revoked!==1){row={blob:params[0],expires_at:params[1],revoked:0};}return {toArray:()=>[]};}
+  if(query.startsWith('UPDATE room')){if(row?.revoked!==1&&row?.blob===params[2]){row={blob:params[0],expires_at:params[1],revoked:0};}return {toArray:()=>[]};}
   throw Error('Unknown SQL query');
  }}};
  const live=new context.Room({storage},{});
  assert.equal((await live.read()).status,404);
  assert.equal((await live.create(blob)).status,204);
- assert.equal((await live.update(blob)).status,204);
+ assert.equal((await live.update(blob,blob)).status,204);
+ assert.equal((await live.update(blob,'Q'.repeat(16)+'.'+'R'.repeat(40))).status,409);
+ assert.equal((await live.update(blob)).status,428);
+
  assert.equal((await live.revoke()).status,204);
  assert.equal(row.revoked,1);
  assert.equal((await live.read()).status,410);
  assert.equal((await live.create(blob)).status,410);
- assert.equal((await live.update(blob)).status,410);
+ assert.equal((await live.update(blob,blob)).status,410);
  assert.equal((await live.revoke()).status,410);
 });
 test('frontend preserves encryption and explicitly creates rooms; an old link never silently recreates',()=>{
@@ -121,6 +131,9 @@ test('frontend preserves encryption and explicitly creates rooms; an old link ne
  assert.match(js,/crypto\.getRandomValues/);
  assert.match(js,/request\('POST',sealed\)/);
  assert.match(js,/if\(!createdRoom\)/);
+ assert.match(js,/request\('PUT',sealed,previousVersion\)/);
+ assert.match(js,/previousVersion=conflict.cloudVersion;previousLocal=JSON.stringify\(conflict.incoming\)/);
+
  assert.match(js,/Revoke pairing for all devices/);
  assert.match(js,/history\.replaceState\(null,'',location\.pathname\+location\.search\)/);
  assert.doesNotMatch(js,/getDisplayMedia|MediaRecorder|screenrecord/);
