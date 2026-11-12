@@ -41,7 +41,7 @@ jobs:
           echo "Preview URL: $NEWVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "Serving revision: $NEWVIEW_EXPECTED_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "Read-only smoke PASS. Physical devices, licensing and signing are NOT certified." >> "$GITHUB_STEP_SUMMARY"
-  chromium-responsive:
+  browser-responsive:
     needs: revision-and-routes
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -59,14 +59,14 @@ jobs:
       - name: Install disposable Chromium runner dependencies
         run: |
           npm install --no-save --package-lock=false playwright@1.57.0
-          npx playwright install --with-deps chromium
-      - name: Check four viewports, nav and keyboard focus
+          npx playwright install --with-deps chromium firefox
+      - name: Check Chromium + Firefox, four viewports and simulated TV remote keys
         run: node tools/verify-integration-browser.mjs
       - name: Upload screenshots for human review (not acceptance evidence)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: newview-integration-preview-chromium-screenshots
+          name: newview-integration-preview-crossbrowser-screenshots
           path: preview-screenshots/
           if-no-files-found: ignore
           retention-days: 14
