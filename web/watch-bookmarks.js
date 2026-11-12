@@ -12,7 +12,7 @@
   {name:'Internet Archive',url:'https://archive.org/details/movies',category:'Public domain'}
  ];
  const safe=raw=>root.NewViewBrowserSafeUrl?.(raw)||null;
- function saved(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v.filter(x=>x&&typeof x.name==='string'&&safe(x.url)===x.url).slice(0,50):[];}catch{return [];}}
+ function saved(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v.filter(x=>x&&typeof x.name==='string'&&x.name.trim().length>0&&x.name.length<=60&&safe(x.url)===x.url).slice(0,50):[];}catch{return [];}}
  function install(){
   const host=document.getElementById('nv-watch-hub')||document.querySelector('[data-workspace="media"]');
   if(!host||document.getElementById('nv-watch-bookmark-panel'))return;
@@ -55,7 +55,7 @@
   form.addEventListener('submit',event=>{
    event.preventDefault();const target=safe(url.value);if(!target){status.textContent='Use a valid public HTTPS website.';return;}
    const list=saved();if(list.length>=50){status.textContent='Maximum 50 custom bookmarks.';return;}
-   if(list.some(x=>x.url===target)){status.textContent='Bookmark already saved.';return;}
+   if(list.some(x=>x.url===target)||defaults.some(x=>x.url===target)){status.textContent='Bookmark already saved.';return;}
    list.push({name:name.value.trim().slice(0,60)||new URL(target).hostname,url:target});
    try{localStorage.setItem(KEY,JSON.stringify(list));name.value='';url.value='';category.value='Custom';status.textContent='Bookmark saved on this device.';render();}catch{status.textContent='Unable to save bookmarks.';}
   });
