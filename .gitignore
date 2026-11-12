@@ -22,3 +22,10 @@ Thumbs.db
 *qa-evidence*.local.md
 *readiness*.local.json
 *readiness*.local.md
+
+# Sensitive owner-only licensing, review evidence and prepared distributions
+*.private-rights.json
+*rights.private.json
+*release*.local.json
+signed/
+release-out/
