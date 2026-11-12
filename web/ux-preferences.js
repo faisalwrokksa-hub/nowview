@@ -43,6 +43,8 @@
   const focus=field('Focus indicator','focus',[['visible','Standard'],['strong','High visibility']]);
   const reset=document.createElement('button');reset.type='button';reset.textContent='Reset display preferences';
   reset.addEventListener('click',()=>{save(defaults);density.value=state.density;motion.value=state.motion;focus.value=state.focus;});panel.append(reset);
+  const exportButton=document.createElement('button');exportButton.type='button';exportButton.textContent='Export preferences';
+  exportButton.addEventListener('click',()=>{const data={version:1,display:state};try{const raw=localStorage.getItem('newview.home.boxes.v2');data.homeShortcuts=raw?JSON.parse(raw):[];data.shortcutCount=Number(localStorage.getItem('newview.home.box-count.v2'))||3;}catch{data.homeShortcuts=[];}const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='newview-preferences.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});panel.append(exportButton);
   host.append(panel);
   // Preserve focus when a workspace switch removes or hides the focused control.
   const nav=document.getElementById('nv-simple-nav')||document.getElementById('workspace-switcher');
