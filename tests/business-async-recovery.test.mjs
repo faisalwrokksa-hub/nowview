@@ -21,7 +21,7 @@ function create(){
  const events=[];
  const document={getElementById:id=>ids[id]||null,createElement:()=>new Element()};
  const window={dispatchEvent:e=>events.push(e.detail)};
- const context={document,window,Intl,Date,Set,Error,CustomEvent:class{constructor(name,opts){this.name=name;this.detail=opts.detail;}}};
+ const context={document,window,Intl,Date,Set,Error,TextEncoder,CustomEvent:class{constructor(name,opts){this.name=name;this.detail=opts.detail;}}};
  vm.runInNewContext(source,context);
  return {ids,picker,cards,status,events,api:window.NewViewBusiness,select:file=>{
   picker.files=[file];return picker.listeners.get('change')();
