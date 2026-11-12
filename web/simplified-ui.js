@@ -93,7 +93,7 @@
   featured.append(featuredHeading,featuredSelect,featuredPlay,featuredStatus);
   function syncFeatured(){
    const catalog=document.querySelector('#newview-channel-directory select[aria-label="Available IPTV channels"]');
-   if(!catalog||!catalog.options.length)return;
+   if(!catalog||!catalog.options.length){featuredStatus.textContent='No channels loaded yet. Open Watch to refresh the channel directory.';return;}
    const old=featuredSelect.value;
    featuredSelect.replaceChildren();
    const candidates=[...catalog.options].filter(o=>o.value.startsWith('https://'));
@@ -121,7 +121,7 @@
    const items=window.NewViewNewsReader?.getItems?.()||[];
    newsStrip.replaceChildren();
    const latest=[...items].sort((a,b)=>(Date.parse(b.publishedAt)||0)-(Date.parse(a.publishedAt)||0)).slice(0,4);
-   if(!latest.length){newsStrip.append(el('p','nv-home-news-empty','Loading publisher headlines…'));return;}
+   if(!latest.length){const offline=typeof navigator!=='undefined'&&!navigator.onLine;newsStrip.append(el('p','nv-home-news-empty',offline?'Offline — headlines unavailable. Reconnect to refresh.':'No publisher headlines available yet. Open Read to retry.'));return;}
    for(const item of latest){
     const btn=el('button','nv-home-news-story');btn.type='button';
     btn.append(el('strong','',item.title),el('small','',item.summary||item.source));
