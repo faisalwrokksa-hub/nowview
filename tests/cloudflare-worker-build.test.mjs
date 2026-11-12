@@ -15,6 +15,7 @@ test('Cloudflare Worker build has explicit Wrangler entrypoint and valid bundle'
  const config=JSON.parse(fs.readFileSync(path.join(root,'wrangler.json'),'utf8'));
  assert.equal(config.name,'nowview');
  assert.equal(config.main,'dist/server/index.js');
+ assert.equal(config.build?.command,'npm run build','wrangler deploy must build assets even if Cloudflare Builds has no separate build command');
  assert.equal(config.workers_dev,true);
  assert.match(config.compatibility_date,/^20\d{2}-\d{2}-\d{2}$/);
  execFileSync(process.execPath,[path.join(root,'cloud/build.mjs')],{cwd:root,stdio:'pipe'});
@@ -65,4 +66,16 @@ test('Worker version is public commit metadata with no caching',async()=>{
  const data=await response.json();
  assert.equal(data.app,'newview');
  assert.ok(data.revision===null||/^[a-f0-9]{40}$/.test(data.revision));
+});
+
+test('Cloudflare Workers Builds is the sole automatic production publisher',()=>{
+ const workflow=fs.readFileSync(path.join(root,'.github/workflows/deploy-production.yml'),'utf8');
+ assert.match(workflow,/workflow_dispatch:/);
+ assert.match(workflow,/confirm_github_deployment:/);
+ assert.match(workflow,/GITHUB_PRODUCTION_DEPLOY_ENABLED/);
+ assert.doesNotMatch(workflow,/^\s+workflow_run:/m,'GitHub must not automatically deploy alongside Cloudflare native Builds');
+ assert.doesNotMatch(workflow,/^\s+push:/m,'GitHub fallback must not publish on push');
+ assert.match(workflow,/CLOUDFLARE_API_TOKEN/);
+ assert.match(workflow,/CLOUDFLARE_ACCOUNT_ID/);
+ assert.match(workflow,/smoke-public-newview\.mjs/);
 });
