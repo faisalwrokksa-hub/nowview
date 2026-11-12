@@ -223,8 +223,8 @@
   }catch(error){
    const reason=error?.name==='AbortError'?'request timed out':String(error?.message||error);
    window.NewViewSourceMonitor?.mark?.('api','iptv-directory','failed',reason);
-   if(allChannels.length){renderChannels();status.textContent='Refresh failed ('+reason+'). Showing '+allChannels.length+' previously loaded channels; stream availability is not guaranteed.';}
-   else{lastFetch=0;stopInline();list.replaceChildren();playChannel.disabled=true;inlinePlay.disabled=true;floatChannel.disabled=true;favorite.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+reason+'). Use the official playlist link or retry.';}
+   if(allChannels.length&&loadedUrl===url){renderChannels();status.textContent='Refresh failed ('+reason+'). Showing '+allChannels.length+' previously loaded channels from this catalog; stream availability is not guaranteed.';}
+   else{lastFetch=0;allChannels=[];loadedUrl=null;stopInline();list.replaceChildren();playChannel.disabled=true;inlinePlay.disabled=true;floatChannel.disabled=true;favorite.disabled=true;open.hidden=true;open.setAttribute('aria-disabled','true');open.removeAttribute('href');status.textContent='Directory unavailable on this device ('+reason+'). Use the official playlist link or retry.';}
   }
   finally{loading=null;loadingUrl=null;refresh.disabled=false;refresh.removeAttribute('aria-busy');}})();return loading;
  }
