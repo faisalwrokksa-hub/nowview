@@ -263,6 +263,7 @@
  function validate(){
   const item=parse(input.value);
   play.disabled=!item;
+  floatYouTube.disabled=!item;
   original.hidden=!item;
   if(item)original.href=item.original;else original.removeAttribute('href');
   return item;
