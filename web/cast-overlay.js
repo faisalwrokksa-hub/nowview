@@ -4,7 +4,7 @@
    capture app, automatic cloud signaling, account login or remote control. */
 (function(){
  const MAX_SIGNAL=120000, MAX_SESSION_MS=30*60*1000, DISCONNECT_GRACE_MS=20000;
- let peer=null, localCapture=null, currentStream=null, mode=null, minimized=false, expiryTimer=null, disconnectTimer=null;
+ let peer=null, localCapture=null, currentStream=null, mode=null, minimized=false, expiryTimer=null, disconnectTimer=null, connectionTimer=null;
  let mediaMode='none',iptvSource=null,iptvTimeout=null,iptvAttempt=0;
  const el=(tag,cls,value)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(value)e.textContent=value;return e;};
  function parseSignal(raw,type){
@@ -116,6 +116,7 @@
   const updateViewport=()=>{document.body.classList.toggle('newview-video-active',!dock.hidden&&!minimized);document.body.classList.toggle('newview-video-left',dock.classList.contains('is-left'));};
   const showDock=()=>{dock.hidden=false;dock.classList.remove('is-minimized');minimized=false;updateViewport();};
   function attachStream(stream){
+   if(connectionTimer){clearTimeout(connectionTimer);connectionTimer=null;}
    clearMedia();mediaMode='cast';heading.textContent='Device screen';currentStream=stream;video.srcObject=stream;showDock();video.play().catch(()=>report('Screen connected · press Play in the viewer'));
    if(mode==='watch')for(const track of stream.getTracks())track.addEventListener('ended',()=>{if(currentStream===stream)reset();},{once:true});
    report('Screen stream connected. Switch to Markets; the viewer stays open.');
@@ -124,6 +125,7 @@
    clearMedia();heading.textContent='Device screen';
    if(expiryTimer)clearTimeout(expiryTimer);expiryTimer=null;
    if(disconnectTimer)clearTimeout(disconnectTimer);disconnectTimer=null;
+   if(connectionTimer)clearTimeout(connectionTimer);connectionTimer=null;
    if(localCapture){localCapture.getTracks().forEach(track=>track.stop());localCapture=null;}
    if(peer){peer.close();peer=null;}
    if(currentStream){video.srcObject=null;currentStream=null;}
@@ -141,7 +143,8 @@
    pc.ontrack=e=>{const stream=e.streams[0]||new MediaStream([e.track]);attachStream(stream);};
    pc.onconnectionstatechange=()=>{
     if(pc!==peer)return;
-    if(pc.connectionState==='failed'||pc.connectionState==='closed'){reset();return;}
+    if(pc.connectionState==='failed'||pc.connectionState==='closed'){reset();report('Connection failed or ended. Create a new offer to retry.');return;}
+    if(pc.connectionState==='connected'&&connectionTimer){clearTimeout(connectionTimer);connectionTimer=null;}
     if(disconnectTimer){clearTimeout(disconnectTimer);disconnectTimer=null;}
     if(pc.connectionState==='disconnected'){
      report('Connection interrupted; closing if not restored within 20 seconds');
@@ -189,7 +192,19 @@
   });
   apply.addEventListener('click',async()=>{
    if(mode!=='watch'||!peer)return;
-   try{await peer.setRemoteDescription(parseSignal(answer.value,'answer'));report('Answer accepted. Connecting on the same local network…');}
+   try{
+    const activePeer=peer;
+    await activePeer.setRemoteDescription(parseSignal(answer.value,'answer'));
+    if(activePeer!==peer)return;
+    if(connectionTimer)clearTimeout(connectionTimer);
+    connectionTimer=setTimeout(()=>{
+     if(peer===activePeer&&activePeer.connectionState!=='connected'){
+      reset();
+      report('No casting connection after 30 seconds. Check same Wi-Fi, permissions, and exchange fresh codes.');
+     }
+    },30000);
+    report('Answer accepted. Connecting on the same local network…');
+   }
    catch(e){fail(e);}
   });
   async function copy(value){try{await navigator.clipboard.writeText(value);report('Code copied. Share privately with the other device.');}catch{report('Clipboard unavailable. Select and copy the code manually.');}}
