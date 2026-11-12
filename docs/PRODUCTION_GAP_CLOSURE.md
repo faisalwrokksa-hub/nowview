@@ -35,5 +35,8 @@ Status: implementation backlog and release gates, **not a claim of completion**.
 - [ ] Verify market/news source accuracy, media rights, privacy, and real user journeys.
 - [ ] Obtain explicit release approval; never infer a 10/10 score from passing CI alone.
 
+## Final QA evidence
+The runnable hardware, browser, and signing checklist is in [Release Acceptance Matrix](RELEASE_ACCEPTANCE_MATRIX.md). All physical-device tests start as NOT RUN and must be supported by observed evidence before release.
+
 ## Release decision
 Do not market the app as production-ready until all critical release gates are closed. Build work can be batched before the final QA phase, but release requires testing and approval.
