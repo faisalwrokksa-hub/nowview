@@ -11,7 +11,9 @@ validateTarget(target,sha);
 const sizes=[{name:'phone390',width:390,height:844},
  {name:'tablet768',width:768,height:1024},
  {name:'desktop1440',width:1440,height:900},
- {name:'tv1920',width:1920,height:1080}];
+ {name:'tv1920',width:1920,height:1080},
+ {name:'shortTV1920',width:1920,height:540},
+ {name:'shortTV1280',width:1280,height:500}];
 mkdirSync('preview-screenshots',{recursive:true});
 const engines=[{name:'chromium',engine:chromium},{name:'firefox',engine:firefox}];
 let failures=0;
