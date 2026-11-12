@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   accelerated-test-apks:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && vars.NEWVIEW_SELF_HOSTED_ENABLED == 'true' && inputs.approve_isolated_runner == true && inputs.expected_main_sha == github.sha }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner && github.ref == 'refs/heads/main' && vars.NEWVIEW_SELF_HOSTED_ENABLED == 'true' && inputs.approve_isolated_runner == true && inputs.expected_main_sha == github.sha }}
     runs-on: [self-hosted, linux, x64, newview-ci-isolated]
     environment: newview-self-hosted-approval
     timeout-minutes: 40
@@ -32,44 +32,26 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Record source identity before any verification
+        shell: bash
+        run: |
+          mkdir -p accelerated-test-artifacts
+          printf 'Source SHA: %s\nRun ID: %s\nRunner: %s\n' \
+            "$GITHUB_SHA" "$GITHUB_RUN_ID" "$RUNNER_NAME" > accelerated-test-artifacts/SOURCE.txt
       - name: Fail closed if main changed or host prerequisites are missing
         run: bash tools/check-self-hosted-runner.sh
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
-      - name: Verify complete app and Worker (no cloud deploy)
+          # Use the checked image's Gradle 8.9; never install tools in a build job.
+          cache-read-only: false
+          cache-cleanup: on-success
+      - name: Verify frontend and build independent development APKs in parallel
         shell: bash
         run: |
           set -euo pipefail
           START=${SECONDS}
-          npm run verify
-          echo "Worker + app verification: $((SECONDS - START)) seconds" >> "$GITHUB_STEP_SUMMARY"
-      - name: Build and verify Android TV test APK (local test identity only)
-        shell: bash
-        run: |
-          set -euo pipefail
-          START=${SECONDS}
-          bash build-apk.sh
-          bash scripts/verify-preview-apk.sh
-          echo "Android TV test build: $((SECONDS - START)) seconds" >> "$GITHUB_STEP_SUMMARY"
-      - name: Build native phone caster test APK
-        shell: bash
-        run: |
-          set -euo pipefail
-          START=${SECONDS}
-          gradle -p phone-caster :app:assembleDebug --offline --no-daemon || gradle -p phone-caster :app:assembleDebug --no-daemon
-          APK=phone-caster/app/build/outputs/apk/debug/app-debug.apk
-          test -s "$APK"
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | grep -F "package: name='app.newview.phonecaster'"
-          echo "Phone Caster test build: $((SECONDS - START)) seconds" >> "$GITHUB_STEP_SUMMARY"
+          bash tools/run-accelerated-checks.sh
+          echo "Parallel verification + two APKs: $((SECONDS - START)) seconds" >> "$GITHUB_STEP_SUMMARY"
       - name: Package development-only artifacts with SHA-256 and provenance
         env:
           SOURCE_SHA: ${{ github.sha }}
@@ -81,9 +63,18 @@ jobs:
           cp phone-caster/app/build/outputs/apk/debug/app-debug.apk accelerated-test-artifacts/NewView-Phone-Caster-test.apk
           (cd accelerated-test-artifacts && sha256sum *.apk > SHA256SUMS.txt)
           printf 'Approved source revision: %s\nSELF-HOSTED DEVELOPMENT BUILD ONLY.\nNot signed for production, not deployed, not certified for hardware/media rights.\n' "$SOURCE_SHA" > accelerated-test-artifacts/README.txt
-      - uses: actions/upload-artifact@v4
+      - name: Retain build logs and timing even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: newview-self-hosted-two-test-apks-${{ github.sha }}
           path: accelerated-test-artifacts/
           retention-days: 14
           if-no-files-found: error
+      - name: Clean generated APKs and development signing material
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf -- build phone-caster/.gradle phone-caster/build phone-caster/app/build accelerated-test-artifacts
+          rm -f -- "$HOME/.android/debug.keystore"

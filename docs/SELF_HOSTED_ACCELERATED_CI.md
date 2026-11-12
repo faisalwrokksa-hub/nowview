@@ -56,6 +56,101 @@ Self-hosting does **not inherently speed up** CI. Gains require faster CPU, prei
 
 The AQ Tech article (November 2022) shows **Terraform provisioning AWS resources via GitHub Actions**. It does **not** provide an approved isolated runner or a NewView-specific AWS security and cost configuration. No Terraform provisioning, AWS access keys, role delegation, EC2 creation or AWS deployment was introduced. An AWS runner should use short-lived permissions and a documented cost cap only after the owner deliberately selects that hosting option.
 
-## Release boundary
+## Prepared image and activation handoff (not activated)
+
+No isolated VM is available. Do not attach the TheOrg Windows runner or install
+NewView's runner on the personal workstation. Activation, Android APK success
+and a speed improvement remain unverified.
+
+Use Ubuntu 24.04 x64 with 4 vCPUs, 8 GB RAM and 20 GiB free disk. The owner must
+approve infrastructure costs, network rules and GitHub administration. Install
+these only inside the disposable build image:
+
+```bash
+sudo apt-get update
+sudo apt-get install --no-install-recommends git curl unzip zip python3 openjdk-17-jdk-headless util-linux
+```
+
+Preinstall Node 22 from nodejs.org and Gradle 8.9 from services.gradle.org,
+checking their official published checksums before extraction. Never pipe a
+download to a shell. Install Android command-line tools from developer.android.com
+using the published checksum, accept its licenses as the owner, then install:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export ANDROID_HOME=/opt/android-sdk
+"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+  'platform-tools' 'platforms;android-34' 'platforms;android-35' \
+  'build-tools;34.0.0' 'build-tools;35.0.0'
+node --version   # 22.x
+javac -version  # 17.x
+gradle --version # 8.9
+```
+
+Platform **35** is mandatory for Phone Caster's compileSdk. The job refuses an
+incomplete image rather than installing tools. There are no npm dependencies
+or lockfile, so an npm dependency cache would cache nothing. Gradle caches build
+tasks and dependencies. Never reuse an APK without verified provenance; this
+job rebuilds APKs and lets Gradle validate cached tasks.
+
+Before snapshotting the image, enforce network isolation outside the guest:
+deny metadata endpoints, production/private networks and inbound connections;
+allow only reviewed GitHub, Android and dependency-registry endpoints. Keep TLS
+validation enabled. After reviewing this policy the owner creates:
+
+```bash
+printf '%s\n' '{"disposable_vm":true,"network_policy_reviewed":true}' | \
+  sudo tee /etc/newview-runner-isolation.json >/dev/null
+sudo chown root:root /etc/newview-runner-isolation.json
+sudo chmod 644 /etc/newview-runner-isolation.json
+```
+
+This attestation records approval; it does not enforce network isolation.
+Create an unprivileged account and install the current official Linux x64
+Actions runner from the registration page, verifying its displayed SHA-256.
+Then launch the prepared helper from that account:
+
+```bash
+export NEWVIEW_RUNNER_ROOT=/opt/newview-runner
+bash /path/to/reviewed-source/tools/start-newview-ephemeral-runner.sh
+```
+
+Enter a fresh registration token only at the hidden local prompt. The helper
+uses `--ephemeral`, never replaces a runner, and removes local runner credentials
+on normal failure/cancellation. After one job **destroy the entire VM**, disk,
+workspace and debug signing keys. A shell trap cannot handle SIGKILL or power
+loss: an external VM supervisor must destroy interrupted VMs, and the owner must
+remove any offline registration in GitHub runner settings. Do not snapshot or
+reuse a registered runner. Crash cleanup is not verified without that supervisor.
+
+Keep `NEWVIEW_SELF_HOSTED_ENABLED` unset/false until GitHub confirms the runner
+online and `newview-self-hosted-approval` has required reviewers, prevents
+self-review and allows only main. These administrative settings require owner
+approval and were not changed. Do not merge PR #167 to activate this workflow.
+
+The workflow also checks the owner actor and exact main SHA, runs independent
+frontend/TV/phone checks in separate process groups, records duration and exit
+status, retains failure logs, verifies phone version/package/signature, and
+cleans generated outputs after upload. Whole-VM destruction is the final cleanup
+boundary, including after forced cancellation. Development signing is separate
+from production signing.
+
+For a benchmark, use the **same source SHA** for the hosted bundle and approved
+isolated run. Export their completed jobs:
+
+```bash
+gh api repos/faisalwrokksa-hub/nowview/actions/runs/HOSTED_RUN_ID/jobs > hosted-jobs.json
+gh api repos/faisalwrokksa-hub/nowview/actions/runs/ISOLATED_RUN_ID/jobs > isolated-jobs.json
+python3 tools/summarize-runner-benchmark.py hosted-jobs.json isolated-jobs.json
+```
+
+Combine API preparation/setup durations with artifact `*.tsv` timings,
+`cache-evidence.txt`, Gradle profile dependency timings and logs. Total wall time
+includes overlapping checks; never add parallel durations as total elapsed time.
+Tool installation in the accelerated job is absent because the image preinstalls
+tools. Compare cold and warm caches separately. Missing measurements remain
+unavailable; the summary tool never certifies a speedup.
+
+## Release boundary (unchanged)
 
 Running the accelerated workflow does not close the 20 real-device/browser acceptance records, establish commercial IPTV/data licensing, sign Android releases, verify upgrades, or approve production. Keep draft PR #167 and the serving `main` unchanged until acceptance gates are complete.
