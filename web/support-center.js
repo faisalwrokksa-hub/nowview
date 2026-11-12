@@ -82,6 +82,12 @@
   ])addText(steps,'li',instruction);
   guide.append(steps);center.append(guide);
 
+  const permissions=document.createElement('details');permissions.className='newview-help-guide';
+  addText(permissions,'summary','Optional Android TV permissions');
+  addText(permissions,'p','The optional TV Home overlay uses Android Draw over other apps and an accessibility service to detect the foreground application. The current implementation reads window-state package/class information, not screen text. It is disabled until you enable the Home panel and grant Android permissions. Check your device Settings to disable access at any time.');
+  addText(permissions,'p','The separate Phone Caster uses Android screen-capture permission when actively started. Only share screens you are authorized to display. Closing a session or declining permission prevents that capture session.');
+  center.append(permissions);
+
   const diagnostic=document.createElement('div');diagnostic.className='newview-support-actions';
   addText(diagnostic,'h4','App version & local diagnostics');
   const status=addText(diagnostic,'p','Build revision not checked. Network status alone does not prove provider availability.');
