@@ -91,7 +91,7 @@
    if(!room||busy||document.hidden||conflict)return;
    if(navigator.onLine===false){report('Browser offline · local dashboard available; cloud layout sync paused');return;}
    const activeSession=session;
-   busy=true;
+   busy=true;push.disabled=true;push.setAttribute('aria-busy','true');report('Checking encrypted device layout…');
    try{
     const current=snapshot(),local=JSON.stringify(current);
     const remote=await request('GET');
@@ -123,7 +123,7 @@
    }catch(error){
     if(activeSession===session&&/room has been revoked/.test(String(error?.message||''))){disconnect();report('This room was revoked. The pairing link is no longer valid.');}
     else if(activeSession===session)report(error?.name==='AbortError'?'Cloud sync timed out; retry':(error?.message||'Unable to synchronize right now'));
-   }finally{busy=false;}
+   }finally{busy=false;push.disabled=false;push.removeAttribute('aria-busy');}
   }
   useCloud.addEventListener('click',()=>{
    if(!conflict)return;
