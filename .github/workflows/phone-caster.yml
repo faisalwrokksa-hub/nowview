@@ -1,6 +1,7 @@
 name: NewView native Android phone caster
 on:
   push:
+    branches: [main]
     paths:
       - 'phone-caster/**'
       - '.github/workflows/phone-caster.yml'
@@ -11,6 +12,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: newview-phone-caster-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   phone-caster:
     runs-on: ubuntu-24.04
