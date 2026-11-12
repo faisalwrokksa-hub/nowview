@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "product": "NewView",
+  "salesStatus": "not-open",
+  "checkoutEnabled": false,
+  "accountProvisioningEnabled": false,
+  "paymentProvider": null,
+  "policyStatus": "draft",
+  "billingCurrency": null,
+  "notice": "Plans are not for sale. Prices, payment handling, account authentication, refunds and support terms require approval.",
+  "plans": [
+    {
+      "id": "preview",
+      "title": "Local Preview",
+      "status": "internal-only",
+      "price": null,
+      "billingInterval": null,
+      "features": [
+        "Dashboard personalization",
+        "Local preferences",
+        "Links to publicly available services"
+      ],
+      "maxDevices": null
+    },
+    {
+      "id": "personal",
+      "title": "Personal",
+      "status": "draft",
+      "price": null,
+      "billingInterval": null,
+      "features": [
+        "Personal dashboard profiles",
+        "Multi-device layout sync (subject to authenticated hosting)"
+      ],
+      "maxDevices": null
+    },
+    {
+      "id": "business",
+      "title": "Business",
+      "status": "draft",
+      "price": null,
+      "billingInterval": null,
+      "features": [
+        "Business dashboard layout tools",
+        "Team/device administration (planned)"
+      ],
+      "maxDevices": null
+    }
+  ],
+  "support": {
+    "intakeEnabled": false,
+    "endpoint": null,
+    "contactUrl": null,
+    "policyApproved": false
+  }
+}
