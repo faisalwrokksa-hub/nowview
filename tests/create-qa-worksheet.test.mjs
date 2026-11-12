@@ -8,6 +8,10 @@ test('worksheet has 20 distinct cases with no false passes',()=>{
  assert.equal(data.records.length,20);
  assert.ok(data.records.every(x=>x.result==='NOT RUN'));
  assert.ok(Object.values(data.gates).every(value=>value===false));
+ assert.equal(data.candidate.sourceCommit,'');
+ assert.equal(data.candidate.tvApkSha256,'');
+ assert.equal(data.candidate.approvedAt,'');
+ assert.equal(data.candidate.previousVersionCode,null);
 });
 test('new worksheet is rejected by release readiness gate',()=>{
  const data=createWorksheet();
