@@ -45,6 +45,10 @@ For each test record: device model, Android version, APK SHA-256, build commit, 
 - [ ] Confirm support contact, customer-facing policies, and release approval.
 - [ ] Release owner signs off explicitly before public distribution.
 
+## Automated evidence check
+
+Record results as a JSON array using the fields below (camelCase: `buildCommit`, `apkSha256`, `result`, `device`, `expected`, `observed`, `tester`, `date`, `evidence`). Run `node tools/check-release-evidence.mjs path/to/evidence.json` locally. The checker fails closed on missing tests, duplicates, malformed PASS records, and missing device/build evidence. It does **not** validate that submitted observations are truthful; human review and all production gates remain mandatory. Never commit private pairing links or keys.
+
 ## Evidence template
 ```text
 Test ID:
