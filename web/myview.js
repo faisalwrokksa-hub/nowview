@@ -253,6 +253,7 @@ item.append(eyebrow,heading,description,insight);
   const updated=preview.market(quote);
   if(live&&live.textContent!==updated)live.textContent=updated;
   updateMarketSourceLink();
+  refreshChart(); // Expired quotes must not retain symbol-specific chart context.
  }
  const freshnessTimer=setInterval(refreshMarketAge,60000);
  freshnessTimer.unref?.();
