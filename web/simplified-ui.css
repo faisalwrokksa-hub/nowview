@@ -626,3 +626,37 @@ body.nv-simple #nv-watch-hub .nv-internal-browser{margin-block:18px}
  body.nv-simple .nv-browser-frame{height:62dvh;min-height:330px}
  body.nv-simple .nv-browser-toolbar select{max-width:100%;flex:1}
 }
+
+/* Always-visible, keyboard/remote-friendly publisher fallback. Never imply a blocked
+   cross-origin iframe can be bypassed or reliably detected by load events. */
+body.nv-simple .nv-browser-external,body.nv-simple .nv-browser-open-full{
+ display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:9px 15px;border:1px solid #b89964;border-radius:9px;
+ background:#234657;color:#fff;text-decoration:none;font-weight:700;
+ box-sizing:border-box;white-space:normal;text-align:center;
+}
+body.nv-simple .nv-browser-fallback{
+ display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;
+ margin:10px 0;background:#122c3a;border:1px solid #45677a;border-radius:10px;
+}
+body.nv-simple .nv-browser-fallback p{flex:1 1 260px;margin:0;line-height:1.5;color:#e5eef7}
+body.nv-simple .nv-browser-fallback button{
+ min-height:44px;padding:9px 12px;border:1px solid #b89964;border-radius:9px;
+ background:#172e41;color:#fff;font:inherit;
+}
+body.nv-simple .nv-browser-fallback [hidden]{display:none!important}
+body.nv-simple .nv-internal-browser :is(.nv-browser-external,.nv-browser-open-full,.nv-browser-fallback button):focus-visible{
+ outline:3px solid #eecb8d;outline-offset:3px;
+}
+body.nv-simple .nv-internal-browser:fullscreen{
+ width:100vw;height:100vh;max-width:none;overflow:auto;padding:18px;
+ background:#0b1827;
+}
+body.nv-simple .nv-internal-browser:fullscreen .nv-browser-frame{
+ height:calc(100vh - 230px);min-height:240px;
+}
+@media(max-width:650px){
+ body.nv-simple .nv-browser-fallback{align-items:stretch}
+ body.nv-simple .nv-browser-fallback p{flex-basis:100%}
+ body.nv-simple .nv-browser-open-full{flex:1 1 100%}
+}
