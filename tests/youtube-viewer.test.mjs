@@ -86,3 +86,35 @@ test('unified browser supports safe URLs, bookmarks, history and Home/Read/Watch
  assert.equal(valid('https://www.youtube.com/'),'https://www.youtube.com/');
  for(const url of ['javascript:alert(1)','http://example.com','https://127.0.0.1/','https://localhost/','https://user:pass@example.com/','https://example.com:8443/'])assert.equal(valid(url),null,url);
 });
+
+
+test('publisher-first browser avoids known blank embeds and keeps a safe manual preview',()=>{
+ const browser=read('web/internal-browser.js');
+ const styles=read('web/simplified-ui.css');
+ assert.match(browser,/prefersFullBrowser\(url\)/);
+ for(const host of ['reuters.com','bbc.com','sec.gov','federalreserve.gov','cnbc.com'])
+  assert.ok(browser.includes("'"+host+"'"),host);
+ assert.match(browser,/retryPreview\.hidden=false/);
+ assert.match(browser,/frame\.hidden=true;frame\.removeAttribute\('src'\)/);
+ assert.match(browser,/openFull\.href=url/);
+ assert.match(browser,/external\.href=url/);
+ assert.match(browser,/openFull\.target='_blank'/);
+ assert.match(browser,/external\.rel='noopener noreferrer'/);
+ assert.match(browser,/nv-browser-open-full/);
+ assert.match(browser,/panel\.requestFullscreen\(\)/);
+ assert.match(styles,/nv-browser-fallback/);
+ assert.match(styles,/nv-browser-frame\[hidden\]/);
+ assert.doesNotMatch(browser,/\.innerHTML\s*=/);
+ assert.doesNotMatch(browser,/document\.domain|X-Frame-Options.*bypass/i);
+});
+test('Android isolated browser displays top-level network and publisher HTTP errors',()=>{
+ const native=read('android/src/dev/fintech/marketcharts/NewsBrowserActivity.java');
+ assert.match(native,/onReceivedError\(WebView view,WebResourceRequest request,WebResourceError error\)/);
+ assert.match(native,/onReceivedHttpError\(WebView view,WebResourceRequest request,WebResourceResponse response\)/);
+ assert.match(native,/request\.isForMainFrame\(\)/);
+ assert.match(native,/retry\.setOnClickListener/);
+ assert.match(native,/pageStatus\.setVisibility\(View\.VISIBLE\)/);
+ assert.doesNotMatch(native,/addJavascriptInterface/);
+ assert.match(native,/setAllowFileAccess\(false\)/);
+ assert.match(native,/setMixedContentMode\(WebSettings\.MIXED_CONTENT_NEVER_ALLOW\)/);
+});
