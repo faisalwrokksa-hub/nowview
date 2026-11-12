@@ -8,7 +8,7 @@ import {evaluate} from './check-release-evidence.mjs';
 export function report(records,checks={}){
  const evidence=evaluate(records);
  const gates=['ci','mediaRights','securityReview','signing','upgradeTest','supportPolicy','ownerApproval'];
- const status=Object.fromEntries(gates.map(key=>[key,checks[key]===true?'CONFIRMED':'UNVERIFIED']));
+ const status=Object.fromEntries(gates.map(key=>[key,checks?.[key]===true?'CONFIRMED':'UNVERIFIED']));
  const unverified=gates.filter(key=>status[key]!=='CONFIRMED');
  return {releaseReady:evidence.ready&&unverified.length===0,acceptance:evidence,otherGates:status,unverified,
   warning:'This report validates submitted records only; it cannot prove physical execution, licensing, signatures or approval.'};
@@ -28,7 +28,7 @@ if(process.argv[1]&&resolve(process.argv[1])===resolve(fileURLToPath(import.meta
  if(!input){console.error('Usage: node tools/release-readiness-report.mjs <records.json> [report.md]');process.exitCode=2;}
  else try{
   const data=JSON.parse(readFileSync(input,'utf8'));
-  const result=report(data.records,data.gates);
+  const result=report(data?.records,data?.gates);
   const rendered=markdown(result);
   if(output)writeFileSync(output,rendered,'utf8');else console.log(rendered);
   if(!result.releaseReady)process.exitCode=1;
