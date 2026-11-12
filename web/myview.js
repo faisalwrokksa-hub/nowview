@@ -253,6 +253,8 @@ item.append(eyebrow,heading,description,insight);
   const updated=preview.market(quote);
   if(live&&live.textContent!==updated)live.textContent=updated;
   updateMarketSourceLink();
+  // Expired quotes must also lose their chart context, without rebuilding cards or moving TV focus.
+  refreshChart();
  }
  const freshnessTimer=setInterval(refreshMarketAge,60000);
  freshnessTimer.unref?.();
