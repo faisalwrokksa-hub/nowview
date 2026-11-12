@@ -168,3 +168,29 @@ test('MyView rejects external text-drag reorder attempts',()=>{
  assert.match(src,/item.addEventListener\('dragend'/);
  assert.doesNotMatch(src,/const from=e.dataTransfer\?\.getData\('text\/plain'\)/);
 });
+
+test('Market Watch clears chart context for invalid or missing snapshots',()=>{
+ assert.match(src,/function chartSymbol\(\)/);
+ assert.match(src,/q\.source==='binance'/);
+ assert.match(src,/q\.quoteTime\*1000>=Date\.now\(\)-86400000\?q\.symbol:'Market'/);
+ assert.match(src,/if\(id==='market'\)refreshChart\(\)/);
+ assert.match(src,/if\(id==='market'\)item\.append\(chartFor\(chartSymbol\(\)\)\)/);
+});
+
+
+test('Market Watch partitions session chart observations by quote currency',()=>{
+ assert.match(src,/symbol\+'\|'\+currency/);
+ assert.match(src,/next\.symbol\.trim\(\)\.slice\(0,24\)\+'\|'\+next\.currency/);
+ assert.match(src,/quoteHistory\.get\(key\)/);
+ assert.match(src,/lastQuoteTime\.get\(key\)/);
+});
+
+test('Official headline direct links are restricted to publisher HTTPS announcement paths',()=>{
+ assert.match(src,/url\.protocol==='https:'/);
+ assert.match(src,/url\.username===''&&url\.password===''/);
+ assert.match(src,/url\.hostname==='www\.federalreserve\.gov'/);
+ assert.match(src,/url\.hostname==='www\.sec\.gov'/);
+ assert.match(src,/url\.pathname\.startsWith\('\/newsevents\/pressreleases\/'\)/);
+ assert.match(src,/url\.pathname\.startsWith\('\/newsroom\/'\)/);
+ assert.match(src,/link\.href=direct\|\|/);
+});
