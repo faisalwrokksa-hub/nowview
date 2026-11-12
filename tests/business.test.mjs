@@ -62,3 +62,9 @@ test('preserves valid quoted CSV fields at end of line and end of file',()=>{
  assert.equal(rows[1][1],'second');
  assert.equal(rows[2][1],'fourth');
 });
+
+test('CSV validation failure clears file input for retry and keeps bounded async state',()=>{
+ assert.match(src,/catch\(error\)\{if\(version===selectionVersion\)\{loadedRows=null;periodLabel\.hidden=true;picker\.value='';/);
+ assert.match(src,/status\.textContent='Reading and validating CSV locally…'/);
+ assert.match(src,/if\(version!==selectionVersion\)return/);
+});
