@@ -41,6 +41,14 @@ The helper fails closed if required inputs are missing or a release artifact alr
 
 It requires `NEWVIEW_RELEASE_KEYSTORE` to be outside the repository, rejects existing `build\newview-release.apk`, reads both passwords through `env:` providers without inserting their values into CLI arguments, verifies the signature and prints a SHA-256 digest. **The helper has not been used to sign an owner build or tested on the owner's Windows installation; that remains an explicit acceptance gate.** The output must be checked against the previous owner-held signing certificate and installed on the actual devices before distribution.
 
+## GitHub owner-signed release workflow (disabled by default)
+
+The existing `.github/workflows/signed-android-release.yml` is a **candidate-generation** path, not a release publication workflow. It requires `NEWVIEW_SIGNED_RELEASE_ENABLED=true` as a repository variable, manual dispatch on protected `main`, an exact 40-character `expected_main_sha`, and the `approve_release_signing` checkbox. Its `newview-android-release` environment must be configured with independent required reviewers and signing secrets **before** opting in. No customer APK is produced by PR builds.
+
+Once authorized, the job signs both TV and Phone Caster APKs, verifies signatures and writes SHA-256 checksums. It also creates GitHub `actions/attest@v4` artifact provenance and an `signed/CANDIDATE-UNAPPROVED.json` file derived from the **measured** signed APK hashes, certificate fingerprints, package IDs and version codes. The extraction tool is `tools/build-release-candidate-manifest.py`.
+
+The manifest deliberately leaves `previousVersionCode`, distribution choice, privacy/support URLs and owner approval fields empty. These must be filled only after verified human review; do **not** publish the manifest alone as an authorized release. A fresh SHA-256 and matching `sourceCommit` are required for the 20 acceptance records.
+
 ## Upgrade gate
 - Bump `android:versionCode` strictly upward for each delivered customer APK and update `versionName` appropriately.
 - Verify same application ID, correct signing lineage and increasing `versionCode` with `apksigner`, `aapt` and a real-device `adb install -r` test.
