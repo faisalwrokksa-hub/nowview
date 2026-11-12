@@ -1,0 +1,58 @@
+# Independent, read-only production verification. Cloudflare Workers Builds is
+# the sole automatic production publisher; this workflow NEVER deploys.
+name: Verify live NewView Worker revision
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'cloud/**'
+      - 'wrangler.json'
+      - 'package.json'
+      - '.github/workflows/verify-live-worker.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: newview-verify-live-main
+  cancel-in-progress: true
+jobs:
+  verify-live:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Await exact main SHA on Cloudflare (no writes)
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          NEWVIEW_URL: https://nowview.faisalwrokksa.workers.dev
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 18); do
+            if node --input-type=module -e '
+              const url=process.env.NEWVIEW_URL+"/version";
+              try {
+                const response=await fetch(url,{redirect:"manual",cache:"no-store",signal:AbortSignal.timeout(8000)});
+                if(!response.ok)process.exit(1);
+                const value=await response.json();
+                if(value?.app!=="newview"||value.revision!==process.env.EXPECTED_SHA)process.exit(1);
+                console.log("Verified live revision "+value.revision);
+              }catch(error){console.error("Live version unavailable: "+error.message);process.exit(1);}
+            '; then
+              exit 0
+            fi
+            echo "Attempt $attempt/18: Worker does not yet serve this exact main commit"
+            sleep 20
+          done
+          echo "::error::Cloudflare did not serve the expected main SHA. Check Worker Settings > Builds, the connected repo/main branch, build logs and the active deployment."
+          exit 1
+      - name: Verify public routes after exact revision matches
+        env:
+          NEWVIEW_URL: https://nowview.faisalwrokksa.workers.dev
+          NEWVIEW_EXPECTED_SHA: ${{ github.sha }}
+        run: node tools/smoke-public-newview.mjs
