@@ -99,6 +99,7 @@
  // Only a drag started from one of our own cards can reorder the dashboard.
  let activeDraggedWidget=null;
  const quoteHistory=new Map();
+ const quoteTimes=new Map();
  const maxQuotePoints=36;
  function chartFor(symbol){
   const points=quoteHistory.get(symbol)||[];
@@ -167,7 +168,7 @@
    const heading=text('h3','',widget.title);
    const eyebrow=text('div','shell-eyebrow',widget.label);
    const description=text('p','',widget.description);
-   const insight=text('p','myview-insight',id==='business'?'Launch Power BI reports securely in Microsoft Power BI.':preview[id](snapshots[id]));
+   const insight=text('p','myview-insight',preview[id](snapshots[id]));
    insight.setAttribute('aria-label',widget.title+' source snapshot');
    insight.dataset.snapshot=id;
    insight.setAttribute('aria-live','off');
@@ -231,9 +232,10 @@ item.append(eyebrow,heading,description,insight);
   const next=event.detail&&typeof event.detail==='object'?event.detail:null;
   if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
-  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
+  if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&typeof next.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(next.currency)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
    const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
-   if(!points.length||points[points.length-1]!==next.price){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);}
+   const lastQuoteTime=quoteTimes.get(key)||0;
+   if(next.quoteTime>lastQuoteTime){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);quoteTimes.set(key,next.quoteTime);}
    refreshChart();
   }
   // Update only the live insight text: rebuilding the grid would steal TV remote/keyboard focus.
