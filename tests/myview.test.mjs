@@ -199,7 +199,9 @@ test('Official Fed/SEC deep links accept article pages but never publisher index
  const sec='https://www.sec.gov/newsroom/press-releases/2026-113-sec-announces-enforcement-annual-results-fiscal-year-2026';
  assert.equal(api.officialAnnouncementUrl('fed',fed),fed);
  assert.equal(api.officialAnnouncementUrl('sec',sec),sec);
- assert.equal(api.officialAnnouncementUrl('sec',sec+'?utm_source=feed#article'),sec,'strip untrusted search/fragment');
+ assert.equal(api.officialAnnouncementUrl('sec',sec+'?utm_source=feed#article'),null,'reject untrusted search/fragment');
+ assert.equal(api.officialAnnouncementUrl('fed',fed+'#target'),null);
+ assert.equal(api.officialAnnouncementUrl('sec',sec+'?year=2026'),null);
  const blocked=[
   ['fed','https://www.federalreserve.gov/newsevents/pressreleases/'],
   ['fed','https://www.federalreserve.gov/newsevents/pressreleases/2026-press.htm'],
