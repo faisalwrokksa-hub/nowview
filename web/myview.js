@@ -145,8 +145,21 @@
   link.hidden=!verified;
   if(!verified){link.removeAttribute('href');link.textContent='Source unavailable';return;}
   const fed=snapshot.source==='fed';
-  link.href=fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom';
-  link.textContent=fed?'Federal Reserve announcements (publisher index)':'SEC newsroom (publisher index)';
+  // Link to the actual announcement only when its HTTPS host is the verified publisher.
+  // Never promote arbitrary event-provided URLs into clickable links.
+  let direct=null;
+  if(typeof snapshot.url==='string'){
+   try{
+    const url=new URL(snapshot.url);
+    if(url.protocol==='https:'&&url.username===''&&url.password===''&&
+      (fed?url.hostname==='www.federalreserve.gov':url.hostname==='www.sec.gov')&&
+      (fed?url.pathname.startsWith('/newsevents/pressreleases/'):url.pathname.startsWith('/newsroom/'))){
+     direct=url.href;
+    }
+   }catch{}
+  }
+  link.href=direct||(fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom');
+  link.textContent=direct?'Read original announcement':fed?'Federal Reserve announcements (publisher index)':'SEC newsroom (publisher index)';
  }
  function render(){
   root.replaceChildren();editor.replaceChildren();
