@@ -20,10 +20,12 @@ test('simplified dashboard omits inactive footer while preserving internal sourc
 });
 test('preview APK verification checks legacy assets and package identity',()=>{
  const verifier=read('../scripts/verify-preview-apk.sh');
- const workflow=read('../.github/workflows/dashboard.yml');
+ const workflow=read('../.github/workflows/complete-apk-bundle.yml');
+ const dashboard=read('../.github/workflows/dashboard.yml');
  assert.match(verifier,/aapt" dump badging/);
  assert.match(verifier,/application-label:'NewView'/);
  for(const asset of ['myview.js','business.js','news.js','media.js','social.js','workspace-shell.js'])assert.match(verifier,new RegExp(asset.replace('.', '\\.') ));
  assert.match(workflow,/bash scripts\/verify-preview-apk\.sh/);
+ assert.doesNotMatch(dashboard,/android-actions\/setup-android@|bash build-apk\.sh/, 'Dashboard validation must not duplicate dedicated Android APK build');
  assert.match(verifier,/NOT release-signing verification/);
 });
