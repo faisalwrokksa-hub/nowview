@@ -15,3 +15,13 @@ test('passing test records alone never bypass owner approval and rights',()=>{
  const gates={ci:true,mediaRights:true,securityReview:true,signing:true,upgradeTest:true,supportPolicy:true,ownerApproval:true};
  assert.equal(report(records,gates).releaseReady,true);
 });
+
+test('null or incomplete inputs produce a complete NO-GO report',()=>{
+ for(const input of [null,{}, {records:null,gates:null}]){
+  const result=report(input?.records,input?.gates);
+  assert.equal(result.releaseReady,false);
+  assert.equal(result.acceptance.missing.length,20);
+  assert.equal(result.acceptance.summary['NOT RUN'],20);
+  assert.match(markdown(result),/NO-GO/);
+ }
+});
