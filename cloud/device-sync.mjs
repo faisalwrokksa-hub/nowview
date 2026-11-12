@@ -22,7 +22,7 @@ export async function handleDeviceSync(request,env,url,fetcher=fetch){
   const origin=request.headers.get('Origin');
   if(origin&&origin!==url.origin)return reply({error:'Cross-origin changes are not allowed'},403);
  }
- let blob;
+ let blob,expectedBlob;
  if(method==='POST'||method==='PUT'){
   const type=request.headers.get('Content-Type')||'';
   if(!/^application\/json(?:\s*;|$)/i.test(type))return reply({error:'JSON required'},415);
@@ -38,6 +38,7 @@ export async function handleDeviceSync(request,env,url,fetcher=fetch){
     !/^[A-Za-z0-9_-]{16,64}\.[A-Za-z0-9_-]{20,7950}$/.test(body.expected)))
     return reply({error:'An expected encrypted room version is required for updates'},428);
   blob=body.blob;
+  if(method==='PUT')expectedBlob=body.expected;
  }
  // Partition is an unguessable client-generated room scoped to a verified Access subject.
  // Do not include a raw Access subject or room secret in storage/DO identifiers.
@@ -48,7 +49,7 @@ export async function handleDeviceSync(request,env,url,fetcher=fetch){
   const room=env.NEWVIEW_SYNC_ROOMS.getByName('sync-v3:'+partition);
   const result=method==='GET'?await room.read():
    method==='POST'?await room.create(blob):
-   method==='PUT'?await room.update(blob,body.expected):
+   method==='PUT'?await room.update(blob,expectedBlob):
    await room.revoke();
   if(result.status===204)return new Response(null,{status:204,headers:base});
   if(result.status===200&&typeof result.blob==='string')return reply({blob:result.blob});
