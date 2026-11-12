@@ -75,7 +75,7 @@
    }
    mount(requested);
    current=url;address.value=url;
-   if(!replace){history=history.slice(0,cursor+1);history.push(url);cursor=history.length-1;}
+   if(!replace){history=history.slice(0,cursor+1);history.push(url);if(history.length>100)history.shift();cursor=history.length-1;}
    const video=parseYouTube(url);
    excerpt.replaceChildren();
    if(title||summary){
