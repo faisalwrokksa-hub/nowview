@@ -66,3 +66,8 @@ test('preserves valid quoted CSV fields at end of line and end of file',()=>{
 test('failed CSV validation clears file selection to permit retrying the same file',()=>{
  assert.match(src,/catch\(error\)\{if\(version===selectionVersion\)\{loadedRows=null;periodLabel\.hidden=true;picker\.value='';/);
 });
+
+test('pending CSV selection replaces stale status before async read',()=>{
+ assert.match(src,/status\.textContent='Reading CSV locally…';/);
+ assert.match(src,/if\(version!==selectionVersion\)return/);
+});
