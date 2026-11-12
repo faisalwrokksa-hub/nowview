@@ -102,7 +102,10 @@
  const lastQuoteTime=new Map();
  const maxQuotePoints=36;
  function chartFor(symbol){
-  const points=quoteHistory.get(symbol)||[];
+  // Partition session observations by quote currency as well as symbol.
+  const currency=snapshots.market?.currency;
+  const key=symbol==='Market'?'':symbol+'|'+currency;
+  const points=quoteHistory.get(key)||[];
   const container=document.createElement('div');container.className='myview-live-chart';
   const title=document.createElement('span');title.className='myview-chart-caption';title.textContent=points.length>1?'Observed quotes this session · '+symbol:'Waiting for at least two valid observed quotes';
   container.append(title);
@@ -234,7 +237,7 @@ item.append(eyebrow,heading,description,insight);
   if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
   if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol.trim())&&typeof next.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(next.currency)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
-   const key=next.symbol.trim().slice(0,24);const points=quoteHistory.get(key)||[];
+   const key=next.symbol.trim().slice(0,24)+'|'+next.currency;const points=quoteHistory.get(key)||[];
    if(next.quoteTime>(lastQuoteTime.get(key)||0)){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);lastQuoteTime.set(key,next.quoteTime);}
   }
   if(id==='market')refreshChart(); // Invalid or missing snapshots must not leave an unrelated chart visible.
