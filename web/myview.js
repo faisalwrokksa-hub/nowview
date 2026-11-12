@@ -160,6 +160,7 @@
   }
   link.href=direct||(fed?'https://www.federalreserve.gov/newsevents/pressreleases.htm':'https://www.sec.gov/newsroom');
   link.textContent=direct?'Read original announcement':fed?'Federal Reserve announcements (publisher index)':'SEC newsroom (publisher index)';
+  link.setAttribute('aria-label',direct?'Read original '+(fed?'Federal Reserve':'SEC')+' announcement':'Open '+(fed?'Federal Reserve announcements':'SEC newsroom')+' publisher index; not a direct headline link');
  }
  function render(){
   root.replaceChildren();editor.replaceChildren();
