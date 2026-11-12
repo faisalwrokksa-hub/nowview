@@ -195,7 +195,7 @@
   });
   useLocal.addEventListener('click',()=>{
    if(!conflict)return;
-   previousVersion=conflict.cloudVersion;previousLocal=JSON.stringify(conflict.incoming);
+   previousVersion=conflict.cloudVersion;previousViewing=conflict.incoming.viewing||null;previousLocal=JSON.stringify(visible(conflict.incoming));
    conflict=null;resolveConflict();
    // The next sync pass will propose this local layout after checking cloud again.
    report('Keeping this layout. Synchronizing the selected version…');update();
