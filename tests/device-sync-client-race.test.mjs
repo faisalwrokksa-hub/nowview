@@ -33,7 +33,7 @@ function mount(fetchImpl){
   createElement:tag=>new Element(tag),addEventListener(){}};
  const location=new URL('https://newview.example/');
  const ctx={window,document,location,history:{replaceState(){}},navigator:{onLine:true,clipboard:{writeText:async()=>{}}},
-  crypto:webcrypto,TextEncoder,TextDecoder,URL,Response,AbortController,Error,Uint8Array,btoa,atob,
+  crypto:webcrypto,TextEncoder,TextDecoder,URL,Response,AbortController,Error,Uint8Array,btoa,atob,fetch:fetchImpl,
   setTimeout,clearTimeout,setInterval:()=>({unref(){}}),clearInterval};
  vm.runInNewContext(source,ctx);
  const els=walk(host);
