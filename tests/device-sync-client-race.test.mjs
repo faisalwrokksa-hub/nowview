@@ -18,6 +18,7 @@ class Element {
 }
 const walk=(e)=>[e,...e.children.flatMap(x=>walk(x))];
 const flush=async()=>{for(let i=0;i<10;i++)await new Promise(r=>setImmediate(r));};
+const until=async(test,label)=>{for(let i=0;i<120;i++){if(test())return;await new Promise(r=>setTimeout(r,15));}throw Error('Timed out: '+label);};
 const defer=()=>{let resolve;const promise=new Promise(r=>{resolve=r;});return {resolve,promise};};
 
 function mount(fetchImpl){
@@ -55,7 +56,7 @@ test('re-pair while earlier room GET is unresolved does not block new room or re
  h.button('Join').listeners.get('click')();
  await flush();
  h.button('Create pairing link').listeners.get('click')();
- await flush();
+ await until(()=>/Encrypted room created/.test(h.control('newview-sync-status').textContent),'new room created');
  assert.match(h.control('newview-sync-status').textContent,/Encrypted room created/);
  assert.equal(h.button('Check for updates').disabled,false);
  stale.resolve(new Response(null,{status:404}));
@@ -81,11 +82,11 @@ test('client sends previous encrypted cloud blob with changed layout and reports
   throw Error('Unexpected method');
  });
  h.button('Create pairing link').listeners.get('click')();
- await flush();
+ await until(()=>saved?.includes('.'),'encrypted room created');
  assert.ok(saved?.includes('.'),'expected encrypted room blob');
  h.updateLocal(['news']);
  h.button('Check for updates').listeners.get('click')();
- await flush();
+ await until(()=>receivedExpected!==null,'conflict write attempted');
  assert.equal(receivedExpected,saved,'compare-and-swap must refer to prior server blob');
  assert.match(h.control('newview-sync-status').textContent,/Room changed on another device/);
  assert.equal(h.button('Check for updates').disabled,false);
