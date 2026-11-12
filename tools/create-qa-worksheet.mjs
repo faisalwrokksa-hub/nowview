@@ -8,5 +8,5 @@ export function createWorksheet(){return {records:ids.map(id=>({id,result:'NOT R
 if(process.argv[1]&&resolve(process.argv[1])===resolve(fileURLToPath(import.meta.url))){
  const output=process.argv[2]||'newview-qa-evidence.local.json';
  if(existsSync(output)){console.error('Refusing to overwrite existing evidence: '+output);process.exitCode=2;}
- else{writeFileSync(output,JSON.stringify(createWorksheet(),null,2)+'\n',{flag:'wx',mode:0o600});console.log('Created local NOT RUN worksheet: '+output);}
+ else{try{writeFileSync(output,JSON.stringify(createWorksheet(),null,2)+'\n',{flag:'wx',mode:0o600});console.log('Created local NOT RUN worksheet: '+output);}catch(error){console.error('Cannot create worksheet: '+error.message);process.exitCode=2;}}
 }
