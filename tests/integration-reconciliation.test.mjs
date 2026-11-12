@@ -83,3 +83,17 @@ test('Cloudflare previews declare isolated sync Durable Object binding without d
   assert.equal(config.previews[restricted],undefined,'Preview must not inherit '+restricted+' into configuration');
  }
 });
+
+
+test('legacy TV WebView remote focus and accessible errors stay visible without changing global grid',()=>{
+ assert.match(css,/Deferred TV-focus accessibility parity from #133/);
+ assert.match(css,/@supports not selector\(:focus-visible\)/);
+ assert.match(css,/@media \(forced-colors:active\)/);
+ assert.match(css,/\.newview-settings-content details>summary \{/);
+ assert.match(css,/#message:not\(\.hidden\)/);
+ assert.match(css,/min-height:44px/);
+ assert.match(css,/@media \(prefers-reduced-motion:reduce\)/);
+ assert.match(css,/body:not\(\.home-panel\):not\(\.nv-simple\)>main/);
+ const smallRail=css.slice(css.indexOf('Short landscape Android TV: retain the normal rail'));
+ assert.doesNotMatch(smallRail,/^\s*body>main\s*\{/m,'Never override the entire four-tab launcher');
+});
