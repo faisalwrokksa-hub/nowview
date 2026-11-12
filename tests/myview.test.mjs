@@ -201,3 +201,9 @@ test('Official announcement URLs reject nonstandard HTTPS ports and retain publi
  assert.match(src,/link\.href=direct\|\|/);
  assert.match(src,/publisher index/);
 });
+
+
+test('Official announcement direct URLs reject query parameters and fragments',()=>{
+ assert.match(src,/url\.search===''&&url\.hash===''/);
+ assert.match(src,/link\.href=direct\|\|/);
+});
