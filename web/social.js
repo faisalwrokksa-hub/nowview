@@ -81,14 +81,18 @@
  let items=load();let metadata=loadMetadata();
  const filter=document.createElement('input');filter.type='search';filter.id='social-saved-search';filter.placeholder='Search saved profiles';filter.setAttribute('aria-label','Search saved social profiles');links.parentElement?.insertBefore(filter,links);
  filter.addEventListener('input',()=>render());
- filter.addEventListener('keydown',event=>{if(event.key==='Escape'&&(filter.value||collectionFilter.value||tagFilter.value)){event.preventDefault();filter.value='';collectionFilter.value='';tagFilter.value='';render();}});
+ function resetSavedFilters(){filter.value='';collectionFilter.value='';tagFilter.value='';render();}
+ function handleFilterEscape(event){if(event.key==='Escape'&&(filter.value||collectionFilter.value||tagFilter.value)){event.preventDefault();resetSavedFilters();filter.focus();}}
+ filter.addEventListener('keydown',handleFilterEscape);
  const matchStatus=document.createElement('p');matchStatus.id='social-saved-match-count';matchStatus.setAttribute('role','status');matchStatus.setAttribute('aria-live','polite');links.parentElement?.insertBefore(matchStatus,links);
  const collectionFilter=document.createElement('select');collectionFilter.setAttribute('aria-label','Filter saved profiles by collection');links.parentElement?.insertBefore(collectionFilter,links);
  collectionFilter.addEventListener('change',()=>render());
+ collectionFilter.addEventListener('keydown',handleFilterEscape);
  const tagFilter=document.createElement('select');tagFilter.setAttribute('aria-label','Filter saved profiles by tag');links.parentElement?.insertBefore(tagFilter,links);
  tagFilter.addEventListener('change',()=>render());
+ tagFilter.addEventListener('keydown',handleFilterEscape);
  const clearFilters=document.createElement('button');clearFilters.type='button';clearFilters.textContent='Clear search and filters';clearFilters.setAttribute('aria-label','Clear saved profile search, tag and collection filters');links.parentElement?.insertBefore(clearFilters,links);
- clearFilters.addEventListener('click',()=>{filter.value='';collectionFilter.value='';tagFilter.value='';render();filter.focus();});
+ clearFilters.addEventListener('click',()=>{resetSavedFilters();filter.focus();});
  const text=(tag,className,value)=>{const e=document.createElement(tag);if(className)e.className=className;e.textContent=value;return e;};
  function renderDiscovery(){
   if(!geoPicker||!topicPicker||!discovery)return;
