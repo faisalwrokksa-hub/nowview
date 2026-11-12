@@ -24,7 +24,7 @@
   document.body.classList.add('nv-simple');
   const el=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;if(text!==undefined)n.textContent=text;return n;};
   const nav=el('nav','nv-simple-nav');nav.id='nv-simple-nav';nav.setAttribute('aria-label','NewView main navigation');
-  const sections=[['home','Home'],['watch','Watch'],['read','Read'],['customize','Customize']];
+  const sections=[['home','Home'],['watch','Watch'],['read','Discover'],['customize','Settings']];
   const buttons=new Map();let active='home',state=read();
   // Respect the saved 1–4 shortcut preference on Home.
   const content=el('section','nv-simple-home');content.id='nv-simple-home';content.setAttribute('aria-label','Personalized Home');
@@ -101,10 +101,47 @@
   const featuredPlay=el('button','','▶ Play in floating video');featuredPlay.type='button';
   const featuredStatus=el('p','nv-home-featured-status','Choose a public channel. Untested streams are not guaranteed to play.');
   featuredHeading.querySelector('strong').textContent='Suggested live TV';
-  featured.append(featuredHeading,featuredPlay,featuredStatus);
+  const featuredLabel=el('label','nv-home-channel-label','Live channel');
+  featuredLabel.append(featuredSelect);
+  const preferences=el('div','nv-home-recommendation-controls');
+  const language=el('select');language.setAttribute('aria-label','Preferred channel language');
+  for(const [value,label] of [['any','Any language'],['english','English'],['arabic','Arabic'],['spanish','Spanish'],['french','French']]){
+   const option=el('option','',label);option.value=value;language.append(option);
+  }
+  const interest=el('select');interest.setAttribute('aria-label','Preferred channel topic');
+  for(const [value,label] of [['all','All interests'],['news','News'],['business','Business'],['sports','Sports'],['music','Music']]){
+   const option=el('option','',label);option.value=value;interest.append(option);
+  }
+  const PREF_KEY='newview.recommendation.preferences.v1';
+  try{const prefs=JSON.parse(localStorage.getItem(PREF_KEY)||'{}');
+   if([...language.options].some(o=>o.value===prefs.language))language.value=prefs.language;
+   if([...interest.options].some(o=>o.value===prefs.interest))interest.value=prefs.interest;
+  }catch{}
+  const savePrefs=()=>{try{localStorage.setItem(PREF_KEY,JSON.stringify({language:language.value,interest:interest.value}));}catch{}syncFeatured();};
+  language.addEventListener('change',savePrefs);interest.addEventListener('change',savePrefs);
+  preferences.append(language,interest);
+  const recentHeading=el('h4','','Continue watching');
+  const recentList=el('div','nv-home-recent');recentList.setAttribute('aria-label','Recently confirmed live TV channels');
+  const clearRecent=el('button','nv-home-clear-history','Clear viewing history');clearRecent.type='button';
+  clearRecent.addEventListener('click',()=>window.NewViewViewing?.clear?.());
+  function renderRecent(){
+   recentList.replaceChildren();
+   const entries=window.NewViewViewing?.read?.()||[];
+   if(!entries.length){recentList.append(el('p','','No recently played channels on this device.'));clearRecent.hidden=true;return;}
+   clearRecent.hidden=false;
+   for(const entry of entries.slice(0,3)){
+    const button=el('button','nv-home-recent-item',entry.name+' · Continue');button.type='button';
+    button.addEventListener('click',()=>{featuredSelect.value=entry.url;
+     if(!window.NewViewCast?.playIPTV?.(entry.url))featuredStatus.textContent='Unable to start this channel. Choose another stream.';
+    });
+    recentList.append(button);
+   }
+  }
+  window.addEventListener('newview:viewing-history',()=>{renderRecent();syncFeatured();});
+  featured.append(featuredHeading,featuredLabel,preferences,featuredPlay,featuredStatus,recentHeading,recentList,clearRecent);
+  renderRecent();
   const playerDock=document.getElementById('newview-cast-dock');
   if(playerDock)featured.append(playerDock);
-  let suggestedStarted=false;
   function syncFeatured(){
    const catalog=document.querySelector('#newview-channel-directory select[aria-label="Available IPTV channels"]');
    if(!catalog||!catalog.options.length){featuredStatus.textContent='No channels loaded yet. Open Watch to refresh the channel directory.';return;}
@@ -126,11 +163,8 @@
    }
    window.NewViewCast?.setChannels?.([...featuredSelect.options].map(o=>({name:o.textContent,url:o.value})));
    const suggestions=[...featuredSelect.options].map(o=>({name:o.textContent,url:o.value}));
-   if(!suggestedStarted&&active==='home'){
-    window.NewViewCast?.open?.();
-    const ready=window.NewViewChannelPicks?.rank?.(suggestions).find(c=>['ready','playing'].includes(window.NewViewChannelPicks.state(c.url)));
-    if(ready){suggestedStarted=true;featuredSelect.value=ready.url;window.NewViewCast?.playIPTV?.(ready.url);}
-   }
+   // Do not auto-play merely because a background probe decoded data.
+   // The user must explicitly choose Play before network media starts.
    window.NewViewChannelPicks?.setCatalog?.(suggestions);
    featuredStatus.textContent=featuredSelect.options.length
     ? 'Change channels inside the video player. Availability depends on the broadcaster.'
@@ -141,11 +175,7 @@
    if(window.NewViewCast?.playIPTV?.(featuredSelect.value)){featuredStatus.textContent='Floating video opened. Playback confirmation depends on the broadcaster.';}
    else featuredStatus.textContent='This stream cannot be played in the floating viewer; try another channel.';
   });
-  window.addEventListener('newview:channel-check',event=>{
-   if(!suggestedStarted&&active==='home'&&['ready','playing'].includes(event.detail?.status)){
-    suggestedStarted=true;featuredSelect.value=event.detail.url;window.NewViewCast?.playIPTV?.(event.detail.url);
-   }
-  });
+  window.addEventListener('newview:channel-check',()=>{if(active==='home')syncFeatured();});
   function populateTopNews(){
    const items=window.NewViewNewsReader?.getItems?.()||[];
    newsStrip.replaceChildren();
@@ -153,7 +183,9 @@
    if(!latest.length){const offline=typeof navigator!=='undefined'&&!navigator.onLine;newsStrip.append(el('p','nv-home-news-empty',offline?'Offline — headlines unavailable. Reconnect to refresh.':'No publisher headlines available yet. Open Read to retry.'));return;}
    for(const item of latest){
     const btn=el('button','nv-home-news-story');btn.type='button';
-    btn.append(el('strong','',item.title),el('small','',item.summary||item.source));
+    const when=Date.parse(item.publishedAt||'');
+    const freshness=Number.isFinite(when)?new Date(when).toLocaleString():'Update time unavailable';
+    btn.append(el('strong','',item.title),el('small','',item.source+' · '+freshness),el('small','',item.summary||'Open publisher to read the story'));
     btn.addEventListener('click',()=>readAtHome(item));
     newsStrip.append(btn);
    }
