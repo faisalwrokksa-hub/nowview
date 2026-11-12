@@ -84,7 +84,7 @@
   return loadedRows.filter(row=>row.date>=first);
  }
  period.addEventListener('change',()=>{if(loadedRows)render(selectedRows());});
- function reset(){selectionVersion++;loadedRows=null;period.value='all';periodLabel.hidden=true;if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));cards.replaceChildren();bars.replaceChildren();status.textContent='No company data loaded. CSV is processed locally and is not uploaded.';picker.value='';}
+ function reset(){selectionVersion++;loadedRows=null;period.value='all';periodLabel.hidden=true;picker.removeAttribute('aria-busy');cards.removeAttribute('aria-busy');if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));cards.replaceChildren();bars.replaceChildren();status.textContent='No company data loaded. CSV is processed locally and is not uploaded.';picker.value='';}
  function render(rows){
   const result=summarize(rows);
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:{revenue:result.revenue,cost:result.cost,orders:result.orders,asOf:result.asOf,count:result.count}}));
