@@ -15,6 +15,16 @@ GitHub references:
 - https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners
 - https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/use-in-a-workflow
 
+## Zero-additional-runner-charge default: GitHub-hosted CI
+
+As documented in GitHub Actions billing, **standard GitHub-hosted runner compute remains free for public repositories**. Larger runners, Actions artifact/cache storage beyond allowances, and other services can have different billing. NewView uses standard Ubuntu-hosted runners and currently does not need AWS EC2 or a self-hosted runner to avoid hosted compute charges. Verify your account billing/quotas separately; do not infer that stored artifacts and caches are unlimited.
+
+The safest immediate acceleration is enabled in the draft integration PR: normal validation and dedicated Android APK jobs remain GitHub-hosted; the dashboard workflow no longer redundantly installs Android SDK/builds another Android TV APK; the two-APK bundle is the sole PR build for TV+Phone Caster; the independent Phone Caster workflow runs only for merged `main` or manual dispatch. Feature-branch `push` duplicates have been removed from dashboard/frontend/phone workflows and superseded PR runs are cancelled without interrupting main. GitHub-side frontend deployment is manual-only, avoiding competing Cloudflare publishers.
+
+**No real-world speed-up percentage is claimed** until a completed workload comparison. Hosted pipelines continue to execute as usual while `NEWVIEW_SELF_HOSTED_ENABLED` remains unset.
+
+Official current billing reference: https://docs.github.com/en/billing/concepts/product-billing/github-actions
+
 ## What has been implemented
 
 `.github/workflows/self-hosted-accelerated-ci.yml` dispatches only after:
