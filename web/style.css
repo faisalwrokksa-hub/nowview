@@ -960,3 +960,12 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
   .workspace-switcher .workspace-tab:focus-visible{outline:3px solid Highlight}
   .newview-settings-content details>summary:focus-visible{outline:3px solid Highlight;outline-offset:2px}
 }
+
+/* Task 1: keyboard/remote users can locate scrollable tabs and error recovery actions. */
+.workspace-switcher{scrollbar-width:thin;scrollbar-color:#c7aa76 #19291f}
+.workspace-switcher .workspace-tab:focus-visible{scroll-margin-inline:28px}
+:is(.shell-page,.workspace,.newview-settings-content) :is([role="alert"],[role="status"]) a:focus-visible{outline-offset:2px;text-decoration:underline}
+@media (forced-colors:active){
+ .workspace-switcher{scrollbar-color:auto}
+ :is(.shell-page,.workspace,.newview-settings-content) :is([role="alert"],[role="status"]) a:focus-visible{outline:3px solid Highlight}
+}
