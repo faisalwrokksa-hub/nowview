@@ -17,7 +17,7 @@ Combine the overlapping fixes on one reviewable branch without touching the serv
 - Do not merge old feature branches wholesale or merge the staging branch back into `main`. Candidate branches overlap and sometimes predate improvements already on main.
 - Do not wholesale merge #133's large responsive TV rail/grid rewrite: the targeted, scoped short-landscape rail covers the narrow-screen use case without changing simplified launcher or Home layout. Real-device acceptance is still required.
 - Preserve staging's independent branch for comparison and targeted QA; this baseline incorporates its key chart integrity outcomes rather than overwriting main.
-- Do not close other PRs/delete their branches until this integration has passed CI and the owner approves which candidates are superseded.
+- **27 superseded draft PRs were closed without merging or deleting their branches** after consolidation into #167, leaving #167 (integration), #133 (deferred broad TV CSS), and #166 (separate staging review) open. Branches remain recoverable; further disposition requires evidence.
 
 ## Verification required
 1. Run `npm run verify`: Node tests including `tests/integration-reconciliation.test.mjs`, Python suites, frontend syntax, Worker and Pages builds.
@@ -29,28 +29,24 @@ Combine the overlapping fixes on one reviewable branch without touching the serv
 ## Rollback and deployment
 The currently deployed Worker source must stay on production main unless this baseline is separately approved, merged and verified. A passing integration CI run alone is not permission to deploy. After eventual approval: record baseline SHA, deploy only through Cloudflare native Workers Builds, validate `/version`, `/healthz` and smoke routes, then use the last known-good Cloudflare version as rollback if any failure appears.
 
-## Cloudflare preview failure investigation — provider-side verification still required
+## Cloudflare preview issue — resolved for this integration
 
-As of this integration branch, Cloudflare Workers Builds has failed on PR previews while the `main` production build succeeded. GitHub CI and `wrangler deploy --dry-run` pass. A GitHub check reports only the Cloudflare build ID, not the failing command or its build log: do **not** assert a specific root cause from the check status.
+Cloudflare Workers Builds and the live revision-verified preview now pass on the exact integration SHA. The `previews.durable_objects.bindings` entry in `wrangler.json` isolates the `NewViewSyncRoom` Durable Object from production. GitHub CI, Wrangler dry-run, live HTTP/health smoke, and Chromium+Firefox four-viewport automated checks have passed.
 
-Preview isolation is now declared in `wrangler.json` using `previews.durable_objects.bindings` and the existing local `NewViewSyncRoom` migration/class. Cloudflare documents that each Worker Preview receives its own Durable Object namespace and data when configured this way. There is no binding to a production KV/D1 resource, and no preview routes or cron.
+This resolves the former **preview CI error**; it does not verify real hardware playback, source rights, owner-signed APKs, or production readiness. The public production Worker remains unchanged.
 
-Check the linked failed Cloudflare build under **Worker: nowview → Settings → Builds**. Inspect the first failing command. Under **Branch control**, verify `main` remains Production and Preview Builds are enabled. For the newer Worker Previews model, the Preview command must invoke `npx wrangler preview` (Wrangler 4.135+). Existing older Workers Builds may require a one-time **Set up Worker Previews** migration; that migration cannot be reverted. Review the provider's impact and bindings before switching. If the environment uses a legacy preview command (for example `wrangler versions upload`) and a Durable Object, validate against the provider's documented restrictions before switching.
-
-**Do not** change the Production branch, disable production deployment, enable a paid service, reuse production credentials in previews, or merge PR #167 merely to bypass a failed preview check.
-
-Official references:
+Official Cloudflare references:
 - https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/
 - https://developers.cloudflare.com/workers/previews/resources/
-- https://developers.cloudflare.com/workers/previews/get-started/
 
 ## Integration quality assessment
-- **Code and CI: 8/10** — all six GitHub workflows passed before the latest preview/TV changes; re-run exact-SHA checks after every new commit.
-- **Commercial release: 5/10** — the current release matrix records 20 NOT RUN hardware/web acceptance cases, and security, media licensing and signing are incomplete.
-- These are subjective readiness estimates, not automated test scores. No production acceptance claim is made.
+
+- **Code / build checks:** passing exact-SHA GitHub verification, Android test APK bundle, synthetic Android TV emulator, read-only Cloudflare preview, and cross-browser Chromium+Firefox. The separate production integration merge remains intentionally on hold.
+- **Commercial release:** **NO-GO** until 20 release-acceptance scenarios have human evidence, seven source/media-rights usages are cleared, and owner-held signing/upgrade, policy/security and signoff gates are satisfied.
+- These are evidence-based statuses, not a claim that physical TV tests or a customer release occurred.
 
 ## Verified preview and automated browser smoke
 
-The Cloudflare integration preview is available at `https://integration-ux-media-business-20261112-nowview.faisalwrokksa.workers.dev/`. A read-only GitHub workflow (`.github/workflows/integration-preview-acceptance.yml`) requires the deployed `/version` revision to exactly match the PR head, then checks HTTP routing/security and exercises the four primary navigation tabs, ArrowRight keyboard focus, horizontal overflow and page exceptions in Chromium at phone/tablet/desktop/TV viewport sizes. Screenshot artifacts are for reviewer inspection.
+The Cloudflare integration preview is available at `https://integration-ux-media-business-20261112-nowview.faisalwrokksa.workers.dev/`. A read-only GitHub workflow (`.github/workflows/integration-preview-acceptance.yml`) requires the deployed `/version` revision to exactly match the PR head, then checks HTTP routing/security and exercises primary navigation tabs, simulated directional/Select keys, horizontal overflow and page exceptions in **Chromium and Firefox**, each at phone/tablet/desktop/TV viewport sizes. A separate Android TV emulator smoke tests installation, synthetic D-pad keys and relaunch. Screenshot artifacts are for reviewer inspection.
 
 These checks can reduce the web risk but do not mark the 20 hardware/browser acceptance items PASS. Release signing remains owner-controlled; a local-only Windows signing script `sign-release.ps1` complements `sign-release.sh` without distributing an APK. A structured commercial rights register now prevents an unsupported 10/10 release declaration.
