@@ -3,7 +3,7 @@ const src=fs.readFileSync(new URL('../web/myview.js',import.meta.url),'utf8');
 function setup(value=null){
  const window={};const document={getElementById:()=>null};let saved=value;
  const localStorage={getItem:()=>saved,setItem:(k,v)=>{saved=v;}};
- vm.runInNewContext(src,{window,document,localStorage});
+ vm.runInNewContext(src,{window,document,localStorage,URL});
  return {api:window.NewViewPersonal,saved:()=>saved};
 }
 test('MyView Daily Brief defaults include Markets, News and Business',()=>{const {api}=setup();assert.deepEqual([...api.load()],['market','news','business']);});
