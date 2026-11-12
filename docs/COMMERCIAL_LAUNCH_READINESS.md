@@ -77,7 +77,17 @@ The release report is **NO-GO** unless all of these are documented:
 
 Only then should an authorized owner decide whether to remove draft status, merge to protected `main`, deploy through a single Cloudflare native flow, smoke-test the production commit and record a rollback. **Never promote merely because a report or automated test passes.**
 
-## 6. Current factual status (12 November 2026)
+## 6. Development added for the pilot workflow
+
+- **In-app Support Center** (`web/support-center.js`): first-use and remote guidance, opt-in same-origin `/version` check, privacy-safe local diagnostic export, and scoped local-data reset with confirmation. The reset does **not** revoke shared sync rooms or remove third-party records. Release channel is `preview` until explicit owner promotion.
+- **Private licensing review file:** `node tools/create-private-rights-worksheet.mjs newview-rights.private.json`. Each of seven categories begins unverified and the local file is ignored by Git. Do not commit private contracts.
+- **Local commercial evidence report:** `node tools/release-readiness-report.mjs newview-release.local.json newview-readiness.local.md newview-rights.private.json`, which can now read private rights rather than requiring publication of legal review details. Existing output reports cannot be silently overwritten.
+- **Safe pilot packaging:** `tools/assemble-release-bundle.mjs` checks a submitted complete review packet and actual signed APK SHA-256 bytes. It is read-only by default; only `--create` writes a fresh local distribution directory. It never signs, publishes, merges, or uploads. A Play Store candidate is blocked from an APK-only package.
+- **Full runbook:** `docs/LOCAL_PILOT_RUNBOOK.md` has the owner-controlled steps and an explicit no-go boundary.
+
+These are development features and operational controls, **not evidence that any source rights are granted, customer policies approved or hardware accepted**.
+
+## 7. Current factual status (12 November 2026)
 
 - Automated NewView integration CI and Cloudflare preview have previously passed; the new launch-gating code requires its own CI verification.
 - Unverified commercial rights: **7 of 7 categories**.
