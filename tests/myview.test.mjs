@@ -184,3 +184,13 @@ test('Market Watch partitions session chart observations by quote currency',()=>
  assert.match(src,/quoteHistory\.get\(key\)/);
  assert.match(src,/lastQuoteTime\.get\(key\)/);
 });
+
+test('Official headline direct links are restricted to publisher HTTPS announcement paths',()=>{
+ assert.match(src,/url\.protocol==='https:'/);
+ assert.match(src,/url\.username===''&&url\.password===''/);
+ assert.match(src,/url\.hostname==='www\.federalreserve\.gov'/);
+ assert.match(src,/url\.hostname==='www\.sec\.gov'/);
+ assert.match(src,/url\.pathname\.startsWith\('\/newsevents\/pressreleases\/'\)/);
+ assert.match(src,/url\.pathname\.startsWith\('\/newsroom\/'\)/);
+ assert.match(src,/link\.href=direct\|\|/);
+});
