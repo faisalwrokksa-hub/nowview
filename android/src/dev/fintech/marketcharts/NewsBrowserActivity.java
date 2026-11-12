@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import android.graphics.Color;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.view.KeyEvent;
 import android.view.View;
@@ -16,7 +17,10 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -25,6 +29,7 @@ import android.webkit.WebViewClient;
 public final class NewsBrowserActivity extends Activity {
     private WebView browser;
     private EditText address;
+    private TextView pageStatus;
     private static final String START="https://www.youtube.com/";
     private static final String BOOKMARK_PREFS="newview.browser.bookmarks.v1";
     private Button bookmarkButton;
@@ -44,7 +49,7 @@ public final class NewsBrowserActivity extends Activity {
             String trimmed=raw==null?"":raw.trim();
             if(!trimmed.startsWith("https://"))trimmed="https://"+trimmed;
             Uri target=Uri.parse(trimmed);
-            if(safePage(target))browser.loadUrl(target.toString());
+            if(safePage(target)){pageStatus.setVisibility(View.GONE);browser.loadUrl(target.toString());}
             else address.setError("HTTPS public websites only");
         }catch(Exception ignored){address.setError("Invalid website address");}
     }
@@ -109,7 +114,7 @@ public final class NewsBrowserActivity extends Activity {
         getWindow().setNavigationBarColor(Color.rgb(9,15,26));
         LinearLayout toolbar=new LinearLayout(this);toolbar.setOrientation(LinearLayout.HORIZONTAL);
         toolbar.setBackgroundColor(Color.rgb(17,28,43));
-        Button back=button("◀"),forward=button("▶"),refresh=button("↻"),bookmarks=button("Bookmarks"),close=button("Close");
+        Button back=button("◀"),forward=button("▶"),refresh=button("↻"),retry=button("Retry"),bookmarks=button("Bookmarks"),close=button("Close");
         bookmarkButton=button("☆");
         address=new EditText(this);address.setSingleLine(true);address.setTextColor(Color.WHITE);
         address.setHint("Search or enter HTTPS website");address.setHintTextColor(Color.LTGRAY);
@@ -118,8 +123,15 @@ public final class NewsBrowserActivity extends Activity {
         address.setImeOptions(EditorInfo.IME_ACTION_GO);
         toolbar.addView(back);toolbar.addView(forward);
         toolbar.addView(address,new LinearLayout.LayoutParams(0,-2,1));
-        toolbar.addView(refresh);toolbar.addView(bookmarkButton);toolbar.addView(bookmarks);toolbar.addView(close);
+        toolbar.addView(refresh);toolbar.addView(retry);toolbar.addView(bookmarkButton);toolbar.addView(bookmarks);toolbar.addView(close);
         root.addView(toolbar);
+        pageStatus=new TextView(this);
+        pageStatus.setTextColor(Color.WHITE);
+        pageStatus.setBackgroundColor(Color.rgb(98,49,39));
+        pageStatus.setPadding(18,12,18,12);
+        pageStatus.setText("Website loading unavailable. Choose Retry or another address.");
+        pageStatus.setVisibility(View.GONE);
+        root.addView(pageStatus);
         browser=new WebView(this);browser.setFocusable(true);browser.setFocusableInTouchMode(true);
         root.addView(browser,new LinearLayout.LayoutParams(-1,0,1));
         setContentView(root);
@@ -143,6 +155,24 @@ public final class NewsBrowserActivity extends Activity {
             @Override public boolean shouldOverrideUrlLoading(WebView view,String url){
                 try{return !safePage(Uri.parse(url));}catch(Exception ignored){return true;}
             }
+            // Frame-policy restrictions do not apply to top-level navigation in
+            // this isolated WebView. Do not add any privileged JavascriptInterface.
+            @Override public void onPageStarted(WebView view,String url,Bitmap favicon){
+                pageStatus.setVisibility(View.GONE);
+                address.setText(url);
+            }
+            @Override public void onReceivedError(WebView view,WebResourceRequest request,WebResourceError error){
+                if(request.isForMainFrame()){
+                    pageStatus.setText("The website could not load. Check the connection and choose Retry, or open another public HTTPS address.");
+                    pageStatus.setVisibility(View.VISIBLE);
+                }
+            }
+            @Override public void onReceivedHttpError(WebView view,WebResourceRequest request,WebResourceResponse response){
+                if(request.isForMainFrame()&&response.getStatusCode()>=400){
+                    pageStatus.setText("Publisher returned HTTP "+response.getStatusCode()+". Choose Retry or open another page.");
+                    pageStatus.setVisibility(View.VISIBLE);
+                }
+            }
             @Override public void onPageFinished(WebView view,String url){
                 address.setText(url);
                 updateBookmarkButton();
@@ -151,6 +181,7 @@ public final class NewsBrowserActivity extends Activity {
         back.setOnClickListener(v->{if(browser.canGoBack())browser.goBack();});
         forward.setOnClickListener(v->{if(browser.canGoForward())browser.goForward();});
         refresh.setOnClickListener(v->browser.reload());
+        retry.setOnClickListener(v->{pageStatus.setVisibility(View.GONE);browser.reload();});
         bookmarkButton.setOnClickListener(v->toggleBookmark());
         bookmarks.setOnClickListener(v->showBookmarks());
         close.setOnClickListener(v->finish());
