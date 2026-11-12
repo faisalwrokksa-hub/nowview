@@ -150,7 +150,7 @@
  favoritesOnly.addEventListener('change',renderChannels);
  search.addEventListener('input',renderChannels);
  hideFailed.addEventListener('change',renderChannels);
- retryFailed.addEventListener('click',()=>{if(!list.value)return;window.NewViewSourceMonitor?.mark?.('iptv',list.value,'unknown','Awaiting new playback check');renderChannels();});
+ retryFailed.addEventListener('click',()=>{const url=list.value;if(retryFailed.disabled||!url||!Array.from(list.options).some(option=>option.value===url)){status.textContent='Select an available channel before retrying its stream.';return;}window.NewViewSourceMonitor?.mark?.('iptv',url,'unknown','Awaiting new playback check');renderChannels();});
  window.addEventListener?.('newview:source-status',e=>{if(e.detail?.kind==='iptv')renderChannels();});
  window.addEventListener?.('newview:source-filter',()=>{hideFailed.checked=window.NewViewSourceMonitor?.getSettings?.().hideFailed!==false;renderChannels();});
  secureOnly.addEventListener('change',renderChannels);
