@@ -912,3 +912,33 @@ body[data-nv-motion="reduced"] *,body[data-nv-motion="reduced"] *::before,body[d
 /* Shared asynchronous source-state affordances */
 [aria-busy="true"]{cursor:progress}[aria-busy="true"]:is(select,button){opacity:.72}button:disabled{cursor:not-allowed;opacity:.55}.nv-home-news-empty,.nv-home-featured-status,.nv-browser-status,.nv-ux-network{line-height:1.5;overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){.nv-simple-tile,.nv-simple-nav button{transition:none!important}}
+
+
+/* Task 1: avoid clipped settings controls when the on-screen keyboard opens. */
+@media (max-width:700px){
+ body>main>.newview-settings[open]>.newview-settings-content{
+  box-sizing:border-box;
+  max-height:calc(100vh - 16px);
+  max-height:calc(100dvh - 16px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+ }
+ body>main>.newview-settings[open]>.newview-settings-content :is(input,select,textarea,button){min-width:0}
+}
+
+
+/* Task 1: predictable feedback and remote focus across compact workspaces. */
+:is(.workspace,.shell-page,[data-workspace]) :is([role="status"],[role="alert"],[aria-live]){
+  min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:normal;
+}
+:is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content) :is(button,a,summary,input,select,textarea,[tabindex]):focus{
+  scroll-margin:28px;
+}
+@media (max-width:600px){
+  body>main>.workspace-switcher{max-width:100%;scroll-padding-inline:16px;-webkit-overflow-scrolling:touch}
+  body>main>.workspace-switcher .workspace-tab{flex-shrink:0}
+}
+@media (prefers-reduced-motion:reduce){
+  :is(.workspace,.shell-page,[data-workspace]) :is([role="status"],[role="alert"],[aria-live]){animation:none!important}
+}
