@@ -115,6 +115,7 @@
   // Invalidate prior data immediately, including when the new file fails validation.
   loadedRows=null;period.value='all';periodLabel.hidden=true;
   cards.replaceChildren();bars.replaceChildren();
+  status.textContent='Reading CSV locally…';
   if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:business',{detail:null}));
   if(file.size>limitBytes){status.textContent='File too large: maximum 1 MB';picker.value='';return;}
   try{const text=await file.text();if(version!==selectionVersion)return;const rows=parseBusinessCsv(text);loadedRows=rows;period.value='all';periodLabel.hidden=false;render(selectedRows());}
