@@ -114,7 +114,16 @@
   const leave=document.createElement('button');leave.type='button';leave.textContent='Disconnect this device';leave.hidden=true;
   const revoke=document.createElement('button');revoke.type='button';revoke.textContent='Revoke pairing for all devices';revoke.hidden=true;
   const status=document.createElement('p');status.id=PREFIX+'status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.textContent='Not connected. Pairing is not account sign-in.';
-  actions.append(create,pairing,join,copy,push,useCloud,useLocal,leave,revoke);section.append(title,description,actions,status);settings.append(section);
+  const shareLabel=document.createElement('label');shareLabel.className='newview-sync-viewing-consent';
+  const shareBox=document.createElement('input');shareBox.type='checkbox';shareBox.checked=shareViewing();
+  shareBox.setAttribute('aria-label','Sync viewing preferences with paired browsers');
+  shareLabel.append(shareBox,' Also sync my favourite channels, recently confirmed viewing, language and interests (opt in on each browser)');
+  actions.append(create,pairing,join,copy,push,useCloud,useLocal,leave,revoke);section.append(title,description,shareLabel,actions,status);settings.append(section);
+  shareBox.addEventListener('change',()=>{
+   try{localStorage.setItem(VIEW_KEY,shareBox.checked?'yes':'no');}catch{shareBox.checked=shareViewing();}
+   report(shareBox.checked?'Viewing preferences may sync with authorized paired browsers.':'Viewing-preference sync disabled on this browser. Layout sync remains available.');
+   if(room)update();
+  });
   function report(message){status.textContent=message;const badge=document.getElementById('newview-device-status');if(badge)badge.textContent=message;}
   function connected(value){copy.hidden=push.hidden=leave.hidden=revoke.hidden=!value;copy.disabled=value;create.hidden=join.hidden=value;pairing.hidden=value;if(!value){useCloud.hidden=useLocal.hidden=true;conflict=null;pairing.value='';}}
   function resolveConflict(){useCloud.hidden=useLocal.hidden=!conflict;}
@@ -122,6 +131,14 @@
    window.NewViewPersonal?.save?.(incoming.widgets);
    window.NewViewPersonal?.render?.();
    window.NewViewShell?.select?.(incoming.workspace);
+   if(shareViewing()&&incoming.viewing){
+    try{
+     localStorage.setItem('newview.media.channel-favorites.v1',JSON.stringify(incoming.viewing.favorites));
+     localStorage.setItem('newview.recommendation.preferences.v1',JSON.stringify({language:incoming.viewing.language,interest:incoming.viewing.interest}));
+    }catch{}
+    window.NewViewViewing?.importConfirmed?.(incoming.viewing.history);
+    window.dispatchEvent?.(new CustomEvent('newview:source-filter',{detail:{synced:true}}));
+   }
   }
   async function update(){
    if(!room||busy||document.hidden||conflict)return;
@@ -134,13 +151,14 @@
     if(activeSession!==session)return;
     if(!remote){
      if(!createdRoom){report('Pairing room not found or expired. Create a fresh link on the first device.');return;}
-     const sealed=await encrypt(current);if(activeSession!==session)return;
+     const sealed=await encrypt(preserved(current));if(activeSession!==session)return;
      await request('POST',sealed);if(activeSession!==session)return;
      previousLocal=local;previousVersion=sealed;createdRoom=false;copy.disabled=false;
      report('Encrypted room created · sharing layouts only, no screen video');
     }else if(remote.blob!==previousVersion){
      const incoming=await decrypt(remote.blob);if(activeSession!==session)return;
-     const serialized=JSON.stringify(incoming);
+     previousViewing=incoming.viewing||null;
+     const serialized=JSON.stringify(visible(incoming));
      // Joining an existing room must never silently replace this device's layout.
      // Ask before overwriting local preferences, even on the first sync.
      if(previousLocal===null&&!createdRoom&&serialized!==local){
@@ -183,13 +201,13 @@
    report('Keeping this layout. Synchronizing the selected version…');update();
   });
   function disconnect(){
-   session++;busy=false;if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=null;createdRoom=false;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
+   session++;busy=false;if(timer)clearInterval(timer);timer=null;room=null;key=null;previousLocal=previousVersion=previousViewing=null;createdRoom=false;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
    if(location.hash.startsWith('#sync='))history.replaceState(null,'',location.pathname+location.search);
    connected(false);report('Disconnected on this device; other devices keep their copies');
   }
   async function pair(value,isNew){
    session++;busy=false;if(timer)clearInterval(timer);timer=null;conflict=null;push.disabled=false;push.removeAttribute('aria-busy');
-   room=value.room;key=value.key;previousLocal=previousVersion=null;createdRoom=isNew;connected(true);
+   room=value.room;key=value.key;previousLocal=previousVersion=previousViewing=null;createdRoom=isNew;connected(true);
    const pairingSession=session;pairing.value='';report('Pairing…');
    await update();
    if(pairingSession!==session)return;
