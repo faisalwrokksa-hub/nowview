@@ -28,6 +28,14 @@
  <article class="shell-card"><span class="shell-eyebrow">03 / YOUR REPORT</span><h3>Save your Power BI report shortcut</h3><p>Paste a report link copied from Power BI. It is stored only in this browser; the report opens on Microsoft Power BI.</p><label for="powerbi-report-url">Power BI report or app URL</label><input type="url" id="powerbi-report-url" inputmode="url" placeholder="https://app.powerbi.com/..." autocomplete="off"/><div class="newview-powerbi-actions"><button type="button" id="powerbi-report-save">Save shortcut</button><a id="powerbi-report-open" href="https://app.powerbi.com/" target="_blank" rel="noopener noreferrer">Open my report ↗</a><button type="button" id="powerbi-report-clear">Clear</button></div><p id="powerbi-report-status" role="status" aria-live="polite">No custom report saved</p></article>
  <article class="shell-card"><span class="shell-eyebrow">PRIVATE &amp; SECURE</span><h3>Your Microsoft account stays with Microsoft</h3><p>NewView does not request your Power BI credentials, fetch private reports, or impersonate your organization's workspace. Report availability and licensing are determined by Microsoft and your organization.</p></article>
 </div>
+<details class="shell-card newview-local-csv" aria-labelledby="business-local-title">
+ <summary id="business-local-title">Local CSV KPI analysis (private, on this device)</summary>
+ <p>Analyze a CSV on this device without uploading it. Required columns: <code>date,revenue,cost,orders,customers</code>. Dates use YYYY-MM-DD; amounts retain the CSV's unspecified currency.</p>
+ <div class="media-actions"><label for="business-file">Choose local CSV</label><input id="business-file" type="file" accept=".csv,text/csv" aria-describedby="business-status"><button id="business-clear" type="button">Clear local data</button></div>
+ <p id="business-status" role="status" aria-live="polite">No company data loaded. CSV is processed locally and is not uploaded.</p>
+ <div id="business-kpis" class="business-kpis" aria-label="Local business KPI summary"></div>
+ <div id="business-trend" class="business-trend" aria-label="Local revenue trend"></div>
+</details>
 </section>
 <section data-workspace="news" class="shell-page"><div class="shell-grid"><article class="shell-card shell-feature"><div class="shell-eyebrow">NEWS INTELLIGENCE</div><h3>Global headlines and financial announcements</h3>
 <div class="news-controls"><label for="news-source">Source</label><select id="news-source"><option value="fed">Federal Reserve</option><option value="sec">U.S. SEC</option><option value="stocktwits">Stocktwits News</option><option value="bbc">BBC World</option><option value="npr">NPR News</option><option value="guardian">The Guardian</option><option value="aljazeera">Al Jazeera English</option><option value="dw">DW English</option><option value="pbs">PBS NewsHour</option></select><button type="button" id="news-refresh">Refresh headlines</button></div>
