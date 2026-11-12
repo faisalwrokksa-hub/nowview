@@ -7,8 +7,9 @@
  const PROFILE=Object.freeze({profile:'realtime',newsMs:120000,marketMs:15000,iptvMs:10800000,hideFailed:true,autoCheck:true});
  const FEEDS=Object.freeze(['fed','sec','stocktwits','bbc','npr','guardian','aljazeera','dw','pbs']);
  const native=typeof location!=='undefined'&&location.protocol==='file:';
+ const NEWS_BATCH_SIZE=3; // Sweep all nine publishers across three 2-minute cycles.
  const states=new Map(),journal=[];const MAX_LOG=60,FAIL_TTL=30*60000;
- let newsTimer=null,marketTimer=null,iptvTimer=null,active=false,checking=false,cloudHealth=null;
+ let newsTimer=null,marketTimer=null,iptvTimer=null,active=false,checking=false,cloudHealth=null,nextFeedIndex=0;
  function read(){
   try{const x=JSON.parse(localStorage.getItem(KEY)||'null');return x&&typeof x==='object'?{
    ...PROFILE,hideFailed:x.hideFailed!==false,autoCheck:x.autoCheck!==false
@@ -47,7 +48,7 @@
  }
  let lastMarket=null;
  root.addEventListener?.('newview:market',e=>{if(e.detail&&typeof e.detail==='object')lastMarket=e.detail;});
- async function checkNews(){
+ async function checkNews(fullScan=false){
   if(!active||checking||!settings.autoCheck||typeof document!=='undefined'&&document.hidden||navigator.onLine===false)return;
   if(native){
    // Native RSS is implemented separately. Trigger a visible-source refresh,
@@ -59,7 +60,9 @@
   checking=true;
   try{
    // Serial and bounded to avoid spikes or exhausting publisher quotas.
-   for(const id of FEEDS){
+   const targets=fullScan?FEEDS:Array.from({length:Math.min(NEWS_BATCH_SIZE,FEEDS.length)},(_,i)=>FEEDS[(nextFeedIndex+i)%FEEDS.length]);
+   if(!fullScan)nextFeedIndex=(nextFeedIndex+targets.length)%FEEDS.length;
+   for(const id of targets){
     if(!active||!settings.autoCheck||document.hidden)break;
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);
     try{
@@ -105,7 +108,7 @@
  function render(){
   if(typeof document==='undefined')return;
   const host=document.getElementById('newview-monitor-feed'),summary=document.getElementById('newview-monitor-summary');
-  if(summary)summary.textContent=(active&&settings.autoCheck?'Monitoring while NewView is open':'Monitoring paused')+' · News 2m · Market freshness 15s · IPTV directory 3h'+(cloudHealth?' · Cloud checks '+cloudHealth.feeds+' feeds (checked '+new Date(cloudHealth.checkedAt).toLocaleTimeString()+')':' · Cloud monitoring not connected');
+  if(summary)summary.textContent=(active&&settings.autoCheck?'Monitoring while NewView is open':'Monitoring paused')+' · News batch every 2m (all feeds ~6m) · Market freshness 15s · IPTV directory 3h'+(cloudHealth?' · Cloud checks '+cloudHealth.feeds+' feeds (checked '+new Date(cloudHealth.checkedAt).toLocaleTimeString()+')':' · Cloud monitoring not connected');
   if(!host)return;
   host.replaceChildren();
   const entries=journal.filter(e=>e.kind==='update'||!settings.hideFailed||e.status!=='failed').slice(0,12);
@@ -127,7 +130,7 @@
   const hideLabel=document.createElement('label'),hideBox=document.createElement('input');hideBox.type='checkbox';hideBox.id='newview-monitor-hide-failed';hideBox.checked=settings.hideFailed;hideLabel.append(hideBox,' Hide confirmed unavailable sources');
   const autoLabel=document.createElement('label'),autoBox=document.createElement('input');autoBox.type='checkbox';autoBox.id='newview-monitor-auto-check';autoBox.checked=settings.autoCheck;autoLabel.append(autoBox,' Automatic checks');
   const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Check sources now';
-  refresh.addEventListener('click',()=>{checkNews();checkCloud();checkMarket();event('newview:iptv-refresh',{});});
+  refresh.addEventListener('click',()=>{checkNews(true);checkCloud();checkMarket();event('newview:iptv-refresh',{});});
   hideBox.addEventListener('change',()=>{settings.hideFailed=hideBox.checked;save();render();event('newview:source-filter',{});});
   autoBox.addEventListener('change',()=>{settings.autoCheck=autoBox.checked;save();restart();});
   controls.append(hideLabel,autoLabel,refresh);
