@@ -27,13 +27,16 @@ export async function handleDeviceSync(request,env,url,fetcher=fetch){
   const type=request.headers.get('Content-Type')||'';
   if(!/^application\/json(?:\s*;|$)/i.test(type))return reply({error:'JSON required'},415);
   const size=Number(request.headers.get('Content-Length'));
-  if(Number.isFinite(size)&&size>12000)return reply({error:'Request too large'},413);
+  if(Number.isFinite(size)&&size>18000)return reply({error:'Request too large'},413);
   let body;
-  try{const text=await request.text();if(text.length>12000)return reply({error:'Request too large'},413);body=JSON.parse(text);}
+  try{const text=await request.text();if(text.length>18000)return reply({error:'Request too large'},413);body=JSON.parse(text);}
   catch{return reply({error:'Invalid JSON'},400);}
   if(!body||typeof body.blob!=='string'||body.blob.length>8000||
      !/^[A-Za-z0-9_-]{16,64}\.[A-Za-z0-9_-]{20,7950}$/.test(body.blob))
    return reply({error:'Invalid encrypted layout'},400);
+  if(method==='PUT'&&(typeof body.expected!=='string'||body.expected.length>8000||
+    !/^[A-Za-z0-9_-]{16,64}\.[A-Za-z0-9_-]{20,7950}$/.test(body.expected)))
+    return reply({error:'An expected encrypted room version is required for updates'},428);
   blob=body.blob;
  }
  // Partition is an unguessable client-generated room scoped to a verified Access subject.
@@ -45,12 +48,13 @@ export async function handleDeviceSync(request,env,url,fetcher=fetch){
   const room=env.NEWVIEW_SYNC_ROOMS.getByName('sync-v3:'+partition);
   const result=method==='GET'?await room.read():
    method==='POST'?await room.create(blob):
-   method==='PUT'?await room.update(blob):
+   method==='PUT'?await room.update(blob,body.expected):
    await room.revoke();
   if(result.status===204)return new Response(null,{status:204,headers:base});
   if(result.status===200&&typeof result.blob==='string')return reply({blob:result.blob});
   if(result.status===410)return reply({error:'This pairing room has been revoked. Create a new room.'},410);
-  if(result.status===409)return reply({error:'This pairing room already exists'},409);
+  if(result.status===409)return reply({error:method==='PUT'?'Room changed on another device; refresh before updating':'This pairing room already exists'},409);
+  if(result.status===428)return reply({error:'Expected room version required'},428);
   if(result.status===404)return reply({error:'Room empty or expired'},404);
   return reply({error:'Unable to process encrypted layout'},400);
  }catch{
