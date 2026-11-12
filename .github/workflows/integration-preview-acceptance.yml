@@ -1,0 +1,72 @@
+name: NewView integration preview live acceptance (read-only)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'web/**'
+      - 'cloud/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'wrangler.json'
+      - 'package.json'
+      - '.github/workflows/integration-preview-acceptance.yml'
+permissions:
+  contents: read
+concurrency:
+  group: newview-integration-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  revision-and-routes:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'integration/ux-media-business-20261112' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      NEWVIEW_URL: https://integration-ux-media-business-20261112-nowview.faisalwrokksa.workers.dev/
+      NEWVIEW_EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify preview is serving the exact integration SHA (bounded wait)
+        run: node tools/verify-integration-preview.mjs
+      - name: Validate public routes and security responses (read-only)
+        run: npm run smoke:public
+      - name: Record verified release identity
+        if: success()
+        run: |
+          echo "Preview URL: $NEWVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Serving revision: $NEWVIEW_EXPECTED_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Read-only smoke PASS. Physical devices, licensing and signing are NOT certified." >> "$GITHUB_STEP_SUMMARY"
+  chromium-responsive:
+    needs: revision-and-routes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NEWVIEW_URL: https://integration-ux-media-business-20261112-nowview.faisalwrokksa.workers.dev/
+      NEWVIEW_EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install disposable Chromium runner dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.57.0
+          npx playwright install --with-deps chromium
+      - name: Check four viewports, nav and keyboard focus
+        run: node tools/verify-integration-browser.mjs
+      - name: Upload screenshots for human review (not acceptance evidence)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newview-integration-preview-chromium-screenshots
+          path: preview-screenshots/
+          if-no-files-found: ignore
+          retention-days: 14
