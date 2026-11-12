@@ -48,3 +48,9 @@ Official references:
 - **Code and CI: 8/10** — all six GitHub workflows passed before the latest preview/TV changes; re-run exact-SHA checks after every new commit.
 - **Commercial release: 5/10** — the current release matrix records 20 NOT RUN hardware/web acceptance cases, and security, media licensing and signing are incomplete.
 - These are subjective readiness estimates, not automated test scores. No production acceptance claim is made.
+
+## Verified preview and automated browser smoke
+
+The Cloudflare integration preview is available at `https://integration-ux-media-business-20261112-nowview.faisalwrokksa.workers.dev/`. A read-only GitHub workflow (`.github/workflows/integration-preview-acceptance.yml`) requires the deployed `/version` revision to exactly match the PR head, then checks HTTP routing/security and exercises the four primary navigation tabs, ArrowRight keyboard focus, horizontal overflow and page exceptions in Chromium at phone/tablet/desktop/TV viewport sizes. Screenshot artifacts are for reviewer inspection.
+
+These checks can reduce the web risk but do not mark the 20 hardware/browser acceptance items PASS. Release signing remains owner-controlled; a local-only Windows signing script `sign-release.ps1` complements `sign-release.sh` without distributing an APK. A structured commercial rights register now prevents an unsupported 10/10 release declaration.
