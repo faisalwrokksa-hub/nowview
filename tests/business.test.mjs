@@ -66,3 +66,7 @@ test('preserves valid quoted CSV fields at end of line and end of file',()=>{
 test('rejected CSV resets picker so the same corrected file can be selected again',()=>{
  assert.match(src,/catch\(error\)\{if\(version===selectionVersion\)\{[^\n]*picker\.value='';/);
 });
+
+test('reset clears pending CSV busy indicators after an in-flight read',()=>{
+ assert.match(src,/function reset\(\)\{[^\n]*picker\.removeAttribute\('aria-busy'\);cards\.removeAttribute\('aria-busy'\)/);
+});
