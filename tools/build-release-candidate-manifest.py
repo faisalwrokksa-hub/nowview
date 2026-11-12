@@ -59,7 +59,8 @@ def inspect_apk(path, expected_package):
     version_code = int(found.group(2))
     if version_code < 1:
         raise ValueError("Android release must use a positive versionCode")
-    digest = hashlib.file_digest(path.open("rb"), "sha256").hexdigest()
+    with path.open("rb") as file:
+        digest = hashlib.file_digest(file, "sha256").hexdigest()
     return {
         "apkSha256": digest,
         "signerSha256": signer,
