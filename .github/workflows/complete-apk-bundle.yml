@@ -21,6 +21,21 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Test the actual PR head, not GitHub's synthetic merge commit.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source revision
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SOURCE_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SOURCE_SHA" = "$EXPECTED_SOURCE_SHA" || {
+            echo "::error::Checkout does not match the requested source revision"
+            exit 1
+          }
+          echo "Verified APK source revision: $ACTUAL_SOURCE_SHA"
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -44,18 +59,21 @@ jobs:
           test -s "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | grep -F "package: name='app.newview.phonecaster'"
-      - name: Package both APKs with checksums and source revision
+      - name: Package both APKs with checksums and verified source revision
         env:
-          SOURCE_SHA: ${{ github.sha }}
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
+          SOURCE_SHA="$(git rev-parse HEAD)"
+          test "$SOURCE_SHA" = "$EXPECTED_SOURCE_SHA"
           mkdir -p complete-apks
           cp build/newview.apk complete-apks/NewView-Android-TV-test.apk
           cp phone-caster/app/build/outputs/apk/debug/app-debug.apk complete-apks/NewView-Phone-Caster-test.apk
           printf 'NewView Android test bundle\nSource commit: %s\n\nInstall NewView-Android-TV-test.apk on Android TV.\nInstall NewView-Phone-Caster-test.apk on your Android phone.\n\nBoth APKs use development signing identities and are NOT app-store production releases.\nCasting requires the same reachable local network and manual WebRTC offer/answer exchange.\nReal-device performance has not been certified.\n\nIf upgrading an APK fails due to an incompatible signing key, uninstall the previous DEVELOPMENT build first; this erases its locally stored app data.\n' "$SOURCE_SHA" > complete-apks/INSTALL.txt
-          (cd complete-apks && sha256sum *.apk > SHA256SUMS.txt)
+          (cd complete-apks && sha256sum *.apk > SHA256SUMS.txt && sha256sum -c SHA256SUMS.txt)
           test -s complete-apks/NewView-Android-TV-test.apk
           test -s complete-apks/NewView-Phone-Caster-test.apk
+          grep -Fx "Source commit: $SOURCE_SHA" complete-apks/INSTALL.txt
       - uses: actions/upload-artifact@v4
         with:
           name: NewView-complete-two-APK-test-bundle
