@@ -908,3 +908,20 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 @media (forced-colors:active){
  .workspace-switcher .workspace-tab[aria-current="page"]{border:2px solid Highlight}
 }
+
+/* Task 1: ensure status text and settings controls remain readable at 200% zoom. */
+:is(.workspace,.shell-page,.newview-settings-content) :is([role="status"],[role="alert"],[aria-live]) {
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.newview-settings-content :is(input,select,textarea,button) {
+  max-width:100%;
+  min-width:0;
+}
+@media (max-width:520px) {
+  body>main>.newview-settings[open]>.newview-settings-content {
+    box-sizing:border-box;
+    max-height:calc(100vh - 16px);
+    max-height:calc(100dvh - 16px);
+  }
+}
