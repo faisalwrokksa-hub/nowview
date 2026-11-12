@@ -37,21 +37,38 @@
   address.type='url';address.maxLength=2048;address.placeholder='Enter a public HTTPS address';address.setAttribute('aria-label','Browser website address');
   form.append(address,go);
   const star=make('button','','☆'),bookmarks=make('select');bookmarks.setAttribute('aria-label','Saved browser bookmarks');
-  const external=make('button','','Open publisher'),close=make('button','','✕');
-  for(const b of [back,next,reload,star,external,close])b.type='button';
+  // Use real anchors for publisher navigation: unlike window.open(), their click
+  // remains a direct user gesture and works reliably with popup blockers.
+  const external=make('a','nv-browser-external','Open publisher'),fullscreen=make('button','','Fullscreen'),close=make('button','','✕');
+  external.target='_blank';external.rel='noopener noreferrer';
+  for(const b of [back,next,reload,star,fullscreen,close])b.type='button';
   back.setAttribute('aria-label','Browser back');next.setAttribute('aria-label','Browser forward');
   reload.setAttribute('aria-label','Reload current page');star.setAttribute('aria-label','Save or remove bookmark');
   close.setAttribute('aria-label','Close internal browser');
-  toolbar.append(back,next,reload,form,star,bookmarks,external,close);
+  toolbar.append(back,next,reload,form,star,bookmarks,external,fullscreen,close);
   const status=make('p','nv-browser-status');status.setAttribute('role','status');
   const frame=make('iframe','nv-browser-frame');frame.title='Sandboxed website preview';
   frame.referrerPolicy='no-referrer';frame.loading='lazy';
   frame.setAttribute('sandbox','allow-scripts allow-forms allow-same-origin allow-popups allow-presentation');
   frame.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;
   const excerpt=make('div','nv-browser-excerpt');excerpt.hidden=true;
-  panel.append(toolbar,status,excerpt,frame);
+  const fallback=make('div','nv-browser-fallback');
+  fallback.setAttribute('role','note');
+  const fallbackText=make('p','','If this preview is blank or restricted, open the publisher’s full website. Some websites do not allow iframe previews.');
+  const openFull=make('a','nv-browser-open-full','Open full website');
+  openFull.target='_blank';openFull.rel='noopener noreferrer';
+  const retryPreview=make('button','','Try website preview');retryPreview.type='button';retryPreview.hidden=true;
+  fallback.append(fallbackText,openFull,retryPreview);
+  panel.append(toolbar,status,excerpt,fallback,frame);
   (document.getElementById('nv-read-hub')||document.getElementById('nv-watch-headlines')||document.body).append(panel);
   let history=[],cursor=-1,current='',area='read';
+  // Publisher-owned frame policies cannot be detected reliably from a cross-origin
+  // iframe. Avoid a known-blank experience; still let users try a preview.
+  function prefersFullBrowser(url){
+   const host=new URL(url).hostname.toLowerCase();
+   return ['reuters.com','bbc.com','sec.gov','federalreserve.gov','cnbc.com']
+    .some(domain=>host===domain||host.endsWith('.'+domain));
+  }
   function renderMarks(){
    const records=saved();
    bookmarks.replaceChildren();
@@ -75,6 +92,9 @@
    }
    mount(requested);
    current=url;address.value=url;
+   external.href=url;openFull.href=url;
+   retryPreview.hidden=true;
+   fallback.hidden=false;
    if(!replace){history=history.slice(0,cursor+1);history.push(url);if(history.length>100)history.shift();cursor=history.length-1;}
    const video=parseYouTube(url);
    excerpt.replaceChildren();
@@ -87,12 +107,16 @@
    // external tab, while a video URL may use YouTube's official embed.
    if(youtube.test(new URL(url).hostname)&&!video){
     frame.hidden=true;frame.removeAttribute('src');
-    status.textContent='YouTube does not permit embedding its homepage. Open publisher to browse the full site. Video links can play in this panel.';
+    status.textContent='YouTube’s full website cannot be embedded here. Choose Open full website; individual videos may use the official player.';
+   }else if(!video&&prefersFullBrowser(url)){
+    frame.hidden=true;frame.removeAttribute('src');
+    retryPreview.hidden=false;
+    status.textContent='This publisher commonly restricts embedded pages. Open full website to view the complete page.';
    }else{
     frame.hidden=false;
     frame.src=video?'https://www.youtube-nocookie.com/embed/'+video+'?rel=0':url;
     status.textContent=video?'Official YouTube video · playback controlled by YouTube':
-     'Website preview · some publishers block embedded pages. Use Open publisher if blank.';
+     'Website preview attempted. If blank or blocked by the publisher, choose Open full website.';
    }
    external.textContent=video?'Open YouTube':'Open publisher';
    renderMarks();
@@ -101,14 +125,26 @@
   }
   function closeBrowser(){
    const previous=area;
-   panel.hidden=true;frame.removeAttribute('src');
+   panel.hidden=true;frame.removeAttribute('src');retryPreview.hidden=true;
    if(typeof CustomEvent==='function')document.dispatchEvent(new CustomEvent('newview:browser-close',{detail:{area:previous}}));
   }
   form.addEventListener('submit',e=>{e.preventDefault();if(!show(address.value,{area}))status.textContent='Enter a valid public HTTPS website.';});
   back.addEventListener('click',()=>{if(cursor>0){cursor--;show(history[cursor],{area,replace:true});}});
   next.addEventListener('click',()=>{if(cursor<history.length-1){cursor++;show(history[cursor],{area,replace:true});}});
   reload.addEventListener('click',()=>{if(current)show(current,{area,replace:true});});
-  external.addEventListener('click',()=>{if(current)root.open(current,'_blank','noopener,noreferrer');});
+  retryPreview.addEventListener('click',()=>{
+   if(!current)return;
+   frame.hidden=false;frame.src=current;retryPreview.hidden=true;
+   status.textContent='Website preview attempted. If blank, choose Open full website.';
+  });
+  fullscreen.addEventListener('click',()=>{
+   if(document.fullscreenElement===panel){document.exitFullscreen?.();return;}
+   if(!panel.requestFullscreen){status.textContent='Fullscreen is not supported here. Use the browser fullscreen option.';return;}
+   Promise.resolve(panel.requestFullscreen()).catch(()=>{status.textContent='Fullscreen was denied by this browser.';});
+  });
+  document.addEventListener('fullscreenchange',()=>{
+   fullscreen.textContent=document.fullscreenElement===panel?'Exit fullscreen':'Fullscreen';
+  });
   star.addEventListener('click',()=>{
    if(!current)return;
    const data=saved(),index=data.findIndex(x=>x.url===current);
