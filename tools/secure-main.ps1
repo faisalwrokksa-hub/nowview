@@ -67,8 +67,8 @@ if (-not $Apply) {
     Write-Output $body
     exit 0
 }
-if ($existing.Count -eq 1) {
-    throw 'A ruleset with this name exists. Inspect it; refusing to overwrite an existing protection policy.'
+if ($existing.Count -eq 1 -and $existing[0].enforcement -ne 'active') {
+    throw 'An existing namesake ruleset is not active. Inspect it manually; refusing to override.'
 }
 
 # Disable the two legacy scheduled/CI-triggered merge workflows first.
@@ -85,15 +85,19 @@ foreach ($filename in @('auto-merge.yml', 'safe-auto-merge.yml')) {
 }
 
 # File-backed gh request: avoids putting JSON or credentials in shell arguments.
-$tmp = [System.IO.Path]::GetTempFileName()
-try {
-    [System.IO.File]::WriteAllText($tmp, $body, [System.Text.UTF8Encoding]::new($false))
-    & gh api -X POST "repos/$repo/rulesets" --input $tmp | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        throw 'Ruleset create failed. Ensure repository Administration write permission.'
+if ($existing.Count -eq 0) {
+    $tmp = [System.IO.Path]::GetTempFileName()
+    try {
+        [System.IO.File]::WriteAllText($tmp, $body, [System.Text.UTF8Encoding]::new($false))
+        & gh api -X POST "repos/$repo/rulesets" --input $tmp | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Ruleset create failed. Ensure repository Administration write permission.'
+        }
     }
+    finally { Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue }
+} else {
+    Write-Host "Using existing active ruleset $($existing[0].id); review rules manually for parity."
 }
-finally { Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue }
 $after = @(Invoke-GHJson "repos/$repo/rulesets?per_page=100")
 $active = @($after | Where-Object { $_.name -eq $ruleName -and $_.enforcement -eq 'active' })
 if ($active.Count -ne 1) {
