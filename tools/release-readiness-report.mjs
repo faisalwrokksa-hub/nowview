@@ -4,13 +4,15 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {evaluate} from './check-release-evidence.mjs';
+import {assessRights,currentRights} from './check-commercial-rights.mjs';
 
-export function report(records,checks={}){
+export function report(records,checks={},rights=currentRights()){
  const evidence=evaluate(records);
+ const sourceRights=assessRights(rights);
  const gates=['ci','mediaRights','securityReview','signing','upgradeTest','supportPolicy','ownerApproval'];
  const status=Object.fromEntries(gates.map(key=>[key,checks?.[key]===true?'CONFIRMED':'UNVERIFIED']));
  const unverified=gates.filter(key=>status[key]!=='CONFIRMED');
- return {releaseReady:evidence.ready&&unverified.length===0,acceptance:evidence,otherGates:status,unverified,
+ return {releaseReady:evidence.ready&&unverified.length===0&&sourceRights.ready,acceptance:evidence,sourceRights,otherGates:status,unverified,
   warning:'This report validates submitted records only; it cannot prove physical execution, licensing, signatures or approval.'};
 }
 export function markdown(data){
@@ -19,7 +21,7 @@ export function markdown(data){
  '| Result | Count |','|---|---:|',...Object.entries(data.acceptance.summary).map(([key,value])=>`| ${key} | ${value} |`),'',
  '## Additional release gates','',
  '| Gate | Status |','|---|---|',...Object.entries(data.otherGates).map(([key,value])=>`| ${key} | ${value} |`),'',
- '## Outstanding','',...data.acceptance.missing.map(id=>'- '+id+' not passed'),...data.acceptance.problems.map(message=>'- Evidence error: '+message),...data.unverified.map(key=>'- Gate unverified: '+key),'',
+ '## Source and media rights','',data.sourceRights.ready?'**Documented source rights reviewed:** registry entries show clearance evidence; human legal review still required.':'**NO-GO: commercial source usage rights are not yet documented.**',...data.sourceRights.pending.map(id=>'- Source-rights review pending: '+id),...data.sourceRights.problems.map(message=>'- Source-rights error: '+message),'','## Outstanding','',...data.acceptance.missing.map(id=>'- '+id+' not passed'),...data.acceptance.problems.map(message=>'- Evidence error: '+message),...data.unverified.map(key=>'- Gate unverified: '+key),'',
  '> '+data.warning,''];
  return lines.join('\n');
 }
