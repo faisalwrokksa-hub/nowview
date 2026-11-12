@@ -1009,3 +1009,14 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
     box-shadow:none;
   }
 }
+
+/* Task 1: keep workspace controls legible with browser text-only zoom.
+   Allow long translated tab names to wrap rather than clip inside fixed targets. */
+.workspace-switcher .workspace-tab{
+  overflow-wrap:anywhere;
+  white-space:normal;
+  min-width:0;
+}
+@media (prefers-reduced-motion:reduce){
+  .workspace-switcher .workspace-tab{transition:none!important}
+}
