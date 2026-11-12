@@ -65,9 +65,9 @@
   window.NewViewSourceMonitor?.mark?.('iptv',url,'failed','Browser media element reported playback failure');
  });
  inlineVideo.addEventListener('playing',()=>{
-  if(!inlineSource)return;
+  const url=inlineSource;if(!url)return;
   clearInlineWatchdog();
-  window.NewViewSourceMonitor?.mark?.('iptv',inlineSource,'ok','Browser playback started');
+  window.NewViewSourceMonitor?.mark?.('iptv',url,'ok','Browser playback started');
   inlineStatus.textContent='Live stream playing. Availability depends on the source.';
  });
  inlineVideo.addEventListener('waiting',()=>{
@@ -81,7 +81,7 @@
   try{
    const url=new URL(value);
    if(url.protocol!=='https:'||url.username||url.password||url.port)throw Error('Only standard HTTPS streams are supported.');
-   if(!/\\.(m3u8|mp4)$/i.test(url.pathname))throw Error('Inline playback supports HLS or MP4 URLs only.');
+   if(!/\.(m3u8|mp4)(?:$|[?#])/i.test(url.pathname))throw Error('Inline playback supports HLS or MP4 URLs only.');
    stopInlinePlayback();
    attempt=inlineAttempt;
    inlineSource=url.href;inlineVideo.src=url.href;inlineVideo.load();
