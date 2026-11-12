@@ -117,7 +117,8 @@
   const shareLabel=document.createElement('label');shareLabel.className='newview-sync-viewing-consent';
   const shareBox=document.createElement('input');shareBox.type='checkbox';shareBox.checked=shareViewing();
   shareBox.setAttribute('aria-label','Sync viewing preferences with paired browsers');
-  shareLabel.append(shareBox,' Also sync my favourite channels, recently confirmed viewing, language and interests (opt in on each browser)');
+  const shareText=document.createElement('span');shareText.textContent='Also sync my favourite channels, recently confirmed viewing, language and interests (opt in on each browser)';
+  shareLabel.append(shareBox,shareText);
   actions.append(create,pairing,join,copy,push,useCloud,useLocal,leave,revoke);section.append(title,description,shareLabel,actions,status);settings.append(section);
   shareBox.addEventListener('change',()=>{
    try{localStorage.setItem(VIEW_KEY,shareBox.checked?'yes':'no');}catch{shareBox.checked=shareViewing();}
