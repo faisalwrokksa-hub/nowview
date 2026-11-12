@@ -30,12 +30,15 @@ export function markdown(data){
 }
 if(process.argv[1]&&resolve(process.argv[1])===resolve(fileURLToPath(import.meta.url))){
  const input=process.argv[2],output=process.argv[3];
- if(!input){console.error('Usage: node tools/release-readiness-report.mjs <records.json> [report.md]');process.exitCode=2;}
+ if(!input){console.error('Usage: node tools/release-readiness-report.mjs <records.json> [report.md] [private-rights.json]');process.exitCode=2;}
  else try{
   const data=JSON.parse(readFileSync(input,'utf8'));
-  const result=report(data?.records,data?.gates,currentRights(),data?.candidate);
+  const rightsFile=process.argv[4];
+  // Private license evidence may live outside the public repository; never upload it.
+  const rights=rightsFile?JSON.parse(readFileSync(rightsFile,'utf8')):currentRights();
+  const result=report(data?.records,data?.gates,rights,data?.candidate);
   const rendered=markdown(result);
-  if(output)writeFileSync(output,rendered,'utf8');else console.log(rendered);
+  if(output)writeFileSync(output,rendered,{encoding:'utf8',flag:'wx',mode:0o600});else console.log(rendered);
   if(!result.releaseReady)process.exitCode=1;
  }catch(error){console.error('Invalid readiness input: '+error.message);process.exitCode=2;}
 }
