@@ -31,6 +31,7 @@
    if(!item||!safe(item.url)||item.url.length>300||!Number.isFinite(item.at)||item.at>now+60000||now-item.at>TTL||seen.has(item.url))continue;
    seen.add(item.url);accepted.push({url:item.url,name:String(item.name||'Live TV').slice(0,90),at:item.at});
   }
+  if(entries.length&&!accepted.length)return false;
   // The user explicitly opted in to the encrypted room and chose its layout.
   try{localStorage.setItem(KEY,JSON.stringify(accepted.slice(0,8)));}catch{return false;}
   try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{synced:true}}));}catch{}
