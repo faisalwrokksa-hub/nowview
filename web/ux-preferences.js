@@ -45,6 +45,28 @@
   reset.addEventListener('click',()=>{save(defaults);density.value=state.density;motion.value=state.motion;focus.value=state.focus;});panel.append(reset);
   const exportButton=document.createElement('button');exportButton.type='button';exportButton.textContent='Export preferences';
   exportButton.addEventListener('click',()=>{const data={version:1,display:state};try{const raw=localStorage.getItem('newview.home.boxes.v2');data.homeShortcuts=raw?JSON.parse(raw):[];data.shortcutCount=Number(localStorage.getItem('newview.home.box-count.v2'))||3;}catch{data.homeShortcuts=[];}const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='newview-preferences.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});panel.append(exportButton);
+  const importLabel=document.createElement('label');importLabel.textContent='Restore preferences from JSON';
+  const importFile=document.createElement('input');importFile.type='file';importFile.accept='.json,application/json';importFile.setAttribute('aria-label','Restore NewView preferences JSON');
+  const importStatus=document.createElement('p');importStatus.setAttribute('role','status');importStatus.setAttribute('aria-live','polite');
+  importFile.addEventListener('change',async()=>{
+   const file=importFile.files?.[0];if(!file)return;
+   if(file.size>16384){importStatus.textContent='Preference file exceeds 16 KB.';importFile.value='';return;}
+   try{
+    const data=JSON.parse(await file.text());
+    if(!data||data.version!==1||!data.display||typeof data.display!=='object'||Array.isArray(data.display))throw Error('Unsupported preference format');
+    const allowedShortcuts=['markets','iptv','youtube','news','devices'];
+    if(!Array.isArray(data.homeShortcuts)||data.homeShortcuts.length>4||data.homeShortcuts.some(x=>!allowedShortcuts.includes(x)))throw Error('Invalid Home shortcuts');
+    if(!Number.isInteger(data.shortcutCount)||data.shortcutCount<1||data.shortcutCount>4)throw Error('Invalid shortcut count');
+    if(Object.keys(data.display).some(k=>!Object.hasOwn(defaults,k))||Object.entries(data.display).some(([k,v])=>!allowed[k]?.includes(v)))throw Error('Invalid display settings');
+    const clean=normalize(data.display);
+    localStorage.setItem('newview.home.boxes.v2',JSON.stringify([...new Set(data.homeShortcuts)]));
+    localStorage.setItem('newview.home.box-count.v2',String(data.shortcutCount));
+    save(clean);density.value=state.density;motion.value=state.motion;focus.value=state.focus;
+    importStatus.textContent='Preferences restored. Reload NewView to refresh Home shortcuts.';
+   }catch(error){importStatus.textContent='Restore failed: '+(error instanceof Error?error.message:'Invalid JSON file');}
+   importFile.value='';
+  });
+  importLabel.append(importFile);panel.append(importLabel,importStatus);
   host.append(panel);
   // Preserve focus when a workspace switch removes or hides the focused control.
   const nav=document.getElementById('nv-simple-nav')||document.getElementById('workspace-switcher');
