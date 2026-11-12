@@ -81,12 +81,18 @@
  let items=load();let metadata=loadMetadata();
  const filter=document.createElement('input');filter.type='search';filter.id='social-saved-search';filter.placeholder='Search saved profiles';filter.setAttribute('aria-label','Search saved social profiles');links.parentElement?.insertBefore(filter,links);
  filter.addEventListener('input',()=>render());
- filter.addEventListener('keydown',event=>{if(event.key==='Escape'&&filter.value){event.preventDefault();filter.value='';render();}});
+ function resetSavedFilters(){filter.value='';collectionFilter.value='';tagFilter.value='';render();}
+ function handleFilterEscape(event){if(event.key==='Escape'&&(filter.value||collectionFilter.value||tagFilter.value)){event.preventDefault();resetSavedFilters();filter.focus();}}
+ filter.addEventListener('keydown',handleFilterEscape);
  const matchStatus=document.createElement('p');matchStatus.id='social-saved-match-count';matchStatus.setAttribute('role','status');matchStatus.setAttribute('aria-live','polite');links.parentElement?.insertBefore(matchStatus,links);
  const collectionFilter=document.createElement('select');collectionFilter.setAttribute('aria-label','Filter saved profiles by collection');links.parentElement?.insertBefore(collectionFilter,links);
  collectionFilter.addEventListener('change',()=>render());
+ collectionFilter.addEventListener('keydown',handleFilterEscape);
  const tagFilter=document.createElement('select');tagFilter.setAttribute('aria-label','Filter saved profiles by tag');links.parentElement?.insertBefore(tagFilter,links);
  tagFilter.addEventListener('change',()=>render());
+ tagFilter.addEventListener('keydown',handleFilterEscape);
+ const clearFilters=document.createElement('button');clearFilters.type='button';clearFilters.textContent='Clear search and filters';clearFilters.setAttribute('aria-label','Clear saved profile search, tag and collection filters');links.parentElement?.insertBefore(clearFilters,links);
+ clearFilters.addEventListener('click',()=>{resetSavedFilters();filter.focus();});
  const text=(tag,className,value)=>{const e=document.createElement(tag);if(className)e.className=className;e.textContent=value;return e;};
  function renderDiscovery(){
   if(!geoPicker||!topicPicker||!discovery)return;
@@ -112,9 +118,19 @@
   const tags=[...new Set(items.map(item=>metadata[item.url]?.tag).filter(Boolean))].sort();
   tagFilter.replaceChildren(...[['','All tags'],...tags.map(x=>[x,x])].map(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;return option;}));
   tagFilter.value=tags.includes(selectedTag)?selectedTag:'';
+  clearFilters.disabled=!filter.value&&!collectionFilter.value&&!tagFilter.value;
   if(!items.length){matchStatus.textContent='0 saved profiles';links.append(text('p','social-empty','No public profiles saved. Add a public profile URL to open it from your dashboard.'));return;}
-  const term=filter.value.trim().toLowerCase().slice(0,100);
-  const matching=items.filter(item=>(!collectionFilter.value||metadata[item.url]?.collection===collectionFilter.value)&&(!tagFilter.value||metadata[item.url]?.tag===tagFilter.value)&&(!term||(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||'')).toLowerCase().includes(term)));
+  // Normalize search text only; saved names, URLs and labels remain untouched.
+  const normalizeSearch=value=>String(value).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
+  const term=normalizeSearch(filter.value.trim().slice(0,100));
+  const terms=term.split(/\s+/).filter(Boolean);
+  const matching=items.filter(item=>{
+   if(collectionFilter.value&&metadata[item.url]?.collection!==collectionFilter.value)return false;
+   if(tagFilter.value&&metadata[item.url]?.tag!==tagFilter.value)return false;
+   const searchable=(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||''));
+   const normalizedSearchable=normalizeSearch(searchable);
+   return terms.every(word=>normalizedSearchable.includes(word));
+  });
   matchStatus.textContent=matching.length+' of '+items.length+' saved profiles shown';
   if(!matching.length){links.append(text('p','social-empty','No saved profiles match your search.'));return;}
   for(const item of matching){
