@@ -19,7 +19,7 @@ function setup(){
   return {ok:true,json:async()=>({items:[{url:'https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm'}]})};
  };
  const ctx={window,document,location:{protocol:'https:'},navigator:{onLine:true},
-  localStorage:{getItem:()=>null,setItem(){}},fetch,Date,Map,Set,JSON,CustomEvent:class{constructor(name,options){this.detail=options?.detail;this.name=name;}},
+  localStorage:{getItem:()=>null,setItem(){}},fetch,Date,Map,Set,JSON,AbortController,CustomEvent:class{constructor(name,options){this.detail=options?.detail;this.name=name;}},
   setTimeout,clearTimeout,setInterval:()=>1,clearInterval:()=>{}};
  vm.runInNewContext(code,ctx);
  callbacks.get('DOMContentLoaded')();
