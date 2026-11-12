@@ -48,7 +48,58 @@
  const nativeStream=()=>typeof window.NewViewNative?.playStream==='function';
  const playChannel=document.createElement('button');playChannel.type='button';playChannel.textContent='Play selected channel in NewView';playChannel.hidden=!nativeStream();playChannel.disabled=true;
  const open=document.createElement('a');open.textContent='Open selected stream';open.target='_blank';open.rel='noopener noreferrer';open.hidden=true;
- const inlineWrap=document.createElement('section');inlineWrap.setAttribute('aria-label','Inline IPTV player');inlineWrap.className='newview-inline-tv';const inlineStatus=document.createElement('p');inlineStatus.setAttribute('role','status');inlineStatus.textContent='Choose a channel to try browser-supported playback.';const inlineVideo=document.createElement('video');inlineVideo.controls=true;inlineVideo.playsInline=true;inlineVideo.preload='none';inlineVideo.className='inline-tv-video';inlineVideo.setAttribute('aria-label','Live channel player');const inlinePlay=document.createElement('button');inlinePlay.type='button';inlinePlay.textContent='Play in dashboard';inlinePlay.disabled=true;const inlineStop=document.createElement('button');inlineStop.type='button';inlineStop.textContent='Stop video';inlineStop.disabled=true;const floatChannel=document.createElement('button');floatChannel.type='button';floatChannel.textContent='Float selected IPTV';floatChannel.disabled=true;inlineWrap.append(inlineStatus,inlineVideo,inlinePlay,inlineStop,floatChannel);inlineVideo.addEventListener('error',()=>{const url=inlineVideo.currentSrc||inlineVideo.src;stopInline();if(url)window.NewViewSourceMonitor?.mark?.('iptv',url,'failed','Browser playback failed');inlineStatus.textContent='This stream could not play in the browser. Try native Android TV playback or another channel.';});inlineVideo.addEventListener('playing',()=>{const url=inlineVideo.currentSrc||inlineVideo.src;if(url)window.NewViewSourceMonitor?.mark?.('iptv',url,'ok','Browser playback started');inlineStatus.textContent='Live stream playing. Availability depends on the source.';});stopInline=()=>{inlineVideo.pause();inlineVideo.removeAttribute('src');inlineVideo.load();inlineStop.disabled=true;inlineStatus.textContent='Playback stopped.';};inlineStop.addEventListener('click',stopInline);inlinePlay.addEventListener('click',async()=>{const value=list.value;if(!value||inlinePlay.disabled){inlineStatus.textContent='Select an available channel first.';return;}try{const url=new URL(value);if(url.protocol!=='https:'||url.username||url.password||url.port)throw Error('Only standard HTTPS streams are supported.');if(!/\.(m3u8|mp4)(?:$|[?#])/i.test(url.pathname+url.search))throw Error('Inline playback supports HLS or MP4 URLs only.');inlineVideo.pause();inlineVideo.src=url.href;inlineVideo.load();inlineStop.disabled=false;inlineStatus.textContent='Connecting to selected channel…';await inlineVideo.play();}catch(e){stopInline();inlineStatus.textContent=e?.message||'Playback unavailable. Use the native player if supported.';}});
+ const inlineWrap=document.createElement('section');inlineWrap.setAttribute('aria-label','Inline IPTV player');inlineWrap.className='newview-inline-tv';const inlineStatus=document.createElement('p');inlineStatus.setAttribute('role','status');inlineStatus.textContent='Choose a channel to try browser-supported playback.';const inlineVideo=document.createElement('video');inlineVideo.controls=true;inlineVideo.playsInline=true;inlineVideo.preload='none';inlineVideo.className='inline-tv-video';inlineVideo.setAttribute('aria-label','Live channel player');const inlinePlay=document.createElement('button');inlinePlay.type='button';inlinePlay.textContent='Play in dashboard';inlinePlay.disabled=true;const inlineStop=document.createElement('button');inlineStop.type='button';inlineStop.textContent='Stop video';inlineStop.disabled=true;const floatChannel=document.createElement('button');floatChannel.type='button';floatChannel.textContent='Float selected IPTV';floatChannel.disabled=true;inlineWrap.append(inlineStatus,inlineVideo,inlinePlay,inlineStop,floatChannel);
+ // A connecting stream can stall indefinitely without emitting a media error.
+ // Treat a timeout as unverified, never as proof that a broadcaster is down.
+ let inlineAttempt=0,inlineWatchdog=null,inlineSource=null;
+ function clearInlineWatchdog(){if(inlineWatchdog!==null)clearTimeout(inlineWatchdog);inlineWatchdog=null;}
+ function stopInlinePlayback(message='Playback stopped.'){
+  inlineAttempt++;clearInlineWatchdog();inlineSource=null;
+  inlineVideo.pause();inlineVideo.removeAttribute('src');inlineVideo.load();
+  inlineStop.disabled=true;inlineStatus.textContent=message;
+ }
+ stopInline=()=>stopInlinePlayback();
+ inlineVideo.addEventListener('error',()=>{
+  const url=inlineSource;if(!url)return;
+  stopInlinePlayback('This stream could not play in the browser. Try native Android TV playback or another channel.');
+  window.NewViewSourceMonitor?.mark?.('iptv',url,'failed','Browser media element reported playback failure');
+ });
+ inlineVideo.addEventListener('playing',()=>{
+  const url=inlineSource;if(!url)return;
+  clearInlineWatchdog();
+  window.NewViewSourceMonitor?.mark?.('iptv',url,'ok','Browser playback started');
+  inlineStatus.textContent='Live stream playing. Availability depends on the source.';
+ });
+ inlineVideo.addEventListener('waiting',()=>{
+  if(inlineSource)inlineStatus.textContent='Stream buffering. If playback stops, try another channel or native Android TV playback.';
+ });
+ inlineStop.addEventListener('click',stopInline);
+ inlinePlay.addEventListener('click',async()=>{
+  const value=list.value;
+  let attempt=null;
+  if(!value||inlinePlay.disabled){inlineStatus.textContent='Select an available channel first.';return;}
+  try{
+   const url=new URL(value);
+   if(url.protocol!=='https:'||url.username||url.password||url.port)throw Error('Only standard HTTPS streams are supported.');
+   if(!/\.(m3u8|mp4)(?:$|[?#])/i.test(url.pathname))throw Error('Inline playback supports HLS or MP4 URLs only.');
+   stopInlinePlayback();
+   attempt=inlineAttempt;
+   inlineSource=url.href;inlineVideo.src=url.href;inlineVideo.load();
+   inlineStop.disabled=false;inlineStatus.textContent='Connecting to selected channel…';
+   inlineWatchdog=setTimeout(()=>{
+    if(attempt!==inlineAttempt||!inlineSource||inlineVideo.readyState>=3)return;
+    const stalled=inlineSource;
+    stopInlinePlayback('No playback confirmed after 20 seconds. Try the native TV player or another stream.');
+    window.NewViewSourceMonitor?.mark?.('iptv',stalled,'unknown','Browser stream startup timed out');
+   },20000);
+   await inlineVideo.play();
+  }catch(e){
+   if(attempt!==null&&attempt!==inlineAttempt)return;
+   const failed=inlineSource;
+   stopInlinePlayback(e?.name==='NotAllowedError'?'Playback requires a user gesture. Press Play again.':e?.message||'Playback unavailable. Use the native player if supported.');
+   if(failed&&e?.name!=='NotAllowedError')window.NewViewSourceMonitor?.mark?.('iptv',failed,'unknown','Browser playback not confirmed');
+  }
+ });
  floatChannel.addEventListener('click',()=>{
   const url=list.value;
   if(!url||typeof window.NewViewCast?.playIPTV!=='function'){inlineStatus.textContent='Select a channel and open the floating player first.';return;}

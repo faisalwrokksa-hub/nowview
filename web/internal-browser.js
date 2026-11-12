@@ -61,7 +61,7 @@
   fallback.append(fallbackText,openFull,retryPreview);
   panel.append(toolbar,status,excerpt,fallback,frame);
   (document.getElementById('nv-read-hub')||document.getElementById('nv-watch-headlines')||document.body).append(panel);
-  let history=[],cursor=-1,current='',area='read';
+  let history=[],cursor=-1,current='',area='read',returnFocus=null;
   // Publisher-owned frame policies cannot be detected reliably from a cross-origin
   // iframe. Avoid a known-blank experience; still let users try a preview.
   function prefersFullBrowser(url){
@@ -90,6 +90,7 @@
    if(typeof root.NewViewNative?.openNewsBrowser==='function'){
     root.NewViewNative.openNewsBrowser(url);return true;
    }
+   if(panel.hidden){const active=document.activeElement;returnFocus=active&&active!==document.body?active:null;}
    mount(requested);
    current=url;address.value=url;
    external.href=url;openFull.href=url;
@@ -126,6 +127,10 @@
   function closeBrowser(){
    const previous=area;
    panel.hidden=true;frame.removeAttribute('src');retryPreview.hidden=true;
+   const focus=returnFocus;returnFocus=null;
+   if(focus?.isConnected&&!focus.closest('[hidden],[inert],[aria-hidden="true"]')){
+    try{focus.focus({preventScroll:true});}catch{focus.focus();}
+   }
    if(typeof CustomEvent==='function')document.dispatchEvent(new CustomEvent('newview:browser-close',{detail:{area:previous}}));
   }
   form.addEventListener('submit',e=>{e.preventDefault();if(!show(address.value,{area}))status.textContent='Enter a valid public HTTPS website.';});
