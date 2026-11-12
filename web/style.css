@@ -908,3 +908,7 @@ body[data-nv-motion="reduced"] *,body[data-nv-motion="reduced"] *::before,body[d
 .nv-ux-controls input[type="file"]{max-width:100%;width:100%;min-height:44px}.nv-ux-controls label{max-width:100%}.nv-ux-help{font-size:.875rem;line-height:1.5;opacity:.85}.nv-simple-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}.nv-simple-tile{min-width:0;min-height:52px}.nv-simple-tile-text{min-width:0;overflow-wrap:anywhere}
 @media(max-width:600px){.nv-ux-controls{display:grid;grid-template-columns:minmax(0,1fr)}.nv-ux-controls label{min-width:0}.nv-simple-grid{grid-template-columns:minmax(0,1fr)}.nv-home-lower{min-width:0}}
 @media(min-width:1400px){body.tv-launcher .nv-simple-tile{min-height:84px}body.tv-launcher .nv-simple-nav button{min-height:56px}}
+
+/* Shared asynchronous source-state affordances */
+[aria-busy="true"]{cursor:progress}[aria-busy="true"]:is(select,button){opacity:.72}button:disabled{cursor:not-allowed;opacity:.55}.nv-home-news-empty,.nv-home-featured-status,.nv-browser-status,.nv-ux-network{line-height:1.5;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.nv-simple-tile,.nv-simple-nav button{transition:none!important}}
