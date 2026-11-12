@@ -43,8 +43,31 @@
   const chartHeading=el('div','nv-home-chart-head');
   chartHeading.append(el('strong','','Charts'));
   const openCharts=el('button','','Open charts');openCharts.type='button';openCharts.addEventListener('click',()=>window.NewViewShell?.select?.('markets'));
-  chartHeading.append(openCharts);
+  const PANEL_KEY='newview.home.panel-layout.v1';
+  let layoutPrefs={order:'chart-first',width:'balanced'};
+  try{const saved=JSON.parse(localStorage.getItem(PANEL_KEY)||'{}');
+   if(['chart-first','video-first'].includes(saved.order))layoutPrefs.order=saved.order;
+   if(['balanced','left-wide','right-wide'].includes(saved.width))layoutPrefs.width=saved.width;
+  }catch{}
+  const swapPanels=el('button','nv-home-swap-panels','Swap panels');swapPanels.type='button';
+  swapPanels.setAttribute('aria-label','Swap chart and video panel positions');
+  const panelWidth=el('select','nv-home-panel-width');panelWidth.setAttribute('aria-label','Home panel widths');
+  for(const [value,label] of [['balanced','Balanced'],['left-wide','Left panel wider'],['right-wide','Right panel wider']]){
+   const option=el('option','',label);option.value=value;panelWidth.append(option);
+  }
+  function applyPanelLayout(){
+   homeLower.dataset.panelOrder=layoutPrefs.order;
+   homeLower.dataset.panelWidth=layoutPrefs.width;
+   panelWidth.value=layoutPrefs.width;
+   swapPanels.setAttribute('aria-pressed',String(layoutPrefs.order==='video-first'));
+   try{localStorage.setItem(PANEL_KEY,JSON.stringify(layoutPrefs));}catch{}
+   window.dispatchEvent?.(new Event('resize'));
+  }
+  swapPanels.addEventListener('click',()=>{layoutPrefs.order=layoutPrefs.order==='chart-first'?'video-first':'chart-first';applyPanelLayout();});
+  panelWidth.addEventListener('change',()=>{layoutPrefs.width=panelWidth.value;applyPanelLayout();});
+  chartHeading.append(openCharts,swapPanels,panelWidth);
   mainChart.append(chartHeading);
+  applyPanelLayout();
   const market=document.getElementById('market-shell');
   const marketAnchor=document.createComment('Full market workspace');
   market?.before(marketAnchor);
