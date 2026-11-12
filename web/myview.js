@@ -151,7 +151,7 @@
   if(typeof snapshot.url==='string'){
    try{
     const url=new URL(snapshot.url);
-    if(url.protocol==='https:'&&url.username===''&&url.password===''&&
+    if(url.protocol==='https:'&&url.username===''&&url.password===''&&url.port===''&&
       (fed?url.hostname==='www.federalreserve.gov':url.hostname==='www.sec.gov')&&
       (fed?url.pathname.startsWith('/newsevents/pressreleases/'):url.pathname.startsWith('/newsroom/'))){
      direct=url.href;
