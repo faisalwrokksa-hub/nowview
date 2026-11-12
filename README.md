@@ -30,6 +30,10 @@ NewView is a customizable, multi-screen dashboard product. Start with a **commer
 
 **Current status:** Active multi-dashboard development. For the current implementation and release gaps, see [Production Gap Closure](docs/PRODUCTION_GAP_CLOSURE.md) and [GitHub Actions](https://github.com/faisalwrokksa-hub/nowview/actions). CI-built APKs are test-only; hardware QA, commercial rights and production signing must be verified before release.
 
+## Final acceptance
+
+Use [Release Acceptance Matrix](docs/RELEASE_ACCEPTANCE_MATRIX.md) to record real Android TV, web and signing evidence. Automated test APK builds are not physical-device acceptance.
+
 ## Release signing
 
 Production signing is a separate owner-controlled process. Read [Android release policy](docs/ANDROID_RELEASE_POLICY.md); CI APKs are test-only and must never be sold as stable upgradeable releases.
