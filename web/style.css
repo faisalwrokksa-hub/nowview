@@ -1054,3 +1054,20 @@ body>main>.newview-settings[open]>.newview-settings-content :is(button,a,input,s
 #message :is(button,a,[tabindex]):focus-visible{outline:3px solid #ffd6a3;outline-offset:2px;scroll-margin:16px}
 @media (max-height:520px){#message:not(.hidden){justify-content:flex-start;padding:12px 16px}}
 @media (forced-colors:active){#message :is(button,a,[tabindex]):focus-visible{outline-color:Highlight}}
+
+/* Task 1: retain a visible remote-focus cue in older TV WebViews that do not
+   implement :focus-visible, including loading/error retry actions. */
+@supports not selector(:focus-visible){
+  :is(.workspace-switcher,.workspace,.shell-page,.newview-settings-content,#message)
+  :is(button,a,summary,input,select,textarea,[tabindex]):focus{
+    outline:3px solid #ffd6a3;
+    outline-offset:2px;
+    scroll-margin:24px;
+  }
+}
+@media (forced-colors:active){
+  #message :is(button,a,[tabindex]):focus{outline:3px solid Highlight;outline-offset:2px}
+}
+/* Loading/error copy and recovery controls must fit narrow TV browser panes. */
+#message :is([role="alert"],[role="status"],p,a,button){max-width:100%;overflow-wrap:anywhere}
+#message :is(button,a){min-height:44px}
