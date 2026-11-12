@@ -7,6 +7,7 @@
 import {readFileSync,writeFileSync,openSync,closeSync,unlinkSync,renameSync,lstatSync,existsSync} from 'node:fs';
 import {randomUUID} from 'node:crypto';
 import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {emptyState,applyCommand,validateState,entitlementFor} from './commercial-lifecycle.mjs';
 
 const HELP=[
@@ -107,7 +108,7 @@ export function execute(argv){
  const latest=next.events.at(-1);
  return {accepted:true,event:latest,summary:counts(next)};
 }
-if(process.argv[1]&&resolve(process.argv[1])===resolve(new URL(import.meta.url).pathname)){
+if(process.argv[1]&&resolve(process.argv[1])===resolve(fileURLToPath(import.meta.url))){
  try{console.log(JSON.stringify(execute(process.argv.slice(2)),null,2));}
  catch(error){console.error('Owner operation rejected: '+error.message);process.exitCode=1;}
 }
