@@ -10,10 +10,12 @@ test('NewView has exactly four top-level destinations and no duplicate header ca
  assert.doesNotMatch(cast,/header\?\.append\(trigger\)/);
  assert.doesNotMatch(ui,/header\.append\(devices\)/);
 });
-test('Home always shows three primary choices with news, chart and floating IPTV split',()=>{
+test('Home supports 1–4 personalized shortcuts with news, chart and floating IPTV split',()=>{
  assert.match(ui,/newview\.home\.box-count\.v2/);
- assert.match(ui,/state\.count=3/);
- assert.match(ui,/\.slice\(0,3\)/);
+ assert.doesNotMatch(ui,/state\.count=3/);
+ assert.match(ui,/\.slice\(0,state\.count\)/);
+ assert.match(ui,/state\.count=Number\(selectCount\.value\)/);
+ assert.match(ui,/for\(let n=1;n<=4;n\+\+\)/);
  assert.match(ui,/nv-home-top-news/);
  assert.match(ui,/nv-home-chart-preview/);
  assert.match(ui,/nv-home-featured/);
