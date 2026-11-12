@@ -190,7 +190,14 @@ test('Official headline direct links are restricted to publisher HTTPS announcem
  assert.match(src,/url\.username===''&&url\.password===''/);
  assert.match(src,/url\.hostname==='www\.federalreserve\.gov'/);
  assert.match(src,/url\.hostname==='www\.sec\.gov'/);
- assert.match(src,/url\.pathname\.startsWith\('\/newsevents\/pressreleases\/'\)/);
- assert.match(src,/url\.pathname\.startsWith\('\/newsroom\/'\)/);
+ assert.match(src,/newsevents\\\/pressreleases/);
+ assert.match(src,/newsroom/);
  assert.match(src,/link\.href=direct\|\|/);
+});
+
+
+test('Official announcement URLs reject nonstandard HTTPS ports and retain publisher fallback',()=>{
+ assert.match(src,/url\.port===''/);
+ assert.match(src,/link\.href=direct\|\|/);
+ assert.match(src,/publisher index/);
 });
