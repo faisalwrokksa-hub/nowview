@@ -40,7 +40,7 @@ function mount(fetchImpl){
  const els=walk(host);
  const button=label=>{const b=els.find(x=>x.tag==='button'&&x.textContent===label);assert.ok(b,'button '+label);return b;};
  const control=id=>{const v=els.find(x=>x.id===id);assert.ok(v,'control '+id);return v;};
- return {window,button,control,updateLocal:v=>{selected=[...v];},elements:els};
+ return {window,button,control,updateLocal:v=>{selected=[...v];},current:()=>[...selected],elements:els};
 }
 
 test('re-pair while earlier room GET is unresolved does not block new room or revert new status',async()=>{
@@ -90,4 +90,25 @@ test('client sends previous encrypted cloud blob with changed layout and reports
  assert.equal(receivedExpected,saved,'compare-and-swap must refer to prior server blob');
  assert.match(h.control('newview-sync-status').textContent,/Room changed on another device/);
  assert.equal(h.button('Check for updates').disabled,false);
+});
+
+
+test('joining an existing encrypted room never silently replaces local widgets',async()=>{
+ const room='A'.repeat(43),encodedKey='B'.repeat(43);
+ const key=Buffer.from(encodedKey,'base64url');
+ assert.equal(key.length,32);
+ const nonce=webcrypto.getRandomValues(new Uint8Array(12));
+ const aes=await webcrypto.subtle.importKey('raw',key,'AES-GCM',false,['encrypt']);
+ const ciphertext=await webcrypto.subtle.encrypt({name:'AES-GCM',iv:nonce},aes,new TextEncoder().encode(JSON.stringify({widgets:['news'],workspace:'myview'})));
+ const encrypted=Buffer.from(nonce).toString('base64url')+'.'+Buffer.from(ciphertext).toString('base64url');
+ const h=mount(async(_url,options)=>{
+  if(options.method==='GET')return new Response(JSON.stringify({blob:encrypted}),{status:200,headers:{'content-type':'application/json'}});
+  throw Error('Unexpected write before user resolves pairing conflict');
+ });
+ h.control('newview-sync-link').value='sync='+room+'.'+encodedKey;
+ h.button('Join').listeners.get('click')();
+ await until(()=>/Paired layout differs/.test(h.control('newview-sync-status').textContent),'join conflict prompt');
+ assert.deepEqual(h.current(),['market'],'local layout must be preserved before consent');
+ assert.equal(h.button('Use cloud layout').hidden,false);
+ assert.equal(h.button('Keep this layout').hidden,false);
 });
