@@ -62,3 +62,7 @@ test('preserves valid quoted CSV fields at end of line and end of file',()=>{
  assert.equal(rows[1][1],'second');
  assert.equal(rows[2][1],'fourth');
 });
+
+test('failed CSV validation clears file selection to permit retrying the same file',()=>{
+ assert.match(src,/catch\(error\)\{if\(version===selectionVersion\)\{loadedRows=null;periodLabel\.hidden=true;picker\.value='';/);
+});
