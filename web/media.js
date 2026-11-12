@@ -76,13 +76,14 @@
  inlineStop.addEventListener('click',stopInline);
  inlinePlay.addEventListener('click',async()=>{
   const value=list.value;
+  let attempt=null;
   if(!value||inlinePlay.disabled){inlineStatus.textContent='Select an available channel first.';return;}
   try{
    const url=new URL(value);
    if(url.protocol!=='https:'||url.username||url.password||url.port)throw Error('Only standard HTTPS streams are supported.');
    if(!/\\.(m3u8|mp4)$/i.test(url.pathname))throw Error('Inline playback supports HLS or MP4 URLs only.');
    stopInlinePlayback();
-   const attempt=inlineAttempt;
+   attempt=inlineAttempt;
    inlineSource=url.href;inlineVideo.src=url.href;inlineVideo.load();
    inlineStop.disabled=false;inlineStatus.textContent='Connecting to selected channel…';
    inlineWatchdog=setTimeout(()=>{
@@ -93,6 +94,7 @@
    },20000);
    await inlineVideo.play();
   }catch(e){
+   if(attempt!==null&&attempt!==inlineAttempt)return;
    const failed=inlineSource;
    stopInlinePlayback(e?.name==='NotAllowedError'?'Playback requires a user gesture. Press Play again.':e?.message||'Playback unavailable. Use the native player if supported.');
    if(failed&&e?.name!=='NotAllowedError')window.NewViewSourceMonitor?.mark?.('iptv',failed,'unknown','Browser playback not confirmed');
