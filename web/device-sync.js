@@ -5,15 +5,49 @@
  const PREFIX='newview-sync-', INTERVAL=15000, encoder=new TextEncoder(),decoder=new TextDecoder();
  const allowed=new Set(['myview','markets','media','devices']);
  const mapWorkspace=v=>v==='business'?'myview':v==='news'||v==='social'?'media':v;
- let room=null, key=null, timer=null, busy=false, previousLocal=null, previousVersion=null, createdRoom=false, session=0, conflict=null;
+ let room=null, key=null, timer=null, busy=false, previousLocal=null, previousVersion=null, previousViewing=null, createdRoom=false, session=0, conflict=null;
+ const VIEW_KEY='newview.sync.include-viewing.v1';
+ const shareViewing=()=>{try{return localStorage.getItem(VIEW_KEY)==='yes';}catch{return false;}};
  const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
  function unb64(s){if(!/^[A-Za-z0-9_-]+$/.test(s))throw Error('Invalid pairing key');const str=atob(s.replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(str,c=>c.charCodeAt(0));}
+ function safeStream(url){
+  try{const u=new URL(url);return url.length<=300&&u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&/\.(m3u8|mp4)$/i.test(u.pathname);}
+  catch{return false;}
+ }
+ function viewingSnapshot(){
+  let saved=[],preferences={};
+  try{const raw=JSON.parse(localStorage.getItem('newview.media.channel-favorites.v1')||'[]');
+   if(Array.isArray(raw))saved=raw.filter(safeStream).slice(0,8);
+  }catch{}
+  try{preferences=JSON.parse(localStorage.getItem('newview.recommendation.preferences.v1')||'{}');}catch{}
+  const language=['any','english','arabic','spanish','french'].includes(preferences.language)?preferences.language:'any';
+  const interest=['all','news','business','sports','music'].includes(preferences.interest)?preferences.interest:'all';
+  const history=(window.NewViewViewing?.read?.()||[]).filter(x=>safeStream(x.url)).slice(0,6);
+  return {favorites:saved,history,language,interest};
+ }
  function snapshot(){
-  return {widgets:window.NewViewPersonal?.load?.()||[],workspace:allowed.has(mapWorkspace(document.body.dataset.currentWorkspace))?mapWorkspace(document.body.dataset.currentWorkspace):'myview'};
+  const data={widgets:window.NewViewPersonal?.load?.()||[],workspace:allowed.has(mapWorkspace(document.body.dataset.currentWorkspace))?mapWorkspace(document.body.dataset.currentWorkspace):'myview'};
+  if(shareViewing())data.viewing=viewingSnapshot();
+  return data;
  }
  function validate(data){
   if(!data||!Array.isArray(data.widgets)||data.widgets.length>5||!data.widgets.every(w=>typeof w==='string'&&['market','news','media','business','social'].includes(w))||typeof data.workspace!=='string'||!allowed.has(mapWorkspace(data.workspace)))throw Error('Invalid paired dashboard data');
-  return {widgets:window.NewViewPersonal?.sanitize?.(data.widgets)||[],workspace:mapWorkspace(data.workspace)};
+  const clean={widgets:window.NewViewPersonal?.sanitize?.(data.widgets)||[],workspace:mapWorkspace(data.workspace)};
+  if(data.viewing!==undefined){
+   const v=data.viewing;
+   if(!v||!Array.isArray(v.favorites)||v.favorites.length>8||!v.favorites.every(safeStream)||!Array.isArray(v.history)||v.history.length>6||!v.history.every(x=>x&&safeStream(x.url)&&Number.isFinite(x.at)&&Date.now()-x.at<30*86400000&&x.at<=Date.now()+60000&&typeof x.name==='string'&&x.name.length<=90)||!['any','english','arabic','spanish','french'].includes(v.language)||!['all','news','business','sports','music'].includes(v.interest))throw Error('Invalid encrypted viewing preferences');
+   clean.viewing={favorites:[...new Set(v.favorites)],history:v.history.map(x=>({url:x.url,name:x.name,at:x.at})),language:v.language,interest:v.interest};
+  }
+  return clean;
+ }
+ function visible(data){
+  const clean={widgets:data.widgets,workspace:data.workspace};
+  if(shareViewing()&&data.viewing)clean.viewing=data.viewing;
+  return clean;
+ }
+ function preserved(data){
+  if(!shareViewing()&&previousViewing&&!data.viewing)return {...data,viewing:previousViewing};
+  return data;
  }
  async function encrypt(data){
   const iv=crypto.getRandomValues(new Uint8Array(12));
