@@ -18,11 +18,13 @@ test('integration MyView: timestamped Binance chart partitions symbol/currency a
  assert.match(myview,/quoteTime\*1000>=Date\.now\(\)-86400000/);
 });
 
-test('integration MyView: publisher deep links only to official HTTPS host and standard port',()=>{
- assert.ok(myview.includes("url.protocol==='https:'"));
- assert.ok(myview.includes("url.port===''"));
- assert.ok(myview.includes("url.hostname==='www.federalreserve.gov'"));
- assert.ok(myview.includes("url.hostname==='www.sec.gov'"));
+test('integration MyView: publisher deep links only resolve official announcement articles',()=>{
+ assert.ok(myview.includes('function officialAnnouncementUrl(source,raw)'));
+ assert.ok(myview.includes("url.protocol!=='https:'"));
+ assert.ok(myview.includes('url.username||url.password||url.port'));
+ assert.ok(myview.includes("www.federalreserve.gov"));
+ assert.ok(myview.includes("www.sec.gov"));
+ assert.ok(myview.includes('press-releases|press-release|speeches-statements|public-statement'));
  assert.ok(myview.includes('link.href=direct||'));
 });
 
