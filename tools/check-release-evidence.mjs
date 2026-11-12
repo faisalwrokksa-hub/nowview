@@ -13,7 +13,7 @@ export function validate(record){
  if(record.result==='PASS'){
   for(const field of required)if(typeof record[field]!=='string'||!record[field].trim())errors.push('PASS missing '+field);
   if(!/^[a-f0-9]{40}$/i.test(record.buildCommit||''))errors.push('PASS requires full commit SHA');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(record.date||'')||Number.isNaN(Date.parse(record.date)))errors.push('Invalid date');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(record.date||'')||Number.isNaN(Date.parse(record.date)))errors.push('Invalid date');
   if(record.id?.startsWith('TV-')&&!/^[a-f0-9]{64}$/i.test(record.apkSha256||''))errors.push('TV PASS requires APK SHA-256');
  }
  return errors;
