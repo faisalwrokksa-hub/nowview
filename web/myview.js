@@ -111,7 +111,7 @@
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 320 90');svg.setAttribute('role','img');svg.setAttribute('aria-label',symbol+' observed session quote trend');
   const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','#24b9a2');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');line.setAttribute('points',points.map((v,i)=>(i*320/(points.length-1)).toFixed(1)+','+(82-(v-min)/range*74).toFixed(1)).join(' '));svg.append(line);container.append(svg);return container;
  }
- function chartSymbol(){const q=snapshots.market;return q&&q.source==='binance'&&typeof q.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(q.symbol)&&typeof q.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(q.currency)&&Number.isFinite(q.price)&&q.price>=0&&Number.isSafeInteger(q.quoteTime)&&q.quoteTime>0&&q.quoteTime*1000<=Date.now()+300000&&q.quoteTime*1000>=Date.now()-86400000?q.symbol:'Market';}
+ function chartSymbol(){const q=snapshots.market;return q&&q.source==='binance'&&typeof q.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(q.symbol)&&typeof q.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(q.currency)&&Number.isFinite(q.price)&&q.price>=0&&Number.isSafeInteger(q.quoteTime)&&q.quoteTime>0&&q.quoteTime*1000<=Date.now()+300000&&q.quoteTime*1000>=Date.now()-86400000?q.symbol.trim():'Market';}
  function refreshChart(){const card=root.querySelector('[data-widget="market"]');if(!card)return;card.querySelector('.myview-live-chart')?.replaceWith(chartFor(chartSymbol()));}
 
  const snapshots={market:null,business:null,news:null,social:null};
@@ -234,7 +234,7 @@ item.append(eyebrow,heading,description,insight);
   if(id!=='news'&&id!=='market'&&preview[id](next)===preview[id](snapshots[id]))return; // Market and news source-link validity may change independently of preview text.
   snapshots[id]=next;
   if(id==='market'&&next&&next.source==='binance'&&typeof next.symbol==='string'&&/^[A-Z0-9][A-Z0-9._/-]{0,23}$/.test(next.symbol)&&typeof next.currency==='string'&&/^[A-Z0-9]{2,12}$/.test(next.currency)&&Number.isFinite(next.price)&&next.price>=0&&Number.isSafeInteger(next.quoteTime)&&next.quoteTime>0&&next.quoteTime*1000<=Date.now()+300000&&next.quoteTime*1000>=Date.now()-86400000){
-   const key=next.symbol.slice(0,24);const points=quoteHistory.get(key)||[];
+   const key=next.symbol.trim().slice(0,24);const points=quoteHistory.get(key)||[];
    if(next.quoteTime>(lastQuoteTime.get(key)||0)){points.push(next.price);if(points.length>maxQuotePoints)points.shift();quoteHistory.set(key,points);lastQuoteTime.set(key,next.quoteTime);}
   }
   if(id==='market')refreshChart(); // Invalid or missing snapshots must not leave an unrelated chart visible.
