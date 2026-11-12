@@ -61,6 +61,8 @@ Review provenance: https://docs.github.com/en/actions/how-tos/secure-your-work/u
 
 Finalize `docs/CUSTOMER_POLICY_DRAFT.md` with the **actual** operator, contact, privacy legal basis, data recipients, cookie and sync log retention, user rights, supported devices, support SLAs, refunds and incident process. Do not publish the draft with placeholders.
 
+The Settings interface now has configurable in-app policy/support destinations. In `web/index.html`, the meta slots `newview-privacy-policy-url` and `newview-support-url` are intentionally blank until the **real, approved, publicly accessible HTTPS pages** exist. When blank or unsafe, Settings explicitly reports that commercial policy destinations are pending; it does not link to fictional pages. Before consumer launch, fill both with the approved URLs, verify the links work on Android TV and supported browsers, and reconfirm the exact privacy text matches application data flows.
+
 Use the evidence report (nonzero exit code is expected before release):
 
 ```sh
