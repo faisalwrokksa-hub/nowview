@@ -27,6 +27,7 @@ public final class StreamPlayerActivity extends Activity {
     private Uri stream;
     private Runnable watchdog;
     private boolean stopped=false;
+    private boolean resumePlayback=false;
 
     private boolean allowed(Uri uri) {
         if(uri==null||!"https".equalsIgnoreCase(uri.getScheme())||uri.getHost()==null
@@ -97,6 +98,7 @@ public final class StreamPlayerActivity extends Activity {
         video.setMediaController(controls);
         video.setOnPreparedListener(mp->{
             cancelWatchdog();
+            resumePlayback=false;
             status.setVisibility(View.GONE);
             video.start();
             controls.show(4000);
@@ -127,7 +129,24 @@ public final class StreamPlayerActivity extends Activity {
         }
         return super.onKeyDown(keyCode,event);
     }
-    @Override protected void onPause(){cancelWatchdog();if(video!=null)video.pause();super.onPause();}
+    @Override protected void onPause(){
+        resumePlayback=video!=null&&video.isPlaying()&&retry!=null&&retry.getVisibility()!=View.VISIBLE;
+        cancelWatchdog();
+        if(video!=null)video.pause();
+        super.onPause();
+    }
+    @Override protected void onResume(){
+        super.onResume();
+        if(!stopped&&resumePlayback&&video!=null&&retry!=null&&retry.getVisibility()!=View.VISIBLE){
+            resumePlayback=false;
+            try{
+                video.start();
+                armWatchdog("Stream did not resume after returning to NewView.");
+            }catch(RuntimeException e){
+                showFailure("Stream could not resume. Press Retry or Back.");
+            }
+        }
+    }
     @Override protected void onDestroy(){
         stopped=true;
         cancelWatchdog();
