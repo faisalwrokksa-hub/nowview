@@ -81,7 +81,7 @@
  let items=load();let metadata=loadMetadata();
  const filter=document.createElement('input');filter.type='search';filter.id='social-saved-search';filter.placeholder='Search saved profiles';filter.setAttribute('aria-label','Search saved social profiles');links.parentElement?.insertBefore(filter,links);
  filter.addEventListener('input',()=>render());
- filter.addEventListener('keydown',event=>{if(event.key==='Escape'&&filter.value){event.preventDefault();filter.value='';render();}});
+ filter.addEventListener('keydown',event=>{if(event.key==='Escape'&&(filter.value||collectionFilter.value||tagFilter.value)){event.preventDefault();filter.value='';collectionFilter.value='';tagFilter.value='';render();}});
  const matchStatus=document.createElement('p');matchStatus.id='social-saved-match-count';matchStatus.setAttribute('role','status');matchStatus.setAttribute('aria-live','polite');links.parentElement?.insertBefore(matchStatus,links);
  const collectionFilter=document.createElement('select');collectionFilter.setAttribute('aria-label','Filter saved profiles by collection');links.parentElement?.insertBefore(collectionFilter,links);
  collectionFilter.addEventListener('change',()=>render());
