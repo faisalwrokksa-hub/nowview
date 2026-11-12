@@ -120,13 +120,16 @@
   tagFilter.value=tags.includes(selectedTag)?selectedTag:'';
   clearFilters.disabled=!filter.value&&!collectionFilter.value&&!tagFilter.value;
   if(!items.length){matchStatus.textContent='0 saved profiles';links.append(text('p','social-empty','No public profiles saved. Add a public profile URL to open it from your dashboard.'));return;}
-  const term=filter.value.trim().toLowerCase().slice(0,100);
+  // Normalize search text only; saved names, URLs and labels remain untouched.
+  const normalizeSearch=value=>String(value).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
+  const term=normalizeSearch(filter.value.trim().slice(0,100));
   const terms=term.split(/\s+/).filter(Boolean);
   const matching=items.filter(item=>{
    if(collectionFilter.value&&metadata[item.url]?.collection!==collectionFilter.value)return false;
    if(tagFilter.value&&metadata[item.url]?.tag!==tagFilter.value)return false;
-   const searchable=(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||'')).toLowerCase();
-   return terms.every(word=>searchable.includes(word));
+   const searchable=(item.name+' '+SOURCES[item.platform].label+' '+item.url+' '+(metadata[item.url]?.tag||'')+' '+(metadata[item.url]?.collection||''));
+   const normalizedSearchable=normalizeSearch(searchable);
+   return terms.every(word=>normalizedSearchable.includes(word));
   });
   matchStatus.textContent=matching.length+' of '+items.length+' saved profiles shown';
   if(!matching.length){links.append(text('p','social-empty','No saved profiles match your search.'));return;}
