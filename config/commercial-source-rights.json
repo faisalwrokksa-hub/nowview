@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "scope": "NewView commercial source rights and data-use review; this file does not grant any rights",
+  "entries": [
+    {
+      "id": "binance-spot-display",
+      "usage": "Binance Spot prices, timestamps and historical bars displayed to customers",
+      "status": "unverified",
+      "reviewer": null,
+      "reviewDate": null,
+      "evidenceUrl": null,
+      "requiredReview": "Check the current Binance market-data display/caching/commercial use terms and instrument-specific rights."
+    },
+    {
+      "id": "official-news-feeds",
+      "usage": "Federal Reserve, SEC and additional publisher RSS titles, short excerpts and links",
+      "status": "unverified",
+      "reviewer": null,
+      "reviewDate": null,
+      "evidenceUrl": null,
+      "requiredReview": "Confirm each publisher's automated retrieval, caching, attribution and commercial excerpt terms."
+    },
+    {
+      "id": "iptv-directory",
+      "usage": "IPTV-org public channel index and playlist metadata",
+      "status": "unverified",
+      "reviewer": null,
+      "reviewDate": null,
+      "evidenceUrl": null,
+      "requiredReview": "Confirm directory data license and attribution; indexing does not license underlying broadcasts."
+    },
+    {
+      "id": "third-party-live-streams",
+      "usage": "User-selected broadcaster IPTV stream playback in web/Android clients",
+      "status": "unverified",
+      "reviewer": null,
+      "reviewDate": null,
+      "evidenceUrl": null,
+      "requiredReview": "Require broadcaster-by-broadcaster regional, embedding, viewing and commercial distribution/use clearance."
+    },
+    {
+      "id": "youtube-player",
+      "usage": "Official YouTube video player, embedded URLs and native browser handoff",
+      "status": "unverified",
+      "reviewer": null,
+      "reviewDate": null,
+      "evidenceUrl": null,
+      "requiredReview": "Review YouTube API/player terms and publisher embedding choices; no ad blocking or forced iframe use."
+    },
+    {
+      "id": "social-discovery-links",
+      "usage": "External public profile and topic discovery URLs",
+      "status": "unverified",
+      "reviewer": null,
+      "reviewDate": null,
+      "evidenceUrl": null,
+      "requiredReview": "Confirm platform link use, trademark and privacy disclosures; no content scraping or claimed live feeds."
+    },
+    {
+      "id": "pipetv-companion",
+      "usage": "Launch already-installed independently distributed PipeTv app",
+      "status": "unverified",
+      "reviewer": null,
+      "reviewDate": null,
+      "evidenceUrl": null,
+      "requiredReview": "Verify dependency GPL notices and app-store handoff policy; NewView cannot assume ownership of third-party components."
+    }
+  ]
+}
