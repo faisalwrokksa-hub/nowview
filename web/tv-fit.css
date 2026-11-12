@@ -91,3 +91,21 @@ body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) .nv-browser-too
 body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) .nv-browser-toolbar :is(button,input,select){min-height:30px!important;padding:4px 7px!important;font-size:12px!important}
 body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) .nv-browser-toolbar select{display:none}
 body.nv-simple .nv-internal-browser:has(.nv-native-browser-slot) .nv-browser-address-form{flex:1 1 160px}
+
+
+/* Unified Home: controls must stay within their card at TV, tablet and phone sizes. */
+body.nv-simple .nv-home-featured{display:flex;flex-direction:column;gap:8px}
+body.nv-simple .nv-home-featured :is(.nv-home-channel-label,.nv-home-recommendation-controls,.nv-home-recent){width:100%;min-width:0;max-width:100%}
+body.nv-simple .nv-home-channel-label{display:grid;gap:5px;font-size:12px;color:#d5e6f2}
+body.nv-simple .nv-home-channel-label select{width:100%;min-width:0;min-height:40px;padding:8px;border:1px solid #5b7f99;border-radius:9px;background:#10283a;color:#f5fafc}
+body.nv-simple .nv-home-recommendation-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+body.nv-simple .nv-home-recommendation-controls select{width:100%;min-width:0;min-height:38px;padding:7px;border:1px solid #5b7f99;border-radius:9px;background:#10283a;color:#f5fafc}
+body.nv-simple .nv-home-recent{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-height:0;max-height:136px;overflow:auto;overscroll-behavior:contain}
+body.nv-simple .nv-home-recent-item{min-height:38px;text-align:left;width:100%;overflow-wrap:anywhere;white-space:normal;padding:7px 10px;border-radius:9px;background:#16344b;color:#eff8fc;border:1px solid #496d81}
+body.nv-simple .nv-home-clear-history{align-self:flex-start;min-height:34px;padding:6px 10px;border:1px solid #496d81;border-radius:8px;background:#122b3e;color:#d7e7ee}
+body.nv-simple .nv-home-featured h4{font-size:13px;margin:8px 0 0;line-height:1.4}
+body.nv-simple :is(.nv-home-recent-item,.nv-home-featured button,.nv-home-featured select):focus-visible{outline:3px solid #f7bf70!important;outline-offset:2px}
+@media(max-width:880px){
+ body.nv-simple .nv-home-recommendation-controls{grid-template-columns:minmax(0,1fr)}
+ body.nv-simple .nv-home-news-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
