@@ -2,6 +2,8 @@
 /* NewViewMedia: safe external Android TV PipeTv handoff or official web embed. */
 (function(){
  let stopInline=()=>{};
+ // The Android bridge accepts signed 32-bit IDs, not epoch milliseconds.
+ let nativeCatalogRequest=0;
  function parse(input){
   try{
    const url=new URL(String(input).trim());
@@ -127,7 +129,7 @@
   if(!force&&cached&&Date.now()-cached.time<10800000)return cached.items;
   if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicCatalog==='function'){
    const raw=await new Promise((resolve,reject)=>{
-    const id=Date.now()+Math.floor(Math.random()*1000),timer=setTimeout(()=>{delete window.__newviewCatalogResult;reject(Error('Catalog timeout'));},20000);
+    const id=++nativeCatalogRequest,timer=setTimeout(()=>{delete window.__newviewCatalogResult;reject(Error('Catalog timeout'));},20000);
     window.__newviewCatalogResult=(received,data,error)=>{
      if(received!==id)return;
      clearTimeout(timer);delete window.__newviewCatalogResult;
@@ -236,7 +238,7 @@
    let content;
    if(location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicPlaylist==='function'){
     content=await new Promise((resolve,reject)=>{
-     const id=Date.now()+Math.floor(Math.random()*1000);
+     const id=++nativeCatalogRequest;
      let parts=[],total=0;
      const cleanup=()=>{clearTimeout(timer);delete window.__newviewPlaylistChunk;parts=[];};
      const timer=setTimeout(()=>{cleanup();reject(Error('Directory timeout'));},45000);

@@ -33,7 +33,7 @@
   // Home is a fixed three-destination command deck; the other sections remain available.
   const homeNews=el('section','nv-home-top-news');homeNews.id='nv-home-top-news';homeNews.setAttribute('aria-label','Suggested top news');
   const newsHeading=el('div','nv-home-news-heading');
-  newsHeading.append(el('strong','','Top news'));
+  newsHeading.append(el('strong','','Hot news'));
   const moreNews=el('button','','More headlines');moreNews.type='button';moreNews.addEventListener('click',()=>show('read'));
   newsHeading.append(moreNews);
   const newsStrip=el('div','nv-home-news-strip');newsStrip.setAttribute('aria-label','Latest publisher stories');
@@ -44,10 +44,19 @@
   chartHeading.append(el('strong','','Charts'));
   const openCharts=el('button','','Open charts');openCharts.type='button';openCharts.addEventListener('click',()=>window.NewViewShell?.select?.('markets'));
   chartHeading.append(openCharts);
-  const chartCanvas=el('canvas');chartCanvas.id='nv-home-chart-preview';chartCanvas.setAttribute('aria-label','Preview of the main market chart');
-  chartCanvas.setAttribute('role','img');chartCanvas.width=680;chartCanvas.height=360;
-  const chartNotice=el('p','nv-home-chart-notice','The market chart is loading. Open Charts for full controls and live data.');
-  mainChart.append(chartHeading,chartCanvas,chartNotice);
+  mainChart.append(chartHeading);
+  const market=document.getElementById('market-shell');
+  const marketAnchor=document.createComment('Full market workspace');
+  market?.before(marketAnchor);
+  function placeChart(atHome){
+   if(!market)return;
+   if(atHome){
+    mainChart.append(market);market.hidden=false;
+    const workspace=market.querySelector('.workspace');if(workspace)workspace.hidden=false;
+    const board=market.querySelector('#stock-board');if(board)board.hidden=true;
+   }else marketAnchor.after(market);
+   requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
+  }
   const articlePanel=el('section','nv-home-article');articlePanel.id='nv-home-article';articlePanel.hidden=true;
   articlePanel.setAttribute('aria-label','Readable article inside Home');
   const articleToolbar=el('div','nv-home-article-toolbar');
@@ -80,7 +89,8 @@
    const browser=window.NewViewInternalBrowser;
    if(browser){
     const isNative=typeof window.NewViewNative?.openNewsBrowser==='function';
-    articleTitle.hidden=!isNative;articleInfo.hidden=!isNative;articleBody.hidden=!isNative;
+    const inBox=typeof window.NewViewNative?.openBoxBrowser==='function';
+    articleTitle.hidden=inBox||!isNative;articleInfo.hidden=inBox||!isNative;articleBody.hidden=inBox||!isNative;
     browser.open(item.url,{area:'home',title:item.title,summary:item.summary||''});
    }else{articleTitle.hidden=false;articleInfo.hidden=false;articleBody.hidden=false;}
    articlePanel.scrollIntoView?.({block:'start',behavior:'smooth'});
@@ -90,13 +100,19 @@
   const featuredSelect=el('select');featuredSelect.setAttribute('aria-label','Featured IPTV channel');
   const featuredPlay=el('button','','▶ Play in floating video');featuredPlay.type='button';
   const featuredStatus=el('p','nv-home-featured-status','Choose a public channel. Untested streams are not guaranteed to play.');
-  featured.append(featuredHeading,featuredSelect,featuredPlay,featuredStatus);
+  featuredHeading.querySelector('strong').textContent='Suggested live TV';
+  featured.append(featuredHeading,featuredPlay,featuredStatus);
+  const playerDock=document.getElementById('newview-cast-dock');
+  if(playerDock)featured.append(playerDock);
+  let suggestedStarted=false;
   function syncFeatured(){
    const catalog=document.querySelector('#newview-channel-directory select[aria-label="Available IPTV channels"]');
    if(!catalog||!catalog.options.length){featuredStatus.textContent='No channels loaded yet. Open Watch to refresh the channel directory.';return;}
    const old=featuredSelect.value;
    featuredSelect.replaceChildren();
-   const candidates=[...catalog.options].filter(o=>o.value.startsWith('https://'));
+   const pool=[...catalog.options].filter(o=>o.value.startsWith('https://'));
+   const ranked=window.NewViewChannelPicks?.rank?.(pool.map(o=>({url:o.value,name:o.textContent||'Public channel'})));
+   const candidates=ranked?ranked.map(c=>({value:c.url,textContent:c.name})):pool;
    const prior=new Set();let count=0;
    for(const opt of candidates){
     if(prior.has(opt.value))continue;prior.add(opt.value);
@@ -108,14 +124,27 @@
     const checked=[...featuredSelect.options].find(o=>window.NewViewSourceMonitor?.status?.('iptv',o.value)==='ok');
     if(checked)featuredSelect.value=checked.value;
    }
+   window.NewViewCast?.setChannels?.([...featuredSelect.options].map(o=>({name:o.textContent,url:o.value})));
+   const suggestions=[...featuredSelect.options].map(o=>({name:o.textContent,url:o.value}));
+   if(!suggestedStarted&&active==='home'){
+    window.NewViewCast?.open?.();
+    const ready=window.NewViewChannelPicks?.rank?.(suggestions).find(c=>['ready','playing'].includes(window.NewViewChannelPicks.state(c.url)));
+    if(ready){suggestedStarted=true;featuredSelect.value=ready.url;window.NewViewCast?.playIPTV?.(ready.url);}
+   }
+   window.NewViewChannelPicks?.setCatalog?.(suggestions);
    featuredStatus.textContent=featuredSelect.options.length
-    ? 'Public IPTV candidates · playback starts only when you press Play'
+    ? 'Change channels inside the video player. Availability depends on the broadcaster.'
     : 'No playable channel candidates loaded yet. Open Watch and refresh the directory.';
   }
   featuredPlay.addEventListener('click',()=>{
    if(!featuredSelect.value){featuredStatus.textContent='Choose a channel first.';return;}
    if(window.NewViewCast?.playIPTV?.(featuredSelect.value)){featuredStatus.textContent='Floating video opened. Playback confirmation depends on the broadcaster.';}
    else featuredStatus.textContent='This stream cannot be played in the floating viewer; try another channel.';
+  });
+  window.addEventListener('newview:channel-check',event=>{
+   if(!suggestedStarted&&active==='home'&&['ready','playing'].includes(event.detail?.status)){
+    suggestedStarted=true;featuredSelect.value=event.detail.url;window.NewViewCast?.playIPTV?.(event.detail.url);
+   }
   });
   function populateTopNews(){
    const items=window.NewViewNewsReader?.getItems?.()||[];
@@ -129,20 +158,6 @@
     newsStrip.append(btn);
    }
   }
-  function updateChartPreview(){
-   if(active==='home'&&!mainChart.hidden){
-    const original=document.getElementById('chart');
-    try{
-     if(original&&original.width>0&&original.height>0){
-      const ctx=chartCanvas.getContext('2d');
-      if(ctx){ctx.clearRect(0,0,chartCanvas.width,chartCanvas.height);ctx.drawImage(original,0,0,chartCanvas.width,chartCanvas.height);chartNotice.textContent='Live market chart preview · Open Charts for full interaction';}
-     }
-    }catch{chartNotice.textContent='Open Charts for live market prices.';}
-   }
-  }
-  // Reuse the existing chart's pixels; do not create simulated market data.
-  // A slow, visibility-scoped refresh avoids a second chart calculation/fetch.
-  window.setInterval(()=>{if(!document.hidden)updateChartPreview();},2500);
   window.addEventListener('newview:news',populateTopNews);
   window.addEventListener('newview:source-status',e=>{if(e.detail?.kind==='iptv')syncFeatured();});
   const originalDirectory=document.getElementById('newview-channel-directory');
@@ -151,7 +166,7 @@
    if(select)new MutationObserver(syncFeatured).observe(select,{childList:true});
   }
   homeLower.append(mainChart,articlePanel,featured);
-  content.append(grid,homeNews,homeLower);home.prepend(content);
+  content.append(homeNews,homeLower);home.prepend(content);
   populateTopNews();syncFeatured();
 
   const watch=el('section','nv-hub-panel');watch.id='nv-watch-hub';watch.hidden=true;
@@ -277,13 +292,14 @@
    if(!sections.some(x=>x[0]===id))return;
    if(id!=='watch')window.NewViewYouTube?.close?.();
    active=id;
+   placeChart(false);
    const view='myview';
    if(window.NewViewShell?.select?.(view)===false)return;
    content.hidden=id!=='home';watch.hidden=id!=='watch';readPanel.hidden=id!=='read';customize.hidden=id!=='customize';
    if(settings)settings.hidden=true;
    if(id==='read'&&!document.getElementById('news-items')?.children.length)document.getElementById('news-refresh')?.click();
    syncNav();
-   if(id==='home'){populateTopNews();syncFeatured();updateChartPreview();if(!window.NewViewNewsReader?.getItems?.().length)document.getElementById('news-refresh')?.click();}
+   if(id==='home'){placeChart(true);populateTopNews();syncFeatured();if(!window.NewViewNewsReader?.getItems?.().length){const source=document.getElementById('news-source');if(source)source.value='bbc';document.getElementById('news-refresh')?.click();}}
    // One document-level scroller: returning to the top of a new section avoids
    // inheriting the previous section's vertical position on phones.
    if(typeof window.scrollTo==='function')window.scrollTo({top:0,behavior:'instant'});
@@ -312,6 +328,7 @@
   document.querySelectorAll('.newview-powerbi-hero,.newview-powerbi-grid,.social-intro,.social-links,.newview-quicklinks').forEach(n=>n.hidden=true);
   document.addEventListener('newview:workspace-change',event=>{
    const view=event.detail?.view;
+   if(view!=='myview')placeChart(false);
    if(view==='markets'||view==='media'||view==='devices'){active=view==='media'?'watch':view==='markets'?'read':'watch';syncNav();}
   });
   window.NewViewSections=Object.freeze({show});

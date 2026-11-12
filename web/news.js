@@ -53,10 +53,12 @@
  const hiddenLabel=document.createElement('label');hiddenLabel.htmlFor=hideFailed.id;hiddenLabel.textContent='Hide failed feeds';
  function filterSources(){
   const monitor=window.NewViewSourceMonitor;
-  for(const option of choose.options)option.hidden=hideFailed.checked&&monitor?.status?.('news',option.value)==='failed';
+  const native=location.protocol==='file:'&&typeof window.NewViewNative?.fetchPublicNews==='function';
+  const supported=['bbc','guardian','npr','fed','sec'];
+  for(const option of choose.options)option.hidden=(native&&!supported.includes(option.value))||(hideFailed.checked&&monitor?.status?.('news',option.value)==='failed');
   const current=choose.selectedOptions[0];
   if(current?.hidden){
-   const replacement=[...choose.options].find(option=>!option.hidden);
+   const replacement=(native?supported.map(id=>[...choose.options].find(o=>o.value===id)).filter(Boolean):[...choose.options]).find(option=>!option.hidden);
    if(replacement){choose.value=replacement.value;refreshNews();}
   }
  }

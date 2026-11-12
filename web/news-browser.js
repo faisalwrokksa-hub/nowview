@@ -28,6 +28,7 @@
  }
  function browse(raw){
   const url=safeUrl(raw);if(!url)return false;
+  if(typeof window.NewViewNative?.openBoxBrowser==='function'&&window.NewViewInternalBrowser?.open?.(url,{area:'read'}))return true;
   if(typeof window.NewViewNative?.openNewsBrowser==='function'){
    window.NewViewNative.openNewsBrowser(url);return true;
   }

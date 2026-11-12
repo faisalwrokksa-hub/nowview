@@ -10,14 +10,19 @@ test('NewView has exactly four top-level destinations and no duplicate header ca
  assert.doesNotMatch(cast,/header\?\.append\(trigger\)/);
  assert.doesNotMatch(ui,/header\.append\(devices\)/);
 });
-test('Home supports 1–4 personalized shortcuts with news, chart and floating IPTV split',()=>{
+test('Home supports 1â€“4 personalized shortcuts with news, chart and floating IPTV split',()=>{
  assert.match(ui,/newview\.home\.box-count\.v2/);
  assert.doesNotMatch(ui,/state\.count=3/);
  assert.match(ui,/\.slice\(0,state\.count\)/);
  assert.match(ui,/state\.count=Number\(selectCount\.value\)/);
  assert.match(ui,/for\(let n=1;n<=4;n\+\+\)/);
  assert.match(ui,/nv-home-top-news/);
- assert.match(ui,/nv-home-chart-preview/);
+ assert.match(ui,/mainChart\.append\(market\)/);
+ assert.doesNotMatch(ui,/ctx\.drawImage/);
+ assert.match(ui,/content\.append\(homeNews,homeLower\)/);
+ const fit=read('tv-fit.css');
+ assert.match(fit,/overflow:auto!important/);
+ assert.match(fit,/grid-template-rows:minmax\(80px,\.32fr\) minmax\(0,1fr\)/);
  assert.match(ui,/nv-home-featured/);
  assert.match(ui,/nv-home-article/);
  assert.match(ui,/NewViewCast\?\.playIPTV/);

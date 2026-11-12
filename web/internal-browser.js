@@ -4,6 +4,12 @@
 (function(root){
  const KEY='newview.browser.bookmarks.web.v1', LIMIT=100;
  const youtube=/^(?:www\.|m\.)?youtube\.com$|^youtu\.be$|^www\.youtube-nocookie\.com$/;
+ function clipBounds(frame,clips,width,height){
+  let left=Math.max(0,frame.left),top=Math.max(0,frame.top),right=Math.min(width,frame.right),bottom=Math.min(height,frame.bottom);
+  for(const clip of clips){left=Math.max(left,clip.left);top=Math.max(top,clip.top);right=Math.min(right,clip.right);bottom=Math.min(bottom,clip.bottom);}
+  left=Math.min(width,Math.max(0,Math.ceil(left)));top=Math.min(height,Math.max(0,Math.ceil(top)));
+  return [left,top,Math.max(0,Math.floor(right)-left),Math.max(0,Math.floor(bottom)-top),Math.round(width)];
+ }
  function safeUrl(raw){
   if(typeof raw!=='string'||!raw.trim()||raw.length>2048)return null;
   try{
@@ -62,6 +68,22 @@
   panel.append(toolbar,status,excerpt,fallback,frame);
   (document.getElementById('nv-read-hub')||document.getElementById('nv-watch-headlines')||document.body).append(panel);
   let history=[],cursor=-1,current='',area='read',returnFocus=null;
+  let nativeActive=false;
+  const boxed=()=>typeof root.NewViewNative?.openBoxBrowser==='function';
+  function nativeBounds(){
+   if(!nativeActive)return null;
+   const r=frame.getBoundingClientRect(),clips=[];
+   for(let p=frame.parentElement;p;p=p.parentElement){
+    if(p.hidden||getComputedStyle(p).display==='none'){return [0,0,0,0,Math.round(innerWidth)];}
+    const style=getComputedStyle(p),b=p.getBoundingClientRect();
+    clips.push({left:/auto|scroll|hidden|clip/.test(style.overflowX)?b.left+p.clientLeft:0,right:/auto|scroll|hidden|clip/.test(style.overflowX)?b.left+p.clientLeft+p.clientWidth:innerWidth,top:/auto|scroll|hidden|clip/.test(style.overflowY)?b.top+p.clientTop:0,bottom:/auto|scroll|hidden|clip/.test(style.overflowY)?b.top+p.clientTop+p.clientHeight:innerHeight});
+   }
+   return clipBounds(r,clips,innerWidth,innerHeight);
+  }
+  function positionNative(){const bounds=nativeBounds();if(bounds)root.NewViewNative.moveBoxBrowser(...bounds);}
+  document.addEventListener('scroll',positionNative,true);root.addEventListener?.('resize',positionNative);
+  if(typeof ResizeObserver==='function')new ResizeObserver(positionNative).observe(panel);
+  setInterval(()=>{if(nativeActive)positionNative();},250);
   // Publisher-owned frame policies cannot be detected reliably from a cross-origin
   // iframe. Avoid a known-blank experience; still let users try a preview.
   function prefersFullBrowser(url){
@@ -87,7 +109,7 @@
   }
   function show(raw,{area:requested='read',title='',summary='',replace=false}={}){
    const url=safeUrl(raw);if(!url)return false;
-   if(typeof root.NewViewNative?.openNewsBrowser==='function'){
+   if(!boxed()&&typeof root.NewViewNative?.openNewsBrowser==='function'){
     root.NewViewNative.openNewsBrowser(url);return true;
    }
    if(panel.hidden){const active=document.activeElement;returnFocus=active&&active!==document.body?active:null;}
@@ -104,6 +126,15 @@
     if(summary)excerpt.append(make('p','',summary));
    }
    excerpt.hidden=!(title||summary);
+   if(boxed()){
+    nativeActive=true;frame.hidden=false;frame.removeAttribute('src');frame.classList.add('nv-native-browser-slot');
+    fallback.hidden=true;excerpt.hidden=true;external.hidden=true;
+    status.textContent='Website opens inside this box. Scroll the page here; publisher sign-in and playback rules still apply.';
+    renderMarks();back.disabled=false;next.disabled=false;
+    frame.scrollIntoView?.({block:'nearest',behavior:'instant'});
+    requestAnimationFrame(()=>{const bounds=nativeBounds();if(bounds)root.NewViewNative.openBoxBrowser(url,...bounds);});
+    return true;
+   }
    // A YouTube homepage cannot be framed; full website navigation will use an
    // external tab, while a video URL may use YouTube's official embed.
    fallbackText.textContent='If this preview is blank or restricted, open the publisher’s full website. Some websites do not allow iframe previews.';
@@ -130,6 +161,7 @@
    return true;
   }
   function closeBrowser(){
+   if(nativeActive){root.NewViewNative?.boxBrowserAction?.('close');nativeActive=false;}
    const previous=area;
    panel.hidden=true;frame.removeAttribute('src');retryPreview.hidden=true;
    const focus=returnFocus;returnFocus=null;
@@ -139,9 +171,9 @@
    if(typeof CustomEvent==='function')document.dispatchEvent(new CustomEvent('newview:browser-close',{detail:{area:previous}}));
   }
   form.addEventListener('submit',e=>{e.preventDefault();if(!show(address.value,{area}))status.textContent='Enter a valid public HTTPS website.';});
-  back.addEventListener('click',()=>{if(cursor>0){cursor--;show(history[cursor],{area,replace:true});}});
-  next.addEventListener('click',()=>{if(cursor<history.length-1){cursor++;show(history[cursor],{area,replace:true});}});
-  reload.addEventListener('click',()=>{if(current)show(current,{area,replace:true});});
+  back.addEventListener('click',()=>{if(nativeActive){root.NewViewNative.boxBrowserAction('back');return;}if(cursor>0){cursor--;show(history[cursor],{area,replace:true});}});
+  next.addEventListener('click',()=>{if(nativeActive){root.NewViewNative.boxBrowserAction('forward');return;}if(cursor<history.length-1){cursor++;show(history[cursor],{area,replace:true});}});
+  reload.addEventListener('click',()=>{if(nativeActive){root.NewViewNative.boxBrowserAction('reload');return;}if(current)show(current,{area,replace:true});});
   retryPreview.addEventListener('click',()=>{
    if(!current)return;
    frame.hidden=false;frame.src=current;retryPreview.hidden=true;
@@ -171,6 +203,7 @@
   root.NewViewInternalBrowser=Object.freeze({open:show,close:closeBrowser,safeUrl,parseYouTube});
  }
  root.NewViewBrowserSafeUrl=safeUrl;
+ root.NewViewBrowserClipBounds=clipBounds;
  if(typeof document!=='undefined'){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
  }
