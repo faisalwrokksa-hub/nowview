@@ -142,12 +142,12 @@
   const fed=source==='fed';
   try{
    const url=new URL(raw);
-   if(url.protocol!=='https:'||url.username||url.password||url.port)return null;
+   if(url.protocol!=='https:'||url.username||url.password||url.port||url.search||url.hash)return null;
    if(url.hostname!==(fed?'www.federalreserve.gov':'www.sec.gov'))return null;
    const article=fed
     ? /^\/newsevents\/pressreleases\/[a-z]{3,30}20\d{6}[a-z]\.htm$/i.test(url.pathname)
     : /^\/newsroom\/(?:press-releases|press-release|speeches-statements|public-statement)\/[a-z0-9][a-z0-9_-]{4,180}$/i.test(url.pathname);
-   // Omit tracking query/fragment from publisher-provided links.
+   // A headline with a query or fragment is not a clean publisher article URL.
    return article?url.origin+url.pathname:null;
   }catch{return null;}
  }
