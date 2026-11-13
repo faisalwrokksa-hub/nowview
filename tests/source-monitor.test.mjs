@@ -60,3 +60,28 @@ test('cloud health is surfaced without claiming unconfigured monitoring works',(
  assert.match(monitor,/checkCloud\(\)/);
  assert.match(monitor,/cloudHealth=\{checkedAt:checked/);
 });
+
+test('old success states expire to unknown without being mistaken for currently playing streams',()=>{
+ let clock=Date.UTC(2026,10,13,12,0,0);
+ class Clock extends Date {static now(){return clock;}}
+ const win={addEventListener(){},dispatchEvent(){}},store=new Map();
+ const context={window:win,Date:Clock,location:{protocol:'https:'},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},URL,Map,Set,JSON};
+ vm.runInNewContext(monitor,context);
+ const api=win.NewViewSourceMonitor;
+ api.mark('news','bbc','ok','Feed responded');
+ api.mark('iptv','https://example.org/stream.m3u8','ok','Playback confirmed');
+ api.mark('api','market','ok','Quote fresh');
+ clock+=151000;
+ assert.equal(api.status('api','market'),'unknown');
+ assert.equal(api.status('news','bbc'),'ok');
+ clock+=450000;
+ assert.equal(api.status('news','bbc'),'unknown');
+ assert.equal(api.status('iptv','https://example.org/stream.m3u8'),'ok');
+ clock+=1300000;
+ assert.equal(api.status('iptv','https://example.org/stream.m3u8'),'unknown');
+ assert.equal(api.hide('iptv','https://example.org/stream.m3u8'),false);
+});
+test('invalid and hour-old cloud snapshots do not keep a healthy indicator',()=>{
+ assert.match(monitor,/Date\.now\(\)-checked>600000/);
+ assert.match(monitor,/cloudHealth=null;render\(\);return/);
+});
