@@ -67,7 +67,7 @@
    const targets=fullScan?FEEDS:Array.from({length:Math.min(NEWS_BATCH_SIZE,FEEDS.length)},(_,i)=>FEEDS[(nextFeedIndex+i)%FEEDS.length]);
    if(!fullScan)nextFeedIndex=(nextFeedIndex+targets.length)%FEEDS.length;
    for(const id of targets){
-    if(!active||!settings.autoCheck||document.hidden)break;
+    if(!active||!settings.autoCheck||document.hidden||navigator.onLine===false)break;
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);
     try{
      const response=await fetch('/api/news?source='+encodeURIComponent(id),{cache:'no-store',signal:controller.signal});
@@ -83,14 +83,20 @@
       if(newest)notify('News',newest+' new '+id.toUpperCase()+' headlines');
      }
      seenNews.set(id,next);
-    }catch(error){mark('news',id,'failed',error?.name==='AbortError'?'Request timed out':error?.message||'Feed unavailable');}
+    }catch(error){
+     if(navigator.onLine===false){mark('news',id,'unknown','Device offline; feed reachability not checked');break;}
+     mark('news',id,'failed',error?.name==='AbortError'?'Request timed out':error?.message||'Feed unavailable');
+    }
     finally{clearTimeout(timeout);}
    }
   }finally{checking=false;}
  }
  const seenNews=new Map();
  async function checkCloud(){
-  if(native||!active||!settings.autoCheck||typeof fetch!=='function'||typeof document==='undefined'||document.hidden)return;
+  if(native||!active||!settings.autoCheck||typeof fetch!=='function'||typeof document==='undefined'||document.hidden||navigator.onLine===false){
+   if(typeof navigator!=='undefined'&&navigator.onLine===false){cloudHealth=null;render();}
+   return;
+  }
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
   try{
    const response=await fetch('/api/source-health',{cache:'no-store',signal:controller.signal});
@@ -114,7 +120,7 @@
  function render(){
   if(typeof document==='undefined')return;
   const host=document.getElementById('newview-monitor-feed'),summary=document.getElementById('newview-monitor-summary');
-  if(summary)summary.textContent=(active&&settings.autoCheck?'Monitoring while NewView is open':'Monitoring paused')+' · News batch every 2m (all feeds ~6m) · Market freshness 15s · IPTV directory 3h'+(cloudHealth?' · Cloud checks '+cloudHealth.feeds+' feeds (checked '+new Date(cloudHealth.checkedAt).toLocaleTimeString()+')':' · Cloud monitoring not connected');
+  if(summary)summary.textContent=(typeof navigator!=='undefined'&&navigator.onLine===false?'Device offline · source checks paused':active&&settings.autoCheck?'Monitoring while NewView is open':'Monitoring paused')+' · News batch every 2m (all feeds ~6m) · Market freshness 15s · IPTV directory 3h'+(cloudHealth?' · Cloud checks '+cloudHealth.feeds+' feeds (checked '+new Date(cloudHealth.checkedAt).toLocaleTimeString()+')':' · Cloud monitoring not connected');
   if(!host)return;
   host.replaceChildren();
   const entries=journal.filter(e=>e.kind==='update'||!settings.hideFailed||e.status!=='failed').slice(0,12);
@@ -159,7 +165,11 @@
   if(typeof document==='undefined')return;
   setup();restart();
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&settings.autoCheck){checkMarket();checkNews();checkCloud();}});
-  root.addEventListener?.('online',()=>{if(settings.autoCheck)checkNews();});
+  root.addEventListener?.('online',()=>{if(settings.autoCheck){checkNews();checkCloud();checkMarket();}render();});
+  root.addEventListener?.('offline',()=>{
+   cloudHealth=null;mark('api','market','unknown','Device offline; quote freshness unverified');
+   render();
+  });
   root.addEventListener?.('pagehide',()=>{active=false;for(const timer of [newsTimer,marketTimer,iptvTimer])if(timer)clearInterval(timer);});
  }
  root.NewViewSourceMonitor=Object.freeze({defaults:PROFILE,feeds:FEEDS,getSettings:()=>({...settings}),status,hide,mark,getEntries,checkNews,checkMarket,notify});
