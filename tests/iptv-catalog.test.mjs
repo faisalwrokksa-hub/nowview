@@ -72,3 +72,22 @@ test('periodic IPTV refresh re-fetches online scope choices instead of using sta
  assert.match(media,/window\.NewViewSourceMonitor\?\.notify\?\.\('IPTV'/);
  assert.match(media,/newly listed streams/);
 });
+
+test('saved IPTV favourites reject credentials, custom ports and malformed URLs',()=>{
+ const start=media.indexOf(' function safeFavoriteUrl(value){');
+ const end=media.indexOf(' function readFavorites()',start);
+ assert.ok(start>=0&&end>start);
+ const src=media.slice(start,end);
+ const verify=vm.runInNewContext(src+';safeFavoriteUrl',{URL});
+ assert.equal(verify('https://tv.example.org/live.m3u8?stream=1'),true);
+ for(const value of [
+  'http://tv.example.org/live.m3u8',
+  'https://user:secret@tv.example.org/live.m3u8',
+  'https://tv.example.org:8443/live.m3u8',
+  'javascript:alert(1)',
+  'https://localhost/live.m3u8',
+  'https://tv.example.org/live.m3u8'.repeat(100)
+ ])assert.equal(verify(value),false,value);
+ assert.match(media,/value\.filter\(safeFavoriteUrl\)/);
+ assert.match(media,/if\(!safeFavoriteUrl\(url\)\)/);
+});
