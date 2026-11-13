@@ -55,7 +55,10 @@
   const status=make('p','nv-browser-status');status.setAttribute('role','status');
   const frame=make('iframe','nv-browser-frame');frame.title='Sandboxed website preview';
   frame.referrerPolicy='no-referrer';frame.loading='lazy';
-  frame.setAttribute('sandbox','allow-scripts allow-forms allow-same-origin allow-popups allow-presentation');
+  // Never grant a scripted preview its real origin: a same-origin page could
+  // otherwise remove its own iframe sandbox and reach the dashboard context.
+  // Publishers requiring cookies or full-site sign-in use the external/native browser.
+  frame.setAttribute('sandbox','allow-scripts allow-forms allow-popups allow-presentation');
   frame.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;
   const excerpt=make('div','nv-browser-excerpt');excerpt.hidden=true;
   const fallback=make('div','nv-browser-fallback');

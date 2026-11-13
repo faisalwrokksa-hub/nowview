@@ -21,3 +21,10 @@ test('remote native pages receive no dashboard bridge and local access stays dis
  assert.match(java,/MIXED_CONTENT_NEVER_ALLOW/);
  assert.match(java,/NewsBrowserActivity.safePage/);
 });
+
+test('scripted website previews run without same-origin sandbox privileges',()=>{
+ assert.match(source,/setAttribute\('sandbox','allow-scripts allow-forms allow-popups allow-presentation'\)/);
+ assert.doesNotMatch(source,/allow-same-origin/);
+ assert.match(source,/referrerPolicy='no-referrer'/);
+ assert.match(source,/external\.rel='noopener noreferrer'/);
+});
