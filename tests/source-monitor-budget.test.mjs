@@ -58,6 +58,7 @@ test('offline mode does not probe feeds, then resumes bounded checks on reconnec
  const {api,requests,navigator}=setup({offline:true});
  await settle();await settle();
  assert.equal(requests.length,0,'offline startup should not make news or health requests');
+ assert.equal(api.status('api','market'),'unknown');
  await api.checkNews(true);
  assert.equal(requests.length,0);
  navigator.onLine=true;
@@ -69,4 +70,9 @@ test('offline recovery updates are explicit and cloud health is not called while
  assert.match(code,/cloudHealth=null;mark\('api','market','unknown'/);
  assert.match(code,/if\(navigator\.onLine===false\)\{mark\('news',id,'unknown'/);
  assert.match(code,/checkNews\(\);checkCloud\(\);checkMarket\(\);/);
+});
+
+test('in-flight cloud replies cannot reintroduce a healthy badge after network loss',()=>{
+ assert.match(code,/if\(navigator\.onLine===false\)\{cloudHealth=null;render\(\);return;\}/);
+ assert.match(code,/if\(typeof navigator!=='undefined'&&navigator\.onLine===false\)\{/);
 });
