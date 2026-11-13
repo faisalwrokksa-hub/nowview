@@ -76,3 +76,12 @@ test('in-flight cloud replies cannot reintroduce a healthy badge after network l
  assert.match(code,/if\(navigator\.onLine===false\)\{cloudHealth=null;render\(\);return;\}/);
  assert.match(code,/if\(typeof navigator!=='undefined'&&navigator\.onLine===false\)\{/);
 });
+
+test('in-flight news replies are discarded when connectivity disappears before JSON resolves',()=>{
+ const start=code.indexOf("const data=await response.json()");
+ const end=code.indexOf("mark('news',id,'ok'",start);
+ assert.ok(start>0&&end>start);
+ const segment=code.slice(start,end);
+ assert.match(segment,/if\(navigator\.onLine===false\)\{mark\('news',id,'unknown'/);
+ assert.match(segment,/break;/);
+});
