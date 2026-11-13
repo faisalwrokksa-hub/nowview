@@ -70,5 +70,14 @@ export async function handleSourceHealth(env,now=Date.now()){
  if(!saved||!saved.updatedAt)return Response.json({error:'No scheduled source-health results yet'},{status:503,headers});
  const age=now-Date.parse(saved.updatedAt);
  if(!Number.isFinite(age)||age<0||age>MAX_AGE_MS)return Response.json({error:'Source-health snapshot expired'},{status:503,headers});
- return Response.json(saved,{headers});
+ // A fresh cron snapshot can still contain a much older IPTV directory result,
+ // because catalog checks are deliberately less frequent than news checks.
+ // Do not present an overdue catalog check as currently available.
+ const catalog=saved.iptv;
+ const checked=Date.parse(catalog?.checkedAt||'');
+ const catalogAge=now-checked;
+ const iptv=(!catalog||!Number.isFinite(catalogAge)||catalogAge<0||catalogAge>IPTV_INTERVAL_MS+MAX_AGE_MS)
+  ?{status:'unknown',detail:'Directory check overdue; individual channel playback unverified',checkedAt:Number.isFinite(checked)?catalog.checkedAt:null}
+  :catalog;
+ return Response.json({...saved,iptv},{headers});
 }
