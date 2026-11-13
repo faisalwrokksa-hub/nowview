@@ -38,3 +38,19 @@ test('confirmed history imports only bounded, validated HTTPS events',()=>{
  assert.equal(ctx.NewViewViewing.read().length,1);
  assert.equal(events.some(x=>x.type==='newview:viewing-history'),true);
 });
+
+test('remote history merges with local playback instead of erasing local successes',()=>{
+ const code=load('web/viewing-history.js'),stored=new Map();
+ const ctx={URL,Date,JSON,CustomEvent:class{constructor(type,args){this.type=type;this.detail=args.detail;}},localStorage:{getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v),removeItem:k=>stored.delete(k)},dispatchEvent(){}};
+ ctx.window=ctx;vm.runInNewContext(code,ctx);
+ const now=Date.now();
+ const local='https://local.example/live.m3u8',remote='https://remote.example/live.m3u8';
+ assert.equal(ctx.NewViewViewing.confirmed(local,'Local'),true);
+ assert.equal(ctx.NewViewViewing.importConfirmed([{url:remote,name:'Remote',at:now-1000}]),true);
+ assert.deepEqual(Array.from(ctx.NewViewViewing.read(),x=>x.url),[local,remote]);
+ assert.equal(ctx.NewViewViewing.importConfirmed([]),true);
+ assert.equal(ctx.NewViewViewing.read().length,2);
+ // A stale remote record must not replace a newer local record for the same URL.
+ assert.equal(ctx.NewViewViewing.importConfirmed([{url:local,name:'Old copy',at:now-50000}]),true);
+ assert.equal(ctx.NewViewViewing.read().find(x=>x.url===local).name,'Local');
+});
