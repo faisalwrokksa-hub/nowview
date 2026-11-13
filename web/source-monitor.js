@@ -8,7 +8,7 @@
  const FEEDS=Object.freeze(['fed','sec','stocktwits','bbc','npr','guardian','aljazeera','dw','pbs']);
  const native=typeof location!=='undefined'&&location.protocol==='file:';
  const NEWS_BATCH_SIZE=3; // Sweep all nine publishers across three 2-minute cycles.
- const states=new Map(),journal=[];const MAX_LOG=60,FAIL_TTL=30*60000;
+ const states=new Map(),journal=[];const MAX_LOG=60,MAX_STATES=500,FAIL_TTL=30*60000;
  const OK_TTL=Object.freeze({news:10*60000,iptv:30*60000,api:150000});
  let newsTimer=null,marketTimer=null,iptvTimer=null,active=false,checking=false,cloudHealth=null,nextFeedIndex=0;
  function read(){
@@ -23,7 +23,11 @@
   if(!['ok','failed','unknown'].includes(status)||!['news','iptv','api'].includes(kind)||typeof id!=='string'||id.length>2048)return;
   const key=kind+':'+id,old=states.get(key),now=Date.now();
   const next={kind,id,status,checkedAt:now,detail:String(detail||'').slice(0,160)};
+  // Bound per-channel health retained during frequent playlist switches.
+  // Map order is updated so the least recently checked entry is discarded first.
+  if(old)states.delete(key);
   states.set(key,next);
+  if(states.size>MAX_STATES)states.delete(states.keys().next().value);
   if(old?.status!==status){
    journal.unshift({kind,id,status,time:now,detail:next.detail});
    if(journal.length>MAX_LOG)journal.length=MAX_LOG;
