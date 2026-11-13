@@ -19,7 +19,8 @@
   if(!safe(url))return false;
   const entries=read().filter(x=>x.url!==url);
   entries.unshift({url,name:String(name||'Live TV').slice(0,90),at:Date.now()});
-  try{localStorage.setItem(KEY,JSON.stringify(entries.slice(0,MAX)));}catch{}
+  // A playback event is not persisted unless the device actually accepted it.
+  try{localStorage.setItem(KEY,JSON.stringify(entries.slice(0,MAX)));}catch{return false;}
   try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{url,confirmed:true}}));}catch{}
   return true;
  }
