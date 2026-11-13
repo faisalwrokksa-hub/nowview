@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const code=readFileSync(new URL('../web/source-monitor.js',import.meta.url),'utf8');
 
-function setup(){
+function setup({offline=false}={}){
  const callbacks=new Map(),requests=[];
  const window={addEventListener(){},dispatchEvent(){}};
  const document={
@@ -18,12 +18,13 @@ function setup(){
   if(String(url)==='/api/source-health')return {ok:false,status:503};
   return {ok:true,json:async()=>({items:[{url:'https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm'}]})};
  };
- const ctx={window,document,location:{protocol:'https:'},navigator:{onLine:true},
+ const navigator={onLine:!offline};
+ const ctx={window,document,location:{protocol:'https:'},navigator,
   localStorage:{getItem:()=>null,setItem(){}},fetch,Date,Map,Set,JSON,AbortController,CustomEvent:class{constructor(name,options){this.detail=options?.detail;this.name=name;}},
   setTimeout,clearTimeout,setInterval:()=>1,clearInterval:()=>{}};
  vm.runInNewContext(code,ctx);
  callbacks.get('DOMContentLoaded')();
- return {api:window.NewViewSourceMonitor,requests};
+ return {api:window.NewViewSourceMonitor,requests,navigator};
 }
 const urls=req=>req.filter(x=>x.startsWith('/api/news?source=')).map(x=>new URL(x,'https://newview.example').searchParams.get('source'));
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
@@ -51,4 +52,27 @@ test('explicit health check may scan all feeds; regular monitoring retains bound
  assert.equal(api.defaults.iptvMs,10800000);
  assert.match(code,/News batch every 2m \(all feeds ~6m\)/);
  assert.match(code,/refresh\.addEventListener\('click',\(\)=>\{checkNews\(true\)/);
+});
+
+test('offline mode does not probe feeds, then resumes bounded checks on reconnect',async()=>{
+ const {api,requests,navigator}=setup({offline:true});
+ await settle();await settle();
+ assert.equal(requests.length,0,'offline startup should not make news or health requests');
+ assert.equal(api.status('api','market'),'unknown');
+ await api.checkNews(true);
+ assert.equal(requests.length,0);
+ navigator.onLine=true;
+ await api.checkNews();
+ assert.deepEqual(urls(requests),['fed','sec','stocktwits']);
+});
+test('offline recovery updates are explicit and cloud health is not called while offline',()=>{
+ assert.match(code,/Device offline · source checks paused/);
+ assert.match(code,/cloudHealth=null;mark\('api','market','unknown'/);
+ assert.match(code,/if\(navigator\.onLine===false\)\{mark\('news',id,'unknown'/);
+ assert.match(code,/checkNews\(\);checkCloud\(\);checkMarket\(\);/);
+});
+
+test('in-flight cloud replies cannot reintroduce a healthy badge after network loss',()=>{
+ assert.match(code,/if\(navigator\.onLine===false\)\{cloudHealth=null;render\(\);return;\}/);
+ assert.match(code,/if\(typeof navigator!=='undefined'&&navigator\.onLine===false\)\{/);
 });
