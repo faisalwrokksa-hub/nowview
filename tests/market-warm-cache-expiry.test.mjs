@@ -30,3 +30,25 @@ test('warm chart cache never returns a trade that crossed the 24-hour expiry', a
   Date.now=realNow;
  }
 });
+
+test('a rewound device clock does not reuse a future-timestamped cached quote',async()=>{
+ const originalFetch=globalThis.fetch,originalNow=Date.now;
+ const start=Date.UTC(2026,10,13,12,0,0),pair='BTCUSDT';
+ let requests=0,fail=false;
+ const payloads={
+  exchangeInfo:{symbols:[{symbol:pair,baseAsset:'BTC',quoteAsset:'USDT',status:'TRADING'}]},
+  klines:[[start-60000,'100','110','90','105','1','0']],
+  'ticker/24hr':{symbol:pair,priceChangePercent:'1'},
+  trades:[{price:'105',time:start-1000}]
+ };
+ try{
+  Date.now=()=>start;
+  globalThis.fetch=async url=>{requests++;if(fail)throw Error('offline');return {ok:true,status:200,json:async()=>payloads[new URL(url).pathname.replace('/api/v3/','')]};};
+  const first=await getChart('BTC','1D');
+  assert.equal(first.price,105);
+  fail=true;
+  Date.now=()=>start-120000;
+  await assert.rejects(()=>getChart('BTC','1D'),/offline/);
+  assert.ok(requests>4,'must attempt a refresh rather than reuse future cache');
+ }finally{globalThis.fetch=originalFetch;Date.now=originalNow;}
+});
