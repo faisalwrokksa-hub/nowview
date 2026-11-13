@@ -16,3 +16,18 @@ test('HLS and MP4 extensions use a literal-dot regex, not escaped backslash',()=
  assert.equal(re.test('/video/sample.mp4'),true);
  assert.equal(re.test('/live/channelxm3u8'),false);
 });
+
+test('buffering after confirmed playback has a bounded recovery watchdog',()=>{
+ const start=source.indexOf("inlineVideo.addEventListener('waiting'");
+ const end=source.indexOf("inlineStop.addEventListener",start);
+ assert.ok(start>0&&end>start);
+ const waiting=source.slice(start,end);
+ assert.match(waiting,/clearInlineWatchdog\(\)/);
+ assert.match(waiting,/inlineWatchdog=setTimeout\(\(\)=>\{/);
+ assert.match(waiting,/attempt!==inlineAttempt\|\|inlineSource!==url/);
+ assert.match(waiting,/inlineVideo\.paused\|\|inlineVideo\.readyState>=3/);
+ assert.match(waiting,/stopInlinePlayback\('Stream buffering timed out/);
+ assert.match(waiting,/mark\?\.\('iptv',url,'unknown'/);
+ assert.match(waiting,/\},20000\)/);
+ assert.doesNotMatch(waiting,/mark\?\.\('iptv',url,'failed'/);
+});
