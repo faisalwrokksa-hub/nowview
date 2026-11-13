@@ -120,7 +120,18 @@
   if(!window.NewViewCast.playIPTV(url))inlineStatus.textContent='Selected stream is not compatible with the floating player.';
  });
  const FAV_KEY='newview.media.channel-favorites.v1';
- function readFavorites(){try{const value=JSON.parse(localStorage.getItem(FAV_KEY)||'[]');return new Set(Array.isArray(value)?value.filter(x=>typeof x==='string'&&x.length<2048&&x.startsWith('https://')).slice(0,200):[]);}catch{return new Set();}}
+ function safeFavoriteUrl(value){
+  if(typeof value!=='string'||value.length>2048)return false;
+  try{
+   const parsed=new URL(value);
+   return parsed.protocol==='https:'&&!parsed.username&&!parsed.password&&!parsed.port&&
+    parsed.hostname.includes('.')&&parsed.href===value;
+  }catch{return false;}
+ }
+ function readFavorites(){try{
+  const value=JSON.parse(localStorage.getItem(FAV_KEY)||'[]');
+  return new Set(Array.isArray(value)?value.filter(safeFavoriteUrl).slice(0,200):[]);
+ }catch{return new Set();}}
  let favorites=readFavorites();
  function saveFavorites(){try{localStorage.setItem(FAV_KEY,JSON.stringify([...favorites].slice(0,200)));return true;}catch{return false;}}
  const favorite=document.createElement('button');favorite.type='button';favorite.textContent='Save favorite';favorite.disabled=true;
@@ -211,7 +222,7 @@
   else{open.removeAttribute('href');status.textContent=allChannels.length?allChannels.length+' loaded · 0 matching. Choose All channels, disable HTTPS-only, or clear search.':'No channels loaded. Try refresh.';}
  }
  list.addEventListener('change',()=>{stopInline();if(list.value){open.href=list.value;open.hidden=false;}else{open.hidden=true;open.removeAttribute('href');}inlinePlay.disabled=!list.value;playChannel.disabled=!list.value;favorite.disabled=!list.value;retryFailed.disabled=!list.value;floatChannel.disabled=!list.value;favorite.textContent=favorites.has(list.value)?'Remove favorite':'Save favorite';});
- favorite.addEventListener('click',()=>{const url=list.value;if(!url)return;if(!url.startsWith('https://')){status.textContent='Only HTTPS channel URLs can be saved as favorites. Enable HTTPS-only or select a secure stream.';return;}const previous=new Set(favorites);if(favorites.has(url))favorites.delete(url);else if(favorites.size<200)favorites.add(url);else{status.textContent='Maximum 200 favorite channels.';return;}if(!saveFavorites()){favorites=previous;status.textContent='Favorites could not be saved on this device. Your previous favorites are unchanged.';return;}renderChannels();});
+ favorite.addEventListener('click',()=>{const url=list.value;if(!url)return;if(!safeFavoriteUrl(url)){status.textContent='Only valid HTTPS channel URLs without embedded credentials or custom ports can be saved. Select another stream.';return;}const previous=new Set(favorites);if(favorites.has(url))favorites.delete(url);else if(favorites.size<200)favorites.add(url);else{status.textContent='Maximum 200 favorite channels.';return;}if(!saveFavorites()){favorites=previous;status.textContent='Favorites could not be saved on this device. Your previous favorites are unchanged.';return;}renderChannels();});
  favoritesOnly.addEventListener('change',renderChannels);
  search.addEventListener('input',renderChannels);
  hideFailed.addEventListener('change',renderChannels);
