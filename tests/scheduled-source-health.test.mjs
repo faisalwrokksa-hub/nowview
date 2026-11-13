@@ -11,6 +11,7 @@ const kv=()=>{
   async put(key,value){values.set(key,value);}
  };
 };
+const healthyFeeds=now=>Object.fromEntries(Object.keys(NEWS_SOURCES).map(id=>[id,{status:'ok',detail:'Source linked',checkedAt:new Date(now).toISOString()}]));
 const sample=Object.fromEntries(Object.entries(NEWS_SOURCES).map(([id,x])=>[x.url,
  '<rss><channel><item><title>Public bulletin</title><link>'+
  (x.homepage||'https://'+x.host+'/news')+
@@ -79,7 +80,7 @@ test('stopped or delayed cron cannot advertise old feed status as live',async()=
  const env={NEWVIEW_SOURCE_HEALTH:kv()};
  const now=Date.UTC(2026,10,13,12,0,0);
  await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify({
-  version:1,updatedAt:new Date(now).toISOString(),feeds:{},iptv:null
+  version:1,updatedAt:new Date(now).toISOString(),feeds:healthyFeeds(now),iptv:null
  }));
  assert.equal((await handleSourceHealth(env,now+599999)).status,200);
  const expired=await handleSourceHealth(env,now+600001);
@@ -89,7 +90,7 @@ test('stopped or delayed cron cannot advertise old feed status as live',async()=
 
 test('fresh cron response cannot mask an overdue IPTV directory check',async()=>{
  const env={NEWVIEW_SOURCE_HEALTH:kv()},now=Date.UTC(2026,10,13,12,0,0);
- const snapshot={version:1,updatedAt:new Date(now).toISOString(),feeds:{},
+ const snapshot={version:1,updatedAt:new Date(now).toISOString(),feeds:healthyFeeds(now),
   iptv:{status:'ok',detail:'Directory reachable; individual channel playback unverified',
    checkedAt:new Date(now-4*60*60*1000).toISOString()}};
  await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify(snapshot));
@@ -104,7 +105,7 @@ test('fresh cron response cannot mask an overdue IPTV directory check',async()=>
 
 test('malformed or non-allowlisted KV feed status fails closed',async()=>{
  const env={NEWVIEW_SOURCE_HEALTH:kv()},now=Date.UTC(2026,10,13,12,0,0);
- const base={version:1,updatedAt:new Date(now).toISOString(),feeds:{},iptv:null};
+ const base={version:1,updatedAt:new Date(now).toISOString(),feeds:healthyFeeds(now),iptv:null};
  for(const feeds of [
   null,[],{'unapproved-feed':{status:'ok',checkedAt:new Date(now).toISOString()}},
   {fed:{status:'verified',checkedAt:new Date(now).toISOString()}},
@@ -116,7 +117,18 @@ test('malformed or non-allowlisted KV feed status fails closed',async()=>{
   assert.match((await response.json()).error,/invalid/);
  }
  await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify({...base,feeds:{
-  fed:{status:'failed',checkedAt:new Date(now).toISOString()}
+  ...healthyFeeds(now),fed:{status:'failed',checkedAt:new Date(now).toISOString()}
  }}));
  assert.equal((await handleSourceHealth(env,now)).status,200);
+});
+
+test('public health rejects missing publishers and stale per-feed checks even if cron timestamp is fresh',async()=>{
+ const env={NEWVIEW_SOURCE_HEALTH:kv()},now=Date.UTC(2026,10,13,12,0,0),feeds=healthyFeeds(now);
+ delete feeds.fed;
+ await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify({updatedAt:new Date(now).toISOString(),feeds}));
+ assert.equal((await handleSourceHealth(env,now)).status,503);
+ const overdue=healthyFeeds(now);
+ overdue.fed.checkedAt=new Date(now-11*60*1000).toISOString();
+ await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify({updatedAt:new Date(now).toISOString(),feeds:overdue}));
+ assert.equal((await handleSourceHealth(env,now)).status,503);
 });
