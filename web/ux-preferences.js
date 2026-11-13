@@ -18,9 +18,13 @@
  }
  let state=load();
  function save(next){
-  state=normalize({...state,...next});apply(state);
-  try{localStorage.setItem(KEY,JSON.stringify(state));}catch{}
+  const candidate=normalize({...state,...next});
+  // Do not present a setting as saved if device storage rejected the write.
+  try{localStorage.setItem(KEY,JSON.stringify(candidate));}
+  catch{return false;}
+  state=candidate;apply(state);
   root.dispatchEvent(new CustomEvent('newview:ux-preferences',{detail:{...state}}));
+  return true;
  }
  function install(){
   if(document.getElementById('nv-ux-controls'))return;
@@ -30,19 +34,26 @@
   const panel=document.createElement('section');panel.id='nv-ux-controls';panel.className='shell-card nv-ux-controls';
   panel.setAttribute('aria-label','Display and navigation preferences');
   const heading=document.createElement('h3');heading.textContent='Display & navigation';panel.append(heading);
+  const saveStatus=document.createElement('p');saveStatus.id='nv-ux-save-status';saveStatus.setAttribute('aria-live','polite');
+  panel.append(saveStatus);
   const description=document.createElement('p');description.textContent='These preferences stay on this device. They do not change account settings.';panel.append(description);
   function field(labelText,key,options){
    const label=document.createElement('label');label.textContent=labelText;
    const select=document.createElement('select');select.setAttribute('aria-label',labelText);
    for(const [value,title] of options){const option=document.createElement('option');option.value=value;option.textContent=title;select.append(option);}
-   select.value=state[key];select.addEventListener('change',()=>save({[key]:select.value}));
+   select.value=state[key];select.addEventListener('change',()=>{
+    if(!save({[key]:select.value})){
+     select.value=state[key];
+     saveStatus.textContent='Device storage is unavailable. This change was not saved.';
+    }else saveStatus.textContent='';
+   });
    label.append(select);panel.append(label);return select;
   }
   const density=field('Layout spacing','density',[['comfortable','Comfortable'],['compact','Compact']]);
   const motion=field('Motion','motion',[['system','Follow device'],['reduced','Reduce animation']]);
   const focus=field('Focus indicator','focus',[['visible','Standard'],['strong','High visibility']]);
   const reset=document.createElement('button');reset.type='button';reset.textContent='Reset display preferences';
-  reset.addEventListener('click',()=>{save(defaults);density.value=state.density;motion.value=state.motion;focus.value=state.focus;});panel.append(reset);
+  reset.addEventListener('click',()=>{if(!save(defaults))saveStatus.textContent='Device storage is unavailable. Preferences were not reset.';else saveStatus.textContent='';density.value=state.density;motion.value=state.motion;focus.value=state.focus;});panel.append(reset);
   const exportButton=document.createElement('button');exportButton.type='button';exportButton.textContent='Export preferences';
   exportButton.addEventListener('click',()=>{const data={version:1,display:state,homeShortcuts:[],shortcutCount:3};try{const raw=localStorage.getItem('newview.home.boxes.v2');const loaded=raw?JSON.parse(raw):[];const allowedShortcuts=['markets','iptv','youtube','news','devices'];if(Array.isArray(loaded))data.homeShortcuts=[...new Set(loaded.filter(x=>allowedShortcuts.includes(x)))].slice(0,4);const count=Number(localStorage.getItem('newview.home.box-count.v2'));if(Number.isInteger(count)&&count>=1&&count<=4)data.shortcutCount=count;}catch{}const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='newview-preferences.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});panel.append(exportButton);
   const importLabel=document.createElement('label');importLabel.textContent='Restore preferences from JSON';
