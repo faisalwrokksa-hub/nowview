@@ -52,7 +52,7 @@ if(process.env.NEWVIEW_REQUIRE_SOURCE_HEALTH==='1'){
   const health=await response.json();
   const age=Date.now()-Date.parse(health.updatedAt);
   assert.ok(Number.isFinite(age)&&age>=0&&age<=10*60*1000,'Scheduled health snapshot must be recent');
-  assert.ok(health.feeds&&typeof health.feeds==='object'&&Object.keys(health.feeds).length===6,'Six allowlisted feeds must be checked');
+  assert.ok(health.feeds&&typeof health.feeds==='object'&&Object.keys(health.feeds).length===9,'Nine allowlisted feeds must be checked');
   assert.ok(health.iptv&&['ok','failed'].includes(health.iptv.status),'IPTV directory must have been checked');
   console.log('PASS /api/source-health fresh Cron snapshot');
  }catch(error){failures.push('/api/source-health: '+error.message);console.error('FAIL /api/source-health',error.message);}
