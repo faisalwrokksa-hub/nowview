@@ -19,11 +19,17 @@
   if(!safe(url))return false;
   const entries=read().filter(x=>x.url!==url);
   entries.unshift({url,name:String(name||'Live TV').slice(0,90),at:Date.now()});
-  try{localStorage.setItem(KEY,JSON.stringify(entries.slice(0,MAX)));}catch{}
+  // A playback event is not persisted unless the device actually accepted it.
+  try{localStorage.setItem(KEY,JSON.stringify(entries.slice(0,MAX)));}catch{return false;}
   try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{url,confirmed:true}}));}catch{}
   return true;
  }
- function clear(){try{localStorage.removeItem(KEY);}catch{}try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{cleared:true}}));}catch{}}
+ function clear(){
+  // Never claim a privacy-sensitive deletion succeeded if local storage refused it.
+  try{localStorage.removeItem(KEY);}catch{return false;}
+  try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{cleared:true}}));}catch{}
+  return true;
+ }
  function importConfirmed(entries){
   if(!Array.isArray(entries)||entries.length>8)return false;
   const now=Date.now(),seen=new Set(),accepted=[];
