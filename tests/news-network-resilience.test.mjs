@@ -102,3 +102,21 @@ test('source-specific cache cannot be mislabelled current when a refresh fails',
  assert.equal(h.marks.at(-1)[1],'fed');
  assert.equal(h.marks.at(-1)[2],'unknown');
 });
+
+test('successful headline response with stale or future fetch timestamp never reports healthy',async()=>{
+ const fed=article('Fed','https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm');
+ const h=harness([
+  {items:[fed],fetchedAt:new Date(Date.now()-7200000).toISOString()},
+  {items:[fed],fetchedAt:new Date(Date.now()+7200000).toISOString()},
+  {items:[fed],fetchedAt:new Date().toISOString()}
+ ]);
+ await h.refresh();
+ assert.equal(h.marks.at(-1)[2],'unknown');
+ assert.match(h.elements['news-status'].textContent,/older than one hour/);
+ await h.refresh();
+ assert.equal(h.marks.at(-1)[2],'unknown');
+ assert.match(h.elements['news-status'].textContent,/future-dated/);
+ await h.refresh();
+ assert.equal(h.marks.at(-1)[2],'ok');
+ assert.match(h.elements['news-status'].textContent,/Recently fetched/);
+});
