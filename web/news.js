@@ -138,8 +138,8 @@
    const fetched=new Date(feed.fetchedAt);
    const age=Date.now()-fetched.getTime();
    const recent=Number.isFinite(age)&&age>=0&&age<=3600000;
-   window.NewViewSourceMonitor?.mark?.('news',sourceId,recent?'ok':'unknown',
-    recent?lastItems.length+' valid recently fetched headlines':'Publisher feed timestamp is stale, future-dated, or unavailable');
+   if(recent)window.NewViewSourceMonitor?.mark?.('news',sourceId,'ok',lastItems.length+' valid recently fetched headlines');
+   else window.NewViewSourceMonitor?.mark?.('news',sourceId,'unknown','Publisher feed timestamp is stale, future-dated, or unavailable');
    renderItems();
    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:sourceId,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
    const freshness=recent?'Recently fetched':'Fetch time unavailable, future-dated, or older than one hour';
