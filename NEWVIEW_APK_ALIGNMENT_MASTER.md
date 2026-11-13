@@ -1,5 +1,7 @@
 # NEWVIEW — MASTER REPOSITORY ALIGNMENT INSTRUCTIONS
 
+> **2026-11-13 current-code reconciliation:** This document records the historical `NewView-Home-1.0.260-signed.apk` comparison and an earlier five-tab target, **not** the current web navigation or verified Android release contract. Current merged dashboard UI uses **Home, Watch, Discover, Settings** (see PR #182 and `web/simplified-ui.js`). Older MyView/Markets/Business/Watch & News/Social descriptions below are preserved for APK provenance only. Do not restore five tabs or change Android package/signing identity solely from this archival specification. Final Android identity, device screenshots, migration and in-place upgrade remain gated by the release acceptance matrix.
+
 **Baseline:** uploaded `NewHome Apk.zip` containing `NewView-Home-1.0.260-signed.apk`. The APK is the currently working **user-reported** Android installation; successful device behavior is not independently verified.
 
 ## Non-negotiable identity and migration
@@ -48,7 +50,7 @@ assets/THIRD-PARTY-NOTICES.txt
 ```
 The legacy repository does not include `home.css`, `home.js`, `refined.css`, `rss.js`, `topics.js`, `watch.js` or `tiger.png` in its `web/` tree. Do not claim source alignment until these assets are incorporated and their exact hashes verified.
 
-## Approved five-tab experience
+## Historical five-tab APK experience (not the current four-section web navigation)
 1. **MyView:** personalized, editable overview and locally persisted widgets.
 2. **Markets:** actual exchange instruments and quotes, line/candlestick chart, EMA20/50, Wilder RSI14, closed-candle alerts, freshness labels.
 3. **Business:** isolated embedded `https://app.theepmo.com/` portal with safe authentication; local CSV analytics remain an optional tool.
@@ -60,7 +62,7 @@ The legacy repository does not include `home.css`, `home.js`, `refined.css`, `rs
 - Riyadh clock/date top-left; up to three attributed headlines across top.
 - Network, Apps, Settings top-right.
 - MR7 TV, Video and Live TV shortcuts below quick controls.
-- Persistent five-tab workspace navigation below header.
+- Historical APK baseline: five-tab workspace navigation below header; current navigation must be validated independently on hardware.
 - Equal left dashboard and right video panels in normal viewing mode.
 - Chart expand/restore takes available space; where provider permits, video can remain audio-only without spawning a second player.
 - No large bottom dock; no dependence on Plume, NewPipe, SmartTube, TizenTube, Automate or accessibility overlays.
@@ -82,7 +84,7 @@ The legacy repository does not include `home.css`, `home.js`, `refined.css`, `rs
 | A. APK inventory | Manifest/package/version, signing fingerprint, asset list and SHA-256 hashes |
 | B. Source recovery | Original source archive received; exact asset comparison against APK |
 | C. Reproducible build | Build produces equivalent app features from tracked source |
-| D. UI verification | Physical projector screenshots: header, five tabs, split view, expanded chart |
+| D. UI verification | Physical projector screenshots: header, agreed current navigation, split view, expanded chart |
 | E. Functional verification | D-pad, video switching, RSS, market alerts, portal login, offline recovery |
 | F. Signing and migration | Certificate continuity and safe upgrade test |
 | G. Release | New signed APK, checksum, test matrix and rollback procedure |
