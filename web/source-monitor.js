@@ -44,7 +44,9 @@
  function checkMarket(){
   // This checks market quote freshness, not an extra Binance REST request.
   const snapshot=lastMarket;
-  if(snapshot&&Number.isFinite(snapshot.quoteTime)&&snapshot.quoteTime*1000<=Date.now()+300000&&Date.now()-snapshot.quoteTime*1000<120000)
+  // Slight clock skew is tolerated, but a quote dated minutes in the future
+  // must not be represented as fresh market data.
+  if(snapshot&&Number.isFinite(snapshot.quoteTime)&&snapshot.quoteTime*1000>0&&snapshot.quoteTime*1000<=Date.now()+5000&&Date.now()-snapshot.quoteTime*1000<120000)
     mark('api','market','ok','Recent Binance-source quote observed');
   else mark('api','market','unknown','No fresh verified quote observed; availability unconfirmed');
  }
@@ -160,6 +162,6 @@
   root.addEventListener?.('online',()=>{if(settings.autoCheck)checkNews();});
   root.addEventListener?.('pagehide',()=>{active=false;for(const timer of [newsTimer,marketTimer,iptvTimer])if(timer)clearInterval(timer);});
  }
- root.NewViewSourceMonitor=Object.freeze({defaults:PROFILE,feeds:FEEDS,getSettings:()=>({...settings}),status,hide,mark,getEntries,checkNews,notify});
+ root.NewViewSourceMonitor=Object.freeze({defaults:PROFILE,feeds:FEEDS,getSettings:()=>({...settings}),status,hide,mark,getEntries,checkNews,checkMarket,notify});
  if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();}
 })(typeof window!=='undefined'?window:globalThis);
