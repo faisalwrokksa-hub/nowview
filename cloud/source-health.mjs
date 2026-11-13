@@ -4,7 +4,7 @@ const KEY='source-health:v1';
 const IPTV_KEY='source-health:iptv:last-check';
 const IPTV_URL='https://iptv-org.github.io/iptv/index.m3u';
 const IPTV_INTERVAL_MS=3*60*60*1000;
-const MAX_AGE_MS=7*24*60*60*1000;
+const MAX_AGE_MS=10*60*1000; // Cron is every two minutes; older snapshots are not live health.
 const headers={'Cache-Control':'no-store','Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff'};
 
 const enabled=env=>typeof env?.NEWVIEW_SOURCE_HEALTH?.get==='function'&&typeof env.NEWVIEW_SOURCE_HEALTH.put==='function';
