@@ -135,12 +135,14 @@
    if(!verified.length)throw Error('No valid source-linked articles');
    lastItems=verified;
    cacheBySource.set(sourceId,{savedAt:Date.now(),items:verified.slice()});
-   window.NewViewSourceMonitor?.mark?.('news',sourceId,'ok',lastItems.length+' valid headlines');
+   const fetched=new Date(feed.fetchedAt);
+   const age=Date.now()-fetched.getTime();
+   const recent=Number.isFinite(age)&&age>=0&&age<=3600000;
+   window.NewViewSourceMonitor?.mark?.('news',sourceId,recent?'ok':'unknown',
+    recent?lastItems.length+' valid recently fetched headlines':'Publisher feed timestamp is stale, future-dated, or unavailable');
    renderItems();
    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('newview:news',{detail:{source:sourceId,count:container.children.length,headline:container.querySelector('.news-link')?.textContent||null}}));
-   const fetched=new Date(typeof feed.fetchedAt==='number'?feed.fetchedAt:feed.fetchedAt);
-   const age=Date.now()-fetched.getTime();
-   const freshness=Number.isFinite(age)&&age>=0&&age<=3600000?'Recently fetched':'Fetch time unavailable or older than one hour';
+   const freshness=recent?'Recently fetched':'Fetch time unavailable, future-dated, or older than one hour';
    lastFetchLabel=freshness+' · fetched '+(Number.isFinite(fetched.getTime())?fetched.toLocaleString():'unknown');renderItems();
   }catch(err){
    if(current!==controller)return;
