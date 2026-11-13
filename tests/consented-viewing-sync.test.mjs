@@ -54,3 +54,22 @@ test('remote history merges with local playback instead of erasing local success
  assert.equal(ctx.NewViewViewing.importConfirmed([{url:local,name:'Old copy',at:now-50000}]),true);
  assert.equal(ctx.NewViewViewing.read().find(x=>x.url===local).name,'Local');
 });
+
+test('confirmed viewing is not reported as saved when local storage rejects a write',()=>{
+ const events=[],stored=new Map();
+ let reject=true;
+ const ctx={URL,Date,JSON,CustomEvent:class{constructor(type,args){this.type=type;this.detail=args.detail;}},localStorage:{
+  getItem:k=>stored.get(k)||null,
+  setItem:(k,v)=>{if(reject)throw Error('Quota exceeded');stored.set(k,v);},
+  removeItem:k=>stored.delete(k)
+ },dispatchEvent:e=>events.push(e)};
+ ctx.window=ctx;vm.runInNewContext(load('web/viewing-history.js'),ctx);
+ const url='https://media.example.org/live.m3u8';
+ assert.equal(ctx.NewViewViewing.confirmed(url,'News'),false);
+ assert.equal(ctx.NewViewViewing.read().length,0);
+ assert.equal(events.length,0);
+ reject=false;
+ assert.equal(ctx.NewViewViewing.confirmed(url,'News'),true);
+ assert.equal(ctx.NewViewViewing.read().length,1);
+ assert.equal(events.length,1);
+});
