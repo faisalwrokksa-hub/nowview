@@ -68,6 +68,14 @@ export async function handleSourceHealth(env,now=Date.now()){
  try{saved=await env.NEWVIEW_SOURCE_HEALTH.get(KEY,'json');}
  catch{return Response.json({error:'Source monitoring temporarily unavailable'},{status:503,headers});}
  if(!saved||!saved.updatedAt)return Response.json({error:'No scheduled source-health results yet'},{status:503,headers});
+ // Treat corrupt or schema-incompatible KV data as unavailable, not as healthy.
+ // Only fixed allowlisted feed IDs and known status values may be published.
+ const statuses=new Set(['ok','failed','unknown']);
+ const feeds=saved.feeds;
+ if(!feeds||typeof feeds!=='object'||Array.isArray(feeds)||
+    Object.keys(feeds).some(id=>!Object.hasOwn(NEWS_SOURCES,id)||!feeds[id]||
+      !statuses.has(feeds[id].status)||!Number.isFinite(Date.parse(feeds[id].checkedAt||''))))return Response.json(
+  {error:'Source-health snapshot invalid'},{status:503,headers});
  const age=now-Date.parse(saved.updatedAt);
  if(!Number.isFinite(age)||age<0||age>MAX_AGE_MS)return Response.json({error:'Source-health snapshot expired'},{status:503,headers});
  // A fresh cron snapshot can still contain a much older IPTV directory result,
