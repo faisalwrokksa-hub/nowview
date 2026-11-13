@@ -80,6 +80,9 @@
      const response=await fetch('/api/news?source='+encodeURIComponent(id),{cache:'no-store',signal:controller.signal});
      if(!response.ok)throw Error('HTTP '+response.status);
      const data=await response.json();
+     // Connectivity may drop while a request is in flight; never turn its
+     // late response into a current source-health success while offline.
+     if(navigator.onLine===false){mark('news',id,'unknown','Device offline; feed reachability not checked');break;}
      if(!Array.isArray(data.items)||!data.items.length)throw Error('No current articles returned');
      mark('news',id,'ok',data.items.length+' source-linked articles');
      const previous=seenNews.get(id)||new Set();
