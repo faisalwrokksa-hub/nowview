@@ -100,3 +100,22 @@ test('fresh cron response cannot mask an overdue IPTV directory check',async()=>
  const fresh=await handleSourceHealth(env,now);
  assert.equal((await fresh.json()).iptv.status,'ok');
 });
+
+test('malformed or non-allowlisted KV feed status fails closed',async()=>{
+ const env={NEWVIEW_SOURCE_HEALTH:kv()},now=Date.UTC(2026,10,13,12,0,0);
+ const base={version:1,updatedAt:new Date(now).toISOString(),feeds:{},iptv:null};
+ for(const feeds of [
+  null,[],{'unapproved-feed':{status:'ok',checkedAt:new Date(now).toISOString()}},
+  {fed:{status:'verified',checkedAt:new Date(now).toISOString()}},
+  {fed:{status:'ok',checkedAt:'not-a-date'}}
+ ]){
+  await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify({...base,feeds}));
+  const response=await handleSourceHealth(env,now);
+  assert.equal(response.status,503,JSON.stringify(feeds));
+  assert.match((await response.json()).error,/invalid/);
+ }
+ await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify({...base,feeds:{
+  fed:{status:'failed',checkedAt:new Date(now).toISOString()}
+ }}));
+ assert.equal((await handleSourceHealth(env,now)).status,200);
+});
