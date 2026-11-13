@@ -73,3 +73,15 @@ test('release smoke checks exact live revision and real cloud monitoring only wh
  assert.match(smoke,/\/api\/source-health/);
  assert.match(smoke,/age<=10\*60\*1000/);
 });
+
+test('stopped or delayed cron cannot advertise old feed status as live',async()=>{
+ const env={NEWVIEW_SOURCE_HEALTH:kv()};
+ const now=Date.UTC(2026,10,13,12,0,0);
+ await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify({
+  version:1,updatedAt:new Date(now).toISOString(),feeds:{},iptv:null
+ }));
+ assert.equal((await handleSourceHealth(env,now+599999)).status,200);
+ const expired=await handleSourceHealth(env,now+600001);
+ assert.equal(expired.status,503);
+ assert.match(JSON.stringify(await expired.json()),/expired/);
+});
