@@ -32,8 +32,16 @@
    seen.add(item.url);accepted.push({url:item.url,name:String(item.name||'Live TV').slice(0,90),at:item.at});
   }
   if(entries.length&&!accepted.length)return false;
-  // The user explicitly opted in to the encrypted room and chose its layout.
-  try{localStorage.setItem(KEY,JSON.stringify(accepted.slice(0,8)));}catch{return false;}
+  // A received room snapshot is not an instruction to erase this device's
+  // confirmed history. Merge by URL, prefer the most recent verified playback,
+  // and retain the same local size and age limits as normal recording.
+  const merged=[...accepted,...read()].sort((a,b)=>b.at-a.at);
+  const seenUrls=new Set();
+  const retained=merged.filter(item=>{
+   if(seenUrls.has(item.url))return false;
+   seenUrls.add(item.url);return true;
+  }).slice(0,MAX);
+  try{localStorage.setItem(KEY,JSON.stringify(retained));}catch{return false;}
   try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{synced:true}}));}catch{}
   return true;
  }
