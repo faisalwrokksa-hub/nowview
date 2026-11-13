@@ -70,6 +70,8 @@ export async function handleSourceHealth(env,now=Date.now()){
  if(!saved||!saved.updatedAt)return Response.json({error:'No scheduled source-health results yet'},{status:503,headers});
  // Treat corrupt or schema-incompatible KV data as unavailable, not as healthy.
  // Only fixed allowlisted feed IDs and known status values may be published.
+ const age=now-Date.parse(saved.updatedAt);
+ if(!Number.isFinite(age)||age<0||age>MAX_AGE_MS)return Response.json({error:'Source-health snapshot expired'},{status:503,headers});
  const statuses=new Set(['ok','failed','unknown']);
  const feeds=saved.feeds;
  if(!feeds||typeof feeds!=='object'||Array.isArray(feeds)||
@@ -78,8 +80,6 @@ export async function handleSourceHealth(env,now=Date.now()){
       !statuses.has(feeds[id].status)||!Number.isFinite(Date.parse(feeds[id].checkedAt||''))||
       now-Date.parse(feeds[id].checkedAt)<0||now-Date.parse(feeds[id].checkedAt)>MAX_AGE_MS))return Response.json(
   {error:'Source-health snapshot invalid'},{status:503,headers});
- const age=now-Date.parse(saved.updatedAt);
- if(!Number.isFinite(age)||age<0||age>MAX_AGE_MS)return Response.json({error:'Source-health snapshot expired'},{status:503,headers});
  // A fresh cron snapshot can still contain a much older IPTV directory result,
  // because catalog checks are deliberately less frequent than news checks.
  // Do not present an overdue catalog check as currently available.
