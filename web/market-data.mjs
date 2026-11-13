@@ -5,9 +5,9 @@ export function normalise(klines,ticker,trades,info,symbol,period,now){
  const pair=symbol+'USDT';
  if(info.symbol!==pair||info.baseAsset!==symbol||info.quoteAsset!=='USDT'||ticker.symbol!==pair)throw new Error('Binance instrument identity mismatch');
  if(info.status!=='TRADING')throw new Error('This exact Binance token pair is not trading');
- const points=new Map();for(const r of klines){if(!Array.isArray(r)||r.length<7||!positive(r[0])||Number(r[0])/1000>now+180||!r.slice(1,5).every(positive))continue;const [o,h,l,c]=r.slice(1,5).map(Number);if(h<Math.max(o,l,c)||l>Math.min(o,h,c))continue;const stamp=Math.floor(Number(r[0])/1000),v=Number(r[5]);points.set(stamp,[stamp,o,h,l,c,r[5]!==null&&Number.isFinite(v)&&v>=0?v:null]);}
+ const points=new Map();for(const r of klines){if(!Array.isArray(r)||r.length<7||!positive(r[0])||Number(r[0])/1000>now+5||!r.slice(1,5).every(positive))continue;const [o,h,l,c]=r.slice(1,5).map(Number);if(h<Math.max(o,l,c)||l>Math.min(o,h,c))continue;const stamp=Math.floor(Number(r[0])/1000),v=Number(r[5]);points.set(stamp,[stamp,o,h,l,c,r[5]!==null&&Number.isFinite(v)&&v>=0?v:null]);}
  const bars=[...points.values()].sort((a,b)=>a[0]-b[0]);if(!bars.length)throw new Error('No valid Binance historical bars');
- const trade=trades.filter(t=>positive(t.price)&&positive(t.time)&&Number(t.time)/1000<=now+180).sort((a,b)=>Number(b.time)-Number(a.time))[0];if(!trade)throw new Error('No timestamped Binance trade');
+ const trade=trades.filter(t=>positive(t.price)&&positive(t.time)&&Number(t.time)/1000<=now+5).sort((a,b)=>Number(b.time)-Number(a.time))[0];if(!trade)throw new Error('No timestamped Binance trade');
  const quoteTime=Math.floor(Number(trade.time)/1000),ageSeconds=Math.max(0,Math.floor(now-quoteTime)),change=ticker.priceChangePercent;
  return {symbol,pair,name:symbol==='BTC'?'Bitcoin':symbol==='ETH'?'Ethereum':'Tokenized stock / ETF',currency:'USDT',period,price:Number(trade.price),quoteTime,fetchedAt:Math.floor(now),ageSeconds,status:ageSeconds>120?'Historical / stale':'Recent exchange trade',session:'Binance Spot · TRADING · 24/7 market',changePercent:change!==null&&change!==''&&Number.isFinite(Number(change))?Number(change):null,changeBasis:'24h',bars,source:'Binance public market-data API',delay:'Last-trade timestamp shown; no account or trading connection'};
 }
