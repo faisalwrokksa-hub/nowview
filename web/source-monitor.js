@@ -9,6 +9,7 @@
  const native=typeof location!=='undefined'&&location.protocol==='file:';
  const NEWS_BATCH_SIZE=3; // Sweep all nine publishers across three 2-minute cycles.
  const states=new Map(),journal=[];const MAX_LOG=60,FAIL_TTL=30*60000;
+ const OK_TTL=Object.freeze({news:10*60000,iptv:30*60000,api:150000});
  let newsTimer=null,marketTimer=null,iptvTimer=null,active=false,checking=false,cloudHealth=null,nextFeedIndex=0;
  function read(){
   try{const x=JSON.parse(localStorage.getItem(KEY)||'null');return x&&typeof x==='object'?{
@@ -34,7 +35,8 @@
  function status(kind,id){
   const x=states.get(kind+':'+id);
   if(!x)return 'unknown';
-  if(x.status==='failed'&&Date.now()-x.checkedAt>FAIL_TTL)return 'unknown';
+  const age=Date.now()-x.checkedAt;
+  if(!Number.isFinite(age)||age<0||age>(x.status==='ok'?OK_TTL[kind]??FAIL_TTL:FAIL_TTL))return 'unknown';
   return x.status;
  }
  function hide(kind,id){return settings.hideFailed&&status(kind,id)==='failed';}
@@ -93,7 +95,9 @@
    if(!response.ok){cloudHealth=null;render();return;}
    const snapshot=await response.json();
    const checked=Date.parse(snapshot?.updatedAt||'');
-   if(!Number.isFinite(checked)||Date.now()-checked>3600000||Date.now()<checked-60000||!snapshot?.feeds||typeof snapshot.feeds!=='object')return;
+   if(!Number.isFinite(checked)||Date.now()-checked>600000||Date.now()<checked-60000||!snapshot?.feeds||typeof snapshot.feeds!=='object'){
+    cloudHealth=null;render();return;
+   }
    cloudHealth={checkedAt:checked,feeds:Object.keys(snapshot.feeds).length,iptv:snapshot.iptv?.status||'unknown'};
    render();
   }catch{cloudHealth=null;render();}
