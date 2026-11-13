@@ -104,3 +104,19 @@ test('market source monitor never treats a substantially future-dated trade as c
  api.checkMarket();
  assert.equal(api.status('api','market'),'unknown');
 });
+
+test('source status records are bounded while frequently checked streams remain available',()=>{
+ const win={addEventListener(){},dispatchEvent(){}};
+ const ctx={window:win,location:{protocol:'https:'},localStorage:{getItem:()=>null},URL,Date,Map,Set,JSON};
+ vm.runInNewContext(monitor,ctx);
+ const api=win.NewViewSourceMonitor;
+ const kept='https://example.org/live-0.m3u8';
+ api.mark('iptv',kept,'ok','Confirmed playing');
+ for(let i=1;i<=499;i++)api.mark('iptv','https://example.org/live-'+i+'.m3u8','failed','Playback failed');
+ api.mark('iptv',kept,'ok','Confirmed again');
+ api.mark('iptv','https://example.org/live-500.m3u8','failed','Playback failed');
+ assert.equal(api.status('iptv',kept),'ok','recently refreshed status remains');
+ assert.equal(api.status('iptv','https://example.org/live-1.m3u8'),'unknown','oldest status was evicted');
+ assert.equal(api.status('iptv','https://example.org/live-500.m3u8'),'failed');
+ assert.ok(api.getEntries().length<=60,'event journal remains bounded separately');
+});
