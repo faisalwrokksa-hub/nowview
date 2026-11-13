@@ -85,3 +85,18 @@ test('stopped or delayed cron cannot advertise old feed status as live',async()=
  assert.equal(expired.status,503);
  assert.match(JSON.stringify(await expired.json()),/expired/);
 });
+
+test('fresh cron response cannot mask an overdue IPTV directory check',async()=>{
+ const env={NEWVIEW_SOURCE_HEALTH:kv()},now=Date.UTC(2026,10,13,12,0,0);
+ const snapshot={version:1,updatedAt:new Date(now).toISOString(),feeds:{},
+  iptv:{status:'ok',detail:'Directory reachable; individual channel playback unverified',
+   checkedAt:new Date(now-4*60*60*1000).toISOString()}};
+ await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify(snapshot));
+ const stale=await handleSourceHealth(env,now);
+ assert.equal(stale.status,200);
+ assert.equal((await stale.json()).iptv.status,'unknown');
+ snapshot.iptv.checkedAt=new Date(now-2*60*60*1000).toISOString();
+ await env.NEWVIEW_SOURCE_HEALTH.put('source-health:v1',JSON.stringify(snapshot));
+ const fresh=await handleSourceHealth(env,now);
+ assert.equal((await fresh.json()).iptv.status,'ok');
+});
