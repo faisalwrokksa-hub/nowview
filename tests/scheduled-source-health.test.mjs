@@ -70,6 +70,7 @@ test('release smoke checks exact live revision and real cloud monitoring only wh
  assert.match(smoke,/NEWVIEW_EXPECTED_SHA/);
  assert.match(smoke,/version\.revision,expected/);
  assert.match(smoke,/NEWVIEW_REQUIRE_SOURCE_HEALTH/);
+ assert.match(smoke,/Object\.keys\(health\.feeds\)\.length===9/);
  assert.match(smoke,/\/api\/source-health/);
  assert.match(smoke,/age<=10\*60\*1000/);
 });
