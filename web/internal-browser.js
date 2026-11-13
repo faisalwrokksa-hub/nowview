@@ -17,7 +17,8 @@
    const u=new URL(candidate);
    if(u.protocol!=='https:'||u.username||u.password||u.port)return null;
    const h=u.hostname.toLowerCase();
-   if(!h.includes('.')||h==='localhost'||h.endsWith('.localhost')||h.endsWith('.local')||
+   if(!h.includes('.')||h.endsWith('.')||h.endsWith('.test')||h.endsWith('.invalid')||h.endsWith('.example')||
+      h==='localhost'||h.endsWith('.localhost')||h.endsWith('.local')||
       h.endsWith('.internal')||h.includes(':')||/^\d+(?:\.\d+){3}$/.test(h))return null;
    return u.href;
   }catch{return null;}

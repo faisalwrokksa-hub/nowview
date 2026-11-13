@@ -28,3 +28,17 @@ test('scripted website previews run without same-origin sandbox privileges',()=>
  assert.match(source,/referrerPolicy='no-referrer'/);
  assert.match(source,/external\.rel='noopener noreferrer'/);
 });
+
+test('public URL validation rejects trailing-dot and reserved hosts',()=>{
+ const safe=context.window.NewViewBrowserSafeUrl;
+ assert.equal(safe('https://intranet.local./home'),null);
+ assert.equal(safe('https://localhost./'),null);
+ assert.equal(safe('https://foo.internal./'),null);
+ assert.equal(safe('https://demo.invalid/'),null);
+ assert.equal(safe('https://test.test/'),null);
+ assert.equal(safe('https://sample.example/'),null);
+ assert.equal(safe('https://example.com./'),null);
+ assert.equal(safe('http://example.com/'),null);
+ assert.equal(safe('https://127.0.0.1/'),null);
+ assert.equal(safe('https://example.com/news'),'https://example.com/news');
+});
