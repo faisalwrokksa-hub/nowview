@@ -85,3 +85,22 @@ test('invalid and hour-old cloud snapshots do not keep a healthy indicator',()=>
  assert.match(monitor,/Date\.now\(\)-checked>600000/);
  assert.match(monitor,/cloudHealth=null;render\(\);return/);
 });
+
+test('market source monitor never treats a substantially future-dated trade as current',()=>{
+ const clock=Date.UTC(2026,10,13,12,0,0);
+ class Clock extends Date {static now(){return clock;}}
+ const listeners=new Map(),win={addEventListener:(n,f)=>listeners.set(n,f),dispatchEvent(){}};
+ const ctx={window:win,Date:Clock,location:{protocol:'https:'},localStorage:{getItem:()=>null},URL,Map,Set,JSON};
+ vm.runInNewContext(monitor,ctx);
+ const api=win.NewViewSourceMonitor;
+ const update=quoteTime=>listeners.get('newview:market')({detail:{quoteTime}});
+ update((clock+60000)/1000);
+ api.checkMarket();
+ assert.equal(api.status('api','market'),'unknown');
+ update((clock-10000)/1000);
+ api.checkMarket();
+ assert.equal(api.status('api','market'),'ok');
+ update((clock-300000)/1000);
+ api.checkMarket();
+ assert.equal(api.status('api','market'),'unknown');
+});
