@@ -42,6 +42,9 @@
  function hide(kind,id){return settings.hideFailed&&status(kind,id)==='failed';}
  function getEntries(){return journal.slice();}
  function checkMarket(){
+  if(typeof navigator!=='undefined'&&navigator.onLine===false){
+   mark('api','market','unknown','Device offline; quote freshness unverified');return;
+  }
   // This checks market quote freshness, not an extra Binance REST request.
   const snapshot=lastMarket;
   // Slight clock skew is tolerated, but a quote dated minutes in the future
@@ -102,6 +105,7 @@
    const response=await fetch('/api/source-health',{cache:'no-store',signal:controller.signal});
    if(!response.ok){cloudHealth=null;render();return;}
    const snapshot=await response.json();
+   if(navigator.onLine===false){cloudHealth=null;render();return;}
    const checked=Date.parse(snapshot?.updatedAt||'');
    if(!Number.isFinite(checked)||Date.now()-checked>600000||Date.now()<checked-60000||!snapshot?.feeds||typeof snapshot.feeds!=='object'){
     cloudHealth=null;render();return;
