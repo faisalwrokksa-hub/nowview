@@ -24,7 +24,12 @@
   try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{url,confirmed:true}}));}catch{}
   return true;
  }
- function clear(){try{localStorage.removeItem(KEY);}catch{}try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{cleared:true}}));}catch{}}
+ function clear(){
+  // Never claim a privacy-sensitive deletion succeeded if local storage refused it.
+  try{localStorage.removeItem(KEY);}catch{return false;}
+  try{root.dispatchEvent(new CustomEvent('newview:viewing-history',{detail:{cleared:true}}));}catch{}
+  return true;
+ }
  function importConfirmed(entries){
   if(!Array.isArray(entries)||entries.length>8)return false;
   const now=Date.now(),seen=new Set(),accepted=[];
