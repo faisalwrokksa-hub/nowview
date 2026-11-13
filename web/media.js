@@ -75,7 +75,17 @@
   inlineStatus.textContent='Live stream playing. Availability depends on the source.';
  });
  inlineVideo.addEventListener('waiting',()=>{
-  if(inlineSource)inlineStatus.textContent='Stream buffering. If playback stops, try another channel or native Android TV playback.';
+  if(!inlineSource)return;
+  inlineStatus.textContent='Stream buffering. If playback stops, try another channel or native Android TV playback.';
+  // Playback can stall after initially succeeding; the startup watchdog was
+  // cleared by the playing event and must be rearmed for later buffering.
+  const attempt=inlineAttempt,url=inlineSource;
+  clearInlineWatchdog();
+  inlineWatchdog=setTimeout(()=>{
+   if(attempt!==inlineAttempt||inlineSource!==url||inlineVideo.paused||inlineVideo.readyState>=3)return;
+   stopInlinePlayback('Stream buffering timed out. Try another channel or the native player.');
+   window.NewViewSourceMonitor?.mark?.('iptv',url,'unknown','Browser playback stalled after buffering');
+  },20000);
  });
  inlineStop.addEventListener('click',stopInline);
  inlinePlay.addEventListener('click',async()=>{
