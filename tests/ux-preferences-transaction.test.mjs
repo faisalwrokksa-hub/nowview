@@ -78,3 +78,14 @@ test('export filters malformed local shortcut storage and uses safe defaults',as
  await importer.import(exported);
  assert.match(importer.importStatus.textContent,/Preferences restored/);
 });
+
+test('a rejected save leaves the active and displayed preferences unchanged',()=>{
+ const h=mount({failureKey:KEY}),before=new Map(h.state);
+ assert.equal(h.root.NewViewUX.set({density:'compact'}),false);
+ assert.deepEqual([...h.state.entries()],[...before.entries()]);
+ assert.equal(h.root.NewViewUX.get().density,'comfortable');
+ assert.equal(h.document.body.dataset.nvDensity,'comfortable');
+ assert.equal(h.root.NewViewUX.set({density:'compact'}),true);
+ assert.equal(h.root.NewViewUX.get().density,'compact');
+ assert.equal(JSON.parse(h.state.get(KEY)).density,'compact');
+});
